@@ -7,9 +7,7 @@ document.getElementById("loginBtn").addEventListener("click", () => {
   const password = document.getElementById("password").value;
 
   signInWithEmailAndPassword(auth, email, password)
-    .then(() => {
-      window.location.href = "dashboard.html";
-    })
+    .then(() => window.location.href = "dashboard.html")
     .catch(err => alert(err.message));
 
 });
