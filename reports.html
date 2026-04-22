@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Reports</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+<h2>Reports</h2>
+
+<button id="generateBtn">Generate Report</button>
+
+<div id="reportBox"></div>
+
+<a href="dashboard.html">Back</a>
+
+<script type="module">
+import { db } from "./js/firebase.js";
+import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+document.getElementById("generateBtn").addEventListener("click", async () => {
+
+  const m = await getDocs(collection(db, "members"));
+  const s = await getDocs(collection(db, "savings"));
+  const l = await getDocs(collection(db, "loans"));
+
+  let savings = 0;
+  let loans = 0;
+
+  s.forEach(d => savings += d.data().amount || 0);
+  l.forEach(d => loans += d.data().amount || 0);
+
+  document.getElementById("reportBox").innerHTML = `
+    <p>Total Members: ${m.size}</p>
+    <p>Total Savings: ${savings}</p>
+    <p>Total Loans: ${loans}</p>
+  `;
+});
+</script>
+
+</body>
+</html>
