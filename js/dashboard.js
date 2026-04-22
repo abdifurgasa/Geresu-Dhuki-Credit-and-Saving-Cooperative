@@ -2,27 +2,26 @@ import { auth, db } from "./firebase.js";
 import { signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// logout
 document.getElementById("logoutBtn").addEventListener("click", () => {
-  signOut(auth).then(() => window.location.href = "index.html");
+  signOut(auth).then(() => location.href = "index.html");
 });
 
-// load stats
-async function loadDashboard() {
+async function load() {
 
-  const members = await getDocs(collection(db, "members"));
-  const savings = await getDocs(collection(db, "savings"));
-  const loans = await getDocs(collection(db, "loans"));
+  const m = await getDocs(collection(db, "members"));
+  const s = await getDocs(collection(db, "savings"));
+  const l = await getDocs(collection(db, "loans"));
 
-  document.getElementById("totalMembers").innerText = members.size;
+  document.getElementById("totalMembers").innerText = m.size;
 
-  let totalSavings = 0;
-  savings.forEach(doc => totalSavings += doc.data().amount || 0);
-  document.getElementById("totalSavings").innerText = totalSavings + " ETB";
+  let ts = 0;
+  s.forEach(d => ts += d.data().amount || 0);
 
-  let totalLoans = 0;
-  loans.forEach(doc => totalLoans += doc.data().amount || 0);
-  document.getElementById("totalLoans").innerText = totalLoans + " ETB";
+  let tl = 0;
+  l.forEach(d => tl += d.data().amount || 0);
+
+  document.getElementById("totalSavings").innerText = ts;
+  document.getElementById("totalLoans").innerText = tl;
 }
 
-loadDashboard();
+load();
