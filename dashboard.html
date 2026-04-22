@@ -1,1 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Dashboard</title>
 
+<link rel="stylesheet" href="css/style.css">
+
+<script src="https://unpkg.com/i18next@23.10.1/i18next.min.js"></script>
+<script src="https://unpkg.com/i18next-browser-languagedetector@7.2.0/i18nextBrowserLanguageDetector.min.js"></script>
+</head>
+
+<body>
+
+<select id="langSelect">
+  <option value="en">English</option>
+  <option value="am">Amharic</option>
+  <option value="om">Afaan Oromo</option>
+</select>
+
+<h1 data-i18n="dashboard"></h1>
+
+<button id="logoutBtn" data-i18n="logout"></button>
+
+<h3 data-i18n="totalMembers"></h3>
+<p id="totalMembers">0</p>
+
+<h3 data-i18n="savings"></h3>
+<p id="totalSavings">0</p>
+
+<h3 data-i18n="loans"></h3>
+<p id="totalLoans">0</p>
+
+<script type="module" src="js/dashboard.js"></script>
+<script type="module" src="js/i18n-init.js"></script>
+
+</body>
+</html>
