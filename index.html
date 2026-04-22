@@ -1,1 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Login</title>
+<link rel="stylesheet" href="css/style.css">
 
+<script src="https://unpkg.com/i18next@23.10.1/i18next.min.js"></script>
+<script src="https://unpkg.com/i18next-browser-languagedetector@7.2.0/i18nextBrowserLanguageDetector.min.js"></script>
+</head>
+
+<body>
+
+<select id="langSelect">
+  <option value="en">English</option>
+  <option value="am">Amharic</option>
+  <option value="om">Afaan Oromo</option>
+</select>
+
+<div class="box">
+  <h2 data-i18n="login"></h2>
+
+  <input id="email" data-i18n-placeholder="email">
+  <input id="password" data-i18n-placeholder="password" type="password">
+
+  <button id="loginBtn" data-i18n="login"></button>
+</div>
+
+<script type="module" src="js/auth.js"></script>
+<script type="module" src="js/i18n-init.js"></script>
+
+</body>
+</html>
