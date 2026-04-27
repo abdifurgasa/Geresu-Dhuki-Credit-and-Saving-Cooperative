@@ -1,41 +1,49 @@
-const translations = {
- en:{
-  dashboard:"Dashboard",
-  members:"Members",
-  savings:"Savings",
-  loans:"Loans",
-  reports:"Reports",
-  settings:"Settings"
- },
- am:{
-  dashboard:"ዳሽቦርድ",
-  members:"አባላት",
-  savings:"ቁጠባ",
-  loans:"ብድር",
-  reports:"ሪፖርት",
-  settings:"ቅንብሮች"
- },
- om:{
-  dashboard:"Daashboordii",
-  members:"Miseensota",
-  savings:"Qusannaa",
-  loans:"Liqii",
-  reports:"Ripoortii",
-  settings:"Sirna"
- }
-};
+export const translations = {
+  en:{
+    dashboard:"Dashboard",
+    members:"Members",
+    savings:"Savings",
+    loans:"Loans",
+    reports:"Reports",
+    settings:"Settings",
+    addMember:"Add Member",
+    deposit:"Deposit",
+    loanCalc:"Loan Calculator",
+    totalMembers:"Total Members",
+    totalSavings:"Total Savings",
+    totalLoans:"Total Loans",
+    totalProfit:"Total Profit"
+  },
 
-function applyLang(lang){
- document.querySelectorAll("[data-i18n]").forEach(el=>{
-  let key = el.getAttribute("data-i18n");
-  if(translations[lang] && translations[lang][key]){
-    el.innerText = translations[lang][key];
+  am:{
+    dashboard:"ዳሽቦርድ",
+    members:"አባላት",
+    savings:"ቁጠባ",
+    loans:"ብድር",
+    reports:"ሪፖርቶች",
+    settings:"ቅንብሮች",
+    addMember:"አባል አክል",
+    deposit:"ቁጠባ ጨምር",
+    loanCalc:"ብድር ካልኩሌተር",
+    totalMembers:"ጠቅላላ አባላት",
+    totalSavings:"ጠቅላላ ቁጠባ",
+    totalLoans:"ጠቅላላ ብድር",
+    totalProfit:"ጠቅላላ ትርፍ"
+  },
+
+  om:{
+    dashboard:"Daashboordii",
+    members:"Miseensota",
+    savings:"Qusannaa",
+    loans:"Liqii",
+    reports:"Ripoortii",
+    settings:"Sirna",
+    addMember:"Miseensa Dabaluu",
+    deposit:"Qusannaa Galchuu",
+    loanCalc:"Lakkooftuu Liqii",
+    totalMembers:"Waliigala Miseensota",
+    totalSavings:"Waliigala Qusannaa",
+    totalLoans:"Waliigala Liqii",
+    totalProfit:"Waliigala Bu'aa"
   }
- });
-}
-
-document.getElementById("langSelect").addEventListener("change",(e)=>{
- applyLang(e.target.value);
-});
-
-applyLang("en");
+};
