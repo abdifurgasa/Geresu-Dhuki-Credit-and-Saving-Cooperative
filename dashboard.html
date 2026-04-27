@@ -1,37 +1,181 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Dashboard</title>
-
-<link rel="stylesheet" href="css/style.css">
-
-<script src="https://unpkg.com/i18next@23.10.1/i18next.min.js"></script>
-<script src="https://unpkg.com/i18next-browser-languagedetector@7.2.0/i18nextBrowserLanguageDetector.min.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SACCO Dashboard</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<style>
+body{margin:0;font-family:Arial;background:#f1f5f9;display:flex}
+.sidebar{width:240px;background:#0f172a;color:#fff;height:100vh;padding:20px}
+.sidebar h2{margin-bottom:20px}
+.sidebar a{display:block;padding:12px;color:#cbd5e1;border-radius:8px;margin-bottom:5px}
+.sidebar a.active, .sidebar a:hover{background:#2563eb;color:#fff}
+.main{flex:1}
+.topbar{display:flex;justify-content:space-between;align-items:center;padding:15px;background:#fff;border-bottom:1px solid #ddd}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;padding:20px}
+.card{background:#fff;padding:20px;border-radius:12px}
+.card h4{margin:0;color:#64748b}
+.card h2{margin:10px 0}
+.content{display:grid;grid-template-columns:2fr 1fr;gap:20px;padding:20px}
+.box{background:#fff;padding:15px;border-radius:12px}
+table{width:100%;border-collapse:collapse}
+th,td{padding:10px;border-bottom:1px solid #eee;text-align:left}
+.tag{padding:5px 10px;border-radius:10px;font-size:12px}
+.green{background:#dcfce7;color:#166534}
+.orange{background:#fed7aa;color:#9a3412}
+.blue{background:#dbeafe;color:#1e40af}
+.red{background:#fee2e2;color:#991b1b}
+.quick button{display:flex;align-items:center;gap:10px;width:100%;padding:10px;margin-bottom:10px;border:none;border-radius:8px;color:#fff;cursor:pointer}
+.b1{background:#3b82f6}.b2{background:#16a34a}.b3{background:#ea580c}.b4{background:#9333ea}
+</style>
 </head>
-
 <body>
 
-<select id="langSelect">
-  <option value="en">English</option>
-  <option value="am">Amharic</option>
-  <option value="om">Afaan Oromo</option>
-</select>
+<div class="sidebar">
+<h2>SACCO</h2>
+<a class="active">Dashboard</a>
+<a>Members</a>
+<a>Savings</a>
+<a>Loans</a>
+<a>Reports</a>
+<a>Transactions</a>
+<a>Settings</a>
+<a>Users</a>
+</div>
 
-<h1 data-i18n="dashboard"></h1>
+<div class="main">
+<div class="topbar">
+<h3>Dashboard</h3>
+<div>EN 🌐 | Admin User</div>
+</div>
 
-<button id="logoutBtn" data-i18n="logout"></button>
+<div class="cards">
+<div class="card"><h4>Total Members</h4><h2>1,248</h2></div>
+<div class="card"><h4>Total Savings</h4><h2>$245,750</h2></div>
+<div class="card"><h4>Total Loans</h4><h2>$178,300</h2></div>
+<div class="card"><h4>Total Profit</h4><h2>$24,560</h2></div>
+</div>
 
-<h3 data-i18n="totalMembers"></h3>
-<p id="totalMembers">0</p>
+<div class="content">
+<div class="box">
+<h3>Recent Transactions</h3>
+<table>
+<tr><th>Type</th><th>Member</th><th>Amount</th><th>Date</th></tr>
+<tr><td><span class="tag green">Saving</span></td><td>Abdi</td><td>+500</td><td>May 19</td></tr>
+<tr><td><span class="tag orange">Loan</span></td><td>Amina</td><td>+5000</td><td>May 18</td></tr>
+<tr><td><span class="tag blue">Repayment</span></td><td>Mohamed</td><td>-1200</td><td>May 17</td></tr>
+</table>
+</div>
 
-<h3 data-i18n="savings"></h3>
-<p id="totalSavings">0</p>
+<div class="box quick">
+<h3>Quick Actions</h3>
+<button class="b1"><i class="fa fa-user"></i>Add Member</button>
+<button class="b2"><i class="fa fa-money-bill"></i>Record Savings</button>
+<button class="b3"><i class="fa fa-coins"></i>Create Loan</button>
+<button class="b4"><i class="fa fa-file"></i>Generate Report</button>
+</div>
+</div>
 
-<h3 data-i18n="loans"></h3>
-<p id="totalLoans">0</p>
+</div>
 
-<script type="module" src="js/dashboard.js"></script>
-<script type="module" src="js/i18n-init.js"></script>
+
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, onSnapshot, addDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCS-3e_WqGHNycDgvlXVkInaynTnvnplYE",
+  authDomain: "geresu-dhuki-sacco.firebaseapp.com",
+  projectId: "geresu-dhuki-sacco",
+  storageBucket: "geresu-dhuki-sacco.firebasestorage.app",
+  messagingSenderId: "944934938425",
+  appId: "1:944934938425:web:caef23f2f3bb34c843eae8"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// ===== DASHBOARD COUNTS =====
+onSnapshot(collection(db, "members"), snap => {
+  document.querySelectorAll('.card h2')[0].innerText = snap.size;
+});
+
+onSnapshot(collection(db, "transactions"), snap => {
+  let savings = 0;
+  let rows = "";
+
+  snap.forEach(doc => {
+    let t = doc.data();
+
+    if (t.type === "Saving") savings += t.amount;
+
+    rows += `<tr>
+      <td><span class="tag ${t.type==='Saving'?'green':t.type==='Loan'?'orange':'blue'}">${t.type}</span></td>
+      <td>${t.member}</td>
+      <td>${t.amount}</td>
+      <td>${t.date || ''}</td>
+    </tr>`;
+  });
+
+  document.querySelectorAll('.card h2')[1].innerText = "$" + savings;
+  document.querySelector("table").innerHTML = `<tr><th>Type</th><th>Member</th><th>Amount</th><th>Date</th></tr>` + rows;
+});
+
+onSnapshot(collection(db, "loans"), snap => {
+  let totalLoans = 0;
+  let profit = 0;
+
+  snap.forEach(doc => {
+    let l = doc.data();
+    totalLoans += l.total || 0;
+    profit += (l.total - l.principal) || 0;
+  });
+
+  document.querySelectorAll('.card h2')[2].innerText = "$" + totalLoans;
+  document.querySelectorAll('.card h2')[3].innerText = "$" + profit;
+});
+
+// ===== QUICK ACTIONS =====
+document.querySelector('.b1').onclick = async () => {
+  let name = prompt("Enter member name");
+  if (!name) return;
+  await addDoc(collection(db, "members"), { name });
+};
+
+document.querySelector('.b2').onclick = async () => {
+  let member = prompt("Member name");
+  let amount = Number(prompt("Amount"));
+  await addDoc(collection(db, "transactions"), {
+    type: "Saving",
+    member,
+    amount,
+    date: new Date().toLocaleDateString()
+  });
+};
+
+document.querySelector('.b3').onclick = async () => {
+  let member = prompt("Member name");
+  let amount = Number(prompt("Loan amount"));
+  let interest = 10;
+  let total = amount + (amount * interest / 100);
+
+  await addDoc(collection(db, "loans"), {
+    member,
+    principal: amount,
+    total
+  });
+
+  await addDoc(collection(db, "transactions"), {
+    type: "Loan",
+    member,
+    amount,
+    date: new Date().toLocaleDateString()
+  });
+};
+
+</script>
 
 </body>
 </html>
