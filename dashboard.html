@@ -128,7 +128,7 @@ th,td{
 .orange{background:#fed7aa;color:#9a3412}
 .blue{background:#dbeafe;color:#1e40af}
 
-/* QUICK ACTIONS */
+/* QUICK ACTIONS ANIMATION */
 .quick button{
   display:flex;
   align-items:center;
@@ -144,10 +144,12 @@ th,td{
   overflow:hidden;
   transition:0.3s;
 }
+
 .quick button:hover{
   transform:translateY(-6px) scale(1.04);
   box-shadow:0 12px 25px rgba(0,0,0,0.25);
 }
+
 .quick button::before{
   content:"";
   position:absolute;
@@ -158,7 +160,9 @@ th,td{
   background:linear-gradient(120deg,transparent,rgba(255,255,255,0.4),transparent);
   transition:0.5s;
 }
+
 .quick button:hover::before{left:120%}
+
 .b1{background:#3b82f6}
 .b2{background:#16a34a}
 .b3{background:#ea580c}
@@ -172,26 +176,26 @@ select{padding:6px;border-radius:6px;border:1px solid #ddd}
 <body>
 
 <div class="sidebar" id="sidebar">
-<h2>SACCO</h2>
-<a class="active"><i class="fa fa-home"></i> <span>Dashboard</span></a>
-<a><i class="fa fa-users"></i> <span>Members</span></a>
-<a><i class="fa fa-wallet"></i> <span>Savings</span></a>
-<a><i class="fa fa-coins"></i> <span>Loans</span></a>
-<a><i class="fa fa-chart-line"></i> <span>Reports</span></a>
-<a><i class="fa fa-gear"></i> <span>Settings</span></a>
+<h2 data-i18n="app">SACCO</h2>
+<a class="active"><i class="fa fa-home"></i> <span data-i18n="dashboard">Dashboard</span></a>
+<a><i class="fa fa-users"></i> <span data-i18n="members">Members</span></a>
+<a><i class="fa fa-wallet"></i> <span data-i18n="savings">Savings</span></a>
+<a><i class="fa fa-coins"></i> <span data-i18n="loans">Loans</span></a>
+<a><i class="fa fa-chart-line"></i> <span data-i18n="reports">Reports</span></a>
+<a><i class="fa fa-gear"></i> <span data-i18n="settings">Settings</span></a>
 </div>
 
 <div class="main">
 
 <div class="topbar">
 <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
-<h3>Dashboard</h3>
+<h3 data-i18n="dashboard">Dashboard</h3>
 
 <div class="topbar-right">
 <select id="langSelect">
-<option value="en">EN</option>
-<option value="am">AM</option>
-<option value="om">OR</option>
+  <option value="en">EN</option>
+  <option value="am">AM</option>
+  <option value="om">OR</option>
 </select>
 
 <button class="logout-btn" onclick="logout()"><i class="fa fa-right-from-bracket"></i> Logout</button>
@@ -199,15 +203,15 @@ select{padding:6px;border-radius:6px;border:1px solid #ddd}
 </div>
 
 <div class="cards">
-<div class="card"><h4>Total Members</h4><h2 id="mCount">0</h2></div>
-<div class="card"><h4>Total Savings</h4><h2 id="sCount">0</h2></div>
-<div class="card"><h4>Total Loans</h4><h2 id="lCount">0</h2></div>
-<div class="card"><h4>Total Profit</h4><h2 id="pCount">0</h2></div>
+<div class="card"><h4 data-i18n="totalMembers">Total Members</h4><h2 id="mCount">0</h2></div>
+<div class="card"><h4 data-i18n="totalSavings">Total Savings</h4><h2 id="sCount">0</h2></div>
+<div class="card"><h4 data-i18n="totalLoans">Total Loans</h4><h2 id="lCount">0</h2></div>
+<div class="card"><h4 data-i18n="totalProfit">Total Profit</h4><h2 id="pCount">0</h2></div>
 </div>
 
 <div class="content">
 <div class="box">
-<h3>Recent Transactions</h3>
+<h3 data-i18n="recentTransactions">Recent Transactions</h3>
 <table>
 <tr><th>Type</th><th>Member</th><th>Amount</th><th>Date</th></tr>
 <tbody id="tx"></tbody>
@@ -215,14 +219,13 @@ select{padding:6px;border-radius:6px;border:1px solid #ddd}
 </div>
 
 <div class="box quick">
-<h3>Quick Actions</h3>
-<button class="b1"><i class="fa fa-user"></i> Add Member</button>
-<button class="b2"><i class="fa fa-money-bill"></i> Record Savings</button>
-<button class="b3"><i class="fa fa-coins"></i> Create Loan</button>
-<button class="b4"><i class="fa fa-file"></i> Generate Report</button>
+<h3 data-i18n="quickActions">Quick Actions</h3>
+<button class="b1"><i class="fa fa-user"></i> <span data-i18n="addMember">Add Member</span></button>
+<button class="b2"><i class="fa fa-money-bill"></i> <span data-i18n="recordSavings">Record Savings</span></button>
+<button class="b3"><i class="fa fa-coins"></i> <span data-i18n="createLoan">Create Loan</span></button>
+<button class="b4"><i class="fa fa-file"></i> <span data-i18n="generateReport">Generate Report</span></button>
 </div>
 </div>
-
 </div>
 
 <script type="module">
@@ -249,6 +252,7 @@ window.logout = async ()=>{
   window.location.href="index.html";
 };
 
+// FIREBASE LIVE DATA
 onSnapshot(collection(db,"members"),snap=>{
   document.getElementById("mCount").innerText=snap.size;
 });
@@ -260,7 +264,6 @@ onSnapshot(collection(db,"transactions"),snap=>{
   snap.forEach(d=>{
     let t=d.data();
     if(t.type=="Saving") savings+=t.amount;
-
     html+=`<tr><td>${t.type}</td><td>${t.member}</td><td>${t.amount}</td><td>${t.date||""}</td></tr>`;
   });
 
@@ -280,6 +283,32 @@ onSnapshot(collection(db,"loans"),snap=>{
 
   document.getElementById("lCount").innerText=total;
   document.getElementById("pCount").innerText=profit;
+});
+
+// LANGUAGE SYSTEM
+const translations={
+ en:{dashboard:"Dashboard",members:"Members",savings:"Savings",loans:"Loans",reports:"Reports",settings:"Settings",quickActions:"Quick Actions",totalMembers:"Total Members",totalSavings:"Total Savings",totalLoans:"Total Loans",totalProfit:"Total Profit",addMember:"Add Member",recordSavings:"Record Savings",createLoan:"Create Loan",generateReport:"Generate Report",recentTransactions:"Recent Transactions",app:"SACCO"},
+ am:{dashboard:"ዳሽቦርድ",members:"አባላት",savings:"ቁጠባ",loans:"ብድር",reports:"ሪፖርቶች",settings:"ቅንብሮች",quickActions:"ፈጣን እርምጃዎች",totalMembers:"ጠቅላላ አባላት",totalSavings:"ጠቅላላ ቁጠባ",totalLoans:"ጠቅላላ ብድር",totalProfit:"ጠቅላላ ትርፍ",addMember:"አባል አክል",recordSavings:"ቁጠባ መዝግብ",createLoan:"ብድር ፍጠር",generateReport:"ሪፖርት ፍጠር",recentTransactions:"የቅርብ ግብይቶች",app:"ሲኤስኮ"},
+ om:{dashboard:"Daashboordii",members:"Miseensota",savings:"Qusannaa",loans:"Liqii",reports:"Ripoortii",settings:"Sirna",quickActions:"Tarkaanfii Ariifachiisaa",totalMembers:"Waliigala Miseensota",totalSavings:"Waliigala Qusannaa",totalLoans:"Waliigala Liqii",totalProfit:"Waliigala Bu'aa",addMember:"Miseensa Dabaluu",recordSavings:"Qusannaa Galchuu",createLoan:"Liqii Uumuu",generateReport:"Ripoortii Uumuu",recentTransactions:"Hojiiwwan Dhihoo",app:"SACCO"}
+};
+
+const langSelect=document.getElementById("langSelect");
+let lang=localStorage.getItem("lang")||"en";
+langSelect.value=lang;
+
+function applyLang(l){
+ document.querySelectorAll("[data-i18n]").forEach(el=>{
+   const k=el.getAttribute("data-i18n");
+   if(translations[l] && translations[l][k]) el.innerText=translations[l][k];
+ });
+}
+
+applyLang(lang);
+
+langSelect.addEventListener("change",e=>{
+ lang=e.target.value;
+ localStorage.setItem("lang",lang);
+ applyLang(lang);
 });
 </script>
 
