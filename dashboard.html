@@ -23,10 +23,7 @@ body{
   height:100vh;
   padding:20px;
   transition:0.3s ease;
-  overflow:hidden;
 }
-
-.sidebar h2{margin-bottom:20px;transition:0.3s}
 
 .sidebar a{
   display:flex;
@@ -37,8 +34,6 @@ body{
   border-radius:8px;
   margin-bottom:5px;
   cursor:pointer;
-  transition:0.2s;
-  white-space:nowrap;
 }
 
 .sidebar a:hover,
@@ -49,44 +44,25 @@ body{
 
 .sidebar.collapsed{
   width:70px;
-  padding:20px 10px;
 }
 
-.sidebar.collapsed a span,
+.sidebar.collapsed span,
 .sidebar.collapsed h2{
   display:none;
 }
 
-.sidebar.collapsed a{
-  justify-content:center;
-  font-size:18px;
-}
-
 /* MAIN */
-.main{flex:1;transition:0.3s}
+.main{flex:1}
 
 /* TOPBAR */
 .topbar{
   display:flex;
   justify-content:space-between;
-  align-items:center;
   padding:15px;
   background:#fff;
-  border-bottom:1px solid #ddd;
 }
 
-.logout-btn{
-  background:#ef4444;
-  color:#fff;
-  border:none;
-  padding:7px 12px;
-  border-radius:8px;
-  cursor:pointer;
-}
-
-/* ========================= */
-/* ANIMATED CARDS */
-/* ========================= */
+/* CARDS */
 .cards{
   display:grid;
   grid-template-columns:repeat(4,1fr);
@@ -98,76 +74,58 @@ body{
   padding:20px;
   border-radius:14px;
   color:#fff;
-  box-shadow:0 6px 18px rgba(0,0,0,0.12);
-  transition:0.4s ease;
-  animation:fadeUp 0.6s ease;
+  animation:fadeUp 0.6s;
 }
 
 .card:hover{
-  transform:translateY(-12px) scale(1.05);
-  box-shadow:0 20px 40px rgba(0,0,0,0.25);
+  transform:translateY(-10px) scale(1.03);
 }
 
 @keyframes fadeUp{
   from{opacity:0; transform:translateY(20px);}
-  to{opacity:1; transform:translateY(0);}
+  to{opacity:1;}
 }
 
-.card:nth-child(1){background:linear-gradient(135deg,#3b82f6,#1d4ed8);}
-.card:nth-child(2){background:linear-gradient(135deg,#22c55e,#15803d);}
-.card:nth-child(3){background:linear-gradient(135deg,#f97316,#c2410c);}
-.card:nth-child(4){background:linear-gradient(135deg,#a855f7,#6b21a8);}
+.card:nth-child(1){background:#3b82f6;}
+.card:nth-child(2){background:#22c55e;}
+.card:nth-child(3){background:#f97316;}
+.card:nth-child(4){background:#a855f7;}
 
 /* CONTENT */
 .page{display:none;padding:20px;}
 .page.active{display:block;}
 
-/* ========================= */
-/* QUICK ACTIONS ANIMATION */
-/* ========================= */
-.quick{
-  margin-top:20px;
+.grid{
+  display:grid;
+  grid-template-columns:2fr 1fr;
+  gap:20px;
+  padding:20px;
 }
 
+.box{
+  background:#fff;
+  padding:15px;
+  border-radius:12px;
+}
+
+/* QUICK */
 .quick button{
-  display:flex;
-  align-items:center;
-  gap:10px;
   width:100%;
-  padding:12px;
   margin-bottom:10px;
+  padding:12px;
   border:none;
-  border-radius:10px;
   color:#fff;
+  border-radius:10px;
   cursor:pointer;
-  position:relative;
-  overflow:hidden;
-  transition:0.3s;
 }
-
-.quick button:hover{
-  transform:translateY(-6px) scale(1.04);
-  box-shadow:0 12px 25px rgba(0,0,0,0.25);
-}
-
-.quick button::before{
-  content:"";
-  position:absolute;
-  top:0;
-  left:-120%;
-  width:100%;
-  height:100%;
-  background:linear-gradient(120deg,transparent,rgba(255,255,255,0.4),transparent);
-  transition:0.5s;
-}
-
-.quick button:hover::before{left:120%}
 
 .b1{background:#3b82f6}
 .b2{background:#16a34a}
 .b3{background:#ea580c}
 .b4{background:#9333ea}
 
+table{width:100%}
+td,th{padding:8px;border-bottom:1px solid #eee}
 </style>
 </head>
 
@@ -177,12 +135,25 @@ body{
 <div class="sidebar" id="sidebar">
 <h2>SACCO</h2>
 
-<a onclick="showPage('dashboard')" class="active"><i class="fa fa-home"></i><span>Dashboard</span></a>
-<a onclick="showPage('members')"><i class="fa fa-users"></i><span>Members</span></a>
-<a onclick="showPage('savings')"><i class="fa fa-wallet"></i><span>Savings</span></a>
-<a onclick="showPage('loans')"><i class="fa fa-coins"></i><span>Loans</span></a>
-<a onclick="showPage('reports')"><i class="fa fa-chart-line"></i><span>Reports</span></a>
-<a onclick="showPage('settings')"><i class="fa fa-gear"></i><span>Settings</span></a>
+<a onclick="showPage('dashboard')" class="active">
+<i class="fa fa-home"></i><span data-i18n="dashboard">Dashboard</span>
+</a>
+
+<a onclick="showPage('members')">
+<i class="fa fa-users"></i><span data-i18n="members">Members</span>
+</a>
+
+<a onclick="showPage('savings')">
+<i class="fa fa-wallet"></i><span data-i18n="savings">Savings</span>
+</a>
+
+<a onclick="showPage('loans')">
+<i class="fa fa-coins"></i><span data-i18n="loans">Loans</span>
+</a>
+
+<a onclick="showPage('reports')">
+<i class="fa fa-chart-line"></i><span data-i18n="reports">Reports</span>
+</a>
 </div>
 
 <!-- MAIN -->
@@ -192,51 +163,107 @@ body{
 <div class="topbar">
 <button onclick="toggleSidebar()">☰</button>
 <h3 id="title">Dashboard</h3>
-<button class="logout-btn">Logout</button>
+
+<select id="lang">
+<option value="en">EN</option>
+<option value="am">AM</option>
+<option value="om">OR</option>
+</select>
 </div>
 
-<!-- DASHBOARD PAGE -->
+<!-- DASHBOARD -->
 <div id="dashboard" class="page active">
 
-<!-- CARDS -->
 <div class="cards">
-  <div class="card"><h4>Total Members</h4><h2 id="mCount">0</h2></div>
-  <div class="card"><h4>Total Savings</h4><h2 id="sCount">0</h2></div>
-  <div class="card"><h4>Total Loans</h4><h2 id="lCount">0</h2></div>
-  <div class="card"><h4>Total Profit</h4><h2 id="pCount">0</h2></div>
+<div class="card"><h4 data-i18n="totalMembers">Members</h4><h2 id="mCount">0</h2></div>
+<div class="card"><h4 data-i18n="totalSavings">Savings</h4><h2 id="sCount">0</h2></div>
+<div class="card"><h4 data-i18n="totalLoans">Loans</h4><h2 id="lCount">0</h2></div>
+<div class="card"><h4 data-i18n="totalProfit">Profit</h4><h2 id="pCount">0</h2></div>
 </div>
 
-<!-- QUICK ACTIONS (RESTORED) -->
-<div class="quick">
-  <button class="b1"><i class="fa fa-user"></i> Add Member</button>
-  <button class="b2"><i class="fa fa-money-bill"></i> Record Savings</button>
-  <button class="b3"><i class="fa fa-coins"></i> Create Loan</button>
-  <button class="b4"><i class="fa fa-file"></i> Generate Report</button>
+<div class="grid">
+
+<!-- TRANSACTIONS -->
+<div class="box">
+<h3>Recent Transactions</h3>
+<table>
+<thead>
+<tr><th>Type</th><th>Member</th><th>Amount</th></tr>
+</thead>
+<tbody id="tx"></tbody>
+</table>
+</div>
+
+<!-- QUICK ACTIONS -->
+<div class="box quick">
+<h3>Quick Actions</h3>
+<button class="b1" onclick="showPage('members')">Add Member</button>
+<button class="b2" onclick="showPage('savings')">Deposit</button>
+<button class="b3" onclick="showPage('loans')">Loan</button>
+<button class="b4" onclick="showPage('reports')">Report</button>
+</div>
+
+</div>
+</div>
+
+<!-- MEMBERS -->
+<div id="members" class="page">
+<h2>Members</h2>
+
+<input id="name" placeholder="Name">
+<input id="phone" placeholder="Phone">
+<button onclick="addMember()">Add</button>
+
+<table>
+<thead>
+<tr><th>Name</th><th>Phone</th><th>Actions</th></tr>
+</thead>
+<tbody id="memberTable"></tbody>
+</table>
+</div>
+
+<!-- SAVINGS -->
+<div id="savings" class="page">
+<h2>Savings</h2>
+
+<select id="saveMember"></select>
+<input id="saveAmount" type="number" placeholder="Amount">
+<button onclick="addSavings()">Deposit</button>
+</div>
+
+<!-- LOANS -->
+<div id="loans" class="page">
+<h2>Loans</h2>
+
+<select id="loanMember"></select>
+<input id="loanAmount" type="number" placeholder="Amount">
+<input id="interest" type="number" placeholder="Interest %">
+
+<h3>Total: <span id="loanTotal">0</span></h3>
+
+<button onclick="calculateLoan()">Calculate</button>
+<button onclick="saveLoan()">Save</button>
+</div>
+
+<!-- REPORT -->
+<div id="reports" class="page">
+<h2>Reports</h2>
+<p>Coming next step...</p>
 </div>
 
 </div>
 
-<!-- OTHER PAGES -->
-<div id="members" class="page"><h2>Members Page</h2></div>
-<div id="savings" class="page"><h2>Savings Page</h2></div>
-<div id="loans" class="page"><h2>Loans Page</h2></div>
-<div id="reports" class="page"><h2>Reports Page</h2></div>
-<div id="settings" class="page"><h2>Settings Page</h2></div>
-
-</div>
+<script type="module" src="js/app.js"></script>
 
 <script>
-/* SPA NAVIGATION */
-function showPage(page){
-  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
-  document.getElementById(page).classList.add("active");
-
-  document.getElementById("title").innerText = page.toUpperCase();
+function showPage(p){
+ document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));
+ document.getElementById(p).classList.add("active");
+ document.getElementById("title").innerText = p.toUpperCase();
 }
 
-/* SIDEBAR TOGGLE */
 function toggleSidebar(){
-  document.getElementById("sidebar").classList.toggle("collapsed");
+ document.getElementById("sidebar").classList.toggle("collapsed");
 }
 </script>
 
