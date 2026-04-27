@@ -3,53 +3,187 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Geresu Dhuki SACCO Dashboard</title>
+<title> Geresu Dhuki SACCO Dashboard</title>
+
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 
 <style>
-body{margin:0;font-family:Arial;background:#f1f5f9;display:flex}
-.sidebar{width:240px;background:#0f172a;color:#fff;height:100vh;padding:20px}
+body{
+  margin:0;
+  font-family:Arial;
+  background:#f1f5f9;
+  display:flex;
+}
+
+/* SIDEBAR */
+.sidebar{
+  width:240px;
+  background:#0f172a;
+  color:#fff;
+  height:100vh;
+  padding:20px;
+  transition:0.3s;
+}
+
 .sidebar h2{margin-bottom:20px}
-.sidebar a{display:block;padding:12px;color:#cbd5e1;border-radius:8px;margin-bottom:5px;cursor:pointer}
-.sidebar a.active, .sidebar a:hover{background:#2563eb;color:#fff}
-.main{flex:1}
-.topbar{display:flex;justify-content:space-between;align-items:center;padding:15px;background:#fff;border-bottom:1px solid #ddd}
-.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;padding:20px}
-.card{background:#fff;padding:20px;border-radius:12px}
-.card h4{margin:0;color:#64748b}
-.card h2{margin:10px 0}
-.content{display:grid;grid-template-columns:2fr 1fr;gap:20px;padding:20px}
-.box{background:#fff;padding:15px;border-radius:12px}
-table{width:100%;border-collapse:collapse}
-th,td{padding:10px;border-bottom:1px solid #eee;text-align:left}
-.tag{padding:5px 10px;border-radius:10px;font-size:12px}
+
+.sidebar a{
+  display:block;
+  padding:12px;
+  color:#cbd5e1;
+  border-radius:8px;
+  margin-bottom:5px;
+  cursor:pointer;
+  transition:0.2s;
+}
+
+.sidebar a:hover,
+.sidebar a.active{
+  background:#2563eb;
+  color:#fff;
+}
+
+.sidebar.collapsed{
+  width:70px;
+}
+
+.sidebar.collapsed a span,
+.sidebar.collapsed h2{
+  display:none;
+}
+
+/* MAIN */
+.main{
+  flex:1;
+}
+
+/* TOPBAR */
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:15px;
+  background:#fff;
+  border-bottom:1px solid #ddd;
+}
+
+/* CARDS */
+.cards{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:15px;
+  padding:20px;
+}
+
+/* CLEAN ANIMATED CARDS (FIXED) */
+.card{
+  background:#fff;
+  padding:20px;
+  border-radius:12px;
+  box-shadow:0 2px 10px rgba(0,0,0,0.05);
+  transition:0.3s ease;
+}
+
+.card:hover{
+  transform:translateY(-8px);
+  box-shadow:0 15px 25px rgba(0,0,0,0.15);
+}
+
+/* CONTENT */
+.content{
+  display:grid;
+  grid-template-columns:2fr 1fr;
+  gap:20px;
+  padding:20px;
+}
+
+.box{
+  background:#fff;
+  padding:15px;
+  border-radius:12px;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+th,td{
+  padding:10px;
+  border-bottom:1px solid #eee;
+  text-align:left;
+}
+
+.tag{
+  padding:5px 10px;
+  border-radius:10px;
+  font-size:12px;
+}
+
 .green{background:#dcfce7;color:#166534}
 .orange{background:#fed7aa;color:#9a3412}
 .blue{background:#dbeafe;color:#1e40af}
-.red{background:#fee2e2;color:#991b1b}
-.quick button{display:flex;align-items:center;gap:10px;width:100%;padding:10px;margin-bottom:10px;border:none;border-radius:8px;color:#fff;cursor:pointer}
-.b1{background:#3b82f6}.b2{background:#16a34a}.b3{background:#ea580c}.b4{background:#9333ea}
 
-select{padding:6px;border-radius:6px;border:1px solid #ddd}
+/* QUICK BUTTONS */
+.quick button{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  width:100%;
+  padding:10px;
+  margin-bottom:10px;
+  border:none;
+  border-radius:8px;
+  color:#fff;
+  cursor:pointer;
+}
+
+.b1{background:#3b82f6}
+.b2{background:#16a34a}
+.b3{background:#ea580c}
+.b4{background:#9333ea}
+
+/* LANGUAGE */
+select{
+  padding:6px;
+  border-radius:6px;
+  border:1px solid #ddd;
+}
+
+/* TOGGLE */
+.toggle-btn{
+  background:#0f172a;
+  color:#fff;
+  border:none;
+  padding:6px 10px;
+  border-radius:6px;
+  cursor:pointer;
+}
 </style>
 </head>
+
 <body>
 
-<div class="sidebar">
+<!-- SIDEBAR -->
+<div class="sidebar" id="sidebar">
 <h2 data-i18n="app">SACCO</h2>
-<a class="active" data-i18n="dashboard">Dashboard</a>
-<a data-i18n="members">Members</a>
-<a data-i18n="savings">Savings</a>
-<a data-i18n="loans">Loans</a>
-<a data-i18n="reports">Reports</a>
-<a data-i18n="transactions">Transactions</a>
-<a data-i18n="settings">Settings</a>
-<a data-i18n="users">Users</a>
+
+<a class="active"><i class="fa fa-home"></i> <span data-i18n="dashboard">Dashboard</span></a>
+<a><i class="fa fa-users"></i> <span data-i18n="members">Members</span></a>
+<a><i class="fa fa-wallet"></i> <span data-i18n="savings">Savings</span></a>
+<a><i class="fa fa-coins"></i> <span data-i18n="loans">Loans</span></a>
+<a><i class="fa fa-chart-line"></i> <span data-i18n="reports">Reports</span></a>
+<a><i class="fa fa-receipt"></i> <span data-i18n="transactions">Transactions</span></a>
+<a><i class="fa fa-gear"></i> <span data-i18n="settings">Settings</span></a>
+<a><i class="fa fa-user"></i> <span data-i18n="users">Users</span></a>
 </div>
 
+<!-- MAIN -->
 <div class="main">
 
 <div class="topbar">
+<button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+
 <h3 data-i18n="dashboard">Dashboard</h3>
 
 <div>
@@ -58,11 +192,11 @@ select{padding:6px;border-radius:6px;border:1px solid #ddd}
   <option value="am">AM</option>
   <option value="om">OR</option>
 </select>
-🌐 | Admin User
+🌐 Admin
+</div>
 </div>
 
-</div>
-
+<!-- CARDS -->
 <div class="cards">
 <div class="card"><h4 data-i18n="totalMembers">Total Members</h4><h2>1,248</h2></div>
 <div class="card"><h4 data-i18n="totalSavings">Total Savings</h4><h2>$245,750</h2></div>
@@ -70,119 +204,64 @@ select{padding:6px;border-radius:6px;border:1px solid #ddd}
 <div class="card"><h4 data-i18n="totalProfit">Total Profit</h4><h2>$24,560</h2></div>
 </div>
 
+<!-- CONTENT -->
 <div class="content">
+
 <div class="box">
 <h3 data-i18n="recentTransactions">Recent Transactions</h3>
 <table>
 <tr>
-<th data-i18n="type">Type</th>
-<th data-i18n="member">Member</th>
-<th data-i18n="amount">Amount</th>
-<th data-i18n="date">Date</th>
+<th>Type</th><th>Member</th><th>Amount</th><th>Date</th>
 </tr>
 
 <tr>
-<td><span class="tag green">Saving</span></td><td>Abdi</td><td>+500</td><td>May 19</td>
+<td><span class="tag green">Saving</span></td>
+<td>Abdi</td>
+<td>+500</td>
+<td>May 19</td>
 </tr>
+
 <tr>
-<td><span class="tag orange">Loan</span></td><td>Amina</td><td>+5000</td><td>May 18</td>
+<td><span class="tag orange">Loan</span></td>
+<td>Amina</td>
+<td>+5000</td>
+<td>May 18</td>
 </tr>
+
 <tr>
-<td><span class="tag blue">Repayment</span></td><td>Mohamed</td><td>-1200</td><td>May 17</td>
+<td><span class="tag blue">Repayment</span></td>
+<td>Mohamed</td>
+<td>-1200</td>
+<td>May 17</td>
 </tr>
+
 </table>
 </div>
 
 <div class="box quick">
 <h3 data-i18n="quickActions">Quick Actions</h3>
-<button class="b1"><i class="fa fa-user"></i><span data-i18n="addMember">Add Member</span></button>
-<button class="b2"><i class="fa fa-money-bill"></i><span data-i18n="recordSavings">Record Savings</span></button>
-<button class="b3"><i class="fa fa-coins"></i><span data-i18n="createLoan">Create Loan</span></button>
-<button class="b4"><i class="fa fa-file"></i><span data-i18n="generateReport">Generate Report</span></button>
-</div>
-</div>
+
+<button class="b1"><i class="fa fa-user"></i> <span data-i18n="addMember">Add Member</span></button>
+<button class="b2"><i class="fa fa-money-bill"></i> <span data-i18n="recordSavings">Record Savings</span></button>
+<button class="b3"><i class="fa fa-coins"></i> <span data-i18n="createLoan">Create Loan</span></button>
+<button class="b4"><i class="fa fa-file"></i> <span data-i18n="generateReport">Generate Report</span></button>
 
 </div>
+</div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, onSnapshot, addDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+</div>
 
-const firebaseConfig = {
-  apiKey: "AIzaSyCS-3e_WqGHNycDgvlXVkInaynTnvnplYE",
-  authDomain: "geresu-dhuki-sacco.firebaseapp.com",
-  projectId: "geresu-dhuki-sacco",
-  storageBucket: "geresu-dhuki-sacco.firebasestorage.app",
-  messagingSenderId: "944934938425",
-  appId: "1:944934938425:web:caef23f2f3bb34c843eae8"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-// FIREBASE LIVE DATA
-onSnapshot(collection(db,"members"),snap=>{
-  document.querySelectorAll('.card h2')[0].innerText = snap.size;
-});
-
-onSnapshot(collection(db,"transactions"),snap=>{
-  let savings=0;
-  let rows="";
-
-  snap.forEach(doc=>{
-    let t=doc.data();
-    if(t.type==="Saving") savings+=t.amount;
-
-    rows+=`<tr>
-      <td><span class="tag ${t.type==='Saving'?'green':t.type==='Loan'?'orange':'blue'}">${t.type}</span></td>
-      <td>${t.member}</td>
-      <td>${t.amount}</td>
-      <td>${t.date||''}</td>
-    </tr>`;
-  });
-
-  document.querySelectorAll('.card h2')[1].innerText="$"+savings;
-  document.querySelector("table").innerHTML=`<tr><th>Type</th><th>Member</th><th>Amount</th><th>Date</th></tr>`+rows;
-});
-
-onSnapshot(collection(db,"loans"),snap=>{
-  let totalLoans=0,profit=0;
-  snap.forEach(doc=>{
-    let l=doc.data();
-    totalLoans+=l.total||0;
-    profit+=(l.total-l.principal)||0;
-  });
-
-  document.querySelectorAll('.card h2')[2].innerText="$"+totalLoans;
-  document.querySelectorAll('.card h2')[3].innerText="$"+profit;
-});
-
-// QUICK ACTIONS
-
-window.addMember=async()=>{
-  let name=prompt("Enter member name");
-  if(!name)return;
-  await addDoc(collection(db,"members"),{name});
+<script>
+// SIDEBAR TOGGLE
+function toggleSidebar(){
+  document.getElementById("sidebar").classList.toggle("collapsed");
 }
 
-window.recordSavings=async()=>{
-  let member=prompt("Member name");
-  let amount=Number(prompt("Amount"));
-  await addDoc(collection(db,"transactions"),{type:"Saving",member,amount,date:new Date().toLocaleDateString()});
-}
-
-window.createLoan=async()=>{
-  let member=prompt("Member name");
-  let amount=Number(prompt("Loan amount"));
-  let total=amount+(amount*0.1);
-  await addDoc(collection(db,"loans"),{member,principal:amount,total});
-}
-
-// I18N
+/* I18N */
 const translations={
- en:{dashboard:"Dashboard",members:"Members",savings:"Savings",loans:"Loans",reports:"Reports",transactions:"Transactions",settings:"Settings",users:"Users",totalMembers:"Total Members",totalSavings:"Total Savings",totalLoans:"Total Loans",totalProfit:"Total Profit",recentTransactions:"Recent Transactions",type:"Type",member:"Member",amount:"Amount",date:"Date",quickActions:"Quick Actions",addMember:"Add Member",recordSavings:"Record Savings",createLoan:"Create Loan",generateReport:"Generate Report"},
- am:{dashboard:"ዳሽቦርድ",members:"አባላት",savings:"ቁጠባ",loans:"ብድር",reports:"ሪፖርቶች",transactions:"ግብይቶች",settings:"ቅንብሮች",users:"ተጠቃሚዎች",totalMembers:"ጠቅላላ አባላት",totalSavings:"ጠቅላላ ቁጠባ",totalLoans:"ጠቅላላ ብድር",totalProfit:"ጠቅላላ ትርፍ",recentTransactions:"የቅርብ ግብይቶች",type:"አይነት",member:"አባል",amount:"መጠን",date:"ቀን",quickActions:"ፈጣን እርምጃዎች",addMember:"አባል አክል",recordSavings:"ቁጠባ መዝግብ",createLoan:"ብድር ፍጠር",generateReport:"ሪፖርት ፍጠር"},
- om:{dashboard:"Daashboordii",members:"Miseensota",savings:"Qusannaa",loans:"Liqii",reports:"Ripoortii",transactions:"Hojiiwwan",settings:"Sirna",users:"Fayyadamtoota",totalMembers:"Waliigala Miseensota",totalSavings:"Waliigala Qusannaa",totalLoans:"Waliigala Liqii",totalProfit:"Waliigala Bu'aa",recentTransactions:"Hojiiwwan Dhihoo",type:"Gosa",member:"Miseensa",amount:"Hanga",date:"Guyyaa",quickActions:"Tarkaanfii Ariifachiisaa",addMember:"Miseensa Dabaluu",recordSavings:"Qusannaa Galchuu",createLoan:"Liqii Uumuu",generateReport:"Ripoortii Uumuu"}
+ en:{dashboard:"Dashboard",members:"Members",savings:"Savings",loans:"Loans",reports:"Reports",transactions:"Transactions",settings:"Settings",users:"Users",totalMembers:"Total Members",totalSavings:"Total Savings",totalLoans:"Total Loans",totalProfit:"Total Profit",recentTransactions:"Recent Transactions",quickActions:"Quick Actions",addMember:"Add Member",recordSavings:"Record Savings",createLoan:"Create Loan",generateReport:"Generate Report",app:"SACCO"},
+ am:{dashboard:"ዳሽቦርድ",members:"አባላት",savings:"ቁጠባ",loans:"ብድር",reports:"ሪፖርቶች",transactions:"ግብይቶች",settings:"ቅንብሮች",users:"ተጠቃሚዎች",totalMembers:"ጠቅላላ አባላት",totalSavings:"ጠቅላላ ቁጠባ",totalLoans:"ጠቅላላ ብድር",totalProfit:"ጠቅላላ ትርፍ",recentTransactions:"የቅርብ ግብይቶች",quickActions:"ፈጣን እርምጃዎች",addMember:"አባል አክል",recordSavings:"ቁጠባ መዝግብ",createLoan:"ብድር ፍጠር",generateReport:"ሪፖርት ፍጠር",app:"ሲኤስኮ"},
+ om:{dashboard:"Daashboordii",members:"Miseensota",savings:"Qusannaa",loans:"Liqii",reports:"Ripoortii",transactions:"Hojiiwwan",settings:"Sirna",users:"Fayyadamtoota",totalMembers:"Waliigala Miseensota",totalSavings:"Waliigala Qusannaa",totalLoans:"Waliigala Liqii",totalProfit:"Waliigala Bu'aa",recentTransactions:"Hojiiwwan Dhihoo",quickActions:"Tarkaanfii Ariifachiisaa",addMember:"Miseensa Dabaluu",recordSavings:"Qusannaa Galchuu",createLoan:"Liqii Uumuu",generateReport:"Ripoortii Uumuu",app:"SACCO"}
 };
 
 const langSelect=document.getElementById("langSelect");
