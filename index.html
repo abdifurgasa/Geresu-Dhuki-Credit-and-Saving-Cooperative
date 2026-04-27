@@ -1,29 +1,122 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Login</title>
-<link rel="stylesheet" href="css/style.css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SACCO Login</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 
 <script src="https://unpkg.com/i18next@23.10.1/i18next.min.js"></script>
 <script src="https://unpkg.com/i18next-browser-languagedetector@7.2.0/i18nextBrowserLanguageDetector.min.js"></script>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#f1f5f9;
+  display:flex;
+  height:100vh;
+}
+
+/* LEFT SIDE (branding like dashboard sidebar) */
+.left{
+  width:50%;
+  background:#0f172a;
+  color:white;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+}
+
+.left h1{
+  font-size:32px;
+}
+
+.left p{
+  color:#cbd5e1;
+}
+
+/* RIGHT SIDE (login) */
+.right{
+  width:50%;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+.card{
+  background:#fff;
+  padding:30px;
+  border-radius:12px;
+  width:320px;
+  box-shadow:0 5px 20px rgba(0,0,0,0.05);
+}
+
+.card h2{
+  margin-bottom:20px;
+}
+
+input{
+  width:100%;
+  padding:10px;
+  margin-bottom:10px;
+  border:1px solid #ddd;
+  border-radius:6px;
+}
+
+button{
+  width:100%;
+  padding:10px;
+  background:#3b82f6;
+  color:#fff;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+}
+
+.top{
+  position:absolute;
+  top:15px;
+  right:15px;
+}
+
+select{
+  padding:5px;
+}
+</style>
 </head>
 
 <body>
 
+<!-- Language -->
+<div class="top">
 <select id="langSelect">
-  <option value="en">English</option>
-  <option value="am">Amharic</option>
-  <option value="om">Afaan Oromo</option>
+  <option value="en">EN</option>
+  <option value="am">AM</option>
+  <option value="om">OR</option>
 </select>
+</div>
 
-<div class="box">
-  <h2 data-i18n="login"></h2>
+<!-- LEFT SIDE -->
+<div class="left">
+  <h1>SACCO SYSTEM</h1>
+  <p data-i18n="dashboard"></p>
+</div>
 
-  <input id="email" data-i18n-placeholder="email">
-  <input id="password" data-i18n-placeholder="password" type="password">
+<!-- RIGHT SIDE -->
+<div class="right">
+  <div class="card">
 
-  <button id="loginBtn" data-i18n="login"></button>
+    <h2 data-i18n="login"></h2>
+
+    <input id="email" data-i18n-placeholder="email" placeholder="Email">
+    <input id="password" type="password" data-i18n-placeholder="password" placeholder="Password">
+
+    <button id="loginBtn" data-i18n="login"></button>
+
+  </div>
 </div>
 
 <script type="module" src="js/auth.js"></script>
