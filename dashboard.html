@@ -44,7 +44,6 @@ body{
 }
 
 .sidebar.collapsed{width:70px}
-
 .sidebar.collapsed a span,
 .sidebar.collapsed h2{display:none}
 
@@ -76,11 +75,7 @@ body{
   cursor:pointer;
   transition:0.3s;
 }
-
-.logout-btn:hover{
-  background:#dc2626;
-  transform:translateY(-2px);
-}
+.logout-btn:hover{background:#dc2626;transform:translateY(-2px)}
 
 /* CARDS */
 .cards{
@@ -128,17 +123,12 @@ th,td{
   text-align:left;
 }
 
-.tag{
-  padding:5px 10px;
-  border-radius:10px;
-  font-size:12px;
-}
-
+.tag{padding:5px 10px;border-radius:10px;font-size:12px}
 .green{background:#dcfce7;color:#166534}
 .orange{background:#fed7aa;color:#9a3412}
 .blue{background:#dbeafe;color:#1e40af}
 
-/* QUICK BUTTONS ANIMATED */
+/* QUICK ACTIONS */
 .quick button{
   display:flex;
   align-items:center;
@@ -152,14 +142,12 @@ th,td{
   cursor:pointer;
   position:relative;
   overflow:hidden;
-  transition:0.3s ease;
+  transition:0.3s;
 }
-
 .quick button:hover{
   transform:translateY(-6px) scale(1.04);
   box-shadow:0 12px 25px rgba(0,0,0,0.25);
 }
-
 .quick button::before{
   content:"";
   position:absolute;
@@ -170,115 +158,129 @@ th,td{
   background:linear-gradient(120deg,transparent,rgba(255,255,255,0.4),transparent);
   transition:0.5s;
 }
-
-.quick button:hover::before{
-  left:120%;
-}
-
+.quick button:hover::before{left:120%}
 .b1{background:#3b82f6}
 .b2{background:#16a34a}
 .b3{background:#ea580c}
 .b4{background:#9333ea}
 
-select{
-  padding:6px;
-  border-radius:6px;
-  border:1px solid #ddd;
-}
-
-.toggle-btn{
-  background:#0f172a;
-  color:#fff;
-  border:none;
-  padding:6px 10px;
-  border-radius:6px;
-  cursor:pointer;
-}
+select{padding:6px;border-radius:6px;border:1px solid #ddd}
+.toggle-btn{background:#0f172a;color:#fff;border:none;padding:6px 10px;border-radius:6px;cursor:pointer}
 </style>
 </head>
 
 <body>
 
-<!-- SIDEBAR -->
 <div class="sidebar" id="sidebar">
-<h2 data-i18n="app">SACCO</h2>
-
-<a class="active"><i class="fa fa-home"></i> <span data-i18n="dashboard">Dashboard</span></a>
-<a><i class="fa fa-users"></i> <span data-i18n="members">Members</span></a>
-<a><i class="fa fa-wallet"></i> <span data-i18n="savings">Savings</span></a>
-<a><i class="fa fa-coins"></i> <span data-i18n="loans">Loans</span></a>
-<a><i class="fa fa-chart-line"></i> <span data-i18n="reports">Reports</span></a>
-<a><i class="fa fa-receipt"></i> <span data-i18n="transactions">Transactions</span></a>
-<a><i class="fa fa-gear"></i> <span data-i18n="settings">Settings</span></a>
-<a><i class="fa fa-user"></i> <span data-i18n="users">Users</span></a>
+<h2>SACCO</h2>
+<a class="active"><i class="fa fa-home"></i> <span>Dashboard</span></a>
+<a><i class="fa fa-users"></i> <span>Members</span></a>
+<a><i class="fa fa-wallet"></i> <span>Savings</span></a>
+<a><i class="fa fa-coins"></i> <span>Loans</span></a>
+<a><i class="fa fa-chart-line"></i> <span>Reports</span></a>
+<a><i class="fa fa-gear"></i> <span>Settings</span></a>
 </div>
 
-<!-- MAIN -->
 <div class="main">
 
 <div class="topbar">
 <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
-
-<h3 data-i18n="dashboard">Dashboard</h3>
+<h3>Dashboard</h3>
 
 <div class="topbar-right">
 <select id="langSelect">
-  <option value="en">EN</option>
-  <option value="am">AM</option>
-  <option value="om">OR</option>
+<option value="en">EN</option>
+<option value="am">AM</option>
+<option value="om">OR</option>
 </select>
 
-<button class="logout-btn" onclick="logout()">
-<i class="fa fa-right-from-bracket"></i> Logout
-</button>
-
+<button class="logout-btn" onclick="logout()"><i class="fa fa-right-from-bracket"></i> Logout</button>
 </div>
 </div>
 
-<!-- CARDS -->
 <div class="cards">
-<div class="card"><h4 data-i18n="totalMembers">Total Members</h4><h2>1,248</h2></div>
-<div class="card"><h4 data-i18n="totalSavings">Total Savings</h4><h2>$245,750</h2></div>
-<div class="card"><h4 data-i18n="totalLoans">Total Loans</h4><h2>$178,300</h2></div>
-<div class="card"><h4 data-i18n="totalProfit">Total Profit</h4><h2>$24,560</h2></div>
+<div class="card"><h4>Total Members</h4><h2 id="mCount">0</h2></div>
+<div class="card"><h4>Total Savings</h4><h2 id="sCount">0</h2></div>
+<div class="card"><h4>Total Loans</h4><h2 id="lCount">0</h2></div>
+<div class="card"><h4>Total Profit</h4><h2 id="pCount">0</h2></div>
 </div>
 
-<!-- CONTENT -->
 <div class="content">
-
 <div class="box">
-<h3 data-i18n="recentTransactions">Recent Transactions</h3>
+<h3>Recent Transactions</h3>
 <table>
 <tr><th>Type</th><th>Member</th><th>Amount</th><th>Date</th></tr>
-<tr><td><span class="tag green">Saving</span></td><td>Abdi</td><td>+500</td><td>May 19</td></tr>
-<tr><td><span class="tag orange">Loan</span></td><td>Amina</td><td>+5000</td><td>May 18</td></tr>
-<tr><td><span class="tag blue">Repayment</span></td><td>Mohamed</td><td>-1200</td><td>May 17</td></tr>
+<tbody id="tx"></tbody>
 </table>
 </div>
 
 <div class="box quick">
-<h3 data-i18n="quickActions">Quick Actions</h3>
-
+<h3>Quick Actions</h3>
 <button class="b1"><i class="fa fa-user"></i> Add Member</button>
 <button class="b2"><i class="fa fa-money-bill"></i> Record Savings</button>
 <button class="b3"><i class="fa fa-coins"></i> Create Loan</button>
 <button class="b4"><i class="fa fa-file"></i> Generate Report</button>
-
 </div>
 </div>
 
 </div>
 
-<script>
-function toggleSidebar(){
-  document.getElementById("sidebar").classList.toggle("collapsed");
-}
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-function logout(){
+const firebaseConfig = {
+  apiKey: "AIzaSyCS-3e_WqGHNycDgvlXVkInaynTnvnplYE",
+  authDomain: "geresu-dhuki-sacco.firebaseapp.com",
+  projectId: "geresu-dhuki-sacco",
+  storageBucket: "geresu-dhuki-sacco.firebasestorage.app",
+  messagingSenderId: "944934938425",
+  appId: "1:944934938425:web:caef23f2f3bb34c843eae8"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+window.logout = async ()=>{
+  await signOut(auth);
   localStorage.clear();
-  alert("Logged out successfully");
-  window.location.href = "index.html";
-}
+  window.location.href="index.html";
+};
+
+onSnapshot(collection(db,"members"),snap=>{
+  document.getElementById("mCount").innerText=snap.size;
+});
+
+onSnapshot(collection(db,"transactions"),snap=>{
+  let html="";
+  let savings=0;
+
+  snap.forEach(d=>{
+    let t=d.data();
+    if(t.type=="Saving") savings+=t.amount;
+
+    html+=`<tr><td>${t.type}</td><td>${t.member}</td><td>${t.amount}</td><td>${t.date||""}</td></tr>`;
+  });
+
+  document.getElementById("tx").innerHTML=html;
+  document.getElementById("sCount").innerText=savings;
+});
+
+onSnapshot(collection(db,"loans"),snap=>{
+  let total=0;
+  let profit=0;
+
+  snap.forEach(d=>{
+    let l=d.data();
+    total+=l.total||0;
+    profit+=(l.total-l.principal)||0;
+  });
+
+  document.getElementById("lCount").innerText=total;
+  document.getElementById("pCount").innerText=profit;
+});
 </script>
 
 </body>
