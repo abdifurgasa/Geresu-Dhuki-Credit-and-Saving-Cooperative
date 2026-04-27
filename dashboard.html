@@ -22,19 +22,23 @@ body{
   color:#fff;
   height:100vh;
   padding:20px;
-  transition:0.3s;
+  transition:0.3s ease;
+  overflow:hidden;
 }
 
-.sidebar h2{margin-bottom:20px}
+.sidebar h2{margin-bottom:20px;transition:0.3s}
 
 .sidebar a{
-  display:block;
+  display:flex;
+  align-items:center;
+  gap:10px;
   padding:12px;
   color:#cbd5e1;
   border-radius:8px;
   margin-bottom:5px;
   cursor:pointer;
   transition:0.2s;
+  white-space:nowrap;
 }
 
 .sidebar a:hover,
@@ -43,12 +47,23 @@ body{
   color:#fff;
 }
 
-.sidebar.collapsed{width:70px}
+.sidebar.collapsed{
+  width:70px;
+  padding:20px 10px;
+}
+
 .sidebar.collapsed a span,
-.sidebar.collapsed h2{display:none}
+.sidebar.collapsed h2{
+  display:none;
+}
+
+.sidebar.collapsed a{
+  justify-content:center;
+  font-size:18px;
+}
 
 /* MAIN */
-.main{flex:1}
+.main{flex:1;transition:0.3s}
 
 /* TOPBAR */
 .topbar{
@@ -128,7 +143,7 @@ th,td{
 .orange{background:#fed7aa;color:#9a3412}
 .blue{background:#dbeafe;color:#1e40af}
 
-/* QUICK ACTIONS ANIMATION */
+/* QUICK ACTIONS */
 .quick button{
   display:flex;
   align-items:center;
@@ -252,6 +267,25 @@ window.logout = async ()=>{
   window.location.href="index.html";
 };
 
+// SIDEBAR STATE (AUTO SAVE)
+const sidebar=document.getElementById("sidebar");
+
+function applySidebar(){
+  const state=localStorage.getItem("sidebarState");
+  if(state==="collapsed") sidebar.classList.add("collapsed");
+}
+
+applySidebar();
+
+window.toggleSidebar=function(){
+  sidebar.classList.toggle("collapsed");
+  if(sidebar.classList.contains("collapsed")){
+    localStorage.setItem("sidebarState","collapsed");
+  }else{
+    localStorage.setItem("sidebarState","open");
+  }
+};
+
 // FIREBASE LIVE DATA
 onSnapshot(collection(db,"members"),snap=>{
   document.getElementById("mCount").innerText=snap.size;
@@ -285,7 +319,7 @@ onSnapshot(collection(db,"loans"),snap=>{
   document.getElementById("pCount").innerText=profit;
 });
 
-// LANGUAGE SYSTEM
+// LANGUAGE
 const translations={
  en:{dashboard:"Dashboard",members:"Members",savings:"Savings",loans:"Loans",reports:"Reports",settings:"Settings",quickActions:"Quick Actions",totalMembers:"Total Members",totalSavings:"Total Savings",totalLoans:"Total Loans",totalProfit:"Total Profit",addMember:"Add Member",recordSavings:"Record Savings",createLoan:"Create Loan",generateReport:"Generate Report",recentTransactions:"Recent Transactions",app:"SACCO"},
  am:{dashboard:"ዳሽቦርድ",members:"አባላት",savings:"ቁጠባ",loans:"ብድር",reports:"ሪፖርቶች",settings:"ቅንብሮች",quickActions:"ፈጣን እርምጃዎች",totalMembers:"ጠቅላላ አባላት",totalSavings:"ጠቅላላ ቁጠባ",totalLoans:"ጠቅላላ ብድር",totalProfit:"ጠቅላላ ትርፍ",addMember:"አባል አክል",recordSavings:"ቁጠባ መዝግብ",createLoan:"ብድር ፍጠር",generateReport:"ሪፖርት ፍጠር",recentTransactions:"የቅርብ ግብይቶች",app:"ሲኤስኮ"},
