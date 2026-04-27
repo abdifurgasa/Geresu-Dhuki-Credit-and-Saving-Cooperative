@@ -262,8 +262,11 @@ select{padding:6px;border-radius:6px;border:1px solid #ddd}
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { 
+  getFirestore, collection, onSnapshot, addDoc, deleteDoc, doc 
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+/* ================= FIREBASE ================= */
 const firebaseConfig = {
   apiKey: "AIzaSyCS-3e_WqGHNycDgvlXVkInaynTnvnplYE",
   authDomain: "geresu-dhuki-sacco.firebaseapp.com",
@@ -277,12 +280,14 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
+/* ================= LOGOUT ================= */
 window.logout = async ()=>{
   await signOut(auth);
   localStorage.clear();
   window.location.href="index.html";
 };
 
+/* ================= SIDEBAR ================= */
 const sidebar=document.getElementById("sidebar");
 
 function applySidebar(){
@@ -293,27 +298,98 @@ applySidebar();
 
 window.toggleSidebar=function(){
   sidebar.classList.toggle("collapsed");
-  localStorage.setItem("sidebarState",sidebar.classList.contains("collapsed")?"collapsed":"open");
+  localStorage.setItem("sidebarState",
+    sidebar.classList.contains("collapsed")?"collapsed":"open");
 };
 
+/* ================= MEMBERS CRUD ================= */
+window.addMember = async ()=>{
+  let name = prompt("Member name");
+  if(!name) return;
+
+  await addDoc(collection(db,"members"),{
+    name,
+    created:new Date()
+  });
+};
+
+window.deleteMember = async(id)=>{
+  if(confirm("Delete member?")){
+    await deleteDoc(doc(db,"members",id));
+  }
+};
+
+/* ================= LOAD MEMBERS ================= */
+let membersList = [];
+
 onSnapshot(collection(db,"members"),snap=>{
-  document.getElementById("mCount").innerText=snap.size;
+  membersList = [];
+  document.getElementById("mCount").innerText = snap.size;
+
+  snap.forEach(d=>{
+    membersList.push({id:d.id,...d.data()});
+  });
 });
 
+/* ================= SAVINGS ================= */
+window.recordSavings = async ()=>{
+  if(membersList.length===0) return alert("No members");
+
+  let name = prompt("Member name?");
+  let amount = Number(prompt("Amount"));
+
+  if(!name || !amount) return;
+
+  await addDoc(collection(db,"transactions"),{
+    type:"Saving",
+    member:name,
+    amount,
+    date:new Date().toLocaleDateString()
+  });
+};
+
+/* ================= LOANS ================= */
+window.createLoan = async ()=>{
+  let name = prompt("Member name?");
+  let principal = Number(prompt("Loan amount"));
+  let interest = Number(prompt("Interest %"));
+
+  if(!principal || !interest) return;
+
+  let total = principal + (principal * interest/100);
+
+  await addDoc(collection(db,"loans"),{
+    member:name,
+    principal,
+    total,
+    interest
+  });
+
+  alert("Loan Total: "+total);
+};
+
+/* ================= DASHBOARD ================= */
 onSnapshot(collection(db,"transactions"),snap=>{
   let html="";
   let savings=0;
 
   snap.forEach(d=>{
     let t=d.data();
-    if(t.type=="Saving") savings+=t.amount;
-    html+=`<tr><td>${t.type}</td><td>${t.member}</td><td>${t.amount}</td><td>${t.date||""}</td></tr>`;
+    if(t.type==="Saving") savings+=t.amount;
+
+    html+=`<tr>
+      <td>${t.type}</td>
+      <td>${t.member}</td>
+      <td>${t.amount}</td>
+      <td>${t.date||""}</td>
+    </tr>`;
   });
 
   document.getElementById("tx").innerHTML=html;
   document.getElementById("sCount").innerText=savings;
 });
 
+/* ================= LOANS TOTAL ================= */
 onSnapshot(collection(db,"loans"),snap=>{
   let total=0;
   let profit=0;
@@ -321,13 +397,19 @@ onSnapshot(collection(db,"loans"),snap=>{
   snap.forEach(d=>{
     let l=d.data();
     total+=l.total||0;
-    profit+=(l.total-l.principal)||0;
+    profit+=(l.total - l.principal)||0;
   });
 
   document.getElementById("lCount").innerText=total;
   document.getElementById("pCount").innerText=profit;
 });
 
+/* ================= QUICK ACTIONS LINK ================= */
+document.querySelector(".b1").onclick = addMember;
+document.querySelector(".b2").onclick = recordSavings;
+document.querySelector(".b3").onclick = createLoan;
+
+/* ================= MULTI LANGUAGE (UNCHANGED) ================= */
 const translations={
  en:{dashboard:"Dashboard",members:"Members",savings:"Savings",loans:"Loans",reports:"Reports",settings:"Settings",quickActions:"Quick Actions",totalMembers:"Total Members",totalSavings:"Total Savings",totalLoans:"Total Loans",totalProfit:"Total Profit",addMember:"Add Member",recordSavings:"Record Savings",createLoan:"Create Loan",generateReport:"Generate Report",recentTransactions:"Recent Transactions",app:"SACCO"},
  am:{dashboard:"ዳሽቦርድ",members:"አባላት",savings:"ቁጠባ",loans:"ብድር",reports:"ሪፖርቶች",settings:"ቅንብሮች",quickActions:"ፈጣን እርምጃዎች",totalMembers:"ጠቅላላ አባላት",totalSavings:"ጠቅላላ ቁጠባ",totalLoans:"ጠቅላላ ብድር",totalProfit:"ጠቅላላ ትርፍ",addMember:"አባል አክል",recordSavings:"ቁጠባ መዝግብ",createLoan:"ብድር ፍጠር",generateReport:"ሪፖርት ፍጠር",recentTransactions:"የቅርብ ግብይቶች",app:"ሲኤስኮ"},
