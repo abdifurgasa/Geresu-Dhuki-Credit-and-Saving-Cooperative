@@ -7,51 +7,46 @@
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 
-<script src="https://unpkg.com/i18next@23.10.1/i18next.min.js"></script>
-<script src="https://unpkg.com/i18next-browser-languagedetector@7.2.0/i18nextBrowserLanguageDetector.min.js"></script>
-
 <style>
 body{
   margin:0;
   font-family:Arial;
   background:#f1f5f9;
-  display:flex;
-  height:100vh;
 }
 
-/* LEFT SIDE (branding like dashboard sidebar) */
-.left{
-  width:50%;
+/* TOP NAV */
+.nav{
   background:#0f172a;
   color:white;
   display:flex;
-  flex-direction:column;
-  justify-content:center;
+  justify-content:space-between;
   align-items:center;
+  padding:12px 20px;
 }
 
-.left h1{
-  font-size:32px;
+.nav .logo{
+  font-weight:bold;
 }
 
-.left p{
-  color:#cbd5e1;
+.nav select{
+  padding:5px;
+  border-radius:6px;
 }
 
-/* RIGHT SIDE (login) */
-.right{
-  width:50%;
+/* LOGIN CENTER */
+.container{
+  height:calc(100vh - 60px);
   display:flex;
   justify-content:center;
   align-items:center;
 }
 
 .card{
-  background:#fff;
+  background:white;
   padding:30px;
   border-radius:12px;
   width:320px;
-  box-shadow:0 5px 20px rgba(0,0,0,0.05);
+  box-shadow:0 10px 25px rgba(0,0,0,0.08);
 }
 
 .card h2{
@@ -70,55 +65,48 @@ button{
   width:100%;
   padding:10px;
   background:#3b82f6;
-  color:#fff;
+  color:white;
   border:none;
   border-radius:6px;
   cursor:pointer;
 }
 
-.top{
-  position:absolute;
-  top:15px;
-  right:15px;
-}
-
-select{
-  padding:5px;
+button:hover{
+  background:#2563eb;
 }
 </style>
 </head>
 
 <body>
 
-<!-- Language -->
-<div class="top">
-<select id="langSelect">
-  <option value="en">EN</option>
-  <option value="am">AM</option>
-  <option value="om">OR</option>
-</select>
+<!-- TOP NAV -->
+<div class="nav">
+  <div class="logo">🏦 SACCO SYSTEM</div>
+
+  <div>
+    <select id="langSelect">
+      <option value="en">EN</option>
+      <option value="am">AM</option>
+      <option value="om">OR</option>
+    </select>
+  </div>
 </div>
 
-<!-- LEFT SIDE -->
-<div class="left">
-  <h1>SACCO SYSTEM</h1>
-  <p data-i18n="dashboard"></p>
-</div>
-
-<!-- RIGHT SIDE -->
-<div class="right">
+<!-- LOGIN -->
+<div class="container">
   <div class="card">
 
-    <h2 data-i18n="login"></h2>
+    <h2 data-i18n="login">Login</h2>
 
-    <input id="email" data-i18n-placeholder="email" placeholder="Email">
-    <input id="password" type="password" data-i18n-placeholder="password" placeholder="Password">
+    <input id="email" placeholder="Email" data-i18n-placeholder="email">
+    <input id="password" type="password" placeholder="Password" data-i18n-placeholder="password">
 
-    <button id="loginBtn" data-i18n="login"></button>
+    <button id="loginBtn" data-i18n="login">Login</button>
 
   </div>
 </div>
 
+<!-- SCRIPTS -->
 <script type="module" src="js/auth.js"></script>
 <script type="module" src="js/i18n-init.js"></script>
 
