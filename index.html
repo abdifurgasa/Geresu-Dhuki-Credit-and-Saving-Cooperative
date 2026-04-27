@@ -7,21 +7,32 @@
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 
+<script src="https://unpkg.com/i18next@23.10.1/i18next.min.js"></script>
+<script src="https://unpkg.com/i18next-browser-languagedetector@7.2.0/i18nextBrowserLanguageDetector.min.js"></script>
+
 <style>
 body{
   margin:0;
   font-family:Arial;
-  background:#f1f5f9;
+
+  /* SACCO BACKGROUND IMAGE */
+  background:
+    linear-gradient(rgba(15,23,42,0.75), rgba(15,23,42,0.75)),
+    url('images/sacco.jpg');
+
+  background-size:cover;
+  background-position:center;
 }
 
 /* TOP NAV */
 .nav{
-  background:#0f172a;
+  background:rgba(15,23,42,0.9);
   color:white;
   display:flex;
   justify-content:space-between;
   align-items:center;
   padding:12px 20px;
+  backdrop-filter: blur(6px);
 }
 
 .nav .logo{
@@ -29,8 +40,9 @@ body{
 }
 
 .nav select{
-  padding:5px;
+  padding:6px;
   border-radius:6px;
+  border:none;
 }
 
 /* LOGIN CENTER */
@@ -42,11 +54,12 @@ body{
 }
 
 .card{
-  background:white;
+  background:rgba(255,255,255,0.95);
   padding:30px;
   border-radius:12px;
   width:320px;
-  box-shadow:0 10px 25px rgba(0,0,0,0.08);
+  box-shadow:0 10px 25px rgba(0,0,0,0.2);
+  backdrop-filter: blur(8px);
 }
 
 .card h2{
@@ -92,7 +105,7 @@ button:hover{
   </div>
 </div>
 
-<!-- LOGIN -->
+<!-- LOGIN BOX -->
 <div class="container">
   <div class="card">
 
