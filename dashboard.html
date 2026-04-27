@@ -61,6 +61,27 @@ body{
   border-bottom:1px solid #ddd;
 }
 
+.topbar-right{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.logout-btn{
+  background:#ef4444;
+  color:#fff;
+  border:none;
+  padding:7px 12px;
+  border-radius:8px;
+  cursor:pointer;
+  transition:0.3s;
+}
+
+.logout-btn:hover{
+  background:#dc2626;
+  transform:translateY(-2px);
+}
+
 /* CARDS */
 .cards{
   display:grid;
@@ -139,7 +160,6 @@ th,td{
   box-shadow:0 12px 25px rgba(0,0,0,0.25);
 }
 
-/* shine animation */
 .quick button::before{
   content:"";
   position:absolute;
@@ -201,13 +221,17 @@ select{
 
 <h3 data-i18n="dashboard">Dashboard</h3>
 
-<div>
+<div class="topbar-right">
 <select id="langSelect">
   <option value="en">EN</option>
   <option value="am">AM</option>
   <option value="om">OR</option>
 </select>
-🌐 Admin
+
+<button class="logout-btn" onclick="logout()">
+<i class="fa fa-right-from-bracket"></i> Logout
+</button>
+
 </div>
 </div>
 
@@ -225,41 +249,20 @@ select{
 <div class="box">
 <h3 data-i18n="recentTransactions">Recent Transactions</h3>
 <table>
-<tr>
-<th>Type</th><th>Member</th><th>Amount</th><th>Date</th>
-</tr>
-
-<tr>
-<td><span class="tag green">Saving</span></td>
-<td>Abdi</td>
-<td>+500</td>
-<td>May 19</td>
-</tr>
-
-<tr>
-<td><span class="tag orange">Loan</span></td>
-<td>Amina</td>
-<td>+5000</td>
-<td>May 18</td>
-</tr>
-
-<tr>
-<td><span class="tag blue">Repayment</span></td>
-<td>Mohamed</td>
-<td>-1200</td>
-<td>May 17</td>
-</tr>
-
+<tr><th>Type</th><th>Member</th><th>Amount</th><th>Date</th></tr>
+<tr><td><span class="tag green">Saving</span></td><td>Abdi</td><td>+500</td><td>May 19</td></tr>
+<tr><td><span class="tag orange">Loan</span></td><td>Amina</td><td>+5000</td><td>May 18</td></tr>
+<tr><td><span class="tag blue">Repayment</span></td><td>Mohamed</td><td>-1200</td><td>May 17</td></tr>
 </table>
 </div>
 
 <div class="box quick">
 <h3 data-i18n="quickActions">Quick Actions</h3>
 
-<button class="b1"><i class="fa fa-user"></i> <span>Add Member</span></button>
-<button class="b2"><i class="fa fa-money-bill"></i> <span>Record Savings</span></button>
-<button class="b3"><i class="fa fa-coins"></i> <span>Create Loan</span></button>
-<button class="b4"><i class="fa fa-file"></i> <span>Generate Report</span></button>
+<button class="b1"><i class="fa fa-user"></i> Add Member</button>
+<button class="b2"><i class="fa fa-money-bill"></i> Record Savings</button>
+<button class="b3"><i class="fa fa-coins"></i> Create Loan</button>
+<button class="b4"><i class="fa fa-file"></i> Generate Report</button>
 
 </div>
 </div>
@@ -269,6 +272,12 @@ select{
 <script>
 function toggleSidebar(){
   document.getElementById("sidebar").classList.toggle("collapsed");
+}
+
+function logout(){
+  localStorage.clear();
+  alert("Logged out successfully");
+  window.location.href = "index.html";
 }
 </script>
 
