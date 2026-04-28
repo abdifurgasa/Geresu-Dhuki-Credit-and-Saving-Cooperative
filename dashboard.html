@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>SACCO Dashboard Pro</title>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
 <style>
 :root{
   --bg:#f5f7fb;
@@ -46,7 +47,6 @@ body{margin:0;background:var(--bg);color:var(--text);display:flex;}
 }
 .menu a:hover{background:#f1f5f9;}
 
-/* Main */
 .main{
   margin-left:260px;
   padding:20px;
@@ -79,26 +79,42 @@ body{margin:0;background:var(--bg);color:var(--text);display:flex;}
 .card{
   padding:15px;
   border-radius:12px;
-  animation:fadeIn .5s ease;
   color:white;
 }
-.card h3{margin:0;font-size:14px;opacity:.9;}
-.card p{font-size:20px;margin-top:10px;}
 .card1{background:var(--card1)}
 .card2{background:var(--card2)}
 .card3{background:var(--card3)}
 .card4{background:var(--card4)}
 
-@keyframes fadeIn{
-  from{transform:translateY(10px);opacity:0}
-  to{transform:translateY(0);opacity:1}
+.content-grid{
+  display:grid;
+  grid-template-columns:1fr 2fr;
+  gap:15px;
+  margin-top:20px;
+}
+@media(max-width:900px){
+  .content-grid{grid-template-columns:1fr;}
 }
 
 .actions{
   display:grid;
-  grid-template-columns:repeat(4,1fr);
+  grid-template-columns:repeat(2,1fr);
   gap:10px;
 }
+.action-card{
+  padding:15px;
+  border-radius:12px;
+  color:white;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-weight:bold;
+}
+.a1{background:#2563eb;}
+.a2{background:#16a34a;}
+.a3{background:#f97316;}
+.a4{background:#a855f7;}
 
 .table{
   margin-top:20px;
@@ -111,43 +127,13 @@ table{width:100%;border-collapse:collapse;}
 th,td{padding:10px;border-bottom:1px solid var(--border);font-size:14px;}
 th{color:var(--muted);text-align:left;}
 
-.lang{margin-left:10px;}
 tr:nth-child(even){background:#f8fafc;}
 tr:nth-child(odd){background:#ffffff;}
-tr:hover{background:#e2e8f0;transition:.2s;}
-.actions{
-  margin-top:20px;
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:10px;
-}
-.action-card{
-  padding:15px;
-  border-radius:12px;
-  color:white;
-  cursor:pointer;
-  transition:.2s;
-  display:flex;
-  align-items:center;
-  gap:10px;
-  font-weight:bold;
-}
-.action-card:hover{transform:translateY(-3px);}
-.a1{background:#2563eb;}
-.a2{background:#16a34a;}
-.a3{background:#f97316;}
-.content-grid{
-  display:grid;
-  grid-template-columns:1fr 2fr;
-  gap:15px;
-  margin-top:20px;
-}
-@media(max-width:900px){
-  .content-grid{grid-template-columns:1fr;}
-}
+tr:hover{background:#e2e8f0;}
+
 .menu a.active{
   background:#2563eb;
-  color:#ffffff;
+  color:#fff;
   font-weight:bold;
   border-left:4px solid #1d4ed8;
 }
@@ -159,123 +145,126 @@ tr:hover{background:#e2e8f0;transition:.2s;}
 }
 </style>
 </head>
+
 <body>
 
 <div class="sidebar" id="sidebar">
-  <h2 id="title">SACCO</h2>
+  <h2>SACCO</h2>
   <div class="menu">
-    <a href="#" class="nav-item active"><i class="fa fa-home"></i> <span class="txt">Dashboard</span></a>
-    <a href="#" class="nav-item"><i class="fa fa-users"></i> <span class="txt">Members</span></a>
-    <a href="#" class="nav-item"><i class="fa fa-user-group"></i> <span class="txt">Users</span></a>
-    <a href="#" class="nav-item"><i class="fa fa-money-bill"></i> <span class="txt">Loans</span></a>
-    <a href="#" class="nav-item"><i class="fa fa-receipt"></i> <span class="txt">Transactions</span></a>
-    <a href="#" class="nav-item"><i class="fa fa-chart-line"></i> <span class="txt">Reports</span></a>
-    <a href="#" class="nav-item"><i class="fa fa-gear"></i> <span class="txt">Settings</span></a>
-    <a href="#" class="nav-item logout" onclick="logout()"><i class="fa fa-right-from-bracket"></i> <span class="txt">Logout</span></a>
+    <a class="nav-item active">Dashboard</a>
+    <a class="nav-item">Members</a>
+    <a class="nav-item">Users</a>
+    <a class="nav-item">Loans</a>
+    <a class="nav-item">Transactions</a>
+    <a class="nav-item">Reports</a>
+    <a class="nav-item">Settings</a>
+    <a class="nav-item logout" onclick="logout()">Logout</a>
   </div>
 </div>
 
 <div class="main">
+
   <div class="topbar">
     <button class="btn" onclick="toggleSidebar()"><i class="fa fa-bars"></i></button>
-    <div>
-      <button class="btn" onclick="openSettings()"><i class="fa fa-gear"></i></button>
-      <select class="btn lang" onchange="changeLang(this.value)">
-        <option value="en">EN</option>
-        <option value="am">AM</option>
-      </select>
-    </div>
+    <button class="btn"><i class="fa fa-gear"></i></button>
   </div>
 
   <div class="cards">
-    <div class="card card1"><h3 id="c1t">Total Members</h3><p>1,245</p></div>
-    <div class="card card2"><h3 id="c2t">Savings</h3><p>2.5M ETB</p></div>
-    <div class="card card3"><h3 id="c3t">Loans</h3><p>1.1M ETB</p></div>
-    <div class="card card4"><h3 id="c4t">Profit</h3><p>350K ETB</p></div>
+    <div class="card card1"><h3>Total Members</h3><p id="members">0</p></div>
+    <div class="card card2"><h3>Savings</h3><p id="savings">0</p></div>
+    <div class="card card3"><h3>Loans</h3><p id="loans">0</p></div>
+    <div class="card card4"><h3>Profit</h3><p id="profit">0</p></div>
   </div>
 
   <div class="content-grid">
-  <div class="actions">
-  <div class="action-card a1"><i class="fa fa-plus"></i> Quick Deposit</div>
-  <div class="action-card a2"><i class="fa fa-hand-holding-dollar"></i> Quick Loan</div>
-  <div class="action-card a3"><i class="fa fa-user-plus"></i> Add Member</div>
-  <div class="action-card a4"><i class="fa fa-file-lines"></i> Generate Report</div>
-</div>
-    <div class="action-card a2"><i class="fa fa-hand-holding-dollar"></i> Quick Loan</div>
-    <div class="action-card a3"><i class="fa fa-user-plus"></i> Add Member</div>
+
+    <div class="actions">
+      <div class="action-card a1" onclick="addTx('Deposit')">Deposit</div>
+      <div class="action-card a2" onclick="addTx('Loan')">Loan</div>
+      <div class="action-card a3">Add Member</div>
+      <div class="action-card a4">Report</div>
+    </div>
+
+    <div class="table">
+      <h3>Recent Transactions</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Type</th>
+            <th>Member</th>
+            <th>Amount</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+
   </div>
 
-  <div class="table">
-    <h3 id="rt">Recent Transactions</h3>
-    <table>
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Type</th>
-          <th>Member</th>
-          <th>Amount</th>
-          <th>Date</th>
-        </tr>
-      </thead>
-      <tbody id="tbody"></tbody>
-    </table>
-  </div>
 </div>
 
-<script>
-function toggleSidebar(){
-  document.getElementById('sidebar').classList.toggle('collapsed');
-}
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-function logout(){
-  alert('Logged out');
-}
+const firebaseConfig = {
+  apiKey: "AIzaSyCS-3e_WqGHNycDgvlXVkInaynTnvnplYE",
+  authDomain: "geresu-dhuki-sacco.firebaseapp.com",
+  projectId: "geresu-dhuki-sacco",
+  storageBucket: "geresu-dhuki-sacco.firebasestorage.app",
+  messagingSenderId: "944934938425",
+  appId: "1:944934938425:web:caef23f2f3bb34c843eae8",
+  measurementId: "G-QRHNWMZMXC"
+};
 
-function openSettings(){
-  alert('Settings opened');
-}
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-function changeLang(lang){
-  if(lang==='am'){
-    document.getElementById('title').innerText='ሳኮ';
-    document.getElementById('c1t').innerText='አባላት';
-    document.getElementById('c2t').innerText='ቁጠባ';
-    document.getElementById('c3t').innerText='ብድር';
-    document.getElementById('c4t').innerText='ትርፍ';
-    document.getElementById('rt').innerText='የቅርብ ግብይቶች';
-  }else{
-    location.reload();
+onAuthStateChanged(auth,(user)=>{
+  if(!user){
+    location.href="login.html";
   }
-}
+});
 
-const names=['Abebe','Hana','Kebede','Selam','Dawit','Marta'];
-const types=['Deposit','Withdraw','Loan','Repayment'];
-const tbody=document.getElementById('tbody');
+window.logout = () => signOut(auth).then(()=>location.href="login.html");
 
-for(let i=1;i<=25;i++){
-  const tr=document.createElement('tr');
-  const name=names[Math.floor(Math.random()*names.length)];
-  const type=types[Math.floor(Math.random()*types.length)];
-  const amount=(Math.random()*5000+100).toFixed(2);
-  const date=new Date().toISOString().split('T')[0];
+const tbody = document.getElementById("tbody");
 
-  tr.innerHTML=`
-    <td>${i}</td>
-    <td>${type}</td>
-    <td>${name}</td>
-    <td>${amount} ETB</td>
-    <td>${date}</td>
-  `;
-  tbody.appendChild(tr);
-}
-// Active menu highlight
-const navItems=document.querySelectorAll('.nav-item');
-navItems.forEach(item=>{
-  item.addEventListener('click',()=>{
-    navItems.forEach(i=>i.classList.remove('active'));
-    item.classList.add('active');
+onSnapshot(collection(db,"transactions"),(snap)=>{
+  tbody.innerHTML="";
+  snap.forEach(doc=>{
+    const d = doc.data();
+    tbody.innerHTML += `
+      <tr>
+        <td>${doc.id.slice(0,6)}</td>
+        <td>${d.type}</td>
+        <td>${d.member || "-"}</td>
+        <td>${d.amount}</td>
+        <td>${d.date}</td>
+      </tr>
+    `;
   });
 });
+
+window.addTx = async(type)=>{
+  const member = prompt("Member name");
+  const amount = prompt("Amount");
+
+  await addDoc(collection(db,"transactions"),{
+    type,
+    member,
+    amount:Number(amount),
+    date:new Date().toISOString().split("T")[0]
+  });
+};
+
+function toggleSidebar(){
+  document.getElementById("sidebar").classList.toggle("collapsed");
+}
 </script>
 
 </body>
