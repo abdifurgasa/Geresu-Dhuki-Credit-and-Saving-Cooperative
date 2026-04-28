@@ -159,7 +159,76 @@ th,td{
 .blue{background:#dbeafe;color:#1e40af}
 
 /* QUICK ACTIONS */
-.quick button{
+/* CARDS */
+.cards{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:15px;
+  padding:20px;
+}
+
+.card{
+  padding:20px;
+  border-radius:14px;
+  color:#fff;
+}
+
+.card:nth-child(1){background:#3b82f6;}
+.card:nth-child(2){background:#22c55e;}
+.card:nth-child(3){background:#f97316;}
+.card:nth-child(4){background:#a855f7;}
+
+/* CONTENT */
+.content{
+  display:grid;
+  grid-template-columns:2fr 1fr;
+  gap:20px;
+  padding:20px;
+}
+
+.box{
+  background:#fff;
+  padding:15px;
+  border-radius:12px;
+}
+
+table{width:100%;border-collapse:collapse;}
+th,td{padding:10px;border-bottom:1px solid #eee;}
+
+.btn{
+  padding:5px 8px;
+  border:none;
+  border-radius:5px;
+  cursor:pointer;
+}
+.edit{background:#facc15;}
+.del{background:#ef4444;color:#fff;}
+
+/* QUICK */
+  .quick button{
+  width:100%;
+  padding:12px;
+  margin-bottom:10px;
+  border:none;
+  border-radius:10px;
+  color:#fff;
+  cursor:pointer;
+}
+
+.b1{background:#3b82f6}
+.b2{background:#16a34a}
+.b3{background:#ea580c}
+.b4{background:#9333ea}
+
+/* RECENT COLORS */
+.r1{background:#dcfce7;}
+.r2{background:#fee2e2;}
+.r3{background:#dbeafe;}
+.r4{background:#fef3c7;}
+.r5{background:#ede9fe;}
+
+select{padding:6px;}
+  
   display:flex;
   align-items:center;
   gap:10px;
@@ -172,7 +241,7 @@ th,td{
   cursor:pointer;
   position:relative;
   overflow:hidden;
-  transition:0.3s;
+  transition:0.8s;
 }
 
 .quick button:hover{
@@ -257,7 +326,52 @@ select{padding:6px;border-radius:6px;border:1px solid #ddd}
 </div>
 </div>
 </div>
+<!-- CONTENT -->
+<div class="content">
 
+<!-- TABLES -->
+<div class="box">
+
+<h3>Recent Actions (10 rows)</h3>
+<table>
+<thead>
+<tr><th>Name</th><th>Amount</th><th>Reason</th><th>Date</th></tr>
+</thead>
+<tbody id="recent"></tbody>
+</table>
+
+<hr>
+
+<h3>Members</h3>
+<table>
+<tbody id="members"></tbody>
+</table>
+
+<hr>
+
+<h3>Savings</h3>
+<table>
+<tbody id="savings"></tbody>
+</table>
+
+<hr>
+
+<h3>Loans</h3>
+<table>
+<tbody id="loans"></tbody>
+</table>
+
+</div>
+
+<!-- QUICK -->
+<div class="box quick">
+<h3>Quick Actions</h3>
+<button class="b1" onclick="addMember()">Add Member</button>
+<button class="b2" onclick="addSaving()">Add Savings</button>
+<button class="b3" onclick="addLoan()">Add Loan</button>
+<button class="b4">Settings</button>
+</div>
+  
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
