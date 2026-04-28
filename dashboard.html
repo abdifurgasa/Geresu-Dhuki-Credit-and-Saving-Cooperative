@@ -38,7 +38,8 @@ body{margin:0;background:var(--bg);color:var(--text);display:flex;}
 .sidebar.collapsed{width:70px;}
 .sidebar h2{font-size:18px;margin-bottom:20px;}
 .menu a{
-  display:flex;align-items:center;
+  display:flex;
+  align-items:center;
   gap:10px;
   padding:10px;
   color:var(--text);
@@ -166,14 +167,13 @@ tr:hover{background:#e2e8f0;}
 
   <div class="topbar">
     <button class="btn" onclick="toggleSidebar()"><i class="fa fa-bars"></i></button>
-    <button class="btn"><i class="fa fa-gear"></i></button>
   </div>
 
   <div class="cards">
     <div class="card card1"><h3>Total Members</h3><p id="members">0</p></div>
-    <div class="card card2"><h3>Savings</h3><p id="savings">0</p></div>
-    <div class="card card3"><h3>Loans</h3><p id="loans">0</p></div>
-    <div class="card card4"><h3>Profit</h3><p id="profit">0</p></div>
+    <div class="card card2"><h3>Savings</h3><p id="savings">0 ETB</p></div>
+    <div class="card card3"><h3>Loans</h3><p id="loans">0 ETB</p></div>
+    <div class="card card4"><h3>Profit</h3><p id="profit">0 ETB</p></div>
   </div>
 
   <div class="content-grid">
@@ -210,6 +210,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+/* FIREBASE */
 const firebaseConfig = {
   apiKey: "AIzaSyCS-3e_WqGHNycDgvlXVkInaynTnvnplYE",
   authDomain: "geresu-dhuki-sacco.firebaseapp.com",
@@ -224,32 +225,58 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
+/* AUTH */
 onAuthStateChanged(auth,(user)=>{
-  if(!user){
-    location.href="login.html";
-  }
+  if(!user) location.href="login.html";
 });
 
-window.logout = () => signOut(auth).then(()=>location.href="login.html");
+window.logout = ()=>signOut(auth).then(()=>location.href="login.html");
 
+/* TABLE */
 const tbody = document.getElementById("tbody");
 
+/* SAVINGS CALC */
+const savingsEl = document.getElementById("savings");
+
+function calcSavings(data){
+  let total = 0;
+
+  data.forEach(t=>{
+    const amt = Number(t.amount || 0);
+
+    if(t.type==="Deposit") total += amt;
+    else if(t.type==="Repayment") total += amt;
+    else if(t.type==="Loan") total -= amt;
+  });
+
+  savingsEl.innerText = total.toFixed(2) + " ETB";
+}
+
+/* LIVE DATA */
 onSnapshot(collection(db,"transactions"),(snap)=>{
-  tbody.innerHTML="";
+  tbody.innerHTML = "";
+
+  const all = [];
+
   snap.forEach(doc=>{
     const d = doc.data();
+    all.push(d);
+
     tbody.innerHTML += `
       <tr>
         <td>${doc.id.slice(0,6)}</td>
         <td>${d.type}</td>
-        <td>${d.member || "-"}</td>
-        <td>${d.amount}</td>
+        <td>${d.member}</td>
+        <td>${d.amount} ETB</td>
         <td>${d.date}</td>
       </tr>
     `;
   });
+
+  calcSavings(all);
 });
 
+/* ADD TRANSACTION */
 window.addTx = async(type)=>{
   const member = prompt("Member name");
   const amount = prompt("Amount");
@@ -262,9 +289,10 @@ window.addTx = async(type)=>{
   });
 };
 
-function toggleSidebar(){
+/* UI */
+window.toggleSidebar = ()=>{
   document.getElementById("sidebar").classList.toggle("collapsed");
-}
+};
 </script>
 
 </body>
