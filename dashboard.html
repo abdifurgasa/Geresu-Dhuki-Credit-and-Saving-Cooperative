@@ -4,6 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>SACCO Dashboard Pro</title>
+
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 
 <style>
@@ -63,14 +64,12 @@ body{margin:0;background:var(--bg);color:var(--text);display:flex;}
   margin-bottom:20px;
 }
 .btn{
-  background:#ffffff;
-  color:var(--text);
+  background:#fff;
   border:1px solid var(--border);
   padding:8px 12px;
   border-radius:6px;
   cursor:pointer;
 }
-.btn:hover{background:#f1f5f9;}
 
 .cards{
   display:grid;
@@ -93,9 +92,6 @@ body{margin:0;background:var(--bg);color:var(--text);display:flex;}
   gap:15px;
   margin-top:20px;
 }
-@media(max-width:900px){
-  .content-grid{grid-template-columns:1fr;}
-}
 
 .actions{
   display:grid;
@@ -107,10 +103,10 @@ body{margin:0;background:var(--bg);color:var(--text);display:flex;}
   border-radius:12px;
   color:white;
   cursor:pointer;
+  font-weight:bold;
   display:flex;
   align-items:center;
   gap:10px;
-  font-weight:bold;
 }
 .a1{background:#2563eb;}
 .a2{background:#16a34a;}
@@ -124,13 +120,13 @@ body{margin:0;background:var(--bg);color:var(--text);display:flex;}
   border-radius:10px;
   border:1px solid var(--border);
 }
+
 table{width:100%;border-collapse:collapse;}
-th,td{padding:10px;border-bottom:1px solid var(--border);font-size:14px;}
+th,td{padding:10px;border-bottom:1px solid var(--border);}
 th{color:var(--muted);text-align:left;}
 
 tr:nth-child(even){background:#f8fafc;}
-tr:nth-child(odd){background:#ffffff;}
-tr:hover{background:#e2e8f0;}
+tr:nth-child(odd){background:#fff;}
 
 .menu a.active{
   background:#2563eb;
@@ -138,24 +134,28 @@ tr:hover{background:#e2e8f0;}
   font-weight:bold;
   border-left:4px solid #1d4ed8;
 }
-.menu a.logout{color:#ef4444;}
-.menu a.logout:hover{background:#fee2e2;}
+
+.menu a.logout{
+  color:#ef4444;
+}
+.menu a.logout:hover{
+  background:#fee2e2;
+}
 </style>
 </head>
 
 <body>
 
 <div class="sidebar" id="sidebar">
-  <h2 id="title">SACCO</h2>
-
+  <h2>SACCO</h2>
   <div class="menu">
-    <a class="nav-item active"><i class="fa fa-home"></i> <span>Dashboard</span></a>
-    <a class="nav-item"><i class="fa fa-users"></i> <span>Members</span></a>
-    <a class="nav-item"><i class="fa fa-user-group"></i> <span>Users</span></a>
-    <a class="nav-item"><i class="fa fa-money-bill"></i> <span>Loans</span></a>
-    <a class="nav-item"><i class="fa fa-receipt"></i> <span>Transactions</span></a>
-    <a class="nav-item"><i class="fa fa-chart-line"></i> <span>Reports</span></a>
-    <a class="nav-item"><i class="fa fa-gear"></i> <span>Settings</span></a>
+    <a class="nav-item active">Dashboard</a>
+    <a class="nav-item">Members</a>
+    <a class="nav-item">Users</a>
+    <a class="nav-item">Loans</a>
+    <a class="nav-item">Transactions</a>
+    <a class="nav-item">Reports</a>
+    <a class="nav-item">Settings</a>
     <a class="nav-item logout" onclick="logout()">Logout</a>
   </div>
 </div>
@@ -164,7 +164,6 @@ tr:hover{background:#e2e8f0;}
 
   <div class="topbar">
     <button class="btn" onclick="toggleSidebar()"><i class="fa fa-bars"></i></button>
-
     <select class="btn" onchange="setLang(this.value)">
       <option value="en">EN</option>
       <option value="am">AM</option>
@@ -173,10 +172,10 @@ tr:hover{background:#e2e8f0;}
   </div>
 
   <div class="cards">
-    <div class="card card1"><h3 id="c1t">Total Members</h3><p id="members">0</p></div>
-    <div class="card card2"><h3 id="c2t">Total Savings</h3><p id="savings">0 ETB</p></div>
-    <div class="card card3"><h3 id="c3t">Total Loans</h3><p id="loans">0 ETB</p></div>
-    <div class="card card4"><h3 id="c4t">Total Profit</h3><p id="profit">0 ETB</p></div>
+    <div class="card card1"><h3>Total Members</h3><p id="members">0</p></div>
+    <div class="card card2"><h3>Total Savings</h3><p id="savings">0 ETB</p></div>
+    <div class="card card3"><h3>Total Loans</h3><p id="loans">0 ETB</p></div>
+    <div class="card card4"><h3>Total Profit</h3><p id="profit">0 ETB</p></div>
   </div>
 
   <div class="content-grid">
@@ -209,61 +208,59 @@ tr:hover{background:#e2e8f0;}
 </div>
 
 <script type="module">
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { translations } from "./i18n.js";
+import { getFirestore, collection, addDoc, onSnapshot, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-/* FIREBASE */
 const firebaseConfig = {
   apiKey: "AIzaSyCS-3e_WqGHNycDgvlXVkInaynTnvnplYE",
   authDomain: "geresu-dhuki-sacco.firebaseapp.com",
   projectId: "geresu-dhuki-sacco",
   storageBucket: "geresu-dhuki-sacco.firebasestorage.app",
   messagingSenderId: "944934938425",
-  appId: "1:944934938425:web:caef23f2f3bb34c843eae8",
-  measurementId: "G-QRHNWMZMXC"
+  appId: "1:944934938425:web:caef23f2f3bb34c843eae8"
 };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-/* AUTH */
-onAuthStateChanged(auth,(user)=>{
-  if(!user) location.href="login.html";
+let role = null;
+
+/* AUTH + ROLE CHECK */
+onAuthStateChanged(auth, async (user)=>{
+  if(!user){
+    location.href="login.html";
+    return;
+  }
+
+  const snap = await getDoc(doc(db,"users",user.uid));
+
+  if(!snap.exists()){
+    alert("No role assigned");
+    await signOut(auth);
+    location.href="login.html";
+    return;
+  }
+
+  role = snap.data().role;
 });
 
+/* LOGOUT */
 window.logout = ()=>signOut(auth).then(()=>location.href="login.html");
 
-/* LANGUAGE */
-let lang = "en";
-
-function t(k){ return translations[lang][k] || k; }
-
-window.setLang = (l)=>{
-  lang = l;
-
-  document.getElementById("c1t").innerText = t("totalMembers");
-  document.getElementById("c2t").innerText = t("totalSavings");
-  document.getElementById("c3t").innerText = t("totalLoans");
-  document.getElementById("c4t").innerText = t("totalProfit");
-};
-
 /* SAVINGS */
-const savingsEl = document.getElementById("savings");
-
 function calcSavings(data){
   let total = 0;
 
   data.forEach(t=>{
     const a = Number(t.amount||0);
-
     if(t.type==="Deposit") total += a;
     else if(t.type==="Loan") total -= a;
   });
 
-  savingsEl.innerText = total.toFixed(2)+" ETB";
+  document.getElementById("savings").innerText = total.toFixed(2)+" ETB";
 }
 
 /* FIRESTORE */
@@ -273,13 +270,13 @@ onSnapshot(collection(db,"transactions"),(snap)=>{
   tbody.innerHTML="";
   const all=[];
 
-  snap.forEach(doc=>{
-    const d = doc.data();
+  snap.forEach(docu=>{
+    const d = docu.data();
     all.push(d);
 
     tbody.innerHTML += `
       <tr>
-        <td>${doc.id.slice(0,6)}</td>
+        <td>${docu.id.slice(0,6)}</td>
         <td>${d.type}</td>
         <td>${d.member}</td>
         <td>${d.amount}</td>
@@ -291,8 +288,14 @@ onSnapshot(collection(db,"transactions"),(snap)=>{
   calcSavings(all);
 });
 
-/* ADD TX */
-document.getElementById("depositBtn").onclick = async()=>{
+/* ADD TRANSACTION (ADMIN ONLY) */
+document.getElementById("depositBtn").onclick = async ()=>{
+
+  if(role !== "admin"){
+    alert("Access denied (Admin only)");
+    return;
+  }
+
   const member = prompt("Member");
   const amount = prompt("Amount");
 
@@ -308,6 +311,7 @@ document.getElementById("depositBtn").onclick = async()=>{
 window.toggleSidebar = ()=>{
   document.getElementById("sidebar").classList.toggle("collapsed");
 };
+
 </script>
 
 </body>
