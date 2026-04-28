@@ -138,27 +138,24 @@ tr:hover{background:#e2e8f0;}
   font-weight:bold;
   border-left:4px solid #1d4ed8;
 }
-.menu a.logout{
-  color:#ef4444;
-}
-.menu a.logout:hover{
-  background:#fee2e2;
-}
+.menu a.logout{color:#ef4444;}
+.menu a.logout:hover{background:#fee2e2;}
 </style>
 </head>
 
 <body>
 
 <div class="sidebar" id="sidebar">
-  <h2>SACCO</h2>
+  <h2 id="title">SACCO</h2>
+
   <div class="menu">
-    <a class="nav-item active">Dashboard</a>
-    <a class="nav-item">Members</a>
-    <a class="nav-item">Users</a>
-    <a class="nav-item">Loans</a>
-    <a class="nav-item">Transactions</a>
-    <a class="nav-item">Reports</a>
-    <a class="nav-item">Settings</a>
+    <a class="nav-item active"><i class="fa fa-home"></i> <span>Dashboard</span></a>
+    <a class="nav-item"><i class="fa fa-users"></i> <span>Members</span></a>
+    <a class="nav-item"><i class="fa fa-user-group"></i> <span>Users</span></a>
+    <a class="nav-item"><i class="fa fa-money-bill"></i> <span>Loans</span></a>
+    <a class="nav-item"><i class="fa fa-receipt"></i> <span>Transactions</span></a>
+    <a class="nav-item"><i class="fa fa-chart-line"></i> <span>Reports</span></a>
+    <a class="nav-item"><i class="fa fa-gear"></i> <span>Settings</span></a>
     <a class="nav-item logout" onclick="logout()">Logout</a>
   </div>
 </div>
@@ -167,22 +164,28 @@ tr:hover{background:#e2e8f0;}
 
   <div class="topbar">
     <button class="btn" onclick="toggleSidebar()"><i class="fa fa-bars"></i></button>
+
+    <select class="btn" onchange="setLang(this.value)">
+      <option value="en">EN</option>
+      <option value="am">AM</option>
+      <option value="om">OM</option>
+    </select>
   </div>
 
   <div class="cards">
-    <div class="card card1"><h3>Total Members</h3><p id="members">0</p></div>
-    <div class="card card2"><h3>Savings</h3><p id="savings">0 ETB</p></div>
-    <div class="card card3"><h3>Loans</h3><p id="loans">0 ETB</p></div>
-    <div class="card card4"><h3>Profit</h3><p id="profit">0 ETB</p></div>
+    <div class="card card1"><h3 id="c1t">Total Members</h3><p id="members">0</p></div>
+    <div class="card card2"><h3 id="c2t">Total Savings</h3><p id="savings">0 ETB</p></div>
+    <div class="card card3"><h3 id="c3t">Total Loans</h3><p id="loans">0 ETB</p></div>
+    <div class="card card4"><h3 id="c4t">Total Profit</h3><p id="profit">0 ETB</p></div>
   </div>
 
   <div class="content-grid">
 
     <div class="actions">
-      <div class="action-card a1" onclick="addTx('Deposit')">Deposit</div>
-      <div class="action-card a2" onclick="addTx('Loan')">Loan</div>
+      <div class="action-card a1" id="depositBtn">Deposit</div>
+      <div class="action-card a2">Loan Calculator</div>
       <div class="action-card a3">Add Member</div>
-      <div class="action-card a4">Report</div>
+      <div class="action-card a4">Reports</div>
     </div>
 
     <div class="table">
@@ -209,6 +212,7 @@ tr:hover{background:#e2e8f0;}
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { translations } from "./i18n.js";
 
 /* FIREBASE */
 const firebaseConfig = {
@@ -232,31 +236,42 @@ onAuthStateChanged(auth,(user)=>{
 
 window.logout = ()=>signOut(auth).then(()=>location.href="login.html");
 
-/* TABLE */
-const tbody = document.getElementById("tbody");
+/* LANGUAGE */
+let lang = "en";
 
-/* SAVINGS CALC */
+function t(k){ return translations[lang][k] || k; }
+
+window.setLang = (l)=>{
+  lang = l;
+
+  document.getElementById("c1t").innerText = t("totalMembers");
+  document.getElementById("c2t").innerText = t("totalSavings");
+  document.getElementById("c3t").innerText = t("totalLoans");
+  document.getElementById("c4t").innerText = t("totalProfit");
+};
+
+/* SAVINGS */
 const savingsEl = document.getElementById("savings");
 
 function calcSavings(data){
   let total = 0;
 
   data.forEach(t=>{
-    const amt = Number(t.amount || 0);
+    const a = Number(t.amount||0);
 
-    if(t.type==="Deposit") total += amt;
-    else if(t.type==="Repayment") total += amt;
-    else if(t.type==="Loan") total -= amt;
+    if(t.type==="Deposit") total += a;
+    else if(t.type==="Loan") total -= a;
   });
 
-  savingsEl.innerText = total.toFixed(2) + " ETB";
+  savingsEl.innerText = total.toFixed(2)+" ETB";
 }
 
-/* LIVE DATA */
-onSnapshot(collection(db,"transactions"),(snap)=>{
-  tbody.innerHTML = "";
+/* FIRESTORE */
+const tbody = document.getElementById("tbody");
 
-  const all = [];
+onSnapshot(collection(db,"transactions"),(snap)=>{
+  tbody.innerHTML="";
+  const all=[];
 
   snap.forEach(doc=>{
     const d = doc.data();
@@ -267,7 +282,7 @@ onSnapshot(collection(db,"transactions"),(snap)=>{
         <td>${doc.id.slice(0,6)}</td>
         <td>${d.type}</td>
         <td>${d.member}</td>
-        <td>${d.amount} ETB</td>
+        <td>${d.amount}</td>
         <td>${d.date}</td>
       </tr>
     `;
@@ -276,13 +291,13 @@ onSnapshot(collection(db,"transactions"),(snap)=>{
   calcSavings(all);
 });
 
-/* ADD TRANSACTION */
-window.addTx = async(type)=>{
-  const member = prompt("Member name");
+/* ADD TX */
+document.getElementById("depositBtn").onclick = async()=>{
+  const member = prompt("Member");
   const amount = prompt("Amount");
 
   await addDoc(collection(db,"transactions"),{
-    type,
+    type:"Deposit",
     member,
     amount:Number(amount),
     date:new Date().toISOString().split("T")[0]
