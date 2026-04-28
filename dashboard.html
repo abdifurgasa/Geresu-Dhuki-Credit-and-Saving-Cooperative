@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title> Geresu Dhuki SACCO Dashboard</title>
+<title> GERESU DHUKI SACCO Dashboard</title>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 
 <style>
@@ -241,7 +241,7 @@ select{padding:6px;border-radius:6px;border:1px solid #ddd}
 
 <div class="content">
 <div class="box">
-<h3 data-i18n="recentTransactions">Recent Quick actions</h3>
+<h3 data-i18n="recentTransactions"> Recent Quick actions</h3>
 <table>
 <tr><th>Type</th><th>Member</th><th>Amount</th><th>Date</th></tr>
 <tbody id="tx"></tbody>
@@ -407,7 +407,8 @@ onSnapshot(collection(db,"loans"),snap=>{
 document.querySelector(".b1").onclick = addMember;
 document.querySelector(".b2").onclick = recordSavings;
 document.querySelector(".b3").onclick = createLoan;
-
+document.querySelector(".b4").onclick = generaterReport;
+  
 /* ================= MULTI LANGUAGE (UNCHANGED) ================= */
 const translations={
  en:{dashboard:"Dashboard",members:"Members",savings:"Savings",loans:"Loans",reports:"Reports",settings:"Settings",quickActions:"Quick Actions",totalMembers:"Total Members",totalSavings:"Total Savings",totalLoans:"Total Loans",totalProfit:"Total Profit",addMember:"Add Member",recordSavings:"Record Savings",createLoan:"Create Loan",generateReport:"Generate Report",recentTransactions:"Recent Transactions",app:"SACCO"},
