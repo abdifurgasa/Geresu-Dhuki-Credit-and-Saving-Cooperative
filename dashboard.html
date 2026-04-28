@@ -1,680 +1,281 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title> GERESU DHUKI SACCO Dashboard</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SACCO Dashboard Pro</title>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-
 <style>
-body{
-  margin:0;
-  font-family:Arial;
-  background:#f1f5f9;
-  display:flex;
+:root{
+  --bg:#f5f7fb;
+  --panel:#ffffff;
+  --card1:#2563eb;
+  --card2:#16a34a;
+  --card3:#f97316;
+  --card4:#a855f7;
+  --text:#0f172a;
+  --muted:#64748b;
+  --sidebar:#ffffff;
+  --border:#e2e8f0;
 }
+*{box-sizing:border-box;font-family:Arial;}
+body{margin:0;background:var(--bg);color:var(--text);display:flex;}
 
-/* SIDEBAR */
+/* Sidebar */
 .sidebar{
-  width:240px;
-  background:#0f172a;
-  color:#fff;
+  width:260px;
+  background:var(--sidebar);
   height:100vh;
   padding:20px;
-  transition:0.3s ease;
-  overflow:hidden;
+  transition:.3s;
+  position:fixed;
+  left:0;
+  top:0;
+  overflow:auto;
+  border-right:1px solid var(--border);
 }
-
-.sidebar h2{margin-bottom:20px;transition:0.3s}
-
-.sidebar a{
-  display:flex;
-  align-items:center;
+.sidebar.collapsed{width:70px;}
+.sidebar h2{font-size:18px;margin-bottom:20px;}
+.menu a{
+  display:flex;align-items:center;
   gap:10px;
-  padding:12px;
-  color:#cbd5e1;
+  padding:10px;
+  color:var(--text);
+  text-decoration:none;
   border-radius:8px;
-  margin-bottom:5px;
-  cursor:pointer;
-  transition:0.2s;
-  white-space:nowrap;
 }
+.menu a:hover{background:#f1f5f9;}
 
-.sidebar a:hover,
-.sidebar a.active{
-  background:#2563eb;
-  color:#fff;
+/* Main */
+.main{
+  margin-left:260px;
+  padding:20px;
+  width:100%;
+  transition:.3s;
 }
+.sidebar.collapsed ~ .main{margin-left:70px;}
 
-.sidebar.collapsed{
-  width:70px;
-  padding:20px 10px;
-}
-
-.sidebar.collapsed a span,
-.sidebar.collapsed h2{
-  display:none;
-}
-
-.sidebar.collapsed a{
-  justify-content:center;
-  font-size:18px;
-}
-
-/* MAIN */
-.main{flex:1;transition:0.3s}
-
-/* TOPBAR */
 .topbar{
   display:flex;
   justify-content:space-between;
   align-items:center;
-  padding:15px;
-  background:#fff;
-  border-bottom:1px solid #ddd;
+  margin-bottom:20px;
 }
-
-.topbar-right{
-  display:flex;
-  align-items:center;
-  gap:10px;
-}
-
-.logout-btn{
-  background:#ef4444;
-  color:#fff;
-  border:none;
-  padding:7px 12px;
-  border-radius:8px;
-  cursor:pointer;
-  transition:0.3s;
-}
-.logout-btn:hover{background:#dc2626;transform:translateY(-2px)}
-
-/* CARDS - UPDATED FINTECH STYLE */
-.cards{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:15px;
-  padding:20px;
-}
-
-.card{
-  padding:20px;
-  border-radius:14px;
-  color:#fff;
-  box-shadow:0 6px 18px rgba(0,0,0,0.12);
-  transition:0.3s ease;
-}
-
-.card:hover{
-  transform:translateY(-10px) scale(1.02);
-  box-shadow:0 18px 35px rgba(0,0,0,0.2);
-}
-
-.card:nth-child(1){background:linear-gradient(135deg,#3b82f6,#1d4ed8);}
-.card:nth-child(2){background:linear-gradient(135deg,#22c55e,#15803d);}
-.card:nth-child(3){background:linear-gradient(135deg,#f97316,#c2410c);}
-.card:nth-child(4){background:linear-gradient(135deg,#a855f7,#6b21a8);}
-
-.card h4{
-  margin:0;
-  opacity:0.9;
-  font-weight:500;
-}
-
-.card h2{
-  margin:10px 0 0 0;
-  font-size:28px;
-}
-
-/* CONTENT */
-.content{
-  display:grid;
-  grid-template-columns:2fr 1fr;
-  gap:20px;
-  padding:20px;
-}
-
-.box{
-  background:#fff;
-  padding:15px;
-  border-radius:12px;
-}
-
-table{
-  width:100%;
-  border-collapse:collapse;
-}
-
-th,td{
-  padding:10px;
-  border-bottom:1px solid #eee;
-  text-align:left;
-}
-
-.tag{padding:5px 10px;border-radius:10px;font-size:12px}
-.green{background:#dcfce7;color:#166534}
-.orange{background:#fed7aa;color:#9a3412}
-.blue{background:#dbeafe;color:#1e40af}
-
-/* QUICK ACTIONS */
-/* CARDS */
-.cards{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:15px;
-  padding:20px;
-}
-
-.card{
-  padding:20px;
-  border-radius:14px;
-  color:#fff;
-}
-
-.card:nth-child(1){background:#3b82f6;}
-.card:nth-child(2){background:#22c55e;}
-.card:nth-child(3){background:#f97316;}
-.card:nth-child(4){background:#a855f7;}
-
-/* CONTENT */
-.content{
-  display:grid;
-  grid-template-columns:2fr 1fr;
-  gap:20px;
-  padding:20px;
-}
-
-.box{
-  background:#fff;
-  padding:15px;
-  border-radius:12px;
-}
-
-table{width:100%;border-collapse:collapse;}
-th,td{padding:10px;border-bottom:1px solid #eee;}
-
 .btn{
-  padding:5px 8px;
-  border:none;
-  border-radius:5px;
+  background:#ffffff;
+  color:var(--text);
+  border:1px solid var(--border);
+  padding:8px 12px;
+  border-radius:6px;
   cursor:pointer;
 }
-.edit{background:#facc15;}
-.del{background:#ef4444;color:#fff;}
+.btn:hover{background:#f1f5f9;}
 
-/* QUICK */
-  .quick button{
-  width:100%;
-  padding:12px;
-  margin-bottom:10px;
-  border:none;
+.cards{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:15px;
+}
+.card{
+  padding:15px;
+  border-radius:12px;
+  animation:fadeIn .5s ease;
+  color:white;
+}
+.card h3{margin:0;font-size:14px;opacity:.9;}
+.card p{font-size:20px;margin-top:10px;}
+.card1{background:var(--card1)}
+.card2{background:var(--card2)}
+.card3{background:var(--card3)}
+.card4{background:var(--card4)}
+
+@keyframes fadeIn{
+  from{transform:translateY(10px);opacity:0}
+  to{transform:translateY(0);opacity:1}
+}
+
+.actions{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+}
+
+.table{
+  margin-top:20px;
+  background:var(--panel);
+  padding:15px;
   border-radius:10px;
-  color:#fff;
-  cursor:pointer;
+  border:1px solid var(--border);
 }
+table{width:100%;border-collapse:collapse;}
+th,td{padding:10px;border-bottom:1px solid var(--border);font-size:14px;}
+th{color:var(--muted);text-align:left;}
 
-.b1{background:#3b82f6}
-.b2{background:#16a34a}
-.b3{background:#ea580c}
-.b4{background:#9333ea}
-
-/* RECENT COLORS */
-.r1{background:#dcfce7;}
-.r2{background:#fee2e2;}
-.r3{background:#dbeafe;}
-.r4{background:#fef3c7;}
-.r5{background:#ede9fe;}
-
-select{padding:6px;}
-  
+.lang{margin-left:10px;}
+tr:nth-child(even){background:#f8fafc;}
+tr:nth-child(odd){background:#ffffff;}
+tr:hover{background:#e2e8f0;transition:.2s;}
+.actions{
+  margin-top:20px;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+}
+.action-card{
+  padding:15px;
+  border-radius:12px;
+  color:white;
+  cursor:pointer;
+  transition:.2s;
   display:flex;
   align-items:center;
   gap:10px;
-  width:100%;
-  padding:12px;
-  margin-bottom:10px;
-  border:none;
-  border-radius:10px;
-  color:#fff;
-  cursor:pointer;
-  position:relative;
-  overflow:hidden;
-  transition:0.8s;
+  font-weight:bold;
 }
-
-.quick button:hover{
-  transform:translateY(-6px) scale(1.04);
-  box-shadow:0 12px 25px rgba(0,0,0,0.25);
+.action-card:hover{transform:translateY(-3px);}
+.a1{background:#2563eb;}
+.a2{background:#16a34a;}
+.a3{background:#f97316;}
+.content-grid{
+  display:grid;
+  grid-template-columns:1fr 2fr;
+  gap:15px;
+  margin-top:20px;
 }
-
-.quick button::before{
-  content:"";
-  position:absolute;
-  top:0;
-  left:-120%;
-  width:100%;
-  height:100%;
-  background:linear-gradient(120deg,transparent,rgba(255,255,255,0.4),transparent);
-  transition:0.5s;
+@media(max-width:900px){
+  .content-grid{grid-template-columns:1fr;}
 }
-
-.quick button:hover::before{left:120%}
-
-.b1{background:#3b82f6}
-.b2{background:#16a34a}
-.b3{background:#ea580c}
-.b4{background:#9333ea}
-
-select{padding:6px;border-radius:6px;border:1px solid #ddd}
-.toggle-btn{background:#0f172a;color:#fff;border:none;padding:6px 10px;border-radius:6px;cursor:pointer}
+.menu a.active{
+  background:#2563eb;
+  color:#ffffff;
+  font-weight:bold;
+  border-left:4px solid #1d4ed8;
+}
+.menu a.logout{
+  color:#ef4444;
+}
+.menu a.logout:hover{
+  background:#fee2e2;
+}
 </style>
 </head>
-
 <body>
 
 <div class="sidebar" id="sidebar">
-<h2 data-i18n="app"> GERESU DHUKI SACCO</h2>
-<a class="active"><i class="fa fa-home"></i> <span data-i18n="dashboard">Dashboard</span></a>
-<a><i class="fa fa-users"></i> <span data-i18n="members">Members</span></a>
-<a><i class="fa fa-wallet"></i> <span data-i18n="savings">Savings</span></a>
-<a><i class="fa fa-coins"></i> <span data-i18n="loans">Loans</span></a>
-<a><i class="fa fa-chart-line"></i> <span data-i18n="reports">Reports</span></a>
-<a><i class="fa fa-gear"></i> <span data-i18n="settings">Settings</span></a>
+  <h2 id="title">SACCO</h2>
+  <div class="menu">
+    <a href="#" class="nav-item active"><i class="fa fa-home"></i> <span class="txt">Dashboard</span></a>
+    <a href="#" class="nav-item"><i class="fa fa-users"></i> <span class="txt">Members</span></a>
+    <a href="#" class="nav-item"><i class="fa fa-user-group"></i> <span class="txt">Users</span></a>
+    <a href="#" class="nav-item"><i class="fa fa-money-bill"></i> <span class="txt">Loans</span></a>
+    <a href="#" class="nav-item"><i class="fa fa-receipt"></i> <span class="txt">Transactions</span></a>
+    <a href="#" class="nav-item"><i class="fa fa-chart-line"></i> <span class="txt">Reports</span></a>
+    <a href="#" class="nav-item"><i class="fa fa-gear"></i> <span class="txt">Settings</span></a>
+    <a href="#" class="nav-item logout" onclick="logout()"><i class="fa fa-right-from-bracket"></i> <span class="txt">Logout</span></a>
+  </div>
 </div>
 
 <div class="main">
+  <div class="topbar">
+    <button class="btn" onclick="toggleSidebar()"><i class="fa fa-bars"></i></button>
+    <div>
+      <button class="btn" onclick="openSettings()"><i class="fa fa-gear"></i></button>
+      <select class="btn lang" onchange="changeLang(this.value)">
+        <option value="en">EN</option>
+        <option value="am">AM</option>
+      </select>
+    </div>
+  </div>
 
-<div class="topbar">
-<button class="toggle-btn" onclick="toggleSidebar()">☰</button>
-<h3 data-i18n="dashboard">Dashboard</h3>
+  <div class="cards">
+    <div class="card card1"><h3 id="c1t">Total Members</h3><p>1,245</p></div>
+    <div class="card card2"><h3 id="c2t">Savings</h3><p>2.5M ETB</p></div>
+    <div class="card card3"><h3 id="c3t">Loans</h3><p>1.1M ETB</p></div>
+    <div class="card card4"><h3 id="c4t">Profit</h3><p>350K ETB</p></div>
+  </div>
 
-<div class="topbar-right">
-<select id="langSelect">
-  <option value="en">EN</option>
-  <option value="am">AM</option>
-  <option value="om">OR</option>
-</select>
-
-<button class="logout-btn" onclick="logout()"><i class="fa fa-right-from-bracket"></i> Logout</button>
+  <div class="content-grid">
+  <div class="actions">
+  <div class="action-card a1"><i class="fa fa-plus"></i> Quick Deposit</div>
+  <div class="action-card a2"><i class="fa fa-hand-holding-dollar"></i> Quick Loan</div>
+  <div class="action-card a3"><i class="fa fa-user-plus"></i> Add Member</div>
+  <div class="action-card a4"><i class="fa fa-file-lines"></i> Generate Report</div>
 </div>
-</div>
+    <div class="action-card a2"><i class="fa fa-hand-holding-dollar"></i> Quick Loan</div>
+    <div class="action-card a3"><i class="fa fa-user-plus"></i> Add Member</div>
+  </div>
 
-<div class="cards">
-<div class="card"><h4 data-i18n="totalMembers">Total Members</h4><h2 id="mCount">0</h2></div>
-<div class="card"><h4 data-i18n="totalSavings">Total Savings</h4><h2 id="sCount">0</h2></div>
-<div class="card"><h4 data-i18n="totalLoans">Total Loans</h4><h2 id="lCount">0</h2></div>
-<div class="card"><h4 data-i18n="totalProfit">Total Profit</h4><h2 id="pCount">0</h2></div>
-</div>
-
-<div class="box">
-
-<h3>Recent Actions (10 rows)</h3>
-<table>
-<thead>
-<tr><th>Name</th><th>Amount</th><th>Reason</th><th>Date</th></tr>
-</thead>
-<tbody id="recent"></tbody>
-</table>
-
-<hr>
-
-<h3>Members</h3>
-<table>
-<tbody id="members"></tbody>
-</table>
-
-<hr>
-
-<h3>Savings</h3>
-<table>
-<tbody id="savings"></tbody>
-</table>
-
-<hr>
-
-<h3>Loans</h3>
-<table>
-<tbody id="loans"></tbody>
-</table>
-
+  <div class="table">
+    <h3 id="rt">Recent Transactions</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Type</th>
+          <th>Member</th>
+          <th>Amount</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
 </div>
 
-<!-- QUICK -->
-<div class="box quick">
-<h3>Quick Actions</h3>
-<button class="b1" onclick="addMember()">Add Member</button>
-<button class="b2" onclick="addSaving()">Add Savings</button>
-<button class="b3" onclick="addLoan()">Add Loan</button>
-<button class="b4">Settings</button>
-</div>
-
-</div>
-</div>>
-
-<div class="box quick">
-<h3 data-i18n="quickActions">Quick Actions</h3>
-<button class="b1"><i class="fa fa-user"></i> <span data-i18n="addMember">Add Member</span></button>
-<button class="b2"><i class="fa fa-money-bill"></i> <span data-i18n="recordSavings">Record Savings</span></button>
-<button class="b3"><i class="fa fa-coins"></i> <span data-i18n="createLoan">Create Loan</span></button>
-<button class="b4"><i class="fa fa-file"></i> <span data-i18n="generateReport">Generate Report</span></button>
-</div>
-</div>
-</div>
-<!-- CONTENT -->
-<div class="content">
-
-<!-- TABLES -->
-<div class="box">
-
-<h3>Recent Actions (10 rows)</h3>
-<table>
-<thead>
-<tr><th>Name</th><th>Amount</th><th>Reason</th><th>Date</th></tr>
-</thead>
-<tbody id="recent"></tbody>
-</table>
-
-<hr>
-
-<h3>Members</h3>
-<table>
-<tbody id="members"></tbody>
-</table>
-
-<hr>
-
-<h3>Savings</h3>
-<table>
-<tbody id="savings"></tbody>
-</table>
-
-<hr>
-
-<h3>Loans</h3>
-<table>
-<tbody id="loans"></tbody>
-</table>
-
-</div>
-
-<!-- QUICK -->
-<div class="box quick">
-<h3>Quick Actions</h3>
-<button class="b1" onclick="addMember()">Add Member</button>
-<button class="b2" onclick="addSaving()">Add Savings</button>
-<button class="b3" onclick="addLoan()">Add Loan</button>
-<button class="b4">Settings</button>
-</div>
-  
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { 
-  getFirestore, collection, onSnapshot, addDoc, deleteDoc, doc 
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-/* ================= FIREBASE ================= */
-const firebaseConfig = {
-  apiKey: "AIzaSyCS-3e_WqGHNycDgvlXVkInaynTnvnplYE",
-  authDomain: "geresu-dhuki-sacco.firebaseapp.com",
-  projectId: "geresu-dhuki-sacco",
-  storageBucket: "geresu-dhuki-sacco.firebasestorage.app",
-  messagingSenderId: "944934938425",
-  appId: "1:944934938425:web:caef23f2f3bb34c843eae8"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-
-/* ================= LOGOUT ================= */
-window.logout = async ()=>{
-  await signOut(auth);
-  localStorage.clear();
-  window.location.href="index.html";
-};
-
-/* ================= SIDEBAR ================= */
-const sidebar=document.getElementById("sidebar");
-
-function applySidebar(){
-  const state=localStorage.getItem("sidebarState");
-  if(state==="collapsed") sidebar.classList.add("collapsed");
+<script>
+function toggleSidebar(){
+  document.getElementById('sidebar').classList.toggle('collapsed');
 }
-applySidebar();
 
-window.toggleSidebar=function(){
-  sidebar.classList.toggle("collapsed");
-  localStorage.setItem("sidebarState",
-    sidebar.classList.contains("collapsed")?"collapsed":"open");
-};
+function logout(){
+  alert('Logged out');
+}
 
-/* ================= MEMBERS CRUD ================= */
-window.addMember = async ()=>{
-  let name = prompt("Member name");
-  if(!name) return;
+function openSettings(){
+  alert('Settings opened');
+}
 
-  await addDoc(collection(db,"members"),{
-    name,
-    created:new Date()
-  });
-};
-
-window.deleteMember = async(id)=>{
-  if(confirm("Delete member?")){
-    await deleteDoc(doc(db,"members",id));
+function changeLang(lang){
+  if(lang==='am'){
+    document.getElementById('title').innerText='ሳኮ';
+    document.getElementById('c1t').innerText='አባላት';
+    document.getElementById('c2t').innerText='ቁጠባ';
+    document.getElementById('c3t').innerText='ብድር';
+    document.getElementById('c4t').innerText='ትርፍ';
+    document.getElementById('rt').innerText='የቅርብ ግብይቶች';
+  }else{
+    location.reload();
   }
-};
-
-/* ================= LOAD MEMBERS ================= */
-let membersList = [];
-
-onSnapshot(collection(db,"members"),snap=>{
-  membersList = [];
-  document.getElementById("mCount").innerText = snap.size;
-
-  snap.forEach(d=>{
-    membersList.push({id:d.id,...d.data()});
-  });
-});
-
-/* ================= SAVINGS ================= */
-window.recordSavings = async ()=>{
-  if(membersList.length===0) return alert("No members");
-
-  let name = prompt("Member name?");
-  let amount = Number(prompt("Amount"));
-
-  if(!name || !amount) return;
-
-  await addDoc(collection(db,"transactions"),{
-    type:"Saving",
-    member:name,
-    amount,
-    date:new Date().toLocaleDateString()
-  });
-};
-
-/* ================= LOANS ================= */
-window.createLoan = async ()=>{
-  let name = prompt("Member name?");
-  let principal = Number(prompt("Loan amount"));
-  let interest = Number(prompt("Interest %"));
-
-  if(!principal || !interest) return;
-
-  let total = principal + (principal * interest/100);
-
-  await addDoc(collection(db,"loans"),{
-    member:name,
-    principal,
-    total,
-    interest
-  });
-
-  alert("Loan Total: "+total);
-};
-
-/* ================= DASHBOARD ================= */
-onSnapshot(collection(db,"transactions"),snap=>{
-  let html="";
-  let savings=0;
-
-  snap.forEach(d=>{
-    let t=d.data();
-    if(t.type==="Saving") savings+=t.amount;
-
-    html+=`<tr>
-      <td>${t.type}</td>
-      <td>${t.member}</td>
-      <td>${t.amount}</td>
-      <td>${t.date||""}</td>
-    </tr>`;
-  });
-
-  document.getElementById("tx").innerHTML=html;
-  document.getElementById("sCount").innerText=savings;
-});
-
-/* ================= LOANS TOTAL ================= */
-onSnapshot(collection(db,"loans"),snap=>{
-  let total=0;
-  let profit=0;
-
-  snap.forEach(d=>{
-    let l=d.data();
-    total+=l.total||0;
-    profit+=(l.total - l.principal)||0;
-  });
-
-  document.getElementById("lCount").innerText=total;
-  document.getElementById("pCount").innerText=profit;
-});
-
-/* ================= QUICK ACTIONS LINK ================= */
-document.querySelector(".b1").onclick = addMember;
-document.querySelector(".b2").onclick = recordSavings;
-document.querySelector(".b3").onclick = createLoan;
-document.querySelector(".b4").onclick = generaterReport;
-  
-/* ================= MULTI LANGUAGE (UNCHANGED) ================= */
-const translations={
- en:{dashboard:"Dashboard",members:"Members",savings:"Savings",loans:"Loans",reports:"Reports",settings:"Settings",quickActions:"Quick Actions",totalMembers:"Total Members",totalSavings:"Total Savings",totalLoans:"Total Loans",totalProfit:"Total Profit",addMember:"Add Member",recordSavings:"Record Savings",createLoan:"Create Loan",generateReport:"Generate Report",recentTransactions:"Recent Transactions",app:"SACCO"},
- am:{dashboard:"ዳሽቦርድ",members:"አባላት",savings:"ቁጠባ",loans:"ብድር",reports:"ሪፖርቶች",settings:"ቅንብሮች",quickActions:"ፈጣን እርምጃዎች",totalMembers:"ጠቅላላ አባላት",totalSavings:"ጠቅላላ ቁጠባ",totalLoans:"ጠቅላላ ብድር",totalProfit:"ጠቅላላ ትርፍ",addMember:"አባል አክል",recordSavings:"ቁጠባ መዝግብ",createLoan:"ብድር ፍጠር",generateReport:"ሪፖርት ፍጠር",recentTransactions:"የቅርብ ግብይቶች",app:"ሲኤስኮ"},
- om:{dashboard:"Daashboordii",members:"Miseensota",savings:"Qusannaa",loans:"Liqii",reports:"Ripoortii",settings:"Sirna",quickActions:"Tarkaanfii Ariifachiisaa",totalMembers:"Waliigala Miseensota",totalSavings:"Waliigala Qusannaa",totalLoans:"Waliigala Liqii",totalProfit:"Waliigala Bu'aa",addMember:"Miseensa Dabaluu",recordSavings:"Qusannaa Galchuu",createLoan:"Liqii Uumuu",generateReport:"Ripoortii Uumuu",recentTransactions:"Hojiiwwan Dhihoo",app:"SACCO"}
-};
-
-const langSelect=document.getElementById("langSelect");
-let lang=localStorage.getItem("lang")||"en";
-langSelect.value=lang;
-
-function applyLang(l){
- document.querySelectorAll("[data-i18n]").forEach(el=>{
-   const k=el.getAttribute("data-i18n");
-   if(translations[l] && translations[l][k]) el.innerText=translations[l][k];
- });
-}
-applyLang(lang);
-
-langSelect.addEventListener("change",e=>{
- lang=e.target.value;
- localStorage.setItem("lang",lang);
- applyLang(lang);
-});
-/* ADD MEMBER */
-window.addMember = async ()=>{
-let name = prompt("Name");
-if(!name) return;
-await addDoc(collection(db,"members"),{name});
 }
 
-/* ADD SAVING */
-window.addSaving = async ()=>{
-let name = prompt("Name");
-let amount = Number(prompt("Amount"));
-await addDoc(collection(db,"savings"),{name,amount,date:new Date().toLocaleDateString()});
+const names=['Abebe','Hana','Kebede','Selam','Dawit','Marta'];
+const types=['Deposit','Withdraw','Loan','Repayment'];
+const tbody=document.getElementById('tbody');
+
+for(let i=1;i<=25;i++){
+  const tr=document.createElement('tr');
+  const name=names[Math.floor(Math.random()*names.length)];
+  const type=types[Math.floor(Math.random()*types.length)];
+  const amount=(Math.random()*5000+100).toFixed(2);
+  const date=new Date().toISOString().split('T')[0];
+
+  tr.innerHTML=`
+    <td>${i}</td>
+    <td>${type}</td>
+    <td>${name}</td>
+    <td>${amount} ETB</td>
+    <td>${date}</td>
+  `;
+  tbody.appendChild(tr);
 }
-
-/* ADD LOAN */
-window.addLoan = async ()=>{
-let name = prompt("Name");
-let amount = Number(prompt("Loan"));
-await addDoc(collection(db,"loans"),{name,amount,date:new Date().toLocaleDateString()});
-}
-
-/* MEMBERS */
-onSnapshot(collection(db,"members"),snap=>{
-document.getElementById("mCount").innerText=snap.size;
-let html="";
-snap.forEach(d=>{
-html+=`
-<tr>
-<td>${d.data().name}</td>
-<td>
-<button class="btn edit" onclick="editMember('${d.id}')">Edit</button>
-<button class="btn del" onclick="delMember('${d.id}')">Del</button>
-</td>
-</tr>`;
+// Active menu highlight
+const navItems=document.querySelectorAll('.nav-item');
+navItems.forEach(item=>{
+  item.addEventListener('click',()=>{
+    navItems.forEach(i=>i.classList.remove('active'));
+    item.classList.add('active');
+  });
 });
-document.getElementById("members").innerHTML=html;
-});
-
-/* SAVINGS */
-onSnapshot(collection(db,"savings"),snap=>{
-let total=0,html="";
-snap.forEach(d=>{
-let x=d.data();
-total+=x.amount;
-html+=`<tr><td>${x.name}</td><td>${x.amount}</td>
-<td><button class="btn del" onclick="delSave('${d.id}')">Del</button></td></tr>`;
-});
-document.getElementById("sCount").innerText=total;
-document.getElementById("savings").innerHTML=html;
-});
-
-/* LOANS */
-onSnapshot(collection(db,"loans"),snap=>{
-let total=0,html="";
-snap.forEach(d=>{
-let x=d.data();
-total+=x.amount;
-html+=`<tr><td>${x.name}</td><td>${x.amount}</td>
-<td><button class="btn del" onclick="delLoan('${d.id}')">Del</button></td></tr>`;
-});
-document.getElementById("lCount").innerText=total;
-document.getElementById("loans").innerHTML=html;
-});
-
-  /* RECENT (10 only + colors) */
-onSnapshot(collection(db,"savings"),snap=>{
-let arr=[];
-snap.forEach(d=>arr.push(d.data()));
-
-arr=arr.slice(-10).reverse();
-
-let colors=["r1","r2","r3","r4","r5"];
-let html="";
-
-arr.forEach((x,i)=>{
-html+=`
-<tr class="${colors[i%5]}">
-<td>${x.name}</td>
-<td>${x.amount}</td>
-<td>Saving</td>
-<td>${x.date}</td>
-</tr>`;
-});
-
-document.getElementById("recent").innerHTML=html;
-});
-
-/* DELETE */
-window.delMember=id=>deleteDoc(doc(db,"members",id));
-window.delSave=id=>deleteDoc(doc(db,"savings",id));
-window.delLoan=id=>deleteDoc(doc(db,"loans",id));
-
 </script>
 
 </body>
