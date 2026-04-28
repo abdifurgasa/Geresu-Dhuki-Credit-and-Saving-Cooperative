@@ -433,6 +433,98 @@ langSelect.addEventListener("change",e=>{
  localStorage.setItem("lang",lang);
  applyLang(lang);
 });
+/* ADD MEMBER */
+window.addMember = async ()=>{
+let name = prompt("Name");
+if(!name) return;
+await addDoc(collection(db,"members"),{name});
+}
+
+/* ADD SAVING */
+window.addSaving = async ()=>{
+let name = prompt("Name");
+let amount = Number(prompt("Amount"));
+await addDoc(collection(db,"savings"),{name,amount,date:new Date().toLocaleDateString()});
+}
+
+/* ADD LOAN */
+window.addLoan = async ()=>{
+let name = prompt("Name");
+let amount = Number(prompt("Loan"));
+await addDoc(collection(db,"loans"),{name,amount,date:new Date().toLocaleDateString()});
+}
+
+/* MEMBERS */
+onSnapshot(collection(db,"members"),snap=>{
+document.getElementById("mCount").innerText=snap.size;
+let html="";
+snap.forEach(d=>{
+html+=`
+<tr>
+<td>${d.data().name}</td>
+<td>
+<button class="btn edit" onclick="editMember('${d.id}')">Edit</button>
+<button class="btn del" onclick="delMember('${d.id}')">Del</button>
+</td>
+</tr>`;
+});
+document.getElementById("members").innerHTML=html;
+});
+
+/* SAVINGS */
+onSnapshot(collection(db,"savings"),snap=>{
+let total=0,html="";
+snap.forEach(d=>{
+let x=d.data();
+total+=x.amount;
+html+=`<tr><td>${x.name}</td><td>${x.amount}</td>
+<td><button class="btn del" onclick="delSave('${d.id}')">Del</button></td></tr>`;
+});
+document.getElementById("sCount").innerText=total;
+document.getElementById("savings").innerHTML=html;
+});
+
+/* LOANS */
+onSnapshot(collection(db,"loans"),snap=>{
+let total=0,html="";
+snap.forEach(d=>{
+let x=d.data();
+total+=x.amount;
+html+=`<tr><td>${x.name}</td><td>${x.amount}</td>
+<td><button class="btn del" onclick="delLoan('${d.id}')">Del</button></td></tr>`;
+});
+document.getElementById("lCount").innerText=total;
+document.getElementById("loans").innerHTML=html;
+});
+
+  /* RECENT (10 only + colors) */
+onSnapshot(collection(db,"savings"),snap=>{
+let arr=[];
+snap.forEach(d=>arr.push(d.data()));
+
+arr=arr.slice(-10).reverse();
+
+let colors=["r1","r2","r3","r4","r5"];
+let html="";
+
+arr.forEach((x,i)=>{
+html+=`
+<tr class="${colors[i%5]}">
+<td>${x.name}</td>
+<td>${x.amount}</td>
+<td>Saving</td>
+<td>${x.date}</td>
+</tr>`;
+});
+
+document.getElementById("recent").innerHTML=html;
+});
+
+/* DELETE */
+window.delMember=id=>deleteDoc(doc(db,"members",id));
+window.delSave=id=>deleteDoc(doc(db,"savings",id));
+window.delLoan=id=>deleteDoc(doc(db,"loans",id));
+
 </script>
 
 </body>
