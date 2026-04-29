@@ -6,9 +6,16 @@ import {
 onAuthStateChanged(auth, (user) => {
 
   if (!user) {
-    // ❌ Not logged in → back to login
+    window.location.href = "index.html";
+    return;
+  }
+
+  // ✅ ROLE CHECK
+  const role = localStorage.getItem("role");
+
+  if (!role) {
+    alert("No role found");
     window.location.href = "index.html";
   }
 
-  // ✅ Logged in → stay on dashboard
 });
