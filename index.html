@@ -1,8 +1,12 @@
 <!DOCTYPE html>
 <html>
+<head>
+<title>Login</title>
+</head>
+
 <body>
 
-<h2 id="title">Login Test</h2>
+<h2 id="title">Login</h2>
 
 <select onchange="changeLang(this.value)">
   <option value="en">EN</option>
@@ -12,7 +16,13 @@
 
 <br><br>
 
-<button onclick="go()" id="loginBtn">Login</button>
+<input id="email" placeholder="Email">
+<br><br>
+
+<input id="password" type="password" placeholder="Password">
+<br><br>
+
+<button onclick="loginFirebase()" id="loginBtn">Login</button>
 
 <script type="module">
 import { translations } from "./js/i18n.js";
@@ -25,14 +35,18 @@ window.changeLang = function(lang){
   document.getElementById("title").innerText =
     translations[lang].title;
 
+  document.getElementById("email").placeholder =
+    translations[lang].email;
+
+  document.getElementById("password").placeholder =
+    translations[lang].password;
+
   document.getElementById("loginBtn").innerText =
     translations[lang].login;
 }
-
-window.go = function(){
-  window.location.href = "dashboard.html";
-}
 </script>
+
+<script type="module" src="js/auth.js"></script>
 
 </body>
 </html>
