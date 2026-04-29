@@ -3,261 +3,124 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SACCO PRO+</title>
-
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-<script src="https://unpkg.com/i18next@23.10.1/dist/umd/i18next.min.js"></script>
+<title>SACCO Dashboard</title>
 
 <style>
-body{margin:0;font-family:Arial;background:#f1f5f9;display:flex}
-
-/* SIDEBAR */
-.sidebar{
-width:240px;background:#fff;border-right:1px solid #ddd;padding:15px
+body{
+  margin:0;
+  font-family:Arial;
+  background:#f5f7fb;
 }
-.sidebar a{
-display:block;padding:10px;margin:5px 0;cursor:pointer;border-radius:8px
+
+/* TOPBAR */
+.topbar{
+  background:#1e293b;
+  color:white;
+  padding:15px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
 }
-.sidebar a:hover{background:#f1f5f9}
-.active{background:#2563eb;color:#fff}
 
-.submenu{display:none;padding-left:10px}
+.topbar h2{
+  margin:0;
+}
 
-/* MAIN */
-.main{flex:1;padding:10px;animation:fade .3s}
-@keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1}}
+/* CONTENT */
+.container{
+  padding:20px;
+  display:grid;
+  gap:15px;
+}
 
-/* CARDS */
-.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-.card{padding:15px;border-radius:10px;color:#fff}
-.c1{background:#3b82f6}
-.c2{background:#16a34a}
-.c3{background:#f97316}
-.c4{background:#9333ea}
+.card{
+  background:white;
+  padding:20px;
+  border-radius:10px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.1);
+}
 
-/* BOX */
-.box{background:#fff;padding:15px;border-radius:10px;margin-top:10px}
+/* ADMIN */
+.admin-only{
+  border-left:5px solid #2563eb;
+}
 
-/* TABLE */
-table{width:100%;border-collapse:collapse}
-td,th{padding:8px;border-bottom:1px solid #eee}
+/* BUTTON */
+button{
+  padding:8px 12px;
+  border:none;
+  background:#ef4444;
+  color:white;
+  border-radius:6px;
+  cursor:pointer;
+}
 
-/* COLORS */
-.r1{background:#dcfce7}
-.r2{background:#fee2e2}
-.r3{background:#dbeafe}
-.r4{background:#fef3c7}
-.r5{background:#ede9fe}
-
-/* QUICK */
-.quick{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
-.q{padding:15px;border-radius:10px;color:#fff;cursor:pointer}
-.q1{background:#3b82f6}
-.q2{background:#16a34a}
-.q3{background:#f97316}
-.q4{background:#9333ea}
+button:hover{
+  background:#dc2626;
+}
 </style>
 </head>
 
 <body>
 
-<!-- SIDEBAR -->
-<div class="sidebar">
-
-<a onclick="nav('dashboard')" class="active" data-i18n="dashboard">Dashboard</a>
-<a onclick="nav('members')" data-i18n="members">Members</a>
-<a onclick="nav('savings')" data-i18n="savings">Savings</a>
-<a onclick="nav('loans')" data-i18n="loans">Loans</a>
-<a onclick="nav('transactions')" data-i18n="transactions">Transactions</a>
-
-<a onclick="toggleMenu('userMenu')" data-i18n="users">Users ▼</a>
-<div id="userMenu" class="submenu">
-<a onclick="nav('users')" data-i18n="users">All Users</a>
-<a onclick="nav('settings')" data-i18n="settings">Settings</a>
+<!-- TOPBAR -->
+<div class="topbar">
+  <h2>🏦 SACCO Dashboard</h2>
+  <button onclick="logout()">Logout</button>
 </div>
 
-<a onclick="logout()" data-i18n="logout">Logout</a>
+<!-- CONTENT -->
+<div class="container">
 
-</div>
+  <!-- USER INFO -->
+  <div class="card">
+    <h3>Dashboard ✅</h3>
+    <p id="roleText">Loading...</p>
+  </div>
 
-<div class="main">
-
-<!-- LANGUAGE -->
-<select onchange="setLang(this.value)">
-<option value="en">EN</option>
-<option value="am">AM</option>
-<option value="om">OM</option>
-</select>
-
-<!-- DASHBOARD -->
-<div id="dashboard">
-
-<div class="cards">
-<div class="card c1"><span data-i18n="members"></span><h2 id="mCount">0</h2></div>
-<div class="card c2"><span data-i18n="savings"></span><h2 id="sCount">0</h2></div>
-<div class="card c3"><span data-i18n="loans"></span><h2 id="lCount">0</h2></div>
-<div class="card c4">Profit<h2 id="pCount">0</h2></div>
-</div>
-
-<div class="box quick">
-<div class="q q1" onclick="addTx('Deposit')" data-i18n="deposit">Deposit</div>
-<div class="q q2" onclick="loanCalc()" data-i18n="loanCalc">Loan Calc</div>
-<div class="q q3" onclick="nav('members')">+ Member</div>
-<div class="q q4">Reports</div>
-</div>
-
-<div class="box">
-<h3 data-i18n="recent">Recent Actions</h3>
-<table>
-<thead><tr><th>Name</th><th>Amount</th><th>Type</th><th>Date</th></tr></thead>
-<tbody id="recent"></tbody>
-</table>
-</div>
+  <!-- ADMIN PANEL -->
+  <div class="card admin-only" id="adminPanel">
+    <h3>Admin Panel</h3>
+    <p>✔ Manage Users</p>
+    <p>✔ Approve Loans</p>
+    <p>✔ View Reports</p>
+  </div>
 
 </div>
 
-<!-- TRANSACTIONS -->
-<div id="transactions" style="display:none" class="box">
-<h3 data-i18n="transactions">Transactions</h3>
-<table><tbody id="tx"></tbody></table>
-</div>
+<!-- 🔐 PROTECT PAGE -->
+<script type="module" src="js/guard.js"></script>
 
-<!-- USERS -->
-<div id="users" style="display:none" class="box">
-<h3 data-i18n="users">Users</h3>
-<table><tbody id="usersTbl"></tbody></table>
-</div>
-
-<!-- SETTINGS -->
-<div id="settings" style="display:none" class="box">
-<h3 data-i18n="settings">Settings</h3>
-<p>...</p>
-</div>
-
-</div>
-
+<!-- 🔥 ROLE + LOGOUT LOGIC -->
 <script type="module">
+import { auth } from "./js/firebase.js";
+import {
+  signOut
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, onSnapshot, addDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+/* 🔐 GET ROLE */
+const role = localStorage.getItem("role");
+const roleText = document.getElementById("roleText");
+const adminPanel = document.getElementById("adminPanel");
 
-/* FIREBASE */
-const app = initializeApp({
-apiKey:"AIzaSyCS-3e...",
-authDomain:"geresu-dhuki-sacco.firebaseapp.com",
-projectId:"geresu-dhuki-sacco"
-});
-const db=getFirestore(app);
-const auth=getAuth(app);
-
-/* NAV */
-window.nav=(id)=>{
-document.querySelectorAll(".main > div").forEach(x=>x.style.display="none");
-document.getElementById(id).style.display="block";
-};
-
-/* MENU */
-window.toggleMenu=(id)=>{
-let m=document.getElementById(id);
-m.style.display=m.style.display==="block"?"none":"block";
-};
-
-/* LOGOUT */
-window.logout=()=>signOut(auth).then(()=>location.href="index.html");
-
-/* ADD TX */
-window.addTx=async(type)=>{
-let name=prompt("Name");
-let amount=Number(prompt("Amount"));
-await addDoc(collection(db,"transactions"),{
-name,amount,type,date:new Date().toLocaleDateString()
-});
-};
-
-/* LOAD TX */
-onSnapshot(collection(db,"transactions"),snap=>{
-let html="",arr=[];
-snap.forEach(d=>{
-let x=d.data();
-arr.push(x);
-html+=`<tr><td>${x.name}</td><td>${x.amount}</td><td>${x.type}</td><td>${x.date}</td></tr>`;
-});
-tx.innerHTML=html;
-renderRecent(arr);
-});
-
-/* RECENT */
-function renderRecent(arr){
-let colors=["r1","r2","r3","r4","r5"];
-arr=arr.slice(-10).reverse();
-let html="";
-arr.forEach((x,i)=>{
-html+=`<tr class="${colors[i%5]}">
-<td>${x.name}</td><td>${x.amount}</td><td>${x.type}</td><td>${x.date}</td>
-</tr>`;
-});
-recent.innerHTML=html;
+/* SHOW ROLE */
+if(role){
+  roleText.innerText = "Logged in as: " + role;
+}else{
+  roleText.innerText = "No role found";
 }
 
-/* USERS */
-onSnapshot(collection(db,"users"),snap=>{
-let html="";
-snap.forEach(d=>{
-let u=d.data();
-html+=`<tr><td>${u.email}</td><td>${u.role}</td></tr>`;
-});
-usersTbl.innerHTML=html;
-});
-
-/* LOAN CALC */
-window.loanCalc=()=>{
-let a=Number(prompt("Amount"));
-let i=Number(prompt("Interest %"));
-alert("Total: "+(a+(a*i/100)));
-};
-
-/* ================= i18n ================= */
-
-const resources = {
-en:{translation:{
-dashboard:"Dashboard",members:"Members",savings:"Savings",loans:"Loans",
-transactions:"Transactions",users:"Users",settings:"Settings",
-logout:"Logout",recent:"Recent Actions",deposit:"Deposit",loanCalc:"Loan Calculator"
-}},
-am:{translation:{
-dashboard:"ዳሽቦርድ",members:"አባላት",savings:"ቁጠባ",loans:"ብድር",
-transactions:"ግብይቶች",users:"ተጠቃሚዎች",settings:"ቅንብሮች",
-logout:"ውጣ",recent:"የቅርብ እርምጃዎች",deposit:"ገቢ",loanCalc:"ብድር ካልኩሌተር"
-}},
-om:{translation:{
-dashboard:"Daashboordii",members:"Miseensota",savings:"Qusannaa",loans:"Liqii",
-transactions:"Sochii",users:"Fayyadamtoota",settings:"Sirna",
-logout:"Ba'i",recent:"Tarkaanfii Dhihoo",deposit:"Kuusaa",loanCalc:"Lakkooftuu Liqii"
-}}
-};
-
-const savedLang = localStorage.getItem("lang");
-const browserLang = navigator.language.startsWith("am")?"am":
-                    navigator.language.startsWith("om")?"om":"en";
-
-const lang = savedLang || browserLang;
-
-i18next.init({lng:lang,resources},()=>updateContent());
-
-function updateContent(){
-document.querySelectorAll("[data-i18n]").forEach(el=>{
-el.innerText=i18next.t(el.getAttribute("data-i18n"));
-});
+/* 🔐 ROLE CONTROL */
+if(role !== "admin"){
+  adminPanel.style.display = "none";
 }
 
-window.setLang=(l)=>{
-i18next.changeLanguage(l,()=>{
-localStorage.setItem("lang",l);
-updateContent();
-});
-};
-
+/* 🔓 LOGOUT */
+window.logout = async function(){
+  await signOut(auth);
+  localStorage.removeItem("role"); // clean
+  window.location.href = "index.html";
+}
 </script>
 
 </body>
