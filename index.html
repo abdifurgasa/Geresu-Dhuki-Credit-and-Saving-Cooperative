@@ -1,52 +1,104 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Login</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SACCO Login</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#0f172a;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+
+.card{
+  background:white;
+  padding:25px;
+  border-radius:10px;
+  width:320px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.3);
+}
+
+h2{
+  text-align:center;
+  margin-bottom:15px;
+}
+
+input{
+  width:100%;
+  padding:10px;
+  margin:8px 0;
+  border:1px solid #ddd;
+  border-radius:6px;
+}
+
+button{
+  width:100%;
+  padding:10px;
+  background:#2563eb;
+  color:white;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+}
+
+button:hover{
+  background:#1d4ed8;
+}
+
+.lang{
+  width:100%;
+  padding:6px;
+  margin-bottom:10px;
+}
+</style>
+
 </head>
 
 <body>
 
-<h2 id="title">Login</h2>
+<div class="card">
 
-<select onchange="changeLang(this.value)">
-  <option value="en">EN</option>
-  <option value="am">AM</option>
-  <option value="om">OR</option>
-</select>
+  <select class="lang" id="langSelect">
+    <option value="en">English</option>
+    <option value="am">Amharic</option>
+    <option value="om">Afaan Oromo</option>
+  </select>
 
-<br><br>
+  <h2 id="title">Login</h2>
 
-<input id="email" placeholder="Email">
-<br><br>
+  <input type="email" id="email" placeholder="Email">
+  <input type="password" id="password" placeholder="Password">
 
-<input id="password" type="password" placeholder="Password">
-<br><br>
+  <button onclick="loginFirebase()" id="loginBtn">Login</button>
 
-<button onclick="loginFirebase()" id="loginBtn">Login</button>
+</div>
 
-<script type="module">
-import { translations } from "./js/i18n.js";
-
-let currentLang = "en";
-
-window.changeLang = function(lang){
-  currentLang = lang;
-
-  document.getElementById("title").innerText =
-    translations[lang].title;
-
-  document.getElementById("email").placeholder =
-    translations[lang].email;
-
-  document.getElementById("password").placeholder =
-    translations[lang].password;
-
-  document.getElementById("loginBtn").innerText =
-    translations[lang].login;
-}
-</script>
-
+<!-- FIREBASE LOGIN LOGIC -->
 <script type="module" src="js/auth.js"></script>
+
+<!-- SIMPLE i18n -->
+<script>
+const translations = {
+  en: { title:"Login", email:"Email", password:"Password", login:"Login" },
+  am: { title:"መግቢያ", email:"ኢሜይል", password:"የይለፍ ቃል", login:"ግባ" },
+  om: { title:"Seensa", email:"Imeelii", password:"Jecha Darbii", login:"Seeni" }
+};
+
+document.getElementById("langSelect").addEventListener("change", (e)=>{
+  const lang = e.target.value;
+
+  document.getElementById("title").innerText = translations[lang].title;
+  document.getElementById("email").placeholder = translations[lang].email;
+  document.getElementById("password").placeholder = translations[lang].password;
+  document.getElementById("loginBtn").innerText = translations[lang].login;
+});
+</script>
 
 </body>
 </html>
