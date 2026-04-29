@@ -1,66 +1,65 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Dashboard</title>
+<meta charset="UTF-8">
+<title>SACCO Dashboard</title>
 
 <style>
-body{
-  font-family:Arial;
-  margin:0;
-  background:#f5f7fb;
+body{margin:0;font-family:Arial;background:#f5f7fb;}
+
+.sidebar{
+  width:220px;
+  height:100vh;
+  background:white;
+  position:fixed;
+  padding:20px;
 }
 
-.topbar{
-  background:#1e293b;
-  color:white;
-  padding:15px;
-  display:flex;
-  justify-content:space-between;
-}
-
-.container{
+.main{
+  margin-left:240px;
   padding:20px;
 }
 
 .card{
   background:white;
-  padding:20px;
+  padding:15px;
+  margin:10px;
   border-radius:10px;
-  margin-bottom:15px;
 }
-
-.admin{
-  border-left:5px solid #2563eb;
-}
-
 button{
-  padding:8px 12px;
-  background:red;
+  background:#2563eb;
   color:white;
   border:none;
-  border-radius:6px;
+  padding:8px;
 }
 </style>
-
 </head>
-
 <body>
 
-<div class="topbar">
-  <h3>SACCO Dashboard</h3>
-  <button onclick="logout()">Logout</button>
+<div class="sidebar">
+  <h3>Menu</h3>
+  <p>Dashboard</p>
 </div>
 
-<div class="container">
+<div class="main">
 
   <div class="card">
-    <h3>Welcome</h3>
-    <p id="roleText">Loading role...</p>
+    <h3>Add Member</h3>
+    <input id="mname" placeholder="Name">
+    <input id="mphone" placeholder="Phone">
+    <button onclick="addMember()">Add</button>
   </div>
 
-  <div class="card admin" id="adminBox">
-    <h3>Admin Panel</h3>
-    <p>Only admin can see this</p>
+  <div class="card">
+    <h3>Add Savings</h3>
+    <input id="mid" placeholder="Member ID">
+    <input id="amount" placeholder="Amount">
+    <button onclick="addSaving()">Save</button>
+  </div>
+
+  <div class="card">
+    <h3>Total Savings</h3>
+    <p id="total">0</p>
   </div>
 
 </div>
@@ -69,54 +68,54 @@ button{
 import { auth, db } from "./js/firebase.js";
 
 import {
-  onAuthStateChanged,
-  signOut
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-
-import {
-  doc,
-  getDoc
+  collection,
+  addDoc,
+  getDocs
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-const roleText = document.getElementById("roleText");
-const adminBox = document.getElementById("adminBox");
+/* MEMBER */
+window.addMember = async function(){
 
-onAuthStateChanged(auth, async (user) => {
+  const name = document.getElementById("mname").value;
+  const phone = document.getElementById("mphone").value;
 
-  if (!user) {
-    window.location.href = "index.html";
-    return;
-  }
+  await addDoc(collection(db,"members"),{
+    name, phone
+  });
 
-  try {
+  alert("Member added");
+}
 
-    const snap = await getDoc(doc(db, "users", user.uid));
+/* SAVINGS */
+window.addSaving = async function(){
 
-    if (!snap.exists()) {
-      roleText.innerText = "Role missing, contact admin";
-      adminBox.style.display = "none";
-      return;
-    }
+  const mid = document.getElementById("mid").value;
+  const amount = Number(document.getElementById("amount").value);
 
-    const role = snap.data().role;
+  await addDoc(collection(db,"savings"),{
+    memberId: mid,
+    amount,
+    date: new Date()
+  });
 
-    roleText.innerText = "Role: " + role;
+  loadTotal();
+}
 
-    if (role !== "admin") {
-      adminBox.style.display = "none";
-    }
+/* TOTAL */
+async function loadTotal(){
 
-  } catch (err) {
-    console.error(err);
-    roleText.innerText = "Error loading role";
-  }
+  const snap = await getDocs(collection(db,"savings"));
 
-});
+  let total = 0;
 
-window.logout = async function () {
-  await signOut(auth);
-  window.location.href = "index.html";
-};
+  snap.forEach(d=>{
+    total += d.data().amount;
+  });
+
+  document.getElementById("total").innerText = total;
+}
+
+loadTotal();
 </script>
 
 </body>
