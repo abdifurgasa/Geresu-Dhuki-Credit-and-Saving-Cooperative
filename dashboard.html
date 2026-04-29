@@ -1,126 +1,122 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SACCO Dashboard</title>
+<title>Dashboard</title>
 
 <style>
 body{
-  margin:0;
   font-family:Arial;
+  margin:0;
   background:#f5f7fb;
 }
 
-/* TOPBAR */
 .topbar{
   background:#1e293b;
   color:white;
   padding:15px;
   display:flex;
   justify-content:space-between;
-  align-items:center;
 }
 
-.topbar h2{
-  margin:0;
-}
-
-/* CONTENT */
 .container{
   padding:20px;
-  display:grid;
-  gap:15px;
 }
 
 .card{
   background:white;
   padding:20px;
   border-radius:10px;
-  box-shadow:0 4px 10px rgba(0,0,0,0.1);
+  margin-bottom:15px;
 }
 
-/* ADMIN */
-.admin-only{
+.admin{
   border-left:5px solid #2563eb;
 }
 
-/* BUTTON */
 button{
   padding:8px 12px;
-  border:none;
-  background:#ef4444;
+  background:red;
   color:white;
+  border:none;
   border-radius:6px;
-  cursor:pointer;
-}
-
-button:hover{
-  background:#dc2626;
 }
 </style>
+
 </head>
 
 <body>
 
-<!-- TOPBAR -->
 <div class="topbar">
-  <h2>🏦 SACCO Dashboard</h2>
+  <h3>SACCO Dashboard</h3>
   <button onclick="logout()">Logout</button>
 </div>
 
-<!-- CONTENT -->
 <div class="container">
 
-  <!-- USER INFO -->
   <div class="card">
-    <h3>Dashboard ✅</h3>
-    <p id="roleText">Loading...</p>
+    <h3>Welcome</h3>
+    <p id="roleText">Loading role...</p>
   </div>
 
-  <!-- ADMIN PANEL -->
-  <div class="card admin-only" id="adminPanel">
+  <div class="card admin" id="adminBox">
     <h3>Admin Panel</h3>
-    <p>✔ Manage Users</p>
-    <p>✔ Approve Loans</p>
-    <p>✔ View Reports</p>
+    <p>Only admin can see this</p>
   </div>
 
 </div>
 
-<!-- 🔐 PROTECT PAGE -->
-<script type="module" src="js/guard.js"></script>
-
-<!-- 🔥 ROLE + LOGOUT LOGIC -->
 <script type="module">
-import { auth } from "./js/firebase.js";
+import { auth, db } from "./js/firebase.js";
+
 import {
+  onAuthStateChanged,
   signOut
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-/* 🔐 GET ROLE */
-const role = localStorage.getItem("role");
+import {
+  doc,
+  getDoc
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
 const roleText = document.getElementById("roleText");
-const adminPanel = document.getElementById("adminPanel");
+const adminBox = document.getElementById("adminBox");
 
-/* SHOW ROLE */
-if(role){
-  roleText.innerText = "Logged in as: " + role;
-}else{
-  roleText.innerText = "No role found";
-}
+onAuthStateChanged(auth, async (user) => {
 
-/* 🔐 ROLE CONTROL */
-if(role !== "admin"){
-  adminPanel.style.display = "none";
-}
+  if (!user) {
+    window.location.href = "index.html";
+    return;
+  }
 
-/* 🔓 LOGOUT */
-window.logout = async function(){
+  try {
+
+    const snap = await getDoc(doc(db, "users", user.uid));
+
+    if (!snap.exists()) {
+      roleText.innerText = "Role missing, contact admin";
+      adminBox.style.display = "none";
+      return;
+    }
+
+    const role = snap.data().role;
+
+    roleText.innerText = "Role: " + role;
+
+    if (role !== "admin") {
+      adminBox.style.display = "none";
+    }
+
+  } catch (err) {
+    console.error(err);
+    roleText.innerText = "Error loading role";
+  }
+
+});
+
+window.logout = async function () {
   await signOut(auth);
-  localStorage.removeItem("role"); // clean
   window.location.href = "index.html";
-}
+};
 </script>
 
 </body>
