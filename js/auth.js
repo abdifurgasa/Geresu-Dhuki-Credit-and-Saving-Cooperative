@@ -16,23 +16,16 @@ window.loginFirebase = async function () {
 
   try {
 
+    // 1. LOGIN ONLY FIRST
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
 
-    // GET ROLE FROM FIRESTORE
-    const snap = await getDoc(doc(db, "users", user.uid));
+    console.log("Login success:", user.email);
 
-    if (!snap.exists()) {
-      alert("No role assigned in Firestore!");
-      return;
-    }
+    // 2. SAVE UID TEMP (important for dashboard)
+    localStorage.setItem("uid", user.uid);
 
-    const role = snap.data().role;
-
-    // SAVE ROLE TEMP
-    localStorage.setItem("role", role);
-
-    // REDIRECT
+    // 3. REDIRECT IMMEDIATELY (NO BLOCKING)
     window.location.href = "dashboard.html";
 
   } catch (error) {
