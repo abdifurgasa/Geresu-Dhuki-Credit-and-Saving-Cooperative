@@ -1,126 +1,38 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title> GERESU DHUKI SACCO Login</title>
-
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-
-<script src="https://unpkg.com/i18next@23.10.1/i18next.min.js"></script>
-<script src="https://unpkg.com/i18next-browser-languagedetector@7.2.0/i18nextBrowserLanguageDetector.min.js"></script>
-
-<style>
-body{
-  margin:0;
-  font-family:Arial;
-
-  /* SACCO BACKGROUND IMAGE */
-  background:
-    linear-gradient(rgba(15,23,42,0.75), rgba(15,23,42,0.75)),
-    url('images/sacco.jpg');
-
-  background-size:cover;
-  background-position:center;
-}
-
-/* TOP NAV */
-.nav{
-  background:rgba(15,23,42,0.9);
-  color:white;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:12px 20px;
-  backdrop-filter: blur(6px);
-}
-
-.nav .logo{
-  font-weight:bold;
-}
-
-.nav select{
-  padding:6px;
-  border-radius:6px;
-  border:none;
-}
-
-/* LOGIN CENTER */
-.container{
-  height:calc(100vh - 60px);
-  display:flex;
-  justify-content:center;
-  align-items:center;
-}
-
-.card{
-  background:rgba(255,255,255,0.95);
-  padding:30px;
-  border-radius:12px;
-  width:320px;
-  box-shadow:0 10px 25px rgba(0,0,0,0.2);
-  backdrop-filter: blur(8px);
-}
-
-.card h2{
-  margin-bottom:20px;
-}
-
-input{
-  width:100%;
-  padding:10px;
-  margin-bottom:10px;
-  border:1px solid #ddd;
-  border-radius:6px;
-}
-
-button{
-  width:100%;
-  padding:10px;
-  background:#3b82f6;
-  color:white;
-  border:none;
-  border-radius:6px;
-  cursor:pointer;
-}
-
-button:hover{
-  background:#2563eb;
-}
-</style>
-</head>
-
+<html>
 <body>
 
-<!-- TOP NAV -->
-<div class="nav">
-  <div class="logo">🏦 GERESU DHUKI SACCO SYSTEM</div>
+<h2 id="title">Login Test</h2>
 
-  <div>
-    <select id="langSelect">
-      <option value="en">EN</option>
-      <option value="am">AM</option>
-      <option value="om">OR</option>
-    </select>
-  </div>
-</div>
+<select onchange="changeLang(this.value)">
+  <option value="en">EN</option>
+  <option value="am">AM</option>
+  <option value="om">OR</option>
+</select>
 
-<!-- LOGIN BOX -->
-<div class="container">
-  <div class="card">
+<br><br>
 
-    <h2 data-i18n="login">Login</h2>
+<button onclick="go()" id="loginBtn">Login</button>
 
-    <input id="email" placeholder="Email" data-i18n-placeholder="email">
-    <input id="password" type="password" placeholder="Password" data-i18n-placeholder="password">
+<script type="module">
+import { translations } from "./js/i18n.js";
 
-    <button id="loginBtn" data-i18n="login">Login</button>
+let currentLang = "en";
 
-  </div>
-</div>
+window.changeLang = function(lang){
+  currentLang = lang;
 
-<!-- SCRIPTS -->
-<script type="module" src="js/auth.js"></script>
+  document.getElementById("title").innerText =
+    translations[lang].title;
+
+  document.getElementById("loginBtn").innerText =
+    translations[lang].login;
+}
+
+window.go = function(){
+  window.location.href = "dashboard.html";
+}
+</script>
 
 </body>
 </html>
