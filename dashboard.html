@@ -1,318 +1,227 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>SACCO Dashboard Pro</title>
-
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-
+<!-- ================= MODAL FORM ================= -->
 <style>
-:root{
-  --bg:#f5f7fb;
-  --panel:#ffffff;
-  --card1:#2563eb;
-  --card2:#16a34a;
-  --card3:#f97316;
-  --card4:#a855f7;
-  --text:#0f172a;
-  --muted:#64748b;
-  --sidebar:#ffffff;
-  --border:#e2e8f0;
-}
-*{box-sizing:border-box;font-family:Arial;}
-body{margin:0;background:var(--bg);color:var(--text);display:flex;}
-
-/* Sidebar */
-.sidebar{
-  width:260px;
-  background:var(--sidebar);
-  height:100vh;
-  padding:20px;
-  transition:.3s;
+.modal{
   position:fixed;
-  left:0;
-  top:0;
-  overflow:auto;
-  border-right:1px solid var(--border);
-}
-.sidebar.collapsed{width:70px;}
-.sidebar h2{font-size:18px;margin-bottom:20px;}
-.menu a{
-  display:flex;
+  top:0;left:0;
+  width:100%;height:100%;
+  background:rgba(0,0,0,0.4);
+  display:none;
   align-items:center;
-  gap:10px;
-  padding:10px;
-  color:var(--text);
-  text-decoration:none;
-  border-radius:8px;
+  justify-content:center;
 }
-.menu a:hover{background:#f1f5f9;}
-
-.main{
-  margin-left:260px;
-  padding:20px;
-  width:100%;
-  transition:.3s;
-}
-.sidebar.collapsed ~ .main{margin-left:70px;}
-
-.topbar{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:20px;
-}
-.btn{
+.modal-content{
   background:#fff;
-  border:1px solid var(--border);
-  padding:8px 12px;
-  border-radius:6px;
-  cursor:pointer;
-}
-
-.cards{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:15px;
-}
-.card{
-  padding:15px;
-  border-radius:12px;
-  color:white;
-}
-.card1{background:var(--card1)}
-.card2{background:var(--card2)}
-.card3{background:var(--card3)}
-.card4{background:var(--card4)}
-
-.content-grid{
-  display:grid;
-  grid-template-columns:1fr 2fr;
-  gap:15px;
-  margin-top:20px;
-}
-
-.actions{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:10px;
-}
-.action-card{
-  padding:15px;
-  border-radius:12px;
-  color:white;
-  cursor:pointer;
-  font-weight:bold;
-  display:flex;
-  align-items:center;
-  gap:10px;
-}
-.a1{background:#2563eb;}
-.a2{background:#16a34a;}
-.a3{background:#f97316;}
-.a4{background:#a855f7;}
-
-.table{
-  margin-top:20px;
-  background:var(--panel);
-  padding:15px;
+  padding:20px;
   border-radius:10px;
-  border:1px solid var(--border);
+  width:300px;
 }
-
-table{width:100%;border-collapse:collapse;}
-th,td{padding:10px;border-bottom:1px solid var(--border);}
-th{color:var(--muted);text-align:left;}
-
-tr:nth-child(even){background:#f8fafc;}
-tr:nth-child(odd){background:#fff;}
-
-.menu a.active{
-  background:#2563eb;
-  color:#fff;
-  font-weight:bold;
-  border-left:4px solid #1d4ed8;
-}
-
-.menu a.logout{
-  color:#ef4444;
-}
-.menu a.logout:hover{
-  background:#fee2e2;
+.modal input{
+  width:100%;
+  margin:5px 0;
+  padding:8px;
 }
 </style>
-</head>
 
-<body>
-
-<div class="sidebar" id="sidebar">
-  <h2>SACCO</h2>
-  <div class="menu">
-    <a class="nav-item active">Dashboard</a>
-    <a class="nav-item">Members</a>
-    <a class="nav-item">Users</a>
-    <a class="nav-item">Loans</a>
-    <a class="nav-item">Transactions</a>
-    <a class="nav-item">Reports</a>
-    <a class="nav-item">Settings</a>
-    <a class="nav-item logout" onclick="logout()">Logout</a>
+<div class="modal" id="formModal">
+  <div class="modal-content">
+    <h3 id="formTitle">Add</h3>
+    <input id="fName" placeholder="Name">
+    <input id="fAmount" placeholder="Amount">
+    <input id="fInterest" placeholder="Interest % (Loan only)">
+    <button onclick="saveData()">Save</button>
   </div>
-</div>
-
-<div class="main">
-
-  <div class="topbar">
-    <button class="btn" onclick="toggleSidebar()"><i class="fa fa-bars"></i></button>
-    <select class="btn" onchange="setLang(this.value)">
-      <option value="en">EN</option>
-      <option value="am">AM</option>
-      <option value="om">OM</option>
-    </select>
-  </div>
-
-  <div class="cards">
-    <div class="card card1"><h3>Total Members</h3><p id="members">0</p></div>
-    <div class="card card2"><h3>Total Savings</h3><p id="savings">0 ETB</p></div>
-    <div class="card card3"><h3>Total Loans</h3><p id="loans">0 ETB</p></div>
-    <div class="card card4"><h3>Total Profit</h3><p id="profit">0 ETB</p></div>
-  </div>
-
-  <div class="content-grid">
-
-    <div class="actions">
-      <div class="action-card a1" id="depositBtn">Deposit</div>
-      <div class="action-card a2">Loan Calculator</div>
-      <div class="action-card a3">Add Member</div>
-      <div class="action-card a4">Reports</div>
-    </div>
-
-    <div class="table">
-      <h3>Recent Transactions</h3>
-      <table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Type</th>
-            <th>Member</th>
-            <th>Amount</th>
-            <th>Date</th>
-          </tr>
-        </thead>
-        <tbody id="tbody"></tbody>
-      </table>
-    </div>
-
-  </div>
-
 </div>
 
 <script type="module">
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, collection, addDoc, onSnapshot, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {
+  getFirestore, collection, addDoc, onSnapshot,
+  doc, deleteDoc, updateDoc, getDoc
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyCS-3e_WqGHNycDgvlXVkInaynTnvnplYE",
+/* FIREBASE */
+const app = initializeApp({
+  apiKey: "AIza...",
   authDomain: "geresu-dhuki-sacco.firebaseapp.com",
-  projectId: "geresu-dhuki-sacco",
-  storageBucket: "geresu-dhuki-sacco.firebasestorage.app",
-  messagingSenderId: "944934938425",
-  appId: "1:944934938425:web:caef23f2f3bb34c843eae8"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+  projectId: "geresu-dhuki-sacco"
+});
 const db = getFirestore(app);
+const auth = getAuth(app);
 
-let role = null;
+let currentType = "";
+let editId = null;
+let role = "cashier";
 
-/* AUTH + ROLE CHECK */
+/* AUTH ROLE */
 onAuthStateChanged(auth, async (user)=>{
-  if(!user){
-    location.href="login.html";
-    return;
-  }
+  if(!user) location.href="index.html";
 
   const snap = await getDoc(doc(db,"users",user.uid));
-
-  if(!snap.exists()){
-    alert("No role assigned");
-    await signOut(auth);
-    location.href="login.html";
-    return;
-  }
-
-  role = snap.data().role;
+  if(snap.exists()) role = snap.data().role;
 });
 
-/* LOGOUT */
-window.logout = ()=>signOut(auth).then(()=>location.href="login.html");
+/* OPEN FORM */
+function openForm(type,id=null,data=null){
+  currentType = type;
+  editId = id;
+  document.getElementById("formModal").style.display="flex";
 
-/* SAVINGS */
-function calcSavings(data){
-  let total = 0;
-
-  data.forEach(t=>{
-    const a = Number(t.amount||0);
-    if(t.type==="Deposit") total += a;
-    else if(t.type==="Loan") total -= a;
-  });
-
-  document.getElementById("savings").innerText = total.toFixed(2)+" ETB";
+  if(data){
+    fName.value=data.name;
+    fAmount.value=data.amount||"";
+    fInterest.value=data.interest||"";
+  }else{
+    fName.value="";
+    fAmount.value="";
+    fInterest.value="";
+  }
 }
 
-/* FIRESTORE */
-const tbody = document.getElementById("tbody");
+/* SAVE DATA */
+window.saveData = async ()=>{
+  const name=fName.value;
+  const amount=Number(fAmount.value);
+  const interest=Number(fInterest.value);
 
-onSnapshot(collection(db,"transactions"),(snap)=>{
-  tbody.innerHTML="";
-  const all=[];
-
-  snap.forEach(docu=>{
-    const d = docu.data();
-    all.push(d);
-
-    tbody.innerHTML += `
-      <tr>
-        <td>${docu.id.slice(0,6)}</td>
-        <td>${d.type}</td>
-        <td>${d.member}</td>
-        <td>${d.amount}</td>
-        <td>${d.date}</td>
-      </tr>
-    `;
-  });
-
-  calcSavings(all);
-});
-
-/* ADD TRANSACTION (ADMIN ONLY) */
-document.getElementById("depositBtn").onclick = async ()=>{
-
-  if(role !== "admin"){
-    alert("Access denied (Admin only)");
-    return;
+  if(currentType==="member"){
+    if(editId){
+      await updateDoc(doc(db,"members",editId),{name});
+    }else{
+      await addDoc(collection(db,"members"),{name});
+    }
   }
 
-  const member = prompt("Member");
-  const amount = prompt("Amount");
+  if(currentType==="saving"){
+    if(editId){
+      await updateDoc(doc(db,"savings",editId),{name,amount});
+    }else{
+      await addDoc(collection(db,"savings"),{
+        name,amount,date:new Date().toLocaleDateString()
+      });
+    }
+  }
 
-  await addDoc(collection(db,"transactions"),{
-    type:"Deposit",
-    member,
-    amount:Number(amount),
-    date:new Date().toISOString().split("T")[0]
+  if(currentType==="loan"){
+    const total = amount + (amount*interest/100);
+
+    if(editId){
+      await updateDoc(doc(db,"loans",editId),{name,amount,interest,total});
+    }else{
+      await addDoc(collection(db,"loans"),{
+        name,amount,interest,total,
+        date:new Date().toLocaleDateString()
+      });
+    }
+  }
+
+  formModal.style.display="none";
+};
+
+/* MEMBERS TABLE */
+onSnapshot(collection(db,"members"),snap=>{
+  let html="";
+  snap.forEach(d=>{
+    const x=d.data();
+    html+=`
+    <tr>
+      <td>${x.name}</td>
+      <td>
+        <button onclick="openForm('member','${d.id}',${JSON.stringify(x)})">Edit</button>
+        <button onclick="del('members','${d.id}')">Delete</button>
+      </td>
+    </tr>`;
   });
+  document.getElementById("members").innerHTML=html;
+});
+
+/* SAVINGS */
+onSnapshot(collection(db,"savings"),snap=>{
+  let html="",total=0;
+  let arr=[];
+
+  snap.forEach(d=>{
+    const x=d.data();
+    total+=x.amount;
+    arr.push(x);
+
+    html+=`
+    <tr>
+      <td>${x.name}</td>
+      <td>${x.amount}</td>
+      <td>
+        <button onclick="openForm('saving','${d.id}',${JSON.stringify(x)})">Edit</button>
+        <button onclick="del('savings','${d.id}')">Delete</button>
+      </td>
+    </tr>`;
+  });
+
+  document.getElementById("savings").innerHTML=html;
+  document.getElementById("sCount").innerText=total;
+
+  renderRecent(arr,"Saving");
+});
+
+/* LOANS */
+onSnapshot(collection(db,"loans"),snap=>{
+  let html="",total=0,profit=0;
+  let arr=[];
+
+  snap.forEach(d=>{
+    const x=d.data();
+    total+=x.total;
+    profit+=x.total-x.amount;
+    arr.push(x);
+
+    html+=`
+    <tr>
+      <td>${x.name}</td>
+      <td>${x.total}</td>
+      <td>
+        <button onclick="openForm('loan','${d.id}',${JSON.stringify(x)})">Edit</button>
+        <button onclick="del('loans','${d.id}')">Delete</button>
+      </td>
+    </tr>`;
+  });
+
+  document.getElementById("loans").innerHTML=html;
+  document.getElementById("lCount").innerText=total;
+  document.getElementById("pCount").innerText=profit;
+
+  renderRecent(arr,"Loan");
+});
+
+/* DELETE */
+window.del = (col,id)=>{
+  if(role!=="admin"){
+    alert("Only admin can delete");
+    return;
+  }
+  deleteDoc(doc(db,col,id));
 };
 
-/* UI */
-window.toggleSidebar = ()=>{
-  document.getElementById("sidebar").classList.toggle("collapsed");
-};
+/* RECENT ACTIONS */
+function renderRecent(arr,type){
+  let colors=["r1","r2","r3","r4","r5"];
+  arr=arr.slice(-10).reverse();
+
+  let html="";
+  arr.forEach((x,i)=>{
+    html+=`
+    <tr class="${colors[i%5]}">
+      <td>${x.name}</td>
+      <td>${x.amount}</td>
+      <td>${type}</td>
+      <td>${x.date||""}</td>
+    </tr>`;
+  });
+
+  document.getElementById("recent").innerHTML=html;
+}
+
+/* BUTTON LINKS */
+document.querySelector(".b1").onclick=()=>openForm("member");
+document.querySelector(".b2").onclick=()=>openForm("saving");
+document.querySelector(".b3").onclick=()=>openForm("loan");
 
 </script>
-
-</body>
-</html>
