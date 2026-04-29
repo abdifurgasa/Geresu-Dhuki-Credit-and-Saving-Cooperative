@@ -6,7 +6,8 @@ import {
 
 import {
   doc,
-  getDoc
+  getDoc,
+  setDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 window.loginFirebase = async function () {
@@ -16,16 +17,25 @@ window.loginFirebase = async function () {
 
   try {
 
-    // 1. LOGIN ONLY FIRST
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
 
-    console.log("Login success:", user.email);
+    console.log("UID:", user.uid);
 
-    // 2. SAVE UID TEMP (important for dashboard)
-    localStorage.setItem("uid", user.uid);
+    const userRef = doc(db, "users", user.uid);
+    const snap = await getDoc(userRef);
 
-    // 3. REDIRECT IMMEDIATELY (NO BLOCKING)
+    // 🔥 AUTO CREATE USER IF NOT EXISTS
+    if (!snap.exists()) {
+
+      await setDoc(userRef, {
+        email: user.email,
+        role: "user" // default role
+      });
+
+      console.log("User created in Firestore");
+    }
+
     window.location.href = "dashboard.html";
 
   } catch (error) {
