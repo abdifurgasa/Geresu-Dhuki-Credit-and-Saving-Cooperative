@@ -6,16 +6,17 @@
 
 <link rel="stylesheet" href="css/layout.css">
 <link rel="stylesheet" href="css/components.css">
+
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
 
 <div class="layout">
 
-  <!-- =========================
-       SIDEBAR (PASTE HERE)
-  ========================= -->
+  <!-- SIDEBAR -->
   <aside class="sidebar">
 
     <div class="logo">
@@ -23,45 +24,57 @@
       <p>Admin Panel</p>
     </div>
 
-    <nav class="menu">
+    <nav class="menu" id="sidebarMenu">
       <ul>
 
-        <li><a href="dashboard.html"><i class="fas fa-home"></i><span>Dashboard</span></a></li>
+        <li data-role="admin cashier member" data-page="dashboard.html">
+          <a href="dashboard.html">
+            <i class="fas fa-home"></i>
+            <span>Dashboard</span>
+          </a>
+        </li>
 
-        <li><a href="members.html"><i class="fas fa-users"></i><span>Members</span></a></li>
+        <li data-role="admin cashier" data-page="members.html">
+          <a href="members.html">
+            <i class="fas fa-users"></i>
+            <span>Members</span>
+          </a>
+        </li>
 
-        <!-- SAVINGS -->
-        <li class="has-submenu">
-          <a href="#">
+        <li data-role="admin cashier member" data-page="savings.html">
+          <a href="savings.html">
             <i class="fas fa-piggy-bank"></i>
             <span>Savings</span>
-            <i class="fas fa-chevron-down arrow"></i>
           </a>
-
-          <ul class="submenu">
-            <li><a href="savings.html">All Savings</a></li>
-            <li><a href="add-saving.html">Add Saving</a></li>
-          </ul>
         </li>
 
-        <!-- LOANS -->
-        <li class="has-submenu">
-          <a href="#">
+        <li data-role="admin cashier" data-page="loans.html">
+          <a href="loans.html">
             <i class="fas fa-hand-holding-dollar"></i>
             <span>Loans</span>
-            <i class="fas fa-chevron-down arrow"></i>
           </a>
-
-          <ul class="submenu">
-            <li><a href="loans.html">All Loans</a></li>
-            <li><a href="repayments.html">Repayments</a></li>
-            <li><a href="overdue.html">Overdue Loans</a></li>
-          </ul>
         </li>
 
-        <li><a href="transactions.html"><i class="fas fa-exchange-alt"></i><span>Transactions</span></a></li>
-        <li><a href="reports.html"><i class="fas fa-chart-line"></i><span>Reports</span></a></li>
-        <li><a href="settings.html"><i class="fas fa-cog"></i><span>Settings</span></a></li>
+        <li data-role="admin cashier" data-page="transactions.html">
+          <a href="transactions.html">
+            <i class="fas fa-exchange-alt"></i>
+            <span>Transactions</span>
+          </a>
+        </li>
+
+        <li data-role="admin" data-page="reports.html">
+          <a href="reports.html">
+            <i class="fas fa-chart-line"></i>
+            <span>Reports</span>
+          </a>
+        </li>
+
+        <li data-role="admin cashier member" data-page="settings.html">
+          <a href="settings.html">
+            <i class="fas fa-cog"></i>
+            <span>Settings</span>
+          </a>
+        </li>
 
       </ul>
     </nav>
@@ -73,30 +86,99 @@
 
   </aside>
 
-  <!-- =========================
-       MAIN CONTENT
-  ========================= -->
+  <!-- MAIN -->
   <main class="main">
 
-    <div class="content">
-      <h2>Dashboard Content Here</h2>
-    </div>
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <h2>Admin Dashboard</h2>
+      <div id="userRole">👤 Loading...</div>
+    </header>
+
+    <!-- CONTENT -->
+    <section class="content">
+
+      <!-- CARDS -->
+      <div class="cards">
+
+        <div class="card members">
+          <div>
+            <p>Total Members</p>
+            <h2 id="membersCount">0</h2>
+          </div>
+        </div>
+
+        <div class="card savings">
+          <div>
+            <p>Total Savings</p>
+            <h2 id="savingsTotal">$0</h2>
+          </div>
+        </div>
+
+        <div class="card loans">
+          <div>
+            <p>Total Loans</p>
+            <h2 id="loansTotal">$0</h2>
+          </div>
+        </div>
+
+        <div class="card profit">
+          <div>
+            <p>Net Profit</p>
+            <h2 id="profitTotal">$0</h2>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- CHARTS -->
+      <div class="charts-grid">
+
+        <div class="chart-box">
+          <h3>Savings Trend</h3>
+          <canvas id="savingsChart"></canvas>
+        </div>
+
+        <div class="chart-box">
+          <h3>Loans vs Repayments</h3>
+          <canvas id="loanChart"></canvas>
+        </div>
+
+        <div class="chart-box">
+          <h3>Members Growth</h3>
+          <canvas id="memberChart"></canvas>
+        </div>
+
+      </div>
+
+    </section>
 
   </main>
 
 </div>
 
-<!-- OVERLAY (FOR MOBILE) -->
-<div class="overlay"></div>
-
-<!-- JS -->
-<script src="js/layout.js"></script>
+<!-- FIREBASE -->
+<script type="module" src="js/firebase.js"></script>
+<script type="module" src="js/roleGuard.js"></script>
+<script type="module" src="js/dashboard.js"></script>
+<script type="module" src="js/analytics.js"></script>
 
 <script>
+/* =========================
+   LOGOUT
+========================= */
 function logout(){
   localStorage.clear();
   window.location.href = "index.html";
 }
+
+/* =========================
+   SHOW ROLE
+========================= */
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("userRole").innerText =
+    "👤 " + (localStorage.getItem("role") || "guest");
+});
 </script>
 
 </body>
