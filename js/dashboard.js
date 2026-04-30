@@ -48,3 +48,8 @@ function loadStats(){
 
 /* INIT */
 document.addEventListener("DOMContentLoaded", loadStats);
+import { startOverdueEngine } from "./overdueEngine.js";
+
+document.addEventListener("DOMContentLoaded", () => {
+  startOverdueEngine();
+});
