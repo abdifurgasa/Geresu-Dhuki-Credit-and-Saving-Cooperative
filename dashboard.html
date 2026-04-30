@@ -9,7 +9,6 @@
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 
-<!-- CHART JS -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
@@ -17,74 +16,75 @@
 
 <div class="layout">
 
+  <!-- SIDEBAR -->
   <aside class="sidebar">
 
-  <div class="logo">
-    <h2>SACCO</h2>
-    <p>Admin Panel</p>
-  </div>
+    <div class="logo">
+      <h2>SACCO</h2>
+      <p>Admin Panel</p>
+    </div>
 
-  <nav class="menu" id="sidebarMenu">
-    <ul>
+    <nav class="menu" id="sidebarMenu">
+      <ul>
 
-      <li data-page="dashboard.html">
-        <a href="dashboard.html">
-          <i class="fas fa-home"></i>
-          <span>Dashboard</span>
-        </a>
-      </li>
+        <li data-role="admin cashier member" data-page="dashboard.html">
+          <a href="dashboard.html">
+            <i class="fas fa-home"></i>
+            <span>Dashboard</span>
+          </a>
+        </li>
 
-      <li data-page="members.html">
-        <a href="members.html">
-          <i class="fas fa-users"></i>
-          <span>Members</span>
-        </a>
-      </li>
+        <li data-role="admin cashier" data-page="members.html">
+          <a href="members.html">
+            <i class="fas fa-users"></i>
+            <span>Members</span>
+          </a>
+        </li>
 
-      <li data-page="savings.html">
-        <a href="savings.html">
-          <i class="fas fa-piggy-bank"></i>
-          <span>Savings</span>
-        </a>
-      </li>
+        <li data-role="admin cashier member" data-page="savings.html">
+          <a href="savings.html">
+            <i class="fas fa-piggy-bank"></i>
+            <span>Savings</span>
+          </a>
+        </li>
 
-      <li data-page="loans.html">
-        <a href="loans.html">
-          <i class="fas fa-hand-holding-dollar"></i>
-          <span>Loans</span>
-        </a>
-      </li>
+        <li data-role="admin cashier" data-page="loans.html">
+          <a href="loans.html">
+            <i class="fas fa-hand-holding-dollar"></i>
+            <span>Loans</span>
+          </a>
+        </li>
 
-      <li data-page="transactions.html">
-        <a href="transactions.html">
-          <i class="fas fa-exchange-alt"></i>
-          <span>Transactions</span>
-        </a>
-      </li>
+        <li data-role="admin cashier" data-page="transactions.html">
+          <a href="transactions.html">
+            <i class="fas fa-exchange-alt"></i>
+            <span>Transactions</span>
+          </a>
+        </li>
 
-      <li data-page="reports.html">
-        <a href="reports.html">
-          <i class="fas fa-chart-line"></i>
-          <span>Reports</span>
-        </a>
-      </li>
+        <li data-role="admin" data-page="reports.html">
+          <a href="reports.html">
+            <i class="fas fa-chart-line"></i>
+            <span>Reports</span>
+          </a>
+        </li>
 
-      <li data-page="settings.html">
-        <a href="settings.html">
-          <i class="fas fa-cog"></i>
-          <span>Settings</span>
-        </a>
-      </li>
+        <li data-role="admin cashier member" data-page="settings.html">
+          <a href="settings.html">
+            <i class="fas fa-cog"></i>
+            <span>Settings</span>
+          </a>
+        </li>
 
-    </ul>
-  </nav>
+      </ul>
+    </nav>
 
-  <div class="logout" onclick="logout()">
-    <i class="fas fa-sign-out-alt"></i>
-    <span>Logout</span>
-  </div>
+    <div class="logout" onclick="logout()">
+      <i class="fas fa-sign-out-alt"></i>
+      <span>Logout</span>
+    </div>
 
-</aside>
+  </aside>
 
   <!-- MAIN -->
   <main class="main">
@@ -92,7 +92,7 @@
     <!-- TOPBAR -->
     <header class="topbar">
       <h2>Admin Dashboard</h2>
-      <div>👤 Admin</div>
+      <div id="userRole">👤 Loading...</div>
     </header>
 
     <!-- CONTENT -->
@@ -157,9 +157,29 @@
 
 </div>
 
+<!-- FIREBASE -->
 <script type="module" src="js/firebase.js"></script>
+<script type="module" src="js/roleGuard.js"></script>
 <script type="module" src="js/dashboard.js"></script>
 <script type="module" src="js/analytics.js"></script>
+
+<script>
+/* =========================
+   LOGOUT
+========================= */
+function logout(){
+  localStorage.clear();
+  window.location.href = "index.html";
+}
+
+/* =========================
+   SHOW ROLE
+========================= */
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("userRole").innerText =
+    "👤 " + (localStorage.getItem("role") || "guest");
+});
+</script>
 
 </body>
 </html>
