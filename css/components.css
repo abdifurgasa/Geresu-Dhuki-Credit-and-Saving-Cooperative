@@ -1,39 +1,105 @@
 /* =========================
-   HEADER
+   GLOBAL RESET
 ========================= */
-.page-header{
-  margin-bottom:20px;
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:"Segoe UI", sans-serif;
 }
 
-.page-header h2{
-  font-size:22px;
-  margin-bottom:5px;
-}
-
-.page-header p{
-  color:#777;
-  font-size:14px;
+body{
+  background:#f4f6f9;
 }
 
 /* =========================
-   CARD BASE (IMPORTANT FIX)
+   LAYOUT
+========================= */
+.layout{
+  display:flex;
+  min-height:100vh;
+}
+
+/* =========================
+   SIDEBAR
+========================= */
+.sidebar{
+  width:260px;
+  background:#0f1f3d;
+  color:#fff;
+  padding:20px;
+}
+
+.menu ul{
+  list-style:none;
+}
+
+.menu li a{
+  display:flex;
+  gap:10px;
+  padding:12px;
+  color:#fff;
+  text-decoration:none;
+  border-radius:8px;
+}
+
+.menu li a:hover,
+.menu li.active a{
+  background:#1f3c88;
+}
+
+/* =========================
+   MAIN
+========================= */
+.main{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+}
+
+/* TOPBAR */
+.topbar{
+  background:#fff;
+  padding:15px 20px;
+  border-bottom:1px solid #ddd;
+}
+
+/* =========================
+   DASHBOARD WRAPPER (KEY FIX)
+========================= */
+.dashboard-wrapper{
+  max-width:1200px;
+  margin:0 auto;
+  width:100%;
+  padding:20px;
+}
+
+/* =========================
+   CARDS GRID (WRAPPED)
+========================= */
+.cards{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));
+  gap:20px;
+  width:100%;
+}
+
+/* =========================
+   CARD DESIGN
 ========================= */
 .card{
   border-radius:16px;
   padding:20px;
   box-shadow:0 6px 18px rgba(0,0,0,0.08);
+  color:#fff;
   transition:0.3s;
-  position:relative;
-  overflow:hidden;
-  background:#fff;
 }
 
 .card:hover{
   transform:translateY(-6px);
 }
 
-/* CARD CONTENT */
-.card-content{
+.card-inner{
   display:flex;
   justify-content:space-between;
   align-items:center;
@@ -47,22 +113,19 @@
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:22px;
   background:rgba(255,255,255,0.2);
+  font-size:20px;
 }
 
 /* =========================
-   DASHBOARD CARDS
+   CARD COLORS
 ========================= */
-
 .members{
   background:linear-gradient(135deg,#667eea,#764ba2);
-  color:#fff;
 }
 
 .savings{
   background:linear-gradient(135deg,#11998e,#38ef7d);
-  color:#fff;
 }
 
 .loans{
@@ -72,142 +135,4 @@
 
 .profit{
   background:linear-gradient(135deg,#2b5876,#4e4376);
-  color:#fff;
-}
-
-.penalty{
-  background:linear-gradient(135deg,#ff416c,#ff4b2b);
-  color:#fff;
-}
-
-/* =========================
-   GRID SYSTEM
-========================= */
-.grid{
-  display:grid;
-  grid-template-columns:2fr 1fr;
-  gap:20px;
-}
-
-/* =========================
-   TABLE SYSTEM (CLEAN)
-========================= */
-table{
-  width:100%;
-  border-collapse:collapse;
-}
-
-th, td{
-  padding:12px;
-  text-align:left;
-  border-bottom:1px solid #eee;
-  font-size:14px;
-}
-
-thead{
-  background:#f1f3f9;
-}
-
-tr:hover{
-  background:#f9fafc;
-}
-
-/* =========================
-   BADGES
-========================= */
-.badge-type{
-  padding:5px 12px;
-  border-radius:20px;
-  font-size:12px;
-}
-
-.saving{ background:#e6f9f0; color:#1cc88a; }
-.loan{ background:#fff5e6; color:#f6c23e; }
-.repayment{ background:#fdeaea; color:#e74a3b; }
-.penalty{ background:#ffe5e5; color:#ff4b2b; }
-
-/* =========================
-   AMOUNT COLORS
-========================= */
-.amount.green{ color:#1cc88a; font-weight:bold; }
-.amount.red{ color:#e74a3b; font-weight:bold; }
-.amount.orange{ color:#f6c23e; font-weight:bold; }
-
-/* =========================
-   QUICK ACTIONS
-========================= */
-.action{
-  display:flex;
-  justify-content:space-between;
-  padding:12px;
-  border-radius:10px;
-  margin-bottom:10px;
-  cursor:pointer;
-  color:#fff;
-  transition:0.2s;
-}
-
-.action:hover{
-  transform:translateX(6px);
-}
-
-.action.member{ background:#4e73df; }
-.action.saving{ background:#1cc88a; }
-.action.loan{ background:#f6c23e; }
-.action.report{ background:#9b59b6; }
-
-/* =========================
-   TABLE BUTTON FIX (ONE STYLE ONLY)
-========================= */
-.table-box button{
-  background:#e74a3b;
-  color:#fff;
-  border:none;
-  padding:6px 10px;
-  border-radius:6px;
-  cursor:pointer;
-}
-
-.table-box button:hover{
-  background:#c0392b;
-}
-
-/* =========================
-   CHARTS
-========================= */
-.charts-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
-  gap:20px;
-}
-
-.chart-box{
-  background:#fff;
-  padding:15px;
-  border-radius:12px;
-  box-shadow:0 2px 5px rgba(0,0,0,0.05);
-}
-
-/* =========================
-   REPORT FILTER
-========================= */
-.report-filter{
-  display:flex;
-  gap:10px;
-  margin-bottom:20px;
-}
-
-.report-filter input{
-  padding:6px;
-  border:1px solid #ddd;
-  border-radius:6px;
-}
-
-.report-filter button{
-  background:#4e73df;
-  color:#fff;
-  border:none;
-  padding:8px 12px;
-  border-radius:6px;
-  cursor:pointer;
 }
