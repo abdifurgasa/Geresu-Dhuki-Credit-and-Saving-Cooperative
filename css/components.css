@@ -170,3 +170,21 @@ tr:hover{
 .action.saving{ background:#1cc88a; }
 .action.loan{ background:#f6c23e; }
 .action.report{ background:#9b59b6; }
+.member-item{
+  display:flex;
+  justify-content:space-between;
+  padding:10px;
+  margin:5px 0;
+  background:#fff;
+  border-radius:8px;
+  box-shadow:0 1px 3px rgba(0,0,0,0.1);
+}
+
+.member-item button{
+  background:#e74a3b;
+  border:none;
+  color:#fff;
+  padding:5px 10px;
+  border-radius:6px;
+  cursor:pointer;
+}
