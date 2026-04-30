@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Members</title>
+
+<link rel="stylesheet" href="css/layout.css">
+<link rel="stylesheet" href="css/components.css">
+</head>
+
+<body>
+
+<div class="layout">
+
+  <aside class="sidebar"></aside>
+
+  <main class="main">
+
+    <div class="topbar">
+      <h2>Members</h2>
+    </div>
+
+    <section class="content">
+
+      <!-- FORM -->
+      <div class="card">
+
+        <h3>Add Member</h3>
+
+        <input id="name" placeholder="Full Name">
+        <input id="phone" placeholder="Phone">
+
+        <select id="role">
+          <option value="member">Member</option>
+          <option value="cashier">Cashier</option>
+          <option value="admin">Admin</option>
+        </select>
+
+        <button onclick="addMember()">Save Member</button>
+
+      </div>
+
+      <!-- TABLE -->
+      <div class="transactions">
+
+        <h3>Members List</h3>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Phone</th>
+              <th>Role</th>
+              <th>Date</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+
+          <tbody id="memberTable"></tbody>
+        </table>
+
+      </div>
+
+    </section>
+
+  </main>
+
+</div>
+
+<script type="module" src="js/members.js"></script>
+
+</body>
+</html>
