@@ -1,9 +1,8 @@
 import { db } from "./firebase.js";
-
 import {
   collection,
   addDoc,
-  onSnapshot,
+  getDocs,
   deleteDoc,
   doc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
@@ -13,59 +12,50 @@ import {
 ========================= */
 window.addMember = async function () {
 
-  let name = document.getElementById("name").value.trim();
-  let phone = document.getElementById("phone").value.trim();
-  let role = document.getElementById("role").value || "member";
+  const name = document.getElementById("name").value;
+  const phone = document.getElementById("phone").value;
+  const nid = document.getElementById("nid").value;
 
-  if (!name) return alert("Enter member name");
-
-  try {
-    await addDoc(collection(db, "members"), {
-      name,
-      phone,
-      role,
-      createdAt: new Date().toISOString()
-    });
-
-    document.getElementById("name").value = "";
-    document.getElementById("phone").value = "";
-
-  } catch (err) {
-    console.error(err);
+  if (!name || !phone || !nid) {
+    alert("Fill all fields");
+    return;
   }
+
+  await addDoc(collection(db, "members"), {
+    name,
+    phone,
+    nationalId: nid,
+    createdAt: new Date()
+  });
+
+  alert("Member added successfully");
+
+  loadMembers();
 };
 
 /* =========================
-   LOAD MEMBERS (REAL TIME)
+   LOAD MEMBERS
 ========================= */
-function loadMembers() {
+async function loadMembers() {
 
-  const list = document.getElementById("memberTable");
+  const snap = await getDocs(collection(db, "members"));
 
-  onSnapshot(collection(db, "members"), (snap) => {
+  const table = document.getElementById("memberTable");
+  table.innerHTML = "";
 
-    list.innerHTML = "";
+  snap.forEach(d => {
+    const m = d.data();
 
-    snap.forEach((docSnap) => {
-
-      let d = docSnap.data();
-
-      list.innerHTML += `
-        <tr>
-          <td>${d.name}</td>
-          <td>${d.phone || "-"}</td>
-          <td>${d.role}</td>
-          <td>${d.createdAt?.split("T")[0] || "-"}</td>
-
-          <td>
-            <button onclick="deleteMember('${docSnap.id}')">
-              Delete
-            </button>
-          </td>
-        </tr>
-      `;
-    });
-
+    table.innerHTML += `
+      <tr>
+        <td>${m.name}</td>
+        <td>${m.phone}</td>
+        <td>${m.nationalId}</td>
+        <td>
+          <button onclick="deleteMember('${d.id}')">Delete</button>
+        </td>
+      </tr>
+    `;
   });
 }
 
@@ -73,21 +63,8 @@ function loadMembers() {
    DELETE MEMBER
 ========================= */
 window.deleteMember = async function (id) {
-  try {
-    await deleteDoc(doc(db, "members", id));
-  } catch (err) {
-    console.error(err);
-  }
+  await deleteDoc(doc(db, "members", id));
+  loadMembers();
 };
 
-/* =========================
-   INIT
-========================= */
-document.addEventListener("DOMContentLoaded", () => {
-  loadMembers();
-});
-import { requireRole } from "./auth.js";
-
-document.addEventListener("DOMContentLoaded", () => {
-  requireRole("admin");
-});
+loadMembers();
