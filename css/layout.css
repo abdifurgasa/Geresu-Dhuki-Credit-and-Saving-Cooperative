@@ -13,7 +13,7 @@ body{
 }
 
 /* =========================
-   MAIN LAYOUT
+   LAYOUT
 ========================= */
 .layout{
   display:flex;
@@ -31,156 +31,29 @@ body{
   flex-direction:column;
   justify-content:space-between;
   padding:20px;
-  transition:0.3s;
-  overflow:visible;
 }
 
-/* COLLAPSED */
-.sidebar.collapsed{
-  width:80px;
-}
-
-/* LOGO */
-.logo{
-  margin-bottom:20px;
-}
-
-.logo h2{
-  font-size:22px;
-}
-
-.logo p{
-  font-size:12px;
-  opacity:0.7;
-}
-
-/* =========================
-   MENU
-========================= */
+/* MENU */
 .menu ul{
   list-style:none;
 }
 
-.menu li{
-  margin-bottom:8px;
-}
-
 .menu li a{
   display:flex;
-  align-items:center;
-  gap:12px;
+  gap:10px;
   padding:12px;
-  border-radius:8px;
   color:#fff;
   text-decoration:none;
-  transition:0.2s;
+  border-radius:8px;
 }
 
-/* HOVER + ACTIVE */
 .menu li a:hover,
 .menu li.active a{
   background:#1f3c88;
 }
 
-/* ICON */
-.menu i{
-  width:20px;
-  text-align:center;
-}
-
 /* =========================
-   COLLAPSED MODE
-========================= */
-.sidebar.collapsed span,
-.sidebar.collapsed .logo p{
-  display:none;
-}
-
-.sidebar.collapsed .menu li a{
-  justify-content:center;
-}
-
-/* =========================
-   SUBMENU SYSTEM (FIXED)
-========================= */
-.has-submenu > a{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-
-.arrow{
-  transition:0.3s;
-  font-size:12px;
-}
-
-.has-submenu.open .arrow{
-  transform:rotate(180deg);
-}
-
-/* submenu */
-.submenu{
-  max-height:0;
-  overflow:hidden;
-  transition:max-height 0.35s ease;
-  padding-left:25px;
-}
-
-/* open submenu */
-.has-submenu.open .submenu{
-  max-height:400px;
-}
-
-/* submenu links */
-.submenu li a{
-  display:block;
-  padding:8px;
-  font-size:14px;
-  color:#ddd;
-  text-decoration:none;
-  border-radius:6px;
-}
-
-/* hover submenu */
-.submenu li a:hover{
-  color:#fff;
-  background:rgba(255,255,255,0.08);
-}
-
-/* active submenu */
-.submenu li.active a{
-  background:#2c4fb5;
-  color:#fff;
-}
-
-/* hide submenu in collapsed */
-.sidebar.collapsed .submenu{
-  display:none;
-}
-
-/* hide arrow when collapsed */
-.sidebar.collapsed .has-submenu > a .arrow{
-  display:none;
-}
-
-/* =========================
-   LOGOUT
-========================= */
-.logout{
-  background:#e74a3b;
-  padding:12px;
-  border-radius:8px;
-  text-align:center;
-  cursor:pointer;
-  transition:0.2s;
-}
-
-.logout:hover{
-  background:#c0392b;
-}
-
-/* =========================
-   MAIN CONTENT
+   MAIN
 ========================= */
 .main{
   flex:1;
@@ -188,72 +61,109 @@ body{
   flex-direction:column;
 }
 
-/* =========================
-   TOPBAR
-========================= */
+/* TOPBAR */
 .topbar{
   background:#fff;
   padding:15px 20px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
   border-bottom:1px solid #ddd;
 }
 
-/* =========================
-   CONTENT
-========================= */
+/* CONTENT */
 .content{
   padding:20px;
 }
 
 /* =========================
-   MOBILE SIDEBAR
+   CARDS (FORM)
 ========================= */
-.overlay{
-  position:fixed;
-  top:0;
-  left:0;
+.card{
+  background:#fff;
+  padding:20px;
+  border-radius:12px;
+  box-shadow:0 2px 6px rgba(0,0,0,0.05);
+  margin-bottom:20px;
+}
+
+.card h3{
+  margin-bottom:10px;
+}
+
+/* INPUTS */
+.card input{
   width:100%;
-  height:100%;
-  background:rgba(0,0,0,0.4);
-  display:none;
-  z-index:999;
+  padding:10px;
+  margin-bottom:10px;
+  border:1px solid #ddd;
+  border-radius:8px;
 }
 
-.overlay.active{
-  display:block;
+.card button{
+  width:100%;
+  padding:10px;
+  background:#4e73df;
+  color:#fff;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
 }
 
-@media(max-width:768px){
-  .sidebar{
-    position:fixed;
-    left:-260px;
-    height:100%;
-    z-index:1000;
-  }
-
-  .sidebar.open{
-    left:0;
-  }
-
-  .sidebar.collapsed{
-    width:260px;
-  }
+.card button:hover{
+  background:#2e59d9;
 }
 
 /* =========================
-   DARK MODE
+   SEARCH BOX
 ========================= */
-body.dark {
-  background:#1a1a2e;
-  color:white;
+.search-box{
+  position:relative;
 }
 
-body.dark .topbar {
-  background:#222;
+.search-results{
+  position:absolute;
+  width:100%;
+  background:#fff;
+  border:1px solid #eee;
+  border-radius:8px;
+  max-height:200px;
+  overflow:auto;
+  z-index:10;
 }
 
-body.dark .sidebar {
-  background:#0b1020;
+.search-item{
+  padding:10px;
+  cursor:pointer;
 }
+
+.search-item:hover{
+  background:#f4f6f9;
+}
+
+/* =========================
+   TABLE
+========================= */
+.table-box{
+  background:#fff;
+  padding:20px;
+  border-radius:12px;
+  box-shadow:0 2px 6px rgba(0,0,0,0.05);
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+th, td{
+  padding:12px;
+  border-bottom:1px solid #eee;
+  text-align:left;
+  font-size:14px;
+}
+
+th{
+  background:#f1f3f9;
+}
+
+/* STATUS COLORS */
+.green{color:#1cc88a;}
+.red{color:#e74a3b;}
