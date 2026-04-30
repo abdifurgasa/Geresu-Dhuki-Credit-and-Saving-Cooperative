@@ -6,68 +6,81 @@
 
 <link rel="stylesheet" href="css/layout.css">
 <link rel="stylesheet" href="css/components.css">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 </head>
 
 <body>
 
 <div class="layout">
 
-  <aside class="sidebar"></aside>
+<!-- SIDEBAR -->
+<aside class="sidebar">
 
-  <main class="main">
+  <div class="logo">
+    <h2>SACCO</h2>
+    <p>Members System</p>
+  </div>
 
-    <div class="topbar">
-      <h2>Members</h2>
+  <nav class="menu">
+    <ul>
+      <li><a href="dashboard.html"><i class="fas fa-home"></i><span>Dashboard</span></a></li>
+      <li class="active"><a href="members.html"><i class="fas fa-users"></i><span>Members</span></a></li>
+      <li><a href="loans.html"><i class="fas fa-hand-holding-dollar"></i><span>Loans</span></a></li>
+      <li><a href="savings.html"><i class="fas fa-piggy-bank"></i><span>Savings</span></a></li>
+    </ul>
+  </nav>
+
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+  <div class="topbar">
+    <h2>Members Management</h2>
+  </div>
+
+  <section class="content">
+
+    <!-- FORM -->
+    <div class="card">
+
+      <h3>Add New Member</h3>
+
+      <input id="name" type="text" placeholder="Full Name">
+      <input id="phone" type="text" placeholder="Phone Number">
+      <input id="nid" type="text" placeholder="National ID">
+
+      <button onclick="addMember()">Save Member</button>
+
     </div>
 
-    <section class="content">
+    <!-- TABLE -->
+    <div class="table-box">
 
-      <!-- FORM -->
-      <div class="card">
+      <h3>Members List</h3>
 
-        <h3>Add Member</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Phone</th>
+            <th>National ID</th>
+            <th>Action</th>
+          </tr>
+        </thead>
 
-        <input id="name" placeholder="Full Name">
-        <input id="phone" placeholder="Phone">
+        <tbody id="memberTable"></tbody>
+      </table>
 
-        <select id="role">
-          <option value="member">Member</option>
-          <option value="cashier">Cashier</option>
-          <option value="admin">Admin</option>
-        </select>
+    </div>
 
-        <button onclick="addMember()">Save Member</button>
+  </section>
 
-      </div>
-
-      <!-- TABLE -->
-      <div class="transactions">
-
-        <h3>Members List</h3>
-
-        <table>
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Phone</th>
-              <th>Role</th>
-              <th>Date</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-
-          <tbody id="memberTable"></tbody>
-        </table>
-
-      </div>
-
-    </section>
-
-  </main>
+</main>
 
 </div>
 
 <script type="module" src="js/members.js"></script>
-<script src="js/layout.js"></script>
+
 </body>
 </html>
