@@ -2,30 +2,103 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Login</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<link rel="stylesheet" href="css/layout.css">
-<link rel="stylesheet" href="css/components.css">
+<title>SACCO Login</title>
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Segoe UI;
+}
+
+body{
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background:linear-gradient(135deg,#4e73df,#1cc88a);
+}
+
+/* LOGIN BOX */
+.login-box{
+  width:350px;
+  background:#fff;
+  padding:30px;
+  border-radius:12px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.2);
+}
+
+.login-box h2{
+  text-align:center;
+  margin-bottom:20px;
+}
+
+/* INPUT */
+input{
+  width:100%;
+  padding:10px;
+  margin:10px 0;
+  border:1px solid #ddd;
+  border-radius:8px;
+  outline:none;
+}
+
+/* BUTTON */
+button{
+  width:100%;
+  padding:10px;
+  background:#4e73df;
+  border:none;
+  color:#fff;
+  border-radius:8px;
+  cursor:pointer;
+  font-size:16px;
+  margin-top:10px;
+}
+
+button:hover{
+  background:#2e59d9;
+}
+
+/* ERROR */
+.error{
+  color:red;
+  font-size:13px;
+  margin-top:10px;
+  text-align:center;
+}
+
+/* LOADING */
+.loading{
+  display:none;
+  text-align:center;
+  font-size:14px;
+  margin-top:10px;
+}
+</style>
+
 </head>
 
 <body>
 
-<div class="layout" style="justify-content:center;align-items:center;">
+<div class="login-box">
 
-  <div class="card" style="width:300px">
+  <h2>SACCO Login</h2>
 
-    <h2>Login</h2>
+  <input type="email" id="email" placeholder="Email">
+  <input type="password" id="password" placeholder="Password">
 
-    <input id="email" placeholder="Email">
-    <input id="password" type="password" placeholder="Password">
+  <button onclick="login()">Login</button>
 
-    <button onclick="login()">Login</button>
-
-  </div>
+  <div class="loading" id="loading">Logging in...</div>
+  <div class="error" id="error"></div>
 
 </div>
 
-<script type="module" src="js/auth.js"></script>
+<script type="module" src="js/login.js"></script>
 
 </body>
 </html>
