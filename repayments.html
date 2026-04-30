@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Repayments</title>
+
+<link rel="stylesheet" href="css/layout.css">
+<link rel="stylesheet" href="css/components.css">
+</head>
+
+<body>
+
+<div class="layout">
+
+  <aside class="sidebar"></aside>
+
+  <main class="main">
+
+    <div class="topbar">
+      <h2>Loan Repayments</h2>
+    </div>
+
+    <section class="content">
+
+      <div class="card">
+
+        <h3>Repay Loan</h3>
+
+        <select id="loanSelect"></select>
+
+        <input id="amount" type="number" placeholder="Repayment Amount">
+
+        <button onclick="addRepayment()">Repay</button>
+
+      </div>
+
+      <div class="transactions">
+
+        <h3>Repayment History</h3>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Member</th>
+              <th>Amount</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+
+          <tbody id="repayTable"></tbody>
+        </table>
+
+      </div>
+
+    </section>
+
+  </main>
+
+</div>
+
+<script type="module" src="js/repayments.js"></script>
+
+</body>
+</html>
