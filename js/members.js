@@ -1,40 +1,72 @@
 import { db } from "./firebase.js";
+
 import {
   collection,
   addDoc,
-  getDocs,
+  onSnapshot,
   deleteDoc,
   doc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-/* ADD MEMBER */
-export async function addMember(name, phone){
+/* =========================
+   ADD MEMBER
+========================= */
+window.addMember = async function () {
+  let name = document.getElementById("name").value.trim();
 
-  await addDoc(collection(db, "members"), {
-    name,
-    phone,
-    createdAt: new Date()
+  if (!name) return alert("Enter member name");
+
+  try {
+    await addDoc(collection(db, "members"), {
+      name: name,
+      createdAt: new Date()
+    });
+
+    document.getElementById("name").value = "";
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+/* =========================
+   LOAD MEMBERS (REAL TIME)
+========================= */
+function loadMembers() {
+  const list = document.getElementById("list");
+
+  onSnapshot(collection(db, "members"), (snap) => {
+    list.innerHTML = "";
+
+    snap.forEach((docSnap) => {
+      let data = docSnap.data();
+
+      list.innerHTML += `
+        <div class="member-item">
+          <span>${data.name}</span>
+
+          <button onclick="deleteMember('${docSnap.id}')">
+            Delete
+          </button>
+        </div>
+      `;
+    });
   });
-
-  alert("Member added!");
 }
 
-/* GET MEMBERS */
-export async function getMembers(){
+/* =========================
+   DELETE MEMBER
+========================= */
+window.deleteMember = async function (id) {
+  try {
+    await deleteDoc(doc(db, "members", id));
+  } catch (err) {
+    console.error(err);
+  }
+};
 
-  const snap = await getDocs(collection(db, "members"));
-
-  let data = [];
-  snap.forEach(d => {
-    data.push({ id: d.id, ...d.data() });
-  });
-
-  return data;
-}
-
-/* DELETE MEMBER */
-export async function deleteMember(id){
-
-  await deleteDoc(doc(db, "members", id));
-  alert("Deleted");
-}
+/* =========================
+   INIT
+========================= */
+document.addEventListener("DOMContentLoaded", () => {
+  loadMembers();
+});
