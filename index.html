@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>SACCO</title>
+<title>Login</title>
 
 <link rel="stylesheet" href="css/layout.css">
 <link rel="stylesheet" href="css/components.css">
@@ -12,18 +12,20 @@
 
 <div class="layout" style="justify-content:center;align-items:center;">
 
-  <div style="text-align:center;">
-    <h1>SACCO Management System</h1>
-    <button onclick="goDashboard()">Enter Dashboard</button>
+  <div class="card" style="width:300px">
+
+    <h2>Login</h2>
+
+    <input id="email" placeholder="Email">
+    <input id="password" type="password" placeholder="Password">
+
+    <button onclick="login()">Login</button>
+
   </div>
 
 </div>
 
-<script>
-function goDashboard(){
-  window.location.href="dashboard.html";
-}
-</script>
+<script type="module" src="js/auth.js"></script>
 
 </body>
 </html>
