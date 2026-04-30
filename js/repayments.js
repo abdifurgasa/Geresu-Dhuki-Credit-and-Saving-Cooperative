@@ -2,34 +2,35 @@ import { db } from "./firebase.js";
 
 import {
   collection,
-  addDoc,
-  updateDoc,
-  doc,
   onSnapshot,
-  query,
-  orderBy
+  doc,
+  updateDoc,
+  addDoc,
+  getDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 /* =========================
    LOAD LOANS INTO SELECT
 ========================= */
 function loadLoans() {
+
   const select = document.getElementById("loanSelect");
 
   onSnapshot(collection(db, "loans"), (snap) => {
+
     select.innerHTML = `<option value="">Select Loan</option>`;
 
-    snap.forEach(d => {
-      let data = d.data();
+    snap.forEach(docSnap => {
 
-      let remaining = (data.balance ?? data.amount);
+      let d = docSnap.data();
 
       select.innerHTML += `
-        <option value="${d.id}">
-          ${data.member} - Remaining $${remaining}
+        <option value="${docSnap.id}">
+          ${d.member} | Remaining $${d.balance}
         </option>
       `;
     });
+
   });
 }
 
@@ -38,8 +39,8 @@ function loadLoans() {
 ========================= */
 window.addRepayment = async function () {
 
-  let loanId = document.getElementById("loanSelect").value;
-  let amount = Number(document.getElementById("amount").value);
+  const loanId = document.getElementById("loanSelect").value;
+  const amount = Number(document.getElementById("amount").value);
 
   if (!loanId || !amount) {
     return alert("Select loan and enter amount");
@@ -48,24 +49,28 @@ window.addRepayment = async function () {
   try {
 
     const loanRef = doc(db, "loans", loanId);
+    const loanSnap = await getDoc(loanRef);
 
-    // GET CURRENT LOAN SNAPSHOT
-    let loanSnap = await fetchLoan(loanRef);
+    if (!loanSnap.exists()) return;
 
-    let newPaid = (loanSnap.paid || 0) + amount;
-    let newBalance = loanSnap.amount - newPaid;
+    const loan = loanSnap.data();
+
+    let newPaid = (loan.paid || 0) + amount;
+    let newBalance = loan.amount - newPaid;
+
+    let newStatus = newBalance <= 0 ? "closed" : "active";
 
     // UPDATE LOAN
     await updateDoc(loanRef, {
       paid: newPaid,
       balance: newBalance,
-      status: newBalance <= 0 ? "closed" : "active"
+      status: newStatus
     });
 
-    // ADD TRANSACTION
+    // SAVE TRANSACTION
     await addDoc(collection(db, "transactions"), {
       type: "Repayment",
-      member: loanSnap.member,
+      member: loan.member,
       amount: amount,
       description: "Loan repayment",
       date: new Date().toISOString().split("T")[0]
@@ -81,42 +86,33 @@ window.addRepayment = async function () {
 };
 
 /* =========================
-   FETCH LOAN DATA
-========================= */
-async function fetchLoan(ref){
-  let snap = await ref.get();
-  return snap.data();
-}
-
-/* =========================
-   LOAD REPAYMENTS HISTORY
+   REPAYMENT HISTORY
 ========================= */
 function loadRepayments() {
 
   const table = document.getElementById("repayTable");
 
-  const q = query(collection(db, "transactions"), orderBy("date","desc"));
-
-  onSnapshot(q, snap => {
+  onSnapshot(collection(db, "transactions"), (snap) => {
 
     table.innerHTML = "";
 
-    snap.forEach(d => {
-      let data = d.data();
+    snap.forEach(doc => {
 
-      if(data.type !== "Repayment") return;
+      let d = doc.data();
+
+      if (d.type !== "Repayment") return;
 
       table.innerHTML += `
         <tr>
-          <td>${data.member}</td>
-          <td class="green">$${data.amount}</td>
-          <td>${data.date}</td>
+          <td>${d.member}</td>
+          <td class="green">$${d.amount}</td>
+          <td>${d.description}</td>
+          <td>${d.date}</td>
         </tr>
       `;
     });
 
   });
-
 }
 
 /* =========================
