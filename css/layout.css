@@ -276,3 +276,39 @@ body.dark .table {
   background:#111;
   color:white;
 }
+.has-submenu > a{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.arrow{
+  transition:0.3s;
+}
+
+.has-submenu.open .arrow{
+  transform:rotate(180deg);
+}
+
+.submenu{
+  max-height:0;
+  overflow:hidden;
+  transition:max-height 0.3s ease;
+  padding-left:25px;
+}
+
+.has-submenu.open .submenu{
+  max-height:400px;
+}
+
+.submenu li a{
+  color:#ddd;
+  font-size:14px;
+  text-decoration:none;
+  display:block;
+  padding:8px;
+}
+
+.submenu li a:hover{
+  color:white;
+}
