@@ -230,3 +230,19 @@ body.dark .table {
   background: #111;
   color: white;
 }
+/* prevent flicker */
+.sidebar{
+  transition: width 0.3s ease;
+  overflow:hidden;
+}
+
+/* collapsed */
+.sidebar.collapsed{
+  width:80px;
+}
+
+/* hide text */
+.sidebar.collapsed span,
+.sidebar.collapsed .logo p{
+  display:none;
+}
