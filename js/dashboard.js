@@ -102,3 +102,8 @@ document.addEventListener("DOMContentLoaded", () => {
   loadStats();
   loadTransactions();
 });
+import { protectPage } from "./auth.js";
+
+document.addEventListener("DOMContentLoaded", () => {
+  protectPage();
+});
