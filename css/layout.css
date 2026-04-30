@@ -32,10 +32,10 @@ body{
   justify-content:space-between;
   padding:20px;
   transition:all 0.3s ease;
-  overflow:hidden;
+  overflow:visible; /* FIXED */
 }
 
-/* COLLAPSED DESKTOP */
+/* COLLAPSED */
 .sidebar.collapsed{
   width:80px;
 }
@@ -76,7 +76,7 @@ body{
   transition:0.2s;
 }
 
-/* HOVER + ACTIVE */
+/* ACTIVE + HOVER */
 .menu li a:hover,
 .menu li.active a{
   background:#1f3c88;
@@ -101,7 +101,65 @@ body{
 }
 
 /* =========================
-   LOGOUT BUTTON
+   SUBMENU SYSTEM
+========================= */
+.has-submenu > a{
+  justify-content:space-between;
+}
+
+.arrow{
+  transition:0.3s;
+  font-size:12px;
+}
+
+.has-submenu.open .arrow{
+  transform:rotate(180deg);
+}
+
+/* submenu animation */
+.submenu{
+  max-height:0;
+  overflow:hidden;
+  transition:max-height 0.35s ease;
+  padding-left:30px;
+}
+
+/* open submenu */
+.has-submenu.open .submenu{
+  max-height:500px;
+}
+
+/* submenu links */
+.submenu li a{
+  display:block;
+  padding:8px;
+  font-size:14px;
+  color:#ddd;
+}
+
+.submenu li a:hover{
+  color:#fff;
+}
+
+/* active submenu item */
+.submenu li.active a{
+  background:#2c4fb5;
+  color:#fff;
+  border-radius:6px;
+}
+
+/* hide submenu in collapsed */
+.sidebar.collapsed .submenu{
+  display:none;
+}
+
+/* hide arrow when collapsed */
+.sidebar.collapsed .has-submenu > a .arrow{
+  display:none;
+}
+
+/* =========================
+   LOGOUT
 ========================= */
 .logout{
   background:#e74a3b;
@@ -162,7 +220,7 @@ body{
 }
 
 /* =========================
-   MOBILE SIDEBAR (FIXED)
+   MOBILE SIDEBAR
 ========================= */
 .overlay{
   position:fixed;
@@ -194,7 +252,7 @@ body{
   }
 
   .sidebar.collapsed{
-    width:260px; /* disable collapse on mobile */
+    width:260px;
   }
 }
 
@@ -217,47 +275,4 @@ body.dark .sidebar {
 body.dark .table {
   background:#111;
   color:white;
-}
-/* =========================
-   SUBMENU SYSTEM
-========================= */
-
-.has-submenu > a{
-  justify-content:space-between;
-}
-
-.arrow{
-  transition:0.3s;
-  font-size:12px;
-}
-
-.has-submenu.open .arrow{
-  transform:rotate(180deg);
-}
-
-.submenu{
-  max-height:0;
-  overflow:hidden;
-  transition:0.3s ease;
-  padding-left:30px;
-}
-
-.has-submenu.open .submenu{
-  max-height:200px;
-}
-
-.submenu li a{
-  display:block;
-  padding:8px;
-  font-size:14px;
-  color:#ddd;
-}
-
-.submenu li a:hover{
-  color:#fff;
-}
-
-/* fix collapsed */
-.sidebar.collapsed .submenu{
-  display:none;
 }
