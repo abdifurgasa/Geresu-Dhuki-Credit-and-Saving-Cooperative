@@ -1,56 +1,43 @@
-// =========================
-// SIDEBAR TOGGLE + PERSISTENCE
-// =========================
-
 const sidebar = document.querySelector(".sidebar");
 const toggleBtn = document.querySelector(".toggle-btn");
 
-// Load saved state
+// CREATE OVERLAY
+const overlay = document.createElement("div");
+overlay.classList.add("overlay");
+document.body.appendChild(overlay);
+
+/* LOAD STATE */
 document.addEventListener("DOMContentLoaded", () => {
 
-  const savedState = localStorage.getItem("sidebar");
+  const saved = localStorage.getItem("sidebar");
 
-  if (savedState === "collapsed") {
-    sidebar.classList.add("collapsed");
+  if (window.innerWidth > 768) {
+    if (saved === "collapsed") {
+      sidebar.classList.add("collapsed");
+    }
   }
-
-  setActiveMenu();
 
 });
 
-// Toggle
-if (toggleBtn) {
-  toggleBtn.addEventListener("click", () => {
+/* TOGGLE */
+toggleBtn.addEventListener("click", () => {
 
+  if (window.innerWidth <= 768) {
+    sidebar.classList.toggle("open");
+    overlay.classList.toggle("active");
+  } else {
     sidebar.classList.toggle("collapsed");
 
-    if (sidebar.classList.contains("collapsed")) {
-      localStorage.setItem("sidebar", "collapsed");
-    } else {
-      localStorage.setItem("sidebar", "expanded");
-    }
+    localStorage.setItem(
+      "sidebar",
+      sidebar.classList.contains("collapsed") ? "collapsed" : "expanded"
+    );
+  }
 
-  });
-}
+});
 
-// =========================
-// ACTIVE MENU HIGHLIGHT
-// =========================
-
-function setActiveMenu() {
-
-  const currentPage = window.location.pathname.split("/").pop();
-
-  document.querySelectorAll(".menu li").forEach(item => {
-
-    const page = item.getAttribute("data-page");
-
-    if (page === currentPage) {
-      item.classList.add("active");
-    } else {
-      item.classList.remove("active");
-    }
-
-  });
-
-}
+/* CLOSE ON OVERLAY CLICK */
+overlay.addEventListener("click", () => {
+  sidebar.classList.remove("open");
+  overlay.classList.remove("active");
+});
