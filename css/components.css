@@ -201,3 +201,19 @@ tr:hover{
   border-radius:12px;
   box-shadow:0 2px 5px rgba(0,0,0,0.05);
 }
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+}
+
+.table th, .table td {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  text-align: left;
+}
+
+.blue { color: #4e73df; }
+.green { color: #1cc88a; }
+.red { color: #e74a3b; }
+.orange { color: #f6c23e; }
