@@ -12,17 +12,24 @@ import {
    ADD MEMBER
 ========================= */
 window.addMember = async function () {
+
   let name = document.getElementById("name").value.trim();
+  let phone = document.getElementById("phone").value.trim();
+  let role = document.getElementById("role").value || "member";
 
   if (!name) return alert("Enter member name");
 
   try {
     await addDoc(collection(db, "members"), {
-      name: name,
-      createdAt: new Date()
+      name,
+      phone,
+      role,
+      createdAt: new Date().toISOString()
     });
 
     document.getElementById("name").value = "";
+    document.getElementById("phone").value = "";
+
   } catch (err) {
     console.error(err);
   }
@@ -32,24 +39,33 @@ window.addMember = async function () {
    LOAD MEMBERS (REAL TIME)
 ========================= */
 function loadMembers() {
-  const list = document.getElementById("list");
+
+  const list = document.getElementById("memberTable");
 
   onSnapshot(collection(db, "members"), (snap) => {
+
     list.innerHTML = "";
 
     snap.forEach((docSnap) => {
-      let data = docSnap.data();
+
+      let d = docSnap.data();
 
       list.innerHTML += `
-        <div class="member-item">
-          <span>${data.name}</span>
+        <tr>
+          <td>${d.name}</td>
+          <td>${d.phone || "-"}</td>
+          <td>${d.role}</td>
+          <td>${d.createdAt?.split("T")[0] || "-"}</td>
 
-          <button onclick="deleteMember('${docSnap.id}')">
-            Delete
-          </button>
-        </div>
+          <td>
+            <button onclick="deleteMember('${docSnap.id}')">
+              Delete
+            </button>
+          </td>
+        </tr>
       `;
     });
+
   });
 }
 
