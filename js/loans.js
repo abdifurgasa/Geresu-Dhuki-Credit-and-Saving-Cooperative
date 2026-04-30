@@ -1,71 +1,75 @@
 import { db } from "./firebase.js";
+import { calculateLoan } from "./interestEngine.js";
 
 import {
   collection,
   addDoc,
-  onSnapshot,
-  query,
-  orderBy
+  onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 /* =========================
-   LOAD MEMBERS INTO SELECT
+   LOAD MEMBERS
 ========================= */
 function loadMembers() {
+
   const select = document.getElementById("memberSelect");
 
   onSnapshot(collection(db, "members"), (snap) => {
+
     select.innerHTML = `<option value="">Select Member</option>`;
 
-    snap.forEach(docSnap => {
-      let data = docSnap.data();
-
+    snap.forEach(doc => {
       select.innerHTML += `
-        <option value="${data.name}">
-          ${data.name}
+        <option value="${doc.data().name}">
+          ${doc.data().name}
         </option>
       `;
     });
+
   });
 }
 
 /* =========================
-   ADD LOAN
+   CREATE LOAN (WITH INTEREST)
 ========================= */
 window.addLoan = async function () {
 
-  let member = document.getElementById("memberSelect").value;
-  let amount = document.getElementById("amount").value;
-  let purpose = document.getElementById("purpose").value;
+  const member = document.getElementById("memberSelect").value;
+  const amount = Number(document.getElementById("amount").value);
+  const rate = Number(document.getElementById("rate").value);
+  const months = Number(document.getElementById("months").value);
 
-  if (!member || !amount) {
-    return alert("Select member and enter amount");
+  if (!member || !amount || !rate || !months) {
+    return alert("Please fill all fields");
   }
 
-  amount = Number(amount);
+  const calc = calculateLoan(amount, rate, months);
 
   try {
 
-    // 1. SAVE LOAN
+    // SAVE LOAN
     await addDoc(collection(db, "loans"), {
-      member: member,
-      amount: amount,
-      purpose: purpose || "General loan",
-      date: new Date().toISOString().split("T")[0],
-      status: "active"
-    });
-
-    // 2. ADD TRANSACTION
-    await addDoc(collection(db, "transactions"), {
-      type: "Loan",
-      member: member,
-      amount: amount,
-      description: purpose || "Loan issued",
+      member,
+      principal: calc.principal,
+      interest: calc.interest,
+      amount: calc.total,
+      monthlyInstallment: calc.monthly,
+      paid: 0,
+      balance: calc.total,
+      rate,
+      months,
+      status: "active",
       date: new Date().toISOString().split("T")[0]
     });
 
-    document.getElementById("amount").value = "";
-    document.getElementById("purpose").value = "";
+    // SAVE TRANSACTION
+    await addDoc(collection(db, "transactions"), {
+      type: "Loan",
+      member,
+      amount: calc.total,
+      description: `Loan (${rate}% interest)`,
+      date: new Date().toISOString().split("T")[0]
+    });
 
     alert("Loan created successfully");
 
@@ -75,26 +79,27 @@ window.addLoan = async function () {
 };
 
 /* =========================
-   LOAD LOANS HISTORY
+   LIVE LOAN LIST
 ========================= */
 function loadLoans() {
 
   const table = document.getElementById("loanTable");
 
-  const q = query(collection(db, "loans"), orderBy("date", "desc"));
-
-  onSnapshot(q, (snap) => {
+  onSnapshot(collection(db, "loans"), (snap) => {
 
     table.innerHTML = "";
 
-    snap.forEach(docSnap => {
-      let d = docSnap.data();
+    snap.forEach(doc => {
+
+      const d = doc.data();
 
       table.innerHTML += `
         <tr>
           <td>${d.member}</td>
-          <td class="red">$${d.amount}</td>
-          <td>${d.purpose}</td>
+          <td>$${d.principal}</td>
+          <td>$${d.interest}</td>
+          <td>$${d.amount}</td>
+          <td>$${d.monthlyInstallment}</td>
           <td>${d.status}</td>
           <td>${d.date}</td>
         </tr>
