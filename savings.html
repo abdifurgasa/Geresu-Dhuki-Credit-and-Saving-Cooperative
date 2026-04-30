@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Savings</title>
+
+<link rel="stylesheet" href="css/layout.css">
+<link rel="stylesheet" href="css/components.css">
+</head>
+
+<body>
+
+<div class="layout">
+
+  <!-- SIDEBAR (reuse same) -->
+  <aside class="sidebar"></aside>
+
+  <main class="main">
+
+    <div class="topbar">
+      <h2>Savings</h2>
+    </div>
+
+    <section class="content">
+
+      <!-- FORM -->
+      <div class="card">
+
+        <h3>Add Saving</h3>
+
+        <select id="memberSelect"></select>
+
+        <input id="amount" type="number" placeholder="Amount">
+
+        <button onclick="addSaving()">Save</button>
+
+      </div>
+
+      <!-- TABLE -->
+      <div class="transactions">
+
+        <h3>Saving History</h3>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Member</th>
+              <th>Amount</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+
+          <tbody id="savingsTable"></tbody>
+        </table>
+
+      </div>
+
+    </section>
+
+  </main>
+
+</div>
+
+<script type="module" src="js/savings.js"></script>
+
+</body>
+</html>
