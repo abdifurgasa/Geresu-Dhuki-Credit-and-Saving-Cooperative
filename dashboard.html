@@ -91,8 +91,16 @@
 
     <!-- TOPBAR -->
     <header class="topbar">
-      <h2>Admin Dashboard</h2>
-      <div id="userRole">👤 Loading...</div>
+
+      <div class="top-left">
+        <i class="fas fa-bars toggle-btn"></i>
+        <h2>Admin Dashboard</h2>
+      </div>
+
+      <div class="top-right">
+        <div id="userRole">👤 Loading...</div>
+      </div>
+
     </header>
 
     <!-- CONTENT -->
@@ -157,30 +165,37 @@
 
 </div>
 
+<!-- MOBILE OVERLAY -->
+<div class="overlay"></div>
+
 <!-- FIREBASE -->
 <script type="module" src="js/firebase.js"></script>
+
+<!-- LAYOUT (IMPORTANT FIRST) -->
+<script src="js/layout.js"></script>
+
+<!-- SYSTEM -->
 <script type="module" src="js/roleGuard.js"></script>
 <script type="module" src="js/dashboard.js"></script>
 <script type="module" src="js/analytics.js"></script>
 
-<script>
-/* =========================
-   LOGOUT
-========================= */
-function logout(){
-  localStorage.clear();
-  window.location.href = "index.html";
-}
+<!-- LOGOUT + ROLE -->
+<script type="module">
+import { auth } from "./js/firebase.js";
+import { signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-/* =========================
-   SHOW ROLE
-========================= */
+window.logout = function(){
+  signOut(auth).then(() => {
+    localStorage.clear();
+    window.location.href = "index.html";
+  });
+};
+
 document.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("userRole").innerText =
-    "👤 " + (localStorage.getItem("role") || "guest");
+  const role = localStorage.getItem("role") || "member";
+  document.getElementById("userRole").innerText = "👤 " + role;
 });
 </script>
-<script src="js/layout.js"></script>
 
 </body>
 </html>
