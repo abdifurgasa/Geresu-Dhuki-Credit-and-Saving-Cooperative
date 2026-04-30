@@ -291,3 +291,15 @@ tr:hover{
 .card.penalty{
   background:linear-gradient(135deg,#ff416c,#ff4b2b);
 }
+.table-box button{
+  background:#e74a3b;
+  color:#fff;
+  border:none;
+  padding:6px 10px;
+  border-radius:6px;
+  cursor:pointer;
+}
+
+.table-box button:hover{
+  background:#c0392b;
+}
