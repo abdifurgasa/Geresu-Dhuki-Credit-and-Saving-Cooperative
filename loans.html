@@ -1,1 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Loans</title>
 
+<link rel="stylesheet" href="css/layout.css">
+<link rel="stylesheet" href="css/components.css">
+</head>
+
+<body>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar"></aside>
+
+  <main class="main">
+
+    <div class="topbar">
+      <h2>Loans</h2>
+    </div>
+
+    <section class="content">
+
+      <!-- FORM -->
+      <div class="card">
+
+        <h3>Create Loan</h3>
+
+        <select id="memberSelect"></select>
+
+        <input id="amount" type="number" placeholder="Loan Amount">
+
+        <input id="purpose" type="text" placeholder="Purpose">
+
+        <button onclick="addLoan()">Create Loan</button>
+
+      </div>
+
+      <!-- TABLE -->
+      <div class="transactions">
+
+        <h3>Loan History</h3>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Member</th>
+              <th>Amount</th>
+              <th>Purpose</th>
+              <th>Status</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+
+          <tbody id="loanTable"></tbody>
+        </table>
+
+      </div>
+
+    </section>
+
+  </main>
+
+</div>
+
+<script type="module" src="js/loans.js"></script>
+
+</body>
+</html>
