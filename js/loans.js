@@ -1,137 +1,147 @@
 import { db } from "./firebase.js";
-import { calculateLoan } from "./interestEngine.js";
-
 import {
   collection,
   addDoc,
-  onSnapshot
+  getDocs,
+  Timestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+/* =========================
+   GLOBAL DATA
+========================= */
+let members = [];
 
 /* =========================
    LOAD MEMBERS
 ========================= */
-function loadMembers() {
+async function loadMembers() {
+  const snap = await getDocs(collection(db, "members"));
 
-  const select = document.getElementById("memberSelect");
-
-  onSnapshot(collection(db, "members"), snap => {
-
-    select.innerHTML = `<option value="">Select Member</option>`;
-
-    snap.forEach(d => {
-      select.innerHTML += `
-        <option value="${d.data().name}">
-          ${d.data().name}
-        </option>
-      `;
-    });
-
+  members = [];
+  snap.forEach(doc => {
+    members.push({ id: doc.id, ...doc.data() });
   });
 }
+loadMembers();
 
 /* =========================
-   CREATE LOAN (FULL + OVERDUE SUPPORT)
+   SEARCH MEMBERS
 ========================= */
-window.addLoan = async function () {
+window.searchMembers = function () {
 
-  const member = document.getElementById("memberSelect").value;
-  const amount = Number(document.getElementById("amount").value);
-  const rate = Number(document.getElementById("rate").value);
-  const months = Number(document.getElementById("months").value);
+  const input = document.getElementById("memberSearch").value.toLowerCase();
+  const box = document.getElementById("searchResults");
 
-  if (!member || !amount || !rate || !months) {
-    return alert("Fill all fields");
-  }
+  box.innerHTML = "";
 
-  const calc = calculateLoan(amount, rate, months);
+  if (input.length < 2) return;
 
-  try {
+  const filtered = members.filter(m =>
+    (m.name && m.name.toLowerCase().includes(input)) ||
+    (m.phone && m.phone.includes(input)) ||
+    (m.nationalId && m.nationalId.includes(input))
+  );
 
-    await addDoc(collection(db, "loans"), {
+  filtered.forEach(m => {
+    const div = document.createElement("div");
+    div.className = "search-item";
 
-      member,
+    div.innerHTML = `
+      <b>${m.name}</b><br>
+      <small>${m.phone || ""} | ${m.nationalId || ""}</small>
+    `;
 
-      principal: calc.principal,
-      interest: calc.interest,
-      amount: calc.total,
+    div.onclick = () => selectMember(m);
 
-      monthlyInstallment: calc.monthly,
-
-      paid: 0,
-      balance: calc.total,
-
-      rate,
-      months,
-
-      status: "active",
-
-      // 🔥 OVERDUE SYSTEM
-      dueDate: new Date(Date.now() + (months * 30 * 24 * 60 * 60 * 1000))
-        .toISOString().split("T")[0],
-
-      penaltyRate: 5,
-      penalty: 0,
-      lastPenaltyApplied: null,
-
-      date: new Date().toISOString().split("T")[0]
-    });
-
-    await addDoc(collection(db, "transactions"), {
-      type: "Loan",
-      member,
-      amount: calc.total,
-      description: "Loan issued with interest",
-      date: new Date().toISOString().split("T")[0]
-    });
-
-    alert("Loan created successfully");
-
-  } catch (err) {
-    console.error(err);
-  }
+    box.appendChild(div);
+  });
 };
 
 /* =========================
-   LOAD LOANS TABLE
+   SELECT MEMBER
 ========================= */
-function loadLoans() {
+function selectMember(m) {
+  window.selectedMember = m;
 
-  const table = document.getElementById("loanTable");
-
-  onSnapshot(collection(db, "loans"), snap => {
-
-    table.innerHTML = "";
-
-    snap.forEach(d => {
-
-      const x = d.data();
-
-      table.innerHTML += `
-        <tr>
-          <td>${x.member}</td>
-          <td>$${x.principal}</td>
-          <td>$${x.interest}</td>
-          <td>$${x.amount}</td>
-          <td>$${x.monthlyInstallment}</td>
-
-          <td>${x.dueDate}</td>
-
-          <td class="red">$${x.penalty || 0}</td>
-
-          <td>$${x.balance}</td>
-
-          <td>${x.status}</td>
-        </tr>
-      `;
-    });
-
-  });
+  document.getElementById("selectedMemberName").value = m.name;
+  document.getElementById("memberSearch").value = "";
+  document.getElementById("searchResults").innerHTML = "";
 }
 
 /* =========================
-   INIT
+   LOAN ENGINE
 ========================= */
-document.addEventListener("DOMContentLoaded", () => {
-  loadMembers();
+window.addLoan = async function () {
+
+  const member = window.selectedMember;
+  const amount = parseFloat(document.getElementById("amount").value);
+  const rate = parseFloat(document.getElementById("rate").value);
+  const months = parseInt(document.getElementById("months").value);
+
+  if (!member) return alert("Select member first!");
+  if (!amount || !rate || !months) return alert("Fill all fields!");
+
+  // INTEREST CALCULATION
+  const interest = (amount * rate / 100);
+  const total = amount + interest;
+  const monthly = total / months;
+
+  // DUE DATE
+  let due = new Date();
+  due.setMonth(due.getMonth() + months);
+
+  const loanData = {
+    memberId: member.id,
+    memberName: member.name,
+    amount,
+    rate,
+    months,
+    interest,
+    total,
+    monthly,
+    dueDate: due.toISOString().split("T")[0],
+    penalty: 0,
+    balance: total,
+    status: "ACTIVE",
+    createdAt: Timestamp.now()
+  };
+
+  await addDoc(collection(db, "loans"), loanData);
+
+  alert("Loan Created Successfully");
+
   loadLoans();
-});
+};
+
+/* =========================
+   LOAD LOANS
+========================= */
+async function loadLoans() {
+
+  const snap = await getDocs(collection(db, "loans"));
+
+  const table = document.getElementById("loanTable");
+  table.innerHTML = "";
+
+  snap.forEach(doc => {
+    const l = doc.data();
+
+    const row = `
+      <tr>
+        <td>${l.memberName}</td>
+        <td>${l.amount}</td>
+        <td>${l.interest}</td>
+        <td>${l.total}</td>
+        <td>${l.monthly}</td>
+        <td>${l.dueDate}</td>
+        <td>${l.penalty}</td>
+        <td>${l.balance}</td>
+        <td>${l.status}</td>
+      </tr>
+    `;
+
+    table.innerHTML += row;
+  });
+}
+
+loadLoans();
