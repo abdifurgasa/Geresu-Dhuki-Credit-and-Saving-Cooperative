@@ -218,3 +218,46 @@ body.dark .table {
   background:#111;
   color:white;
 }
+/* =========================
+   SUBMENU SYSTEM
+========================= */
+
+.has-submenu > a{
+  justify-content:space-between;
+}
+
+.arrow{
+  transition:0.3s;
+  font-size:12px;
+}
+
+.has-submenu.open .arrow{
+  transform:rotate(180deg);
+}
+
+.submenu{
+  max-height:0;
+  overflow:hidden;
+  transition:0.3s ease;
+  padding-left:30px;
+}
+
+.has-submenu.open .submenu{
+  max-height:200px;
+}
+
+.submenu li a{
+  display:block;
+  padding:8px;
+  font-size:14px;
+  color:#ddd;
+}
+
+.submenu li a:hover{
+  color:#fff;
+}
+
+/* fix collapsed */
+.sidebar.collapsed .submenu{
+  display:none;
+}
