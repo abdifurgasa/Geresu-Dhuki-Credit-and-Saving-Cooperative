@@ -86,3 +86,8 @@ window.deleteMember = async function (id) {
 document.addEventListener("DOMContentLoaded", () => {
   loadMembers();
 });
+import { requireRole } from "./auth.js";
+
+document.addEventListener("DOMContentLoaded", () => {
+  requireRole("admin");
+});
