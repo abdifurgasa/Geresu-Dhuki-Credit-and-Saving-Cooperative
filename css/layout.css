@@ -213,3 +213,20 @@ body{
     left:0;
   }
 }
+body.dark {
+  background: #1a1a2e;
+  color: white;
+}
+
+body.dark .topbar {
+  background: #222;
+}
+
+body.dark .sidebar {
+  background: #0b1020;
+}
+
+body.dark .table {
+  background: #111;
+  color: white;
+}
