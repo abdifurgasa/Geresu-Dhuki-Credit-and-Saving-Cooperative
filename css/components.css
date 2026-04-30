@@ -250,3 +250,44 @@ tr:hover{
 .green { color: #1cc88a; }
 .red { color: #e74a3b; }
 .orange { color: #f6c23e; }
+/* =========================
+   REPORT FILTER
+========================= */
+.report-filter{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  margin-bottom:20px;
+}
+
+.report-filter input{
+  padding:6px;
+  border:1px solid #ddd;
+  border-radius:6px;
+}
+
+.report-filter button{
+  background:#4e73df;
+  color:white;
+  border:none;
+  padding:8px 12px;
+  border-radius:6px;
+  cursor:pointer;
+}
+
+/* REPORT CARDS COLORS */
+.card.income{
+  background:linear-gradient(135deg,#00c6ff,#0072ff);
+}
+
+.card.expense{
+  background:linear-gradient(135deg,#f7971e,#ffd200);
+}
+
+.card.savings{
+  background:linear-gradient(135deg,#11998e,#38ef7d);
+}
+
+.card.penalty{
+  background:linear-gradient(135deg,#ff416c,#ff4b2b);
+}
