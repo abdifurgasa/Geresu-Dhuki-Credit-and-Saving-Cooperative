@@ -17,31 +17,74 @@
 
 <div class="layout">
 
-  <!-- SIDEBAR -->
   <aside class="sidebar">
 
-    <div>
-      <div class="logo">
-        <h2>SACCO</h2>
-        <p>Admin Panel</p>
-      </div>
+  <div class="logo">
+    <h2>SACCO</h2>
+    <p>Admin Panel</p>
+  </div>
 
-      <nav class="menu">
-        <ul>
-          <li class="active"><span>Dashboard</span></li>
-          <li><span>Members</span></li>
-          <li><span>Savings</span></li>
-          <li><span>Loans</span></li>
-          <li><span>Transactions</span></li>
-          <li><span>Reports</span></li>
-          <li><span>Settings</span></li>
-        </ul>
-      </nav>
-    </div>
+  <nav class="menu" id="sidebarMenu">
+    <ul>
 
-    <div class="logout" onclick="logout()">Logout</div>
+      <li data-page="dashboard.html">
+        <a href="dashboard.html">
+          <i class="fas fa-home"></i>
+          <span>Dashboard</span>
+        </a>
+      </li>
 
-  </aside>
+      <li data-page="members.html">
+        <a href="members.html">
+          <i class="fas fa-users"></i>
+          <span>Members</span>
+        </a>
+      </li>
+
+      <li data-page="savings.html">
+        <a href="savings.html">
+          <i class="fas fa-piggy-bank"></i>
+          <span>Savings</span>
+        </a>
+      </li>
+
+      <li data-page="loans.html">
+        <a href="loans.html">
+          <i class="fas fa-hand-holding-dollar"></i>
+          <span>Loans</span>
+        </a>
+      </li>
+
+      <li data-page="transactions.html">
+        <a href="transactions.html">
+          <i class="fas fa-exchange-alt"></i>
+          <span>Transactions</span>
+        </a>
+      </li>
+
+      <li data-page="reports.html">
+        <a href="reports.html">
+          <i class="fas fa-chart-line"></i>
+          <span>Reports</span>
+        </a>
+      </li>
+
+      <li data-page="settings.html">
+        <a href="settings.html">
+          <i class="fas fa-cog"></i>
+          <span>Settings</span>
+        </a>
+      </li>
+
+    </ul>
+  </nav>
+
+  <div class="logout" onclick="logout()">
+    <i class="fas fa-sign-out-alt"></i>
+    <span>Logout</span>
+  </div>
+
+</aside>
 
   <!-- MAIN -->
   <main class="main">
