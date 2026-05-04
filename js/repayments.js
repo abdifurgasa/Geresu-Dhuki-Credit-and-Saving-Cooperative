@@ -1,113 +1,61 @@
 import { db } from "./firebase.js";
 import {
-  collection,
-  getDocs,
-  addDoc,
-  updateDoc,
-  doc,
-  getDoc,
-  query,
-  where
+  collection, getDocs, addDoc, doc, getDoc, updateDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-/* =========================
-   LOAD LOANS
-========================= */
-const loanSelect = document.getElementById("loanSelect");
-
-async function loadLoans(){
-  const snapshot = await getDocs(collection(db, "loans"));
-
-  loanSelect.innerHTML = "<option>Select Loan</option>";
-
-  snapshot.forEach(docSnap => {
-    const loan = docSnap.data();
-
-    if(loan.balance > 0){
-      loanSelect.innerHTML += `
-        <option value="${docSnap.id}">
-          ${loan.memberName} - Balance: ${loan.balance}
-        </option>
-      `;
+/* ================= UPDATE SCHEDULE ================= */
+function updateSchedule(schedule, amount){
+  for(let s of schedule){
+    if(!s.paid && amount >= s.emi){
+      s.paid = true;
+      amount -= s.emi;
     }
-  });
+  }
+  return schedule;
 }
 
-loadLoans();
-
-/* =========================
-   MAKE REPAYMENT
-========================= */
+/* ================= PAY ================= */
 window.makeRepayment = async function(){
 
-  const loanId = loanSelect.value;
+  const id = loanSelect.value;
   const amount = parseFloat(document.getElementById("amount").value);
 
-  if(!loanId || !amount){
-    alert("Fill all fields");
+  const ref = doc(db,"loans",id);
+  const snap = await getDoc(ref);
+  const loan = snap.data();
+
+  let total = loan.balance + (loan.penalty||0);
+
+  if(amount>total){
+    alert("Too much");
     return;
   }
 
-  const loanRef = doc(db, "loans", loanId);
-  const loanSnap = await getDoc(loanRef);
+  /* penalty first */
+  let penaltyPaid = Math.min(amount, loan.penalty||0);
+  let remaining = amount - penaltyPaid;
 
-  if(!loanSnap.exists()){
-    alert("Loan not found");
-    return;
-  }
+  let newPenalty = loan.penalty - penaltyPaid;
+  let newBalance = loan.balance - remaining;
 
-  const loan = loanSnap.data();
+  if(newBalance<0) newBalance=0;
 
-  let newBalance = loan.balance - amount;
+  let updatedSchedule = updateSchedule(loan.schedule, amount);
 
-  if(newBalance < 0){
-    alert("Amount exceeds balance");
-    return;
-  }
-
-  let status = newBalance === 0 ? "completed" : "ongoing";
-
-  /* UPDATE LOAN */
-  await updateDoc(loanRef, {
-    balance: newBalance,
-    status: status
+  await updateDoc(ref,{
+    balance:newBalance,
+    penalty:newPenalty,
+    schedule:updatedSchedule,
+    lastPaymentDate:new Date().toISOString(),
+    status:newBalance===0?"completed":"ongoing"
   });
 
-  /* SAVE REPAYMENT */
-  await addDoc(collection(db, "repayments"), {
-    loanId,
-    memberName: loan.memberName,
+  await addDoc(collection(db,"repayments"),{
+    loanId:id,
+    memberName:loan.memberName,
     amount,
-    date: new Date().toISOString()
+    date:new Date().toISOString()
   });
 
-  alert("Repayment successful");
-
-  loadLoans();
-  loadRepayments();
+  alert("Paid");
 };
-
-/* =========================
-   LOAD REPAYMENTS
-========================= */
-const table = document.getElementById("repaymentTable");
-
-async function loadRepayments(){
-  const snapshot = await getDocs(collection(db, "repayments"));
-
-  table.innerHTML = "";
-
-  snapshot.forEach(docSnap => {
-    const r = docSnap.data();
-
-    table.innerHTML += `
-      <tr>
-        <td>${r.memberName}</td>
-        <td class="amount green">$${r.amount}</td>
-        <td>${new Date(r.date).toLocaleDateString()}</td>
-      </tr>
-    `;
-  });
-}
-
-loadRepayments();
