@@ -1,147 +1,109 @@
 import { db } from "./firebase.js";
 import {
-  collection,
-  addDoc,
-  getDocs,
-  Timestamp
+  collection, addDoc, getDocs, doc, updateDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-/* =========================
-   GLOBAL DATA
-========================= */
-let members = [];
-
-/* =========================
-   LOAD MEMBERS
-========================= */
-async function loadMembers() {
-  const snap = await getDocs(collection(db, "members"));
-
-  members = [];
-  snap.forEach(doc => {
-    members.push({ id: doc.id, ...doc.data() });
-  });
-}
-loadMembers();
-
-/* =========================
-   SEARCH MEMBERS
-========================= */
-window.searchMembers = function () {
-
-  const input = document.getElementById("memberSearch").value.toLowerCase();
-  const box = document.getElementById("searchResults");
-
-  box.innerHTML = "";
-
-  if (input.length < 2) return;
-
-  const filtered = members.filter(m =>
-    (m.name && m.name.toLowerCase().includes(input)) ||
-    (m.phone && m.phone.includes(input)) ||
-    (m.nationalId && m.nationalId.includes(input))
-  );
-
-  filtered.forEach(m => {
-    const div = document.createElement("div");
-    div.className = "search-item";
-
-    div.innerHTML = `
-      <b>${m.name}</b><br>
-      <small>${m.phone || ""} | ${m.nationalId || ""}</small>
-    `;
-
-    div.onclick = () => selectMember(m);
-
-    box.appendChild(div);
-  });
-};
-
-/* =========================
-   SELECT MEMBER
-========================= */
-function selectMember(m) {
-  window.selectedMember = m;
-
-  document.getElementById("selectedMemberName").value = m.name;
-  document.getElementById("memberSearch").value = "";
-  document.getElementById("searchResults").innerHTML = "";
+/* ================= EMI ================= */
+function EMI(P, r, n){
+  r = r/100/12;
+  return Math.round((P*r*Math.pow(1+r,n))/(Math.pow(1+r,n)-1));
 }
 
-/* =========================
-   LOAN ENGINE
-========================= */
-window.addLoan = async function () {
+/* ================= SCHEDULE ================= */
+function createSchedule(P, rate, months, emi){
+  let balance = P;
+  const r = rate/100/12;
+  const arr = [];
 
-  const member = window.selectedMember;
-  const amount = parseFloat(document.getElementById("amount").value);
-  const rate = parseFloat(document.getElementById("rate").value);
-  const months = parseInt(document.getElementById("months").value);
+  for(let i=1;i<=months;i++){
+    let interest = balance*r;
+    let principal = emi - interest;
 
-  if (!member) return alert("Select member first!");
-  if (!amount || !rate || !months) return alert("Fill all fields!");
+    balance -= principal;
+    if(balance<0) balance=0;
 
-  // INTEREST CALCULATION
-  const interest = (amount * rate / 100);
-  const total = amount + interest;
-  const monthly = total / months;
+    let d = new Date();
+    d.setMonth(d.getMonth()+i);
 
-  // DUE DATE
-  let due = new Date();
-  due.setMonth(due.getMonth() + months);
+    arr.push({
+      installment:i,
+      dueDate:d.toISOString(),
+      emi,
+      principal:Math.round(principal),
+      interest:Math.round(interest),
+      paid:false
+    });
+  }
+  return arr;
+}
 
-  const loanData = {
-    memberId: member.id,
-    memberName: member.name,
-    amount,
+/* ================= ADD LOAN ================= */
+window.addLoan = async function(){
+
+  const name = memberName.value;
+  const P = parseFloat(amount.value);
+  const rate = parseFloat(rateInput.value);
+  const n = parseInt(months.value);
+
+  const emi = EMI(P, rate, n);
+  const schedule = createSchedule(P, rate, n, emi);
+
+  await addDoc(collection(db,"loans"),{
+    memberName:name,
+    principal:P,
     rate,
-    months,
-    interest,
-    total,
-    monthly,
-    dueDate: due.toISOString().split("T")[0],
-    penalty: 0,
-    balance: total,
-    status: "ACTIVE",
-    createdAt: Timestamp.now()
-  };
+    months:n,
+    emi,
+    balance:P,
+    penalty:0,
+    schedule,
+    status:"ongoing",
+    lastPaymentDate:new Date().toISOString()
+  });
 
-  await addDoc(collection(db, "loans"), loanData);
-
-  alert("Loan Created Successfully");
-
+  alert("Loan created");
   loadLoans();
 };
 
-/* =========================
-   LOAD LOANS
-========================= */
-async function loadLoans() {
+/* ================= LOAD LOANS ================= */
+const loanTable = document.getElementById("loanTable");
 
-  const snap = await getDocs(collection(db, "loans"));
+async function loadLoans(){
+  const snap = await getDocs(collection(db,"loans"));
+  loanTable.innerHTML="";
 
-  const table = document.getElementById("loanTable");
-  table.innerHTML = "";
+  snap.forEach(docSnap=>{
+    const l = docSnap.data();
 
-  snap.forEach(doc => {
-    const l = doc.data();
-
-    const row = `
+    loanTable.innerHTML+=`
       <tr>
         <td>${l.memberName}</td>
-        <td>${l.amount}</td>
-        <td>${l.interest}</td>
-        <td>${l.total}</td>
-        <td>${l.monthly}</td>
-        <td>${l.dueDate}</td>
-        <td>${l.penalty}</td>
         <td>${l.balance}</td>
+        <td>${l.emi}</td>
+        <td class="amount red">${l.penalty||0}</td>
         <td>${l.status}</td>
+        <td><button onclick='viewSchedule(${JSON.stringify(l.schedule)})'>View</button></td>
       </tr>
     `;
-
-    table.innerHTML += row;
   });
 }
+
+window.viewSchedule = function(schedule){
+  const t = document.getElementById("scheduleTable");
+  t.innerHTML="";
+
+  schedule.forEach(s=>{
+    t.innerHTML+=`
+      <tr>
+        <td>${s.installment}</td>
+        <td>${new Date(s.dueDate).toLocaleDateString()}</td>
+        <td>${s.emi}</td>
+        <td>${s.principal}</td>
+        <td>${s.interest}</td>
+        <td>${s.paid?"✔":"Pending"}</td>
+      </tr>
+    `;
+  });
+};
 
 loadLoans();
