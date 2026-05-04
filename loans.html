@@ -6,98 +6,81 @@
 
 <link rel="stylesheet" href="css/layout.css">
 <link rel="stylesheet" href="css/components.css">
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 </head>
 
 <body>
 
 <div class="layout">
 
-<!-- ================= SIDEBAR ================= -->
-<aside class="sidebar">
+<aside class="sidebar"></aside>
 
-  <div class="logo">
-    <h2>SACCO</h2>
-    <p>Loan System</p>
-  </div>
-
-  <nav class="menu">
-    <ul>
-      <li><a href="dashboard.html"><i class="fas fa-home"></i><span>Dashboard</span></a></li>
-      <li><a href="members.html"><i class="fas fa-users"></i><span>Members</span></a></li>
-      <li class="active"><a href="loans.html"><i class="fas fa-hand-holding-dollar"></i><span>Loans</span></a></li>
-      <li><a href="savings.html"><i class="fas fa-piggy-bank"></i><span>Savings</span></a></li>
-      <li><a href="transactions.html"><i class="fas fa-exchange-alt"></i><span>Transactions</span></a></li>
-      <li><a href="reports.html"><i class="fas fa-chart-line"></i><span>Reports</span></a></li>
-      <li><a href="settings.html"><i class="fas fa-cog"></i><span>Settings</span></a></li>
-    </ul>
-  </nav>
-
-</aside>
-
-<!-- ================= MAIN ================= -->
 <main class="main">
 
-  <div class="topbar">
-    <h2>Loan Management</h2>
-  </div>
+<div class="topbar">
+  <h2>Loan Management</h2>
+</div>
 
-  <section class="content">
+<section class="content">
 
-    <!-- ================= LOAN FORM ================= -->
-    <div class="card">
+<!-- CREATE LOAN -->
+<div class="card">
+  <h3>Create Loan</h3>
 
-      <h3>Create Loan</h3>
+  <input id="memberName" placeholder="Member Name / Phone / ID">
+  <input id="amount" type="number" placeholder="Principal">
+  <input id="rate" type="number" placeholder="Interest %">
+  <input id="months" type="number" placeholder="Months">
 
-      <!-- SMART SEARCH -->
-      <div class="search-box">
-        <input id="memberSearch" type="text"
-          placeholder="Search Member (Name / Phone / National ID)"
-          onkeyup="searchMembers()">
+  <button onclick="addLoan()">Create Loan</button>
+</div>
 
-        <div id="searchResults" class="search-results"></div>
-      </div>
+<!-- LOANS TABLE -->
+<div class="card">
+  <h3>Loans</h3>
 
-      <input id="selectedMemberName" placeholder="Selected Member" readonly>
-      <input id="amount" type="number" placeholder="Principal Amount">
-      <input id="rate" type="number" placeholder="Interest %">
-      <input id="months" type="number" placeholder="Months">
+  <table>
+    <thead>
+      <tr>
+        <th>Member</th>
+        <th>Balance</th>
+        <th>EMI</th>
+        <th>Penalty</th>
+        <th>Status</th>
+        <th>View</th>
+      </tr>
+    </thead>
 
-      <button onclick="addLoan()">Create Loan</button>
+    <tbody id="loanTable"></tbody>
+  </table>
+</div>
 
-    </div>
+<!-- SCHEDULE -->
+<div class="card">
+  <h3>Repayment Schedule</h3>
 
-    <!-- ================= TABLE ================= -->
-    <div class="table-box">
-      <h3>Loan Records</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Due</th>
+        <th>EMI</th>
+        <th>Principal</th>
+        <th>Interest</th>
+        <th>Status</th>
+      </tr>
+    </thead>
 
-      <table>
-        <thead>
-          <tr>
-            <th>Member</th>
-            <th>Principal</th>
-            <th>Interest</th>
-            <th>Total</th>
-            <th>Monthly</th>
-            <th>Due Date</th>
-            <th>Penalty</th>
-            <th>Balance</th>
-            <th>Status</th>
-          </tr>
-        </thead>
+    <tbody id="scheduleTable"></tbody>
+  </table>
+</div>
 
-        <tbody id="loanTable"></tbody>
-      </table>
-
-    </div>
-
-  </section>
+</section>
 
 </main>
-
 </div>
 
 <script type="module" src="js/loans.js"></script>
+<script src="js/layout.js"></script>
 
 </body>
 </html>
