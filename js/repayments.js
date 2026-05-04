@@ -1,124 +1,113 @@
 import { db } from "./firebase.js";
-
 import {
   collection,
-  onSnapshot,
-  doc,
-  updateDoc,
+  getDocs,
   addDoc,
-  getDoc
+  updateDoc,
+  doc,
+  getDoc,
+  query,
+  where
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 /* =========================
-   LOAD LOANS INTO SELECT
+   LOAD LOANS
 ========================= */
-function loadLoans() {
+const loanSelect = document.getElementById("loanSelect");
 
-  const select = document.getElementById("loanSelect");
+async function loadLoans(){
+  const snapshot = await getDocs(collection(db, "loans"));
 
-  onSnapshot(collection(db, "loans"), (snap) => {
+  loanSelect.innerHTML = "<option>Select Loan</option>";
 
-    select.innerHTML = `<option value="">Select Loan</option>`;
+  snapshot.forEach(docSnap => {
+    const loan = docSnap.data();
 
-    snap.forEach(docSnap => {
-
-      let d = docSnap.data();
-
-      select.innerHTML += `
+    if(loan.balance > 0){
+      loanSelect.innerHTML += `
         <option value="${docSnap.id}">
-          ${d.member} | Remaining $${d.balance}
+          ${loan.memberName} - Balance: ${loan.balance}
         </option>
       `;
-    });
-
+    }
   });
 }
 
+loadLoans();
+
 /* =========================
-   ADD REPAYMENT
+   MAKE REPAYMENT
 ========================= */
-window.addRepayment = async function () {
+window.makeRepayment = async function(){
 
-  const loanId = document.getElementById("loanSelect").value;
-  const amount = Number(document.getElementById("amount").value);
+  const loanId = loanSelect.value;
+  const amount = parseFloat(document.getElementById("amount").value);
 
-  if (!loanId || !amount) {
-    return alert("Select loan and enter amount");
+  if(!loanId || !amount){
+    alert("Fill all fields");
+    return;
   }
 
-  try {
+  const loanRef = doc(db, "loans", loanId);
+  const loanSnap = await getDoc(loanRef);
 
-    const loanRef = doc(db, "loans", loanId);
-    const loanSnap = await getDoc(loanRef);
-
-    if (!loanSnap.exists()) return;
-
-    const loan = loanSnap.data();
-
-    let newPaid = (loan.paid || 0) + amount;
-    let newBalance = loan.amount - newPaid;
-
-    let newStatus = newBalance <= 0 ? "closed" : "active";
-
-    // UPDATE LOAN
-    await updateDoc(loanRef, {
-      paid: newPaid,
-      balance: newBalance,
-      status: newStatus
-    });
-
-    // SAVE TRANSACTION
-    await addDoc(collection(db, "transactions"), {
-      type: "Repayment",
-      member: loan.member,
-      amount: amount,
-      description: "Loan repayment",
-      date: new Date().toISOString().split("T")[0]
-    });
-
-    document.getElementById("amount").value = "";
-
-    alert("Repayment successful");
-
-  } catch (err) {
-    console.error(err);
+  if(!loanSnap.exists()){
+    alert("Loan not found");
+    return;
   }
+
+  const loan = loanSnap.data();
+
+  let newBalance = loan.balance - amount;
+
+  if(newBalance < 0){
+    alert("Amount exceeds balance");
+    return;
+  }
+
+  let status = newBalance === 0 ? "completed" : "ongoing";
+
+  /* UPDATE LOAN */
+  await updateDoc(loanRef, {
+    balance: newBalance,
+    status: status
+  });
+
+  /* SAVE REPAYMENT */
+  await addDoc(collection(db, "repayments"), {
+    loanId,
+    memberName: loan.memberName,
+    amount,
+    date: new Date().toISOString()
+  });
+
+  alert("Repayment successful");
+
+  loadLoans();
+  loadRepayments();
 };
 
 /* =========================
-   REPAYMENT HISTORY
+   LOAD REPAYMENTS
 ========================= */
-function loadRepayments() {
+const table = document.getElementById("repaymentTable");
 
-  const table = document.getElementById("repayTable");
+async function loadRepayments(){
+  const snapshot = await getDocs(collection(db, "repayments"));
 
-  onSnapshot(collection(db, "transactions"), (snap) => {
+  table.innerHTML = "";
 
-    table.innerHTML = "";
+  snapshot.forEach(docSnap => {
+    const r = docSnap.data();
 
-    snap.forEach(doc => {
-
-      let d = doc.data();
-
-      if (d.type !== "Repayment") return;
-
-      table.innerHTML += `
-        <tr>
-          <td>${d.member}</td>
-          <td class="green">$${d.amount}</td>
-          <td>${d.description}</td>
-          <td>${d.date}</td>
-        </tr>
-      `;
-    });
-
+    table.innerHTML += `
+      <tr>
+        <td>${r.memberName}</td>
+        <td class="amount green">$${r.amount}</td>
+        <td>${new Date(r.date).toLocaleDateString()}</td>
+      </tr>
+    `;
   });
 }
 
-/* =========================
-   INIT
-========================= */
-document.addEventListener("DOMContentLoaded", () => {
-  loadLoans();
-  loadRepayments();
-});
+loadRepayments();
