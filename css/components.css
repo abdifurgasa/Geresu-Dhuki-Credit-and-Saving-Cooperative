@@ -27,25 +27,95 @@ body{
   width:260px;
   background:#0f1f3d;
   color:#fff;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
   padding:20px;
+  transition:0.3s;
 }
 
-.menu ul{
-  list-style:none;
+/* COLLAPSE */
+.sidebar.collapsed{
+  width:80px;
 }
+
+/* LOGO */
+.logo h2{ font-size:22px; }
+.logo p{ font-size:12px; opacity:0.7; }
+
+/* =========================
+   MENU
+========================= */
+.menu ul{ list-style:none; }
+
+.menu li{ margin-bottom:8px; }
 
 .menu li a{
   display:flex;
-  gap:10px;
+  align-items:center;
+  gap:12px;
   padding:12px;
+  border-radius:8px;
   color:#fff;
   text-decoration:none;
-  border-radius:8px;
+  transition:0.2s;
 }
 
 .menu li a:hover,
 .menu li.active a{
   background:#1f3c88;
+}
+
+/* ICON */
+.menu i{
+  width:20px;
+  text-align:center;
+}
+
+/* =========================
+   SUBMENU
+========================= */
+.has-submenu > a{
+  justify-content:space-between;
+}
+
+.arrow{
+  font-size:12px;
+  transition:0.3s;
+}
+
+.has-submenu.open .arrow{
+  transform:rotate(180deg);
+}
+
+.submenu{
+  max-height:0;
+  overflow:hidden;
+  transition:0.3s ease;
+  padding-left:25px;
+}
+
+.has-submenu.open .submenu{
+  max-height:300px;
+}
+
+.submenu li a{
+  font-size:14px;
+  color:#ddd;
+}
+
+.submenu li a:hover{
+  color:#fff;
+}
+
+/* HIDE TEXT WHEN COLLAPSED */
+.sidebar.collapsed span,
+.sidebar.collapsed .logo p{
+  display:none;
+}
+
+.sidebar.collapsed .submenu{
+  display:none;
 }
 
 /* =========================
@@ -57,7 +127,9 @@ body{
   flex-direction:column;
 }
 
-/* TOPBAR */
+/* =========================
+   TOPBAR
+========================= */
 .topbar{
   background:#fff;
   padding:15px 20px;
@@ -65,7 +137,7 @@ body{
 }
 
 /* =========================
-   DASHBOARD WRAPPER (KEY FIX)
+   DASHBOARD WRAPPER
 ========================= */
 .dashboard-wrapper{
   max-width:1200px;
@@ -75,18 +147,15 @@ body{
 }
 
 /* =========================
-   CARDS GRID (WRAPPED)
+   CARDS
 ========================= */
 .cards{
   display:grid;
-  grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
   gap:20px;
-  width:100%;
 }
 
-/* =========================
-   CARD DESIGN
-========================= */
+/* CARD */
 .card{
   border-radius:16px;
   padding:20px;
@@ -105,7 +174,6 @@ body{
   align-items:center;
 }
 
-/* ICON */
 .card-icon{
   width:55px;
   height:55px;
@@ -114,25 +182,64 @@ body{
   align-items:center;
   justify-content:center;
   background:rgba(255,255,255,0.2);
-  font-size:20px;
+}
+
+/* COLORS */
+.members{ background:linear-gradient(135deg,#667eea,#764ba2); }
+.savings{ background:linear-gradient(135deg,#11998e,#38ef7d); }
+.loans{ background:linear-gradient(135deg,#f7971e,#ffd200); color:#222; }
+.profit{ background:linear-gradient(135deg,#2b5876,#4e4376); }
+
+/* =========================
+   TABLE
+========================= */
+table{
+  width:100%;
+  border-collapse:collapse;
+  background:#fff;
+  border-radius:12px;
+  overflow:hidden;
+}
+
+th, td{
+  padding:12px;
+  border-bottom:1px solid #eee;
+}
+
+thead{
+  background:#f1f3f9;
+}
+
+tr:hover{
+  background:#f9fafc;
 }
 
 /* =========================
-   CARD COLORS
+   BADGES
 ========================= */
-.members{
-  background:linear-gradient(135deg,#667eea,#764ba2);
+.badge-type{
+  padding:5px 10px;
+  border-radius:20px;
+  font-size:12px;
 }
 
-.savings{
-  background:linear-gradient(135deg,#11998e,#38ef7d);
-}
+.saving{ background:#e6f9f0; color:#1cc88a; }
+.loan{ background:#fff5e6; color:#f6c23e; }
+.repayment{ background:#fdeaea; color:#e74a3b; }
 
-.loans{
-  background:linear-gradient(135deg,#f7971e,#ffd200);
-  color:#222;
-}
+/* =========================
+   MOBILE FIX
+========================= */
+@media(max-width:768px){
+  .sidebar{
+    position:fixed;
+    left:-260px;
+    top:0;
+    height:100%;
+    z-index:1000;
+  }
 
-.profit{
-  background:linear-gradient(135deg,#2b5876,#4e4376);
+  .sidebar.open{
+    left:0;
+  }
 }
