@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Repayments</title>
+<title>Loan Repayments</title>
 
 <link rel="stylesheet" href="css/layout.css">
 <link rel="stylesheet" href="css/components.css">
@@ -17,27 +17,26 @@
   <main class="main">
 
     <div class="topbar">
-      <h2>Loan Repayments</h2>
+      <h2>Loan Repayment</h2>
     </div>
 
     <section class="content">
 
-      <!-- FORM -->
+      <!-- REPAYMENT FORM -->
       <div class="card">
+        <h3>Make Repayment</h3>
 
-        <h3>Repay Loan</h3>
+        <input id="searchInput" placeholder="Search by Name / Phone / ID">
 
         <select id="loanSelect"></select>
 
         <input id="amount" type="number" placeholder="Repayment Amount">
 
-        <button onclick="addRepayment()">Pay</button>
-
+        <button onclick="makeRepayment()">Pay</button>
       </div>
 
       <!-- TABLE -->
-      <div class="transactions">
-
+      <div class="card">
         <h3>Repayment History</h3>
 
         <table>
@@ -45,14 +44,12 @@
             <tr>
               <th>Member</th>
               <th>Amount</th>
-              <th>Description</th>
               <th>Date</th>
             </tr>
           </thead>
 
-          <tbody id="repayTable"></tbody>
+          <tbody id="repaymentTable"></tbody>
         </table>
-
       </div>
 
     </section>
@@ -63,5 +60,6 @@
 
 <script type="module" src="js/repayments.js"></script>
 <script src="js/layout.js"></script>
+
 </body>
 </html>
