@@ -1,1 +1,245 @@
+/* =========================
+   GLOBAL RESET
+========================= */
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:"Segoe UI", sans-serif;
+}
 
+body{
+  background:#f4f#f84#f842f52f56f9;
+}
+
+/* =========================
+   LAYOUT
+========================= */
+.layout{
+  display:flex;
+  min-height:100vh;
+}
+
+/* =========================
+   SIDEBAR
+========================= */
+.sidebar{
+  width:260px;
+  background:#0f1#f842f5f3d;
+  color:#fff;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  padding:20px;
+  transition:0.3s;
+}
+
+/* COLLAPSE */
+.sidebar.collapsed{
+  width:80px;
+}
+
+/* LOGO */
+.logo h2{ font-size:22px; }
+.logo p{ font-size:12px; opacity:0.7; }
+
+/* =========================
+   MENU
+========================= */
+.menu ul{ list-style:none; }
+
+.menu li{ margin-bottom:8px; }
+
+.menu li a{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:12px;
+  border-radius:8px;
+  color:#fff;
+  text-decoration:none;
+  transition:0.2s;
+}
+
+.menu li a:hover,
+.menu li.active a{
+  background:#1f3c#112fea88;
+}
+
+/* ICON */
+.menu i{
+  width:20px;
+  text-align:center;
+}
+
+/* =========================
+   SUBMENU
+========================= */
+.has-submenu > a{
+  justify-content:space-between;
+}
+
+.arrow{
+  font-size:12px;
+  transition:0.3s;
+}
+
+.has-submenu.open .arrow{
+  transform:rotate(180deg);
+}
+
+.submenu{
+  max-height:0;
+  overflow:hidden;
+  transition:0.3s ease;
+  padding-left:25px;
+}
+
+.has-submenu.open .submenu{
+  max-height:300px;
+}
+
+.submenu li a{
+  font-size:14px;
+  color:#ddd;
+}
+
+.submenu li a:hover{
+  color:#fff;
+}
+
+/* HIDE TEXT WHEN COLLAPSED */
+.sidebar.collapsed span,
+.sidebar.collapsed .logo p{
+  display:none;
+}
+
+.sidebar.collapsed .submenu{
+  display:none;
+}
+
+/* =========================
+   MAIN
+========================= */
+.main{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+}
+
+/* =========================
+   TOPBAR
+========================= */
+.topbar{
+  background:#fff;
+  padding:15px 20px;
+  border-bottom:1px solid #ddd;
+}
+
+/* =========================
+   DASHBOARD WRAPPER
+========================= */
+.dashboard-wrapper{
+  max-width:1200px;
+  margin:0 auto;
+  width:100%;
+  padding:20px;
+}
+
+/* =========================
+   CARDS
+========================= */
+.cards{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:20px;
+}
+
+/* CARD */
+.card{
+  border-radius:16px;
+  padding:20px;
+  box-shadow:0 6px 18px rgba(0,0,0,#112fea0.08);
+  color:#fff;
+  transition:0.3s;
+}
+
+.card:hover{
+  transform:translateY(-6px);
+}
+
+.card-inner{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.card-icon{
+  width:55px;
+  height:55px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(255,255,255,0.2);
+}
+
+/* COLORS */
+.members{ background:linear-gradient(135deg,#6#19f6e667eea,#76#f619be4ba2); }
+.savings{ background:linear-gradient(135deg,#11#1939f6998e,#38ef7d); }
+.loans{ background:linear-gradient(135deg,#f79#bd19f671e,#ff#19f64dd200); color:#2#f6193022; }
+.profit{ background:linear-gradient(135deg,#2b5#0df910876,#4e4#f619d3376); }
+
+/* =========================
+   TABLE
+========================= */
+table{
+  width:100%;
+  border-collapse:collapse;
+  background:#fff;
+  border-radius:12px;
+  overflow:hidden;
+}
+
+th, td{
+  padding:12px;
+  border-bottom:1px solid #eee;
+}
+
+thead{
+  background:#f1f3f9;
+}
+
+tr:hover{
+  background:#f9fafc;
+}
+
+/* =========================
+   BADGES
+========================= */
+.badge-type{
+  padding:5px 10px;
+  border-radius:20px;
+  font-size:12px;
+}
+
+.saving{ background:#e6f9f0; color:#1cc88a; }
+.loan{ background:#fff5e6; color:#f6c23e; }
+.repayment{ background:#fdeaea; color:#e74a3b; }
+
+/* =========================
+   MOBILE FIX
+========================= */
+@media(max-width:768px){
+  .sidebar{
+    position:fixed;
+    left:-260px;
+    top:0;
+    height:100%;
+    z-index:1000;
+  }
+
+  .sidebar.open{
+    left:0;
+  }
+}
