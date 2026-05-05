@@ -167,3 +167,48 @@ th{
 /* STATUS COLORS */
 .green{color:#1cc88a;}
 .red{color:#e74a3b;}
+.content{
+  max-width:600px;
+}
+
+.settings-card{
+  background:#ffffff;
+  padding:20px;
+  border-radius:12px;
+  margin-bottom:20px;
+  box-shadow:0 5px 15px rgba(0,0,0,0.05);
+}
+
+.settings-card h3{
+  margin-bottom:15px;
+}
+
+.settings-card button{
+  padding:8px 12px;
+  border:none;
+  border-radius:6px;
+  background:#2563eb;
+  color:white;
+  cursor:pointer;
+  margin-right:5px;
+}
+
+.settings-card button:hover{
+  background:#1d4ed8;
+}
+
+.settings-card input{
+  width:100%;
+  padding:10px;
+  margin-bottom:10px;
+  border:1px solid #ddd;
+  border-radius:6px;
+}
+
+.logout-btn{
+  background:#ef4444;
+}
+
+.logout-btn:hover{
+  background:#dc2626;
+}
