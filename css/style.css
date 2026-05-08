@@ -14,6 +14,22 @@ body {
 }
 
 /* =========================
+   BACKGROUND SUPPORT (OPTIONAL)
+========================= */
+.dashboard-bg {
+  background: url("../assets/images/background.jpg") no-repeat center center fixed;
+  background-size: cover;
+}
+
+.dashboard-bg::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.65);
+  z-index: -1;
+}
+
+/* =========================
    SIDEBAR
 ========================= */
 .sidebar {
@@ -34,8 +50,8 @@ body {
 /* LOGO */
 .logo {
   text-align: center;
+  font-size: 18px;
   margin-bottom: 20px;
-  font-size: 20px;
 }
 
 /* NAVIGATION */
@@ -51,8 +67,8 @@ body {
   gap: 12px;
   padding: 10px;
   border-radius: 10px;
-  color: #cbd5e1;
   text-decoration: none;
+  color: #cbd5e1;
   transition: 0.2s;
 }
 
@@ -117,6 +133,16 @@ body {
   box-shadow: 0 2px 10px rgba(0,0,0,0.05);
 }
 
+/* LANGUAGE SELECT */
+.lang-select {
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: none;
+  background: #0f172a;
+  color: white;
+  font-size: 12px;
+}
+
 /* =========================
    DASHBOARD CARDS
 ========================= */
@@ -128,24 +154,36 @@ body {
 }
 
 .card {
-  padding: 20px;
-  border-radius: 15px;
+  padding: 22px;
+  border-radius: 18px;
   color: white;
-  box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+  box-shadow: 0 15px 30px rgba(0,0,0,0.15);
   transition: 0.2s;
 }
 
 .card:hover {
-  transform: translateY(-3px);
+  transform: translateY(-5px);
 }
 
+.card h3 {
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.card p {
+  font-size: 32px;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+/* CARD COLORS */
 .card.blue { background: linear-gradient(135deg, #2563eb, #1d4ed8); }
 .card.green { background: linear-gradient(135deg, #16a34a, #15803d); }
 .card.orange { background: linear-gradient(135deg, #f97316, #ea580c); }
 .card.purple { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
 
 /* =========================
-   TABLES
+   TABLES (ALL MODULES)
 ========================= */
 .table {
   width: 100%;
@@ -179,7 +217,6 @@ button {
   cursor: pointer;
 }
 
-/* ADD BUTTON */
 .add-btn {
   background: #2563eb;
   color: white;
@@ -195,7 +232,7 @@ button {
 }
 
 /* =========================
-   SEARCH
+   SEARCH BOX
 ========================= */
 .search-box {
   width: 100%;
@@ -207,7 +244,7 @@ button {
 }
 
 /* =========================
-   MODAL (REGISTER FORM)
+   MODAL SYSTEM (FORMS)
 ========================= */
 .modal {
   display: none;
@@ -217,17 +254,14 @@ button {
   backdrop-filter: blur(6px);
   justify-content: center;
   align-items: center;
-  animation: fadeIn 0.2s ease-in-out;
 }
 
-/* MODAL BOX */
 .modal-content {
   width: 380px;
-  background: #ffffff;
+  background: white;
   border-radius: 16px;
   padding: 25px;
   box-shadow: 0 20px 60px rgba(0,0,0,0.25);
-  animation: slideUp 0.25s ease-in-out;
 }
 
 .modal-content h3 {
@@ -235,60 +269,24 @@ button {
   margin-bottom: 15px;
 }
 
-/* INPUTS */
-.modal-content input {
+.modal-content input,
+.modal-content select {
   width: 100%;
   padding: 12px;
   margin: 8px 0;
   border-radius: 10px;
   border: 1px solid #e2e8f0;
-  background: #f8fafc;
   outline: none;
-  transition: 0.2s;
+  background: #f8fafc;
 }
 
 .modal-content input:focus {
   border-color: #2563eb;
-  background: white;
   box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
 }
 
-/* SAVE BUTTON */
-.modal-content button:first-of-type {
-  width: 100%;
-  padding: 12px;
-  margin-top: 10px;
-  border: none;
-  border-radius: 10px;
-  background: linear-gradient(135deg, #2563eb, #1d4ed8);
-  color: white;
-  font-weight: bold;
-}
-
-.modal-content button:last-of-type {
-  width: 100%;
-  padding: 12px;
-  margin-top: 8px;
-  border: none;
-  border-radius: 10px;
-  background: #e2e8f0;
-}
-
 /* =========================
-   ANIMATIONS
-========================= */
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes slideUp {
-  from { transform: translateY(20px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
-
-/* =========================
-   STATUS BADGE
+   STATUS BADGES
 ========================= */
 .status {
   padding: 5px 10px;
@@ -307,14 +305,24 @@ button {
 }
 
 /* =========================
-   RESPONSIVE
+   RESPONSIVE DESIGN
 ========================= */
 @media (max-width: 768px) {
+
   .cards {
     grid-template-columns: repeat(2, 1fr);
   }
 
-  .modal-content {
-    width: 90%;
+  .sidebar {
+    width: 70px;
+  }
+
+  .main {
+    margin-left: 90px;
+  }
+
+  .sidebar .text,
+  .sidebar .logo {
+    display: none;
   }
 }
