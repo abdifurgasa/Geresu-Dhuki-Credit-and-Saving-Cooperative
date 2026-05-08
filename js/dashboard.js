@@ -1,55 +1,32 @@
 import { db } from "./firebase.js";
-
-import {
-  collection,
-  onSnapshot
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 /* =========================
-   STATS LOADER
+   LOAD DASHBOARD DATA
 ========================= */
-function loadStats(){
+async function loadDashboard() {
+  try {
+    const ref = doc(db, "stats", "dashboard");
+    const snap = await getDoc(ref);
 
-  onSnapshot(collection(db, "members"), snap => {
-    document.getElementById("membersCount").innerText = snap.size;
-  });
+    if (snap.exists()) {
+      const data = snap.data();
 
-  onSnapshot(collection(db, "savings"), snap => {
-    let total = 0;
-    snap.forEach(d => total += Number(d.data().amount || 0));
-    document.getElementById("savingsTotal").innerText = "$" + total.toLocaleString();
-  });
-
-  onSnapshot(collection(db, "loans"), snap => {
-    let total = 0;
-    snap.forEach(d => total += Number(d.data().amount || 0));
-    document.getElementById("loansTotal").innerText = "$" + total.toLocaleString();
-  });
-
-  // PROFIT = savings - loans
-  onSnapshot(collection(db, "savings"), s1 => {
-    onSnapshot(collection(db, "loans"), s2 => {
-
-      let savings = 0;
-      let loans = 0;
-
-      s1.forEach(d => savings += Number(d.data().amount || 0));
-      s2.forEach(d => loans += Number(d.data().amount || 0));
-
-      let profit = savings - loans;
-
-      document.getElementById("profitTotal").innerText =
-        "$" + profit.toLocaleString();
-
-    });
-  });
-
+      document.getElementById("members").innerText = data.members || 0;
+      document.getElementById("savings").innerText = (data.savings || 0) + " ETB";
+      document.getElementById("loans").innerText = (data.loans || 0) + " ETB";
+      document.getElementById("profit").innerText = (data.profit || 0) + " ETB";
+    }
+  } catch (err) {
+    console.error(err);
+  }
 }
 
-/* INIT */
-document.addEventListener("DOMContentLoaded", loadStats);
-import { startOverdueEngine } from "./overdueEngine.js";
+loadDashboard();
 
-document.addEventListener("DOMContentLoaded", () => {
-  startOverdueEngine();
-});
+/* =========================
+   SIDEBAR COLLAPSE
+========================= */
+window.toggleSidebar = function () {
+  document.querySelector(".sidebar").classList.toggle("collapsed");
+};
