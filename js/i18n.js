@@ -1,6 +1,3 @@
-/* =========================
-   LANGUAGE DATA
-========================= */
 const translations = {
   EN: {
     dashboard: "Dashboard",
@@ -16,9 +13,7 @@ const translations = {
     totalMembers: "Total Members",
     totalSavings: "Total Savings",
     totalLoans: "Total Loans",
-    totalProfit: "Total Profit",
-    recent: "Recent Transactions",
-    quick: "Quick Actions"
+    totalProfit: "Total Profit"
   },
 
   AM: {
@@ -35,9 +30,7 @@ const translations = {
     totalMembers: "ጠቅላላ አባላት",
     totalSavings: "ጠቅላላ ቁጠባ",
     totalLoans: "ጠቅላላ ብድር",
-    totalProfit: "ጠቅላላ ትርፍ",
-    recent: "የቅርብ ግብይቶች",
-    quick: "ፈጣን እርምጃዎች"
+    totalProfit: "ጠቅላላ ትርፍ"
   },
 
   OR: {
@@ -54,49 +47,30 @@ const translations = {
     totalMembers: "Waliigala Miseensota",
     totalSavings: "Waliigala Kuusaa",
     totalLoans: "Waliigala Liqii",
-    totalProfit: "Waliigala Bu'aa",
-    recent: "Sochii Dhihoo",
-    quick: "Tarkaanfii Ariifataa"
+    totalProfit: "Waliigala Bu'aa"
   }
 };
 
-/* =========================
-   CURRENT LANGUAGE
-========================= */
 let currentLang = localStorage.getItem("lang") || "EN";
 
-/* =========================
-   APPLY TRANSLATION
-========================= */
+/* APPLY */
 function applyTranslations() {
   document.querySelectorAll("[data-i18n]").forEach(el => {
     const key = el.getAttribute("data-i18n");
     el.innerText = translations[currentLang]?.[key] || key;
   });
 
-  // SAFE (no crash if element not exists)
-  const langText = document.getElementById("langText");
-  if (langText) langText.innerText = currentLang;
-
   const langSelect = document.getElementById("langSelect");
   if (langSelect) langSelect.value = currentLang;
 }
 
-/* =========================
-   CHANGE LANGUAGE (GLOBAL)
-========================= */
+/* CHANGE LANGUAGE */
 function changeLang(lang) {
   currentLang = lang;
   localStorage.setItem("lang", lang);
   applyTranslations();
 }
 
-/* =========================
-   INIT
-========================= */
 document.addEventListener("DOMContentLoaded", applyTranslations);
 
-/* =========================
-   MAKE GLOBAL FOR HTML
-========================= */
 window.changeLang = changeLang;
