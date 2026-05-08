@@ -10,37 +10,68 @@
 
 <body>
 
-  <!-- 🌍 LANGUAGE SELECTOR (GLOBAL - ALWAYS VISIBLE) -->
-  <div class="lang-box">
-    <select id="langSelect" onchange="changeLang(this.value)">
-      <option value="EN">English</option>
-      <option value="AM">Amharic</option>
-      <option value="OR">Afaan Oromo</option>
-    </select>
-  </div>
-
   <!-- SIDEBAR -->
-  <aside class="sidebar">
+  <aside class="sidebar" id="sidebar">
 
     <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
 
-    <h2 data-i18n="dashboard">SACCO</h2>
+    <h2 class="logo">SACCO</h2>
 
-    <a href="dashboard.html" data-i18n="dashboard"></a>
-    <a href="members.html" data-i18n="members"></a>
-    <a href="savings.html" data-i18n="savings"></a>
-    <a href="loans.html" data-i18n="loans"></a>
-    <a href="reports.html" data-i18n="reports"></a>
-    <a href="transactions.html" data-i18n="transactions"></a>
-    <a href="settings.html" data-i18n="settings"></a>
+    <nav class="nav">
 
-    <button class="logout" data-i18n="logout"></button>
+      <a href="dashboard.html" class="nav-item">
+        <span class="icon">📊</span>
+        <span class="text" data-i18n="dashboard"></span>
+      </a>
+
+      <a href="members.html" class="nav-item">
+        <span class="icon">👥</span>
+        <span class="text" data-i18n="members"></span>
+      </a>
+
+      <a href="savings.html" class="nav-item">
+        <span class="icon">💰</span>
+        <span class="text" data-i18n="savings"></span>
+      </a>
+
+      <a href="loans.html" class="nav-item">
+        <span class="icon">🏦</span>
+        <span class="text" data-i18n="loans"></span>
+      </a>
+
+      <a href="reports.html" class="nav-item">
+        <span class="icon">📄</span>
+        <span class="text" data-i18n="reports"></span>
+      </a>
+
+      <a href="settings.html" class="nav-item">
+        <span class="icon">⚙️</span>
+        <span class="text" data-i18n="settings"></span>
+      </a>
+
+    </nav>
 
   </aside>
 
   <!-- MAIN -->
   <main class="main">
 
+    <!-- TOP BAR -->
+    <div class="topbar">
+
+      <div class="role-indicator">Admin</div>
+
+      <div class="lang-box">
+        <select id="langSelect" onchange="changeLang(this.value)">
+          <option value="EN">EN</option>
+          <option value="AM">AM</option>
+          <option value="OR">OR</option>
+        </select>
+      </div>
+
+    </div>
+
+    <!-- HEADER -->
     <h1 data-i18n="overview"></h1>
     <p data-i18n="welcome"></p>
 
@@ -71,7 +102,7 @@
 
   </main>
 
-  <!-- SYSTEMS -->
+  <!-- JS -->
   <script src="js/i18n.js"></script>
   <script type="module" src="js/dashboard.js"></script>
 
