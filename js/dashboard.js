@@ -25,7 +25,7 @@ async function loadDashboard() {
 loadDashboard();
 
 /* =========================
-   SIDEBAR COLLAPSE
+   SIDEBAR TOGGLE
 ========================= */
 window.toggleSidebar = function () {
   document.querySelector(".sidebar").classList.toggle("collapsed");
