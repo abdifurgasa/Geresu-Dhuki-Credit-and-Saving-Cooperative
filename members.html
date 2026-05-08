@@ -4,6 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Members</title>
+
   <link rel="stylesheet" href="css/style.css">
 </head>
 
@@ -11,7 +12,6 @@
 
   <!-- SIDEBAR -->
   <aside class="sidebar" id="sidebar">
-
     <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
 
     <h2 class="logo">SACCO</h2>
@@ -23,7 +23,6 @@
       <a href="loans.html" class="nav-item"><span class="icon">🏦</span><span class="text">Loans</span></a>
       <a href="reports.html" class="nav-item"><span class="icon">📄</span><span class="text">Reports</span></a>
     </nav>
-
   </aside>
 
   <!-- MAIN -->
@@ -31,42 +30,62 @@
 
     <h1>Members</h1>
 
-    <!-- ADD BUTTON -->
+    <!-- SEARCH -->
+    <input 
+      type="text" 
+      id="searchInput"
+      class="search-box"
+      placeholder="Search member..."
+      onkeyup="searchMembers()"
+    />
+
+    <!-- ADD -->
     <button class="add-btn" onclick="openForm()">+ Add Member</button>
 
     <!-- TABLE -->
     <table class="table">
       <thead>
         <tr>
-          <th>Full Name</th>
-          <th>Email</th>
+          <th>Name</th>
           <th>Phone</th>
-          <th>National ID</th>
-          <th>Actions</th>
+          <th>NID</th>
+          <th>Savings</th>
+          <th>Status</th>
+          <th>Action</th>
         </tr>
       </thead>
+
       <tbody id="membersTable"></tbody>
     </table>
 
   </main>
 
-  <!-- MODAL FORM -->
+  <!-- FORM MODAL -->
   <div class="modal" id="formModal">
-
     <div class="modal-content">
 
       <h3>Register Member</h3>
 
       <input type="text" id="fullName" placeholder="Full Name">
       <input type="email" id="email" placeholder="Email">
-      <input type="text" id="phone" placeholder="Phone Number">
-      <input type="text" id="nid" placeholder="National ID">
+      <input type="text" id="phone" placeholder="Phone (9 digits)">
+      <input type="text" id="nid" placeholder="National ID (16 digits)">
 
       <button onclick="saveMember()">Save</button>
       <button onclick="closeForm()">Cancel</button>
 
     </div>
+  </div>
 
+  <!-- PROFILE MODAL -->
+  <div class="modal" id="profileModal">
+    <div class="modal-content">
+      <h3>Member Profile</h3>
+
+      <div id="profileData"></div>
+
+      <button onclick="closeProfile()">Close</button>
+    </div>
   </div>
 
   <script type="module" src="js/members.js"></script>
