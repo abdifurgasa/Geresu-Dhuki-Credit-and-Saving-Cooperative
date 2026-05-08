@@ -1,67 +1,72 @@
 <!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>Savings</title>
+<html lang="en">
 
-<link rel="stylesheet" href="css/layout.css">
-<link rel="stylesheet" href="css/components.css">
+<head>
+  <meta charset="UTF-8">
+  <title>Savings</title>
+
+  <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
 
-<div class="layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
 
-  <!-- SIDEBAR (reuse same) -->
-  <aside class="sidebar"></aside>
+    <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
 
+    <h2 class="logo">SACCO</h2>
+
+    <nav class="nav">
+      <a href="dashboard.html" class="nav-item"><span class="icon">📊</span><span class="text">Dashboard</span></a>
+      <a href="members.html" class="nav-item"><span class="icon">👥</span><span class="text">Members</span></a>
+      <a href="savings.html" class="nav-item active"><span class="icon">💰</span><span class="text">Savings</span></a>
+      <a href="loans.html" class="nav-item"><span class="icon">🏦</span><span class="text">Loans</span></a>
+      <a href="reports.html" class="nav-item"><span class="icon">📄</span><span class="text">Reports</span></a>
+    </nav>
+
+  </aside>
+
+  <!-- MAIN -->
   <main class="main">
 
-    <div class="topbar">
-      <h2>Savings</h2>
+    <h1>Savings</h1>
+
+    <!-- DEPOSIT FORM -->
+    <div class="card-form">
+
+      <select id="memberSelect"></select>
+
+      <input type="number" id="amount" placeholder="Enter amount">
+
+      <button onclick="addSaving()">Deposit</button>
+
     </div>
 
-    <section class="content">
+    <!-- TOTAL INFO -->
+    <div class="summary">
+      <h3>Total Savings: <span id="totalSavings">0 ETB</span></h3>
+    </div>
 
-      <!-- FORM -->
-      <div class="card">
+    <!-- TABLE -->
+    <table class="table">
 
-        <h3>Add Saving</h3>
+      <thead>
+        <tr>
+          <th>Member</th>
+          <th>Amount</th>
+          <th>Date</th>
+          <th>Action</th>
+        </tr>
+      </thead>
 
-        <select id="memberSelect"></select>
+      <tbody id="savingsTable"></tbody>
 
-        <input id="amount" type="number" placeholder="Amount">
-
-        <button onclick="addSaving()">Save</button>
-
-      </div>
-
-      <!-- TABLE -->
-      <div class="transactions">
-
-        <h3>Saving History</h3>
-
-        <table>
-          <thead>
-            <tr>
-              <th>Member</th>
-              <th>Amount</th>
-              <th>Date</th>
-            </tr>
-          </thead>
-
-          <tbody id="savingsTable"></tbody>
-        </table>
-
-      </div>
-
-    </section>
+    </table>
 
   </main>
 
-</div>
+  <script type="module" src="js/savings.js"></script>
 
-<script type="module" src="js/savings.js"></script>
-<script src="js/layout.js"></script>
 </body>
 </html>
