@@ -10,10 +10,18 @@
 
 <body>
 
+  <!-- 🌍 LANGUAGE SELECTOR (GLOBAL - ALWAYS VISIBLE) -->
+  <div class="lang-box">
+    <select id="langSelect" onchange="changeLang(this.value)">
+      <option value="EN">English</option>
+      <option value="AM">Amharic</option>
+      <option value="OR">Afaan Oromo</option>
+    </select>
+  </div>
+
   <!-- SIDEBAR -->
   <aside class="sidebar">
 
-    <!-- TOGGLE BUTTON -->
     <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
 
     <h2 data-i18n="dashboard">SACCO</h2>
