@@ -371,3 +371,38 @@ button {
   transform: translateY(-5px);
   background: #f8fafc;
 }
+.search-container {
+  display: flex;
+  gap: 10px;
+}
+
+.search-results {
+  background: white;
+  border-radius: 10px;
+  margin-top: 5px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.result-item {
+  padding: 10px;
+  cursor: pointer;
+  border-bottom: 1px solid #eee;
+}
+
+.result-item:hover {
+  background: #f1f5f9;
+}
+
+.selected-box {
+  background: #0f172a;
+  color: white;
+  padding: 15px;
+  border-radius: 10px;
+  margin: 10px 0;
+}
+
+.form-box {
+  display: flex;
+  gap: 10px;
+}
