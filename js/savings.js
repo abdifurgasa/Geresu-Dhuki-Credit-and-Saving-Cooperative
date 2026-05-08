@@ -1,106 +1,134 @@
 import { db } from "./firebase.js";
-
 import {
   collection,
   addDoc,
-  onSnapshot,
-  query,
-  orderBy
+  getDocs,
+  deleteDoc,
+  doc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+const membersRef = collection(db, "members");
+const savingsRef = collection(db, "savings");
+
+let membersMap = {};
+
 /* =========================
-   LOAD MEMBERS INTO SELECT
+   LOAD MEMBERS (DROPDOWN)
 ========================= */
-function loadMembers() {
-  const select = document.getElementById("memberSelect");
+async function loadMembers() {
 
-  onSnapshot(collection(db, "members"), (snap) => {
-    select.innerHTML = `<option value="">Select Member</option>`;
+  const snap = await getDocs(membersRef);
 
-    snap.forEach(docSnap => {
-      let data = docSnap.data();
+  let options = `<option value="">Select Member</option>`;
 
-      select.innerHTML += `
-        <option value="${data.name}">
-          ${data.name}
-        </option>
-      `;
-    });
+  snap.forEach(m => {
+    membersMap[m.id] = m.data().fullName;
+
+    options += `
+      <option value="${m.id}">
+        ${m.data().fullName}
+      </option>
+    `;
   });
+
+  document.getElementById("memberSelect").innerHTML = options;
 }
+
+loadMembers();
 
 /* =========================
    ADD SAVING
 ========================= */
 window.addSaving = async function () {
 
-  let member = document.getElementById("memberSelect").value;
-  let amount = document.getElementById("amount").value;
+  const memberId = document.getElementById("memberSelect").value;
+  const amount = document.getElementById("amount").value;
 
-  if (!member || !amount) {
-    return alert("Select member and enter amount");
+  if (!memberId || !amount) {
+    alert("Select member and enter amount");
+    return;
   }
 
-  amount = Number(amount);
-
-  try {
-    // 1. SAVE TO SAVINGS COLLECTION
-    await addDoc(collection(db, "savings"), {
-      member: member,
-      amount: amount,
-      date: new Date().toISOString().split("T")[0]
-    });
-
-    // 2. ALSO ADD TO TRANSACTIONS
-    await addDoc(collection(db, "transactions"), {
-      type: "Saving",
-      member: member,
-      amount: amount,
-      description: "Monthly savings deposit",
-      date: new Date().toISOString().split("T")[0]
-    });
-
-    document.getElementById("amount").value = "";
-
-    alert("Saving recorded successfully");
-
-  } catch (err) {
-    console.error(err);
+  if (amount <= 0) {
+    alert("Amount must be greater than 0");
+    return;
   }
+
+  await addDoc(savingsRef, {
+    memberId,
+    amount: Number(amount),
+    date: new Date()
+  });
+
+  document.getElementById("amount").value = "";
+
+  loadSavings();
+  loadTotal();
 };
 
 /* =========================
-   LOAD SAVINGS HISTORY
+   LOAD SAVINGS TABLE
 ========================= */
-function loadSavings() {
+async function loadSavings() {
 
-  const table = document.getElementById("savingsTable");
+  const snap = await getDocs(savingsRef);
 
-  const q = query(collection(db, "savings"), orderBy("date", "desc"));
+  let html = "";
 
-  onSnapshot(q, (snap) => {
+  snap.forEach(s => {
+    const data = s.data();
 
-    table.innerHTML = "";
-
-    snap.forEach(docSnap => {
-      let d = docSnap.data();
-
-      table.innerHTML += `
-        <tr>
-          <td>${d.member}</td>
-          <td class="green">$${d.amount}</td>
-          <td>${d.date}</td>
-        </tr>
-      `;
-    });
-
+    html += `
+      <tr>
+        <td>${membersMap[data.memberId] || "Unknown"}</td>
+        <td>${data.amount} ETB</td>
+        <td>${new Date(data.date.seconds ? data.date.seconds * 1000 : data.date).toLocaleDateString()}</td>
+        <td>
+          <button onclick="deleteSaving('${s.id}')">Delete</button>
+        </td>
+      </tr>
+    `;
   });
+
+  document.getElementById("savingsTable").innerHTML = html;
 }
 
+loadSavings();
+
 /* =========================
-   INIT
+   TOTAL SAVINGS
 ========================= */
-document.addEventListener("DOMContentLoaded", () => {
-  loadMembers();
+async function loadTotal() {
+
+  const snap = await getDocs(savingsRef);
+
+  let total = 0;
+
+  snap.forEach(s => {
+    total += Number(s.data().amount);
+  });
+
+  document.getElementById("totalSavings").innerText = total + " ETB";
+}
+
+loadTotal();
+
+/* =========================
+   DELETE SAVING
+========================= */
+window.deleteSaving = async function (id) {
+
+  if (!confirm("Delete this saving record?")) return;
+
+  await deleteDoc(doc(db, "savings", id));
+
   loadSavings();
-});
+  loadTotal();
+};
+
+/* =========================
+   SIDEBAR
+========================= */
+window.toggleSidebar = function () {
+  document.getElementById("sidebar").classList.toggle("collapsed");
+};
