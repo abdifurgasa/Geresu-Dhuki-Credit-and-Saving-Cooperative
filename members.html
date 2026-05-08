@@ -4,91 +4,54 @@
 <head>
   <meta charset="UTF-8">
   <title>Members</title>
-
   <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
 
-  <!-- SIDEBAR -->
-  <aside class="sidebar" id="sidebar">
-    <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+<div class="container">
 
-    <h2 class="logo">SACCO</h2>
+  <h1>👥 SACCO Members</h1>
 
-    <nav class="nav">
-      <a href="dashboard.html" class="nav-item"><span class="icon">📊</span><span class="text">Dashboard</span></a>
-      <a href="members.html" class="nav-item active"><span class="icon">👥</span><span class="text">Members</span></a>
-      <a href="savings.html" class="nav-item"><span class="icon">💰</span><span class="text">Savings</span></a>
-      <a href="loans.html" class="nav-item"><span class="icon">🏦</span><span class="text">Loans</span></a>
-      <a href="reports.html" class="nav-item"><span class="icon">📄</span><span class="text">Reports</span></a>
-    </nav>
-  </aside>
+  <button class="btn primary" onclick="openModal()">+ Add Member</button>
 
-  <!-- MAIN -->
-  <main class="main">
+  <input id="searchBox" class="input"
+         placeholder="Search by Name / Phone / NID">
 
-    <h1>Members</h1>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Phone</th>
+        <th>NID</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
 
-    <!-- SEARCH -->
-    <input 
-      type="text" 
-      id="searchInput"
-      class="search-box"
-      placeholder="Search member..."
-      onkeyup="searchMembers()"
-    />
+    <tbody id="memberTable"></tbody>
+  </table>
 
-    <!-- ADD -->
-    <button class="add-btn" onclick="openForm()">+ Add Member</button>
+</div>
 
-    <!-- TABLE -->
-    <table class="table">
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Phone</th>
-          <th>NID</th>
-          <th>Savings</th>
-          <th>Status</th>
-          <th>Action</th>
-        </tr>
-      </thead>
+<!-- MODAL -->
+<div id="modal" class="modal">
 
-      <tbody id="membersTable"></tbody>
-    </table>
+  <div class="modal-box">
 
-  </main>
+    <h2 id="title">Add Member</h2>
 
-  <!-- FORM MODAL -->
-  <div class="modal" id="formModal">
-    <div class="modal-content">
+    <input id="name" class="input" placeholder="Full Name">
+    <input id="phone" class="input" placeholder="Phone (9 digits)">
+    <input id="nid" class="input" placeholder="National ID (16 digits)">
 
-      <h3>Register Member</h3>
+    <button class="btn success" onclick="saveMember()">Save</button>
+    <button class="btn danger" onclick="closeModal()">Cancel</button>
 
-      <input type="text" id="fullName" placeholder="Full Name">
-      <input type="email" id="email" placeholder="Email">
-      <input type="text" id="phone" placeholder="Phone (9 digits)">
-      <input type="text" id="nid" placeholder="National ID (16 digits)">
-
-      <button onclick="saveMember()">Save</button>
-      <button onclick="closeForm()">Cancel</button>
-
-    </div>
   </div>
 
-  <!-- PROFILE MODAL -->
-  <div class="modal" id="profileModal">
-    <div class="modal-content">
-      <h3>Member Profile</h3>
+</div>
 
-      <div id="profileData"></div>
-
-      <button onclick="closeProfile()">Close</button>
-    </div>
-  </div>
-
-  <script type="module" src="js/members.js"></script>
+<script type="module" src="js/members.js"></script>
 
 </body>
 </html>
