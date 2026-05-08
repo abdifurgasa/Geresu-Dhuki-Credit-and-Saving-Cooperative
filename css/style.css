@@ -4,21 +4,6 @@ body {
   background: linear-gradient(135deg, #e0f2fe, #f8fafc);
 }
 
-/* 🌍 LANGUAGE */
-.lang-box {
-  position: fixed;
-  top: 15px;
-  right: 15px;
-  z-index: 999;
-}
-
-.lang-box select {
-  padding: 6px 10px;
-  border-radius: 8px;
-  border: none;
-  font-weight: bold;
-}
-
 /* SIDEBAR */
 .sidebar {
   position: fixed;
@@ -26,19 +11,55 @@ body {
   height: 100vh;
   background: #0f172a;
   color: white;
-  padding: 20px;
+  padding: 15px;
   transition: 0.3s;
+  overflow: hidden;
 }
 
-/* COLLAPSE */
 .sidebar.collapsed {
   width: 70px;
 }
 
-.sidebar.collapsed a,
-.sidebar.collapsed h2,
-.sidebar.collapsed .logout {
+/* LOGO */
+.logo {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+/* NAV */
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  color: #cbd5e1;
+  text-decoration: none;
+  border-radius: 10px;
+}
+
+.nav-item:hover {
+  background: #1e293b;
+}
+
+/* ICON */
+.icon {
+  font-size: 20px;
+}
+
+/* COLLAPSE TEXT */
+.sidebar.collapsed .text,
+.sidebar.collapsed .logo {
   display: none;
+}
+
+.sidebar.collapsed .nav-item {
+  justify-content: center;
 }
 
 /* TOGGLE */
@@ -47,8 +68,9 @@ body {
   color: white;
   border: none;
   padding: 8px;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
+  margin-bottom: 10px;
 }
 
 /* MAIN */
@@ -62,6 +84,30 @@ body {
   margin-left: 90px;
 }
 
+/* TOPBAR */
+.topbar {
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+  background: white;
+  padding: 10px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+.role-indicator {
+  background: #0f172a;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+}
+
+/* LANGUAGE */
+.lang-box select {
+  padding: 6px;
+  border-radius: 8px;
+}
+
 /* CARDS */
 .cards {
   display: grid;
@@ -69,20 +115,19 @@ body {
   gap: 15px;
 }
 
-/* CARD STYLE */
 .card {
   padding: 20px;
   border-radius: 14px;
   color: white;
-  transition: 0.3s;
 }
 
-.card:hover {
-  transform: translateY(-6px);
-}
-
-/* COLORS */
 .card:nth-child(1) { background: #2563eb; }
 .card:nth-child(2) { background: #16a34a; }
 .card:nth-child(3) { background: #f97316; }
 .card:nth-child(4) { background: #8b5cf6; }
+
+/* ACTIVE */
+.nav-item.active {
+  background: #2563eb;
+  color: white;
+}
