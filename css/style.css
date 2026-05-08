@@ -14,7 +14,7 @@ body {
 }
 
 /* =========================
-   BACKGROUND SUPPORT (OPTIONAL)
+   BACKGROUND
 ========================= */
 .dashboard-bg {
   background: url("../assets/images/background.jpg") no-repeat center center fixed;
@@ -54,7 +54,7 @@ body {
   margin-bottom: 20px;
 }
 
-/* NAVIGATION */
+/* NAV */
 .nav {
   display: flex;
   flex-direction: column;
@@ -81,12 +81,7 @@ body {
   color: white;
 }
 
-/* ICON */
-.icon {
-  font-size: 18px;
-}
-
-/* COLLAPSE TEXT */
+/* COLLAPSE */
 .sidebar.collapsed .text,
 .sidebar.collapsed .logo {
   display: none;
@@ -96,7 +91,7 @@ body {
   justify-content: center;
 }
 
-/* TOGGLE BUTTON */
+/* TOGGLE */
 .toggle-btn {
   background: #1e293b;
   color: white;
@@ -133,14 +128,15 @@ body {
   box-shadow: 0 2px 10px rgba(0,0,0,0.05);
 }
 
-/* LANGUAGE SELECT */
+/* =========================
+   LANG SELECT
+========================= */
 .lang-select {
   padding: 6px 10px;
   border-radius: 8px;
   border: none;
   background: #0f172a;
   color: white;
-  font-size: 12px;
 }
 
 /* =========================
@@ -159,6 +155,7 @@ body {
   color: white;
   box-shadow: 0 15px 30px rgba(0,0,0,0.15);
   transition: 0.2s;
+  text-decoration: none;
 }
 
 .card:hover {
@@ -176,14 +173,14 @@ body {
   margin-top: 10px;
 }
 
-/* CARD COLORS */
+/* COLORS */
 .card.blue { background: linear-gradient(135deg, #2563eb, #1d4ed8); }
 .card.green { background: linear-gradient(135deg, #16a34a, #15803d); }
 .card.orange { background: linear-gradient(135deg, #f97316, #ea580c); }
 .card.purple { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
 
 /* =========================
-   TABLES (ALL MODULES)
+   TABLE
 ========================= */
 .table {
   width: 100%;
@@ -198,7 +195,6 @@ body {
   background: #0f172a;
   color: white;
   padding: 12px;
-  text-align: left;
 }
 
 .table td {
@@ -213,18 +209,13 @@ body {
 /* =========================
    BUTTONS
 ========================= */
-button {
-  cursor: pointer;
-}
-
 .add-btn {
   background: #2563eb;
   color: white;
   padding: 10px 15px;
   border: none;
   border-radius: 10px;
-  margin: 10px 0;
-  transition: 0.2s;
+  cursor: pointer;
 }
 
 .add-btn:hover {
@@ -232,84 +223,111 @@ button {
 }
 
 /* =========================
-   SEARCH BOX
+   SEARCH SYSTEM (FIXED)
 ========================= */
+.search-container {
+  display: flex;
+  gap: 10px;
+  margin: 10px 0;
+}
+
 .search-box {
   width: 100%;
   padding: 12px;
-  margin: 10px 0;
   border-radius: 10px;
   border: 1px solid #cbd5e1;
-  outline: none;
+}
+
+.search-results {
+  background: white;
+  border-radius: 10px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.result-item {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+}
+
+.result-item:hover {
+  background: #f1f5f9;
 }
 
 /* =========================
-   MODAL SYSTEM (FORMS)
+   SELECT BOX
+========================= */
+.selected-box {
+  background: #0f172a;
+  color: white;
+  padding: 15px;
+  border-radius: 10px;
+  margin: 10px 0;
+}
+
+/* =========================
+   FORM BOX
+========================= */
+.form-box {
+  display: flex;
+  gap: 10px;
+  margin: 10px 0;
+}
+
+/* =========================
+   QUICK ACTIONS
+========================= */
+.action-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 15px;
+}
+
+.action-box {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  text-align: center;
+  text-decoration: none;
+  color: #0f172a;
+  font-weight: bold;
+  transition: 0.2s;
+}
+
+.action-box:hover {
+  transform: translateY(-5px);
+}
+
+/* =========================
+   MODAL
 ========================= */
 .modal {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.6);
-  backdrop-filter: blur(6px);
+  background: rgba(0,0,0,0.5);
   justify-content: center;
   align-items: center;
 }
 
 .modal-content {
-  width: 380px;
   background: white;
-  border-radius: 16px;
   padding: 25px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.25);
-}
-
-.modal-content h3 {
-  text-align: center;
-  margin-bottom: 15px;
-}
-
-.modal-content input,
-.modal-content select {
-  width: 100%;
-  padding: 12px;
-  margin: 8px 0;
-  border-radius: 10px;
-  border: 1px solid #e2e8f0;
-  outline: none;
-  background: #f8fafc;
-}
-
-.modal-content input:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
+  border-radius: 15px;
+  width: 380px;
 }
 
 /* =========================
-   STATUS BADGES
-========================= */
-.status {
-  padding: 5px 10px;
-  border-radius: 20px;
-  font-size: 12px;
-}
-
-.status.active {
-  background: #16a34a;
-  color: white;
-}
-
-.status.inactive {
-  background: #94a3b8;
-  color: white;
-}
-
-/* =========================
-   RESPONSIVE DESIGN
+   RESPONSIVE
 ========================= */
 @media (max-width: 768px) {
 
   .cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .action-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 
@@ -320,89 +338,4 @@ button {
   .main {
     margin-left: 90px;
   }
-
-  .sidebar .text,
-  .sidebar .logo {
-    display: none;
-  }
-}
-/* =========================
-   CLICKABLE CARDS
-========================= */
-.cards a.card {
-  text-decoration: none;
-  display: block;
-}
-
-/* =========================
-   QUICK ACTIONS SECTION
-========================= */
-.quick-actions {
-  margin-top: 30px;
-  color: white;
-}
-
-.quick-actions h3 {
-  margin-bottom: 10px;
-  color: #0f172a;
-}
-
-/* GRID */
-.action-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 15px;
-}
-
-/* BOX */
-.action-box {
-  background: white;
-  padding: 20px;
-  border-radius: 12px;
-  text-align: center;
-  text-decoration: none;
-  color: #0f172a;
-  font-weight: bold;
-  box-shadow: 0 10px 20px rgba(0,0,0,0.08);
-  transition: 0.2s;
-}
-
-.action-box:hover {
-  transform: translateY(-5px);
-  background: #f8fafc;
-}
-.search-container {
-  display: flex;
-  gap: 10px;
-}
-
-.search-results {
-  background: white;
-  border-radius: 10px;
-  margin-top: 5px;
-  max-height: 200px;
-  overflow-y: auto;
-}
-
-.result-item {
-  padding: 10px;
-  cursor: pointer;
-  border-bottom: 1px solid #eee;
-}
-
-.result-item:hover {
-  background: #f1f5f9;
-}
-
-.selected-box {
-  background: #0f172a;
-  color: white;
-  padding: 15px;
-  border-radius: 10px;
-  margin: 10px 0;
-}
-
-.form-box {
-  display: flex;
-  gap: 10px;
 }
