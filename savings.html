@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>Savings</title>
+  <title>Savings System</title>
 
   <link rel="stylesheet" href="css/style.css">
 </head>
@@ -14,7 +14,6 @@
 <aside class="sidebar" id="sidebar">
 
   <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
-
   <h2 class="logo">SACCO</h2>
 
   <nav class="nav">
@@ -32,29 +31,35 @@
 
   <h2>Savings Management</h2>
 
-  <!-- MEMBER SEARCH -->
-  <input type="text" id="searchMember" class="search-box"
-         placeholder="Search by Name / NID / Phone">
+  <!-- SEARCH -->
+  <div class="search-container">
 
-  <!-- SEARCH RESULT -->
+    <input type="text" id="searchMember" class="search-box"
+           placeholder="Search by Name / NID / Phone">
+
+    <button class="search-btn" onclick="manualSearch()">🔍 Search</button>
+
+  </div>
+
+  <!-- RESULTS -->
   <div id="searchResults" class="search-results"></div>
 
-  <!-- SELECTED MEMBER -->
+  <!-- SELECTED -->
   <div class="selected-box">
     <h3>Selected Member</h3>
     <p id="selectedMember">None</p>
   </div>
 
-  <!-- SAVING FORM -->
+  <!-- FORM -->
   <div class="form-box">
 
     <input type="number" id="amount" placeholder="Enter Amount">
 
-    <button class="add-btn" onclick="saveSaving()">Deposit Savings</button>
+    <button class="add-btn" onclick="saveSaving()">Deposit</button>
 
   </div>
 
-  <!-- HISTORY TABLE -->
+  <!-- HISTORY -->
   <h3>Saving History</h3>
 
   <table class="table">
