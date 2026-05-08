@@ -3,169 +3,209 @@ import {
   collection,
   addDoc,
   getDocs,
-  query,
-  where,
   deleteDoc,
+  updateDoc,
   doc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-const membersRef = collection(db, "members");
-const savingsRef = collection(db, "savings");
+/* =====================
+   STATE
+===================== */
+let editId = null;
+let cache = [];
 
-let allMembers = [];
+/* =====================
+   INIT
+===================== */
+document.addEventListener("DOMContentLoaded", () => {
+  loadMembers();
+  searchBox.addEventListener("input", searchMembers);
+});
 
-/* =========================
-   LOAD MEMBERS + SAVINGS TOTAL
-========================= */
-async function loadMembers() {
+/* =====================
+   MODAL
+===================== */
+window.openModal = () => {
+  editId = null;
+  clearForm();
+  modal.style.display = "flex";
+};
 
-  const membersSnap = await getDocs(membersRef);
-  const savingsSnap = await getDocs(savingsRef);
+window.closeModal = () => {
+  modal.style.display = "none";
+};
 
-  let savingsMap = {};
+/* =====================
+   VALIDATION
+===================== */
+function validate(name, phone, nid) {
 
-  savingsSnap.forEach(s => {
-    const data = s.data();
-    savingsMap[data.memberId] = (savingsMap[data.memberId] || 0) + Number(data.amount);
-  });
+  if (!name) return "Name is required";
 
-  allMembers = [];
+  if (!/^[0-9]{9}$/.test(phone)) {
+    return "Phone must be 9 digits";
+  }
 
-  membersSnap.forEach(m => {
-    allMembers.push({
-      id: m.id,
-      ...m.data(),
-      savings: savingsMap[m.id] || 0
-    });
-  });
+  if (!/^[0-9]{16}$/.test(nid)) {
+    return "National ID must be 16 digits";
+  }
 
-  render(allMembers);
+  return null;
 }
 
-loadMembers();
+/* =====================
+   SAVE MEMBER (ADD / EDIT)
+===================== */
+window.saveMember = async () => {
 
-/* =========================
-   RENDER TABLE
-========================= */
-function render(list) {
+  const name = document.getElementById("name").value.trim();
+  const phone = document.getElementById("phone").value.trim();
+  const nid = document.getElementById("nid").value.trim();
 
-  let html = "";
+  const error = validate(name, phone, nid);
+  if (error) return alert(error);
 
-  list.forEach(m => {
+  const snap = await getDocs(collection(db, "members"));
 
-    html += `
+  let duplicate = false;
+
+  snap.forEach(d => {
+    const m = d.data();
+
+    if (!editId) {
+      if (m.phone === phone || m.nid === nid) {
+        duplicate = true;
+      }
+    }
+  });
+
+  if (duplicate) {
+    return alert("Member already exists");
+  }
+
+  if (editId) {
+
+    await updateDoc(doc(db, "members", editId), {
+      name, phone, nid
+    });
+
+    alert("Updated");
+
+  } else {
+
+    await addDoc(collection(db, "members"), {
+      name,
+      phone,
+      nid,
+      createdAt: new Date()
+    });
+
+    alert("Added");
+  }
+
+  closeModal();
+  loadMembers();
+};
+
+/* =====================
+   LOAD MEMBERS
+===================== */
+async function loadMembers() {
+
+  const snap = await getDocs(collection(db, "members"));
+
+  cache = [];
+  memberTable.innerHTML = "";
+
+  snap.forEach(d => {
+
+    const m = d.data();
+
+    cache.push({
+      id: d.id,
+      name: m.name,
+      phone: m.phone,
+      nid: m.nid
+    });
+
+    memberTable.innerHTML += `
       <tr>
-        <td onclick="viewProfile('${m.id}')">${m.fullName}</td>
+        <td>${m.name}</td>
         <td>${m.phone}</td>
         <td>${m.nid}</td>
-        <td>${m.savings} ETB</td>
         <td>
-          <span class="status ${m.savings > 0 ? 'active' : 'inactive'}">
-            ${m.savings > 0 ? 'Active' : 'New'}
-          </span>
-        </td>
-        <td>
-          <button onclick="deleteMember('${m.id}')">Delete</button>
+          <button onclick="editMember('${d.id}')">Edit</button>
+          <button onclick="deleteMember('${d.id}')">Delete</button>
         </td>
       </tr>
     `;
   });
-
-  document.getElementById("membersTable").innerHTML = html;
 }
 
-/* =========================
-   SEARCH
-========================= */
-window.searchMembers = function () {
+/* =====================
+   EDIT MEMBER
+===================== */
+window.editMember = (id) => {
 
-  const val = document.getElementById("searchInput").value.toLowerCase();
+  const m = cache.find(x => x.id === id);
 
-  const filtered = allMembers.filter(m =>
-    m.fullName.toLowerCase().includes(val) ||
-    m.phone.includes(val) ||
-    m.nid.includes(val)
-  );
+  editId = id;
 
-  render(filtered);
+  name.value = m.name;
+  phone.value = m.phone;
+  nid.value = m.nid;
+
+  modal.style.display = "flex";
 };
 
-/* =========================
-   SAVE MEMBER (VALIDATION)
-========================= */
-window.saveMember = async function () {
+/* =====================
+   DELETE MEMBER
+===================== */
+window.deleteMember = async (id) => {
 
-  const fullName = document.getElementById("fullName").value.trim();
-  const email = document.getElementById("email").value.trim();
-  const phone = document.getElementById("phone").value.trim();
-  const nid = document.getElementById("nid").value.trim();
-
-  if (!fullName || !phone || !nid) {
-    alert("Required fields missing");
-    return;
-  }
-
-  if (!/^[0-9]{9}$/.test(phone)) {
-    alert("Phone must be 9 digits");
-    return;
-  }
-
-  if (!/^[0-9]{16}$/.test(nid)) {
-    alert("NID must be 16 digits");
-    return;
-  }
-
-  const nidCheck = await getDocs(query(membersRef, where("nid", "==", nid)));
-  if (!nidCheck.empty) return alert("NID already exists");
-
-  const phoneCheck = await getDocs(query(membersRef, where("phone", "==", phone)));
-  if (!phoneCheck.empty) return alert("Phone already exists");
-
-  await addDoc(membersRef, {
-    fullName,
-    email,
-    phone,
-    nid,
-    createdAt: new Date()
-  });
-
-  closeForm();
-  loadMembers();
-};
-
-/* =========================
-   DELETE
-========================= */
-window.deleteMember = async function (id) {
-  if (!confirm("Delete this member?")) return;
+  if (!confirm("Delete member?")) return;
 
   await deleteDoc(doc(db, "members", id));
+
   loadMembers();
 };
 
-/* =========================
-   PROFILE VIEW
-========================= */
-window.viewProfile = function (id) {
+/* =====================
+   SEARCH
+===================== */
+function searchMembers(e) {
 
-  const member = allMembers.find(m => m.id === id);
+  const value = e.target.value.toLowerCase();
 
-  document.getElementById("profileData").innerHTML = `
-    <p><b>Name:</b> ${member.fullName}</p>
-    <p><b>Phone:</b> ${member.phone}</p>
-    <p><b>NID:</b> ${member.nid}</p>
-    <p><b>Total Savings:</b> ${member.savings} ETB</p>
-  `;
+  memberTable.innerHTML = "";
 
-  document.getElementById("profileModal").style.display = "flex";
-};
+  cache
+    .filter(m =>
+      m.name.toLowerCase().includes(value) ||
+      m.phone.includes(value) ||
+      m.nid.includes(value)
+    )
+    .forEach(m => {
 
-window.closeProfile = function () {
-  document.getElementById("profileModal").style.display = "none";
-};
+      memberTable.innerHTML += `
+        <tr>
+          <td>${m.name}</td>
+          <td>${m.phone}</td>
+          <td>${m.nid}</td>
+          <td>
+            <button onclick="editMember('${m.id}')">Edit</button>
+            <button onclick="deleteMember('${m.id}')">Delete</button>
+          </td>
+        </tr>
+      `;
+    });
+}
 
-/* =========================
-   MODAL CONTROL
-========================= */
-window.openForm = () => document.getElementById("formModal").style.display = "flex";
-window.closeForm = () => document.getElementById("formModal").style.display = "none";
+/* =====================
+   CLEAR FORM
+===================== */
+function clearForm() {
+  name.value = "";
+  phone.value = "";
+  nid.value = "";
+}
