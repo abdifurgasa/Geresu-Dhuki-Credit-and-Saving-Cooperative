@@ -1,184 +1,71 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<title>SACCO Dashboard</title>
+  <meta charset="UTF-8">
+  <title data-i18n="dashboard">Dashboard</title>
 
-<link rel="stylesheet" href="css/layout.css">
-<link rel="stylesheet" href="css/components.css">
-
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
 
-<div class="layout">
-
   <!-- SIDEBAR -->
   <aside class="sidebar">
 
-    <div class="logo">
-      <h2>SACCO</h2>
-      <p>Admin Panel</p>
-    </div>
+    <!-- TOGGLE BUTTON -->
+    <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
 
-    <nav class="menu" id="sidebarMenu">
-      <ul>
+    <h2 data-i18n="dashboard">SACCO</h2>
 
-        <li data-role="admin cashier member" data-page="dashboard.html">
-          <a href="dashboard.html">
-            <i class="fas fa-home"></i>
-            <span>Dashboard</span>
-          </a>
-        </li>
+    <a href="dashboard.html" data-i18n="dashboard"></a>
+    <a href="members.html" data-i18n="members"></a>
+    <a href="savings.html" data-i18n="savings"></a>
+    <a href="loans.html" data-i18n="loans"></a>
+    <a href="reports.html" data-i18n="reports"></a>
+    <a href="transactions.html" data-i18n="transactions"></a>
+    <a href="settings.html" data-i18n="settings"></a>
 
-        <li data-role="admin cashier" data-page="members.html">
-          <a href="members.html">
-            <i class="fas fa-users"></i>
-            <span>Members</span>
-          </a>
-        </li>
-
-        <li data-role="admin cashier member" data-page="savings.html">
-          <a href="savings.html">
-            <i class="fas fa-piggy-bank"></i>
-            <span>Savings</span>
-          </a>
-        </li>
-
-        <li data-role="admin cashier" data-page="loans.html">
-          <a href="loans.html">
-            <i class="fas fa-hand-holding-dollar"></i>
-            <span>Loans</span>
-          </a>
-        </li>
-
-        <li data-role="admin cashier" data-page="transactions.html">
-          <a href="transactions.html">
-            <i class="fas fa-exchange-alt"></i>
-            <span>Transactions</span>
-          </a>
-        </li>
-
-        <li data-role="admin" data-page="reports.html">
-          <a href="reports.html">
-            <i class="fas fa-chart-line"></i>
-            <span>Reports</span>
-          </a>
-        </li>
-
-        <li data-role="admin cashier member" data-page="settings.html">
-          <a href="settings.html">
-            <i class="fas fa-cog"></i>
-            <span>Settings</span>
-          </a>
-        </li>
-
-      </ul>
-    </nav>
-
-    <div class="logout" onclick="logout()">
-      <i class="fas fa-sign-out-alt"></i>
-      <span>Logout</span>
-    </div>
+    <button class="logout" data-i18n="logout"></button>
 
   </aside>
 
   <!-- MAIN -->
   <main class="main">
 
-    <!-- TOPBAR -->
-    <header class="topbar">
-      <h2>Admin Dashboard</h2>
-      <div id="userRole">👤 Loading...</div>
-    </header>
+    <h1 data-i18n="overview"></h1>
+    <p data-i18n="welcome"></p>
 
-    <!-- CONTENT -->
-    <section class="content">
+    <!-- CARDS -->
+    <section class="cards">
 
-      <!-- CARDS -->
-      <div class="cards">
-
-        <div class="card members">
-          <div>
-            <p>Total Members</p>
-            <h2 id="membersCount">0</h2>
-          </div>
-        </div>
-
-        <div class="card savings">
-          <div>
-            <p>Total Savings</p>
-            <h2 id="savingsTotal">$0</h2>
-          </div>
-        </div>
-
-        <div class="card loans">
-          <div>
-            <p>Total Loans</p>
-            <h2 id="loansTotal">$0</h2>
-          </div>
-        </div>
-
-        <div class="card profit">
-          <div>
-            <p>Net Profit</p>
-            <h2 id="profitTotal">$0</h2>
-          </div>
-        </div>
-
+      <div class="card">
+        <h3 data-i18n="totalMembers"></h3>
+        <p id="members">0</p>
       </div>
 
-      <!-- CHARTS -->
-      <div class="charts-grid">
+      <div class="card">
+        <h3 data-i18n="totalSavings"></h3>
+        <p id="savings">0 ETB</p>
+      </div>
 
-        <div class="chart-box">
-          <h3>Savings Trend</h3>
-          <canvas id="savingsChart"></canvas>
-        </div>
+      <div class="card">
+        <h3 data-i18n="totalLoans"></h3>
+        <p id="loans">0 ETB</p>
+      </div>
 
-        <div class="chart-box">
-          <h3>Loans vs Repayments</h3>
-          <canvas id="loanChart"></canvas>
-        </div>
-
-        <div class="chart-box">
-          <h3>Members Growth</h3>
-          <canvas id="memberChart"></canvas>
-        </div>
-
+      <div class="card">
+        <h3 data-i18n="totalProfit"></h3>
+        <p id="profit">0 ETB</p>
       </div>
 
     </section>
 
   </main>
 
-
-
-<!-- FIREBASE -->
-<script type="module" src="js/firebase.js"></script>
-<script type="module" src="js/roleGuard.js"></script>
-<script type="module" src="js/dashboard.js"></script>
-<script type="module" src="js/analytics.js"></script>
-
-<script>
-/* =========================
-   LOGOUT
-========================= */
-function logout(){
-  localStorage.clear();
-  window.location.href = "index.html";
-}
-
-/* =========================
-   SHOW ROLE
-========================= */
-document.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("userRole").innerText =
-    "👤 " + (localStorage.getItem("role") || "guest");
-});
-</script>
+  <!-- SYSTEMS -->
+  <script src="js/i18n.js"></script>
+  <script type="module" src="js/dashboard.js"></script>
 
 </body>
+</html>
