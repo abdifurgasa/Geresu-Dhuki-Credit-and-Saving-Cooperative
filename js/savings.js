@@ -9,118 +9,117 @@ import {
    STATE
 ========================= */
 let selectedMember = null;
+let membersCache = [];
 
 /* =========================
-   SAFE INIT (IMPORTANT FIX)
+   INIT
 ========================= */
 document.addEventListener("DOMContentLoaded", () => {
 
-  const input = document.getElementById("searchMember");
+  document.getElementById("searchMember")
+    .addEventListener("input", liveSearch);
 
-  if (input) {
-    input.addEventListener("input", liveSearch);
-  }
-
+  loadMembersCache();
+  loadSavings();
 });
 
 /* =========================
-   LIVE SEARCH (FIXED)
+   LOAD MEMBERS ONCE
 ========================= */
-async function liveSearch(e) {
-
-  const value = e.target.value.toLowerCase().trim();
-
-  const resultsBox = document.getElementById("searchResults");
-  resultsBox.innerHTML = "";
-
-  if (value.length < 1) return;
+async function loadMembersCache() {
 
   const snap = await getDocs(collection(db, "members"));
 
-  snap.forEach(doc => {
-
+  membersCache = snap.docs.map(doc => {
     const m = doc.data();
 
-    const match =
-      (m.name || "").toLowerCase().includes(value) ||
-      (m.nid || "").includes(value) ||
-      (m.phone || "").includes(value);
-
-    if (match) {
-
-      const div = document.createElement("div");
-      div.className = "result-item";
-
-      div.textContent = `${m.name} | ${m.phone} | ${m.nid}`;
-
-      div.onclick = () => {
-        selectMember(m);
-        resultsBox.innerHTML = "";
-        document.getElementById("searchMember").value = "";
-      };
-
-      resultsBox.appendChild(div);
-    }
+    return {
+      name: m.name || "Unknown",
+      phone: m.phone || "No Phone",
+      nid: m.nid || "No NID"
+    };
   });
 }
 
 /* =========================
-   MANUAL SEARCH BUTTON
+   LIVE SEARCH
 ========================= */
-window.manualSearch = async function () {
+function liveSearch(e) {
 
-  const value = document.getElementById("searchMember").value.toLowerCase().trim();
-  const resultsBox = document.getElementById("searchResults");
+  const value = e.target.value.toLowerCase();
+  const box = document.getElementById("searchResults");
 
-  resultsBox.innerHTML = "";
+  box.innerHTML = "";
 
-  if (!value) {
-    alert("Please type search value");
+  if (!value) return;
+
+  const results = membersCache.filter(m =>
+    m.name.toLowerCase().includes(value) ||
+    m.phone.includes(value) ||
+    m.nid.includes(value)
+  );
+
+  if (results.length === 0) {
+    box.innerHTML = `<div class="result-item">No member found</div>`;
     return;
   }
 
-  const snap = await getDocs(collection(db, "members"));
+  results.forEach(m => {
+    const div = document.createElement("div");
+    div.className = "result-item";
 
-  let found = false;
+    div.textContent = `${m.name} | ${m.phone} | ${m.nid}`;
 
-  snap.forEach(doc => {
+    div.onclick = () => {
+      selectMember(m);
+      box.innerHTML = "";
+      document.getElementById("searchMember").value = "";
+    };
 
-    const m = doc.data();
-
-    const match =
-      (m.name || "").toLowerCase().includes(value) ||
-      (m.nid || "").includes(value) ||
-      (m.phone || "").includes(value);
-
-    if (match) {
-
-      found = true;
-
-      const div = document.createElement("div");
-      div.className = "result-item";
-
-      div.textContent = `${m.name} | ${m.phone} | ${m.nid}`;
-
-      div.onclick = () => {
-        selectMember(m);
-        resultsBox.innerHTML = "";
-        document.getElementById("searchMember").value = "";
-      };
-
-      resultsBox.appendChild(div);
-    }
+    box.appendChild(div);
   });
+}
 
-  if (!found) {
-    resultsBox.innerHTML = `<div class="result-item">No member found</div>`;
+/* =========================
+   MANUAL SEARCH
+========================= */
+window.manualSearch = function () {
+
+  const value = document.getElementById("searchMember").value.toLowerCase();
+  const box = document.getElementById("searchResults");
+
+  box.innerHTML = "";
+
+  const results = membersCache.filter(m =>
+    m.name.toLowerCase().includes(value) ||
+    m.phone.includes(value) ||
+    m.nid.includes(value)
+  );
+
+  if (results.length === 0) {
+    box.innerHTML = `<div class="result-item">No member found</div>`;
+    return;
   }
+
+  results.forEach(m => {
+    const div = document.createElement("div");
+    div.className = "result-item";
+
+    div.textContent = `${m.name} | ${m.phone} | ${m.nid}`;
+
+    div.onclick = () => {
+      selectMember(m);
+      box.innerHTML = "";
+    };
+
+    box.appendChild(div);
+  });
 };
 
 /* =========================
    SELECT MEMBER
 ========================= */
 function selectMember(m) {
-
   selectedMember = m;
 
   document.getElementById("selectedMember").innerText =
@@ -128,35 +127,44 @@ function selectMember(m) {
 }
 
 /* =========================
-   SAVE SAVINGS (UNCHANGED LOGIC)
+   SAVE DEPOSIT (FIXED)
 ========================= */
 window.saveSaving = async function () {
 
-  const amount = document.getElementById("amount").value;
+  try {
 
-  if (!selectedMember) {
-    alert("Select a member first");
-    return;
+    const amount = Number(document.getElementById("amount").value);
+
+    if (!selectedMember) {
+      alert("Select a member first");
+      return;
+    }
+
+    if (!amount || amount <= 0) {
+      alert("Enter valid amount");
+      return;
+    }
+
+    const docRef = await addDoc(collection(db, "savings"), {
+      memberName: selectedMember.name,
+      memberPhone: selectedMember.phone,
+      memberNID: selectedMember.nid,
+      amount: amount,
+      createdAt: new Date()
+    });
+
+    alert("Deposit saved successfully");
+
+    console.log("Saved ID:", docRef.id);
+
+    document.getElementById("amount").value = "";
+
+    loadSavings();
+
+  } catch (err) {
+    console.error("ERROR:", err);
+    alert("Saving failed: " + err.message);
   }
-
-  if (!amount || amount <= 0) {
-    alert("Enter valid amount");
-    return;
-  }
-
-  await addDoc(collection(db, "savings"), {
-    memberName: selectedMember.name,
-    memberNID: selectedMember.nid,
-    memberPhone: selectedMember.phone,
-    amount: Number(amount),
-    date: new Date()
-  });
-
-  alert("Saved successfully");
-
-  document.getElementById("amount").value = "";
-
-  loadSavings();
 };
 
 /* =========================
@@ -177,13 +185,11 @@ async function loadSavings() {
       <tr>
         <td>${s.memberName}</td>
         <td>${s.amount}</td>
-        <td>${new Date(s.date.seconds ? s.date.seconds * 1000 : s.date).toLocaleDateString()}</td>
+        <td>${new Date(s.createdAt?.seconds ? s.createdAt.seconds * 1000 : s.createdAt).toLocaleDateString()}</td>
       </tr>
     `;
   });
 }
-
-loadSavings();
 
 /* =========================
    SIDEBAR
