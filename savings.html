@@ -3,54 +3,34 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>Savings System</title>
+  <title>Savings Module</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
 
-<aside class="sidebar" id="sidebar">
-  <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
-  <h2 class="logo">SACCO</h2>
+<div class="container">
 
-  <nav class="nav">
-    <a href="dashboard.html" class="nav-item">📊 Dashboard</a>
-    <a href="members.html" class="nav-item">👥 Members</a>
-    <a href="savings.html" class="nav-item active">💰 Savings</a>
-    <a href="loans.html" class="nav-item">🏦 Loans</a>
-  </nav>
-</aside>
+  <h1>💰 Savings System</h1>
 
-<main class="main">
+  <!-- MEMBER SEARCH -->
+  <input id="searchMember" class="input"
+         placeholder="Search Member (Name / Phone / NID)">
 
-  <h2>Savings Management</h2>
+  <div id="results"></div>
 
-  <!-- SEARCH -->
-  <div class="search-container">
-
-    <input type="text" id="searchMember" class="search-box"
-           placeholder="Search Name / NID / Phone">
-
-    <button class="search-btn" onclick="manualSearch()">🔍 Search</button>
-
+  <!-- SELECTED MEMBER -->
+  <div id="selectedBox" class="selected-box">
+    No member selected
   </div>
 
-  <div id="searchResults" class="search-results"></div>
+  <!-- DEPOSIT FORM -->
+  <input id="amount" class="input" type="number" placeholder="Enter amount">
 
-  <!-- SELECTED -->
-  <div class="selected-box">
-    <h3>Selected Member</h3>
-    <p id="selectedMember">None</p>
-  </div>
-
-  <!-- DEPOSIT -->
-  <div class="form-box">
-    <input type="number" id="amount" placeholder="Enter Amount">
-    <button class="add-btn" onclick="saveSaving()">Deposit</button>
-  </div>
+  <button class="btn success" onclick="deposit()">Deposit</button>
 
   <!-- HISTORY -->
-  <h3>History</h3>
+  <h3>Transaction History</h3>
   <table class="table">
     <thead>
       <tr>
@@ -59,10 +39,11 @@
         <th>Date</th>
       </tr>
     </thead>
-    <tbody id="savingTable"></tbody>
+
+    <tbody id="historyTable"></tbody>
   </table>
 
-</main>
+</div>
 
 <script type="module" src="js/savings.js"></script>
 
