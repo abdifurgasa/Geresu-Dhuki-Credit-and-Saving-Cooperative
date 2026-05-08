@@ -1,86 +1,75 @@
 <!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>Members</title>
+<html lang="en">
 
-<link rel="stylesheet" href="css/layout.css">
-<link rel="stylesheet" href="css/components.css">
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<head>
+  <meta charset="UTF-8">
+  <title>Members</title>
+  <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
 
-<div class="layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
 
-<!-- SIDEBAR -->
-<aside class="sidebar">
+    <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
 
-  <div class="logo">
-    <h2>SACCO</h2>
-    <p>Members System</p>
-  </div>
+    <h2 class="logo">SACCO</h2>
 
-  <nav class="menu">
-    <ul>
-      <li><a href="dashboard.html"><i class="fas fa-home"></i><span>Dashboard</span></a></li>
-      <li class="active"><a href="members.html"><i class="fas fa-users"></i><span>Members</span></a></li>
-      <li><a href="loans.html"><i class="fas fa-hand-holding-dollar"></i><span>Loans</span></a></li>
-      <li><a href="savings.html"><i class="fas fa-piggy-bank"></i><span>Savings</span></a></li>
-    </ul>
-  </nav>
+    <nav class="nav">
+      <a href="dashboard.html" class="nav-item"><span class="icon">📊</span><span class="text">Dashboard</span></a>
+      <a href="members.html" class="nav-item active"><span class="icon">👥</span><span class="text">Members</span></a>
+      <a href="savings.html" class="nav-item"><span class="icon">💰</span><span class="text">Savings</span></a>
+      <a href="loans.html" class="nav-item"><span class="icon">🏦</span><span class="text">Loans</span></a>
+      <a href="reports.html" class="nav-item"><span class="icon">📄</span><span class="text">Reports</span></a>
+    </nav>
 
-</aside>
+  </aside>
 
-<!-- MAIN -->
-<main class="main">
+  <!-- MAIN -->
+  <main class="main">
 
-  <div class="topbar">
-    <h2>Members Management</h2>
-  </div>
+    <h1>Members</h1>
 
-  <section class="content">
-
-    <!-- FORM -->
-    <div class="card">
-
-      <h3>Add New Member</h3>
-
-      <input id="name" type="text" placeholder="Full Name">
-      <input id="phone" type="text" placeholder="Phone Number">
-      <input id="nid" type="text" placeholder="National ID">
-
-      <button onclick="addMember()">Save Member</button>
-
-    </div>
+    <!-- ADD BUTTON -->
+    <button class="add-btn" onclick="openForm()">+ Add Member</button>
 
     <!-- TABLE -->
-    <div class="table-box">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Full Name</th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th>National ID</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="membersTable"></tbody>
+    </table>
 
-      <h3>Members List</h3>
+  </main>
 
-      <table>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Phone</th>
-            <th>National ID</th>
-            <th>Action</th>
-          </tr>
-        </thead>
+  <!-- MODAL FORM -->
+  <div class="modal" id="formModal">
 
-        <tbody id="memberTable"></tbody>
-      </table>
+    <div class="modal-content">
+
+      <h3>Register Member</h3>
+
+      <input type="text" id="fullName" placeholder="Full Name">
+      <input type="email" id="email" placeholder="Email">
+      <input type="text" id="phone" placeholder="Phone Number">
+      <input type="text" id="nid" placeholder="National ID">
+
+      <button onclick="saveMember()">Save</button>
+      <button onclick="closeForm()">Cancel</button>
 
     </div>
 
-  </section>
+  </div>
 
-</main>
-
-</div>
-
-<script type="module" src="js/members.js"></script>
+  <script type="module" src="js/members.js"></script>
 
 </body>
 </html>
