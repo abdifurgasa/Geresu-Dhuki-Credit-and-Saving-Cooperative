@@ -6,41 +6,57 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 /* =========================
-   GLOBAL STATE
+   STATE
 ========================= */
 let selectedMember = null;
 
 /* =========================
-   LIVE SEARCH (optional UX)
+   SAFE INIT (IMPORTANT FIX)
 ========================= */
-document.getElementById("searchMember").addEventListener("input", liveSearch);
+document.addEventListener("DOMContentLoaded", () => {
 
-async function liveSearch() {
-  const value = this.value.toLowerCase();
-  if (!value) return;
+  const input = document.getElementById("searchMember");
+
+  if (input) {
+    input.addEventListener("input", liveSearch);
+  }
+
+});
+
+/* =========================
+   LIVE SEARCH (FIXED)
+========================= */
+async function liveSearch(e) {
+
+  const value = e.target.value.toLowerCase().trim();
 
   const resultsBox = document.getElementById("searchResults");
   resultsBox.innerHTML = "";
 
+  if (value.length < 1) return;
+
   const snap = await getDocs(collection(db, "members"));
 
   snap.forEach(doc => {
+
     const m = doc.data();
 
     const match =
-      m.name.toLowerCase().includes(value) ||
-      m.nid.includes(value) ||
-      m.phone.includes(value);
+      (m.name || "").toLowerCase().includes(value) ||
+      (m.nid || "").includes(value) ||
+      (m.phone || "").includes(value);
 
     if (match) {
+
       const div = document.createElement("div");
       div.className = "result-item";
 
-      div.innerText = `${m.name} | ${m.phone} | ${m.nid}`;
+      div.textContent = `${m.name} | ${m.phone} | ${m.nid}`;
 
       div.onclick = () => {
         selectMember(m);
         resultsBox.innerHTML = "";
+        document.getElementById("searchMember").value = "";
       };
 
       resultsBox.appendChild(div);
@@ -53,13 +69,13 @@ async function liveSearch() {
 ========================= */
 window.manualSearch = async function () {
 
-  const value = document.getElementById("searchMember").value.toLowerCase();
+  const value = document.getElementById("searchMember").value.toLowerCase().trim();
   const resultsBox = document.getElementById("searchResults");
 
   resultsBox.innerHTML = "";
 
   if (!value) {
-    alert("Type something to search");
+    alert("Please type search value");
     return;
   }
 
@@ -68,24 +84,27 @@ window.manualSearch = async function () {
   let found = false;
 
   snap.forEach(doc => {
+
     const m = doc.data();
 
     const match =
-      m.name.toLowerCase().includes(value) ||
-      m.nid.includes(value) ||
-      m.phone.includes(value);
+      (m.name || "").toLowerCase().includes(value) ||
+      (m.nid || "").includes(value) ||
+      (m.phone || "").includes(value);
 
     if (match) {
+
       found = true;
 
       const div = document.createElement("div");
       div.className = "result-item";
 
-      div.innerText = `${m.name} | ${m.phone} | ${m.nid}`;
+      div.textContent = `${m.name} | ${m.phone} | ${m.nid}`;
 
       div.onclick = () => {
         selectMember(m);
         resultsBox.innerHTML = "";
+        document.getElementById("searchMember").value = "";
       };
 
       resultsBox.appendChild(div);
@@ -101,6 +120,7 @@ window.manualSearch = async function () {
    SELECT MEMBER
 ========================= */
 function selectMember(m) {
+
   selectedMember = m;
 
   document.getElementById("selectedMember").innerText =
@@ -108,14 +128,14 @@ function selectMember(m) {
 }
 
 /* =========================
-   SAVE SAVINGS
+   SAVE SAVINGS (UNCHANGED LOGIC)
 ========================= */
 window.saveSaving = async function () {
 
   const amount = document.getElementById("amount").value;
 
   if (!selectedMember) {
-    alert("Please select a member first");
+    alert("Select a member first");
     return;
   }
 
@@ -132,7 +152,7 @@ window.saveSaving = async function () {
     date: new Date()
   });
 
-  alert("Savings saved successfully");
+  alert("Saved successfully");
 
   document.getElementById("amount").value = "";
 
@@ -153,22 +173,20 @@ async function loadSavings() {
 
     const s = doc.data();
 
-    const row = `
+    table.innerHTML += `
       <tr>
         <td>${s.memberName}</td>
         <td>${s.amount}</td>
         <td>${new Date(s.date.seconds ? s.date.seconds * 1000 : s.date).toLocaleDateString()}</td>
       </tr>
     `;
-
-    table.innerHTML += row;
   });
 }
 
 loadSavings();
 
 /* =========================
-   SIDEBAR TOGGLE
+   SIDEBAR
 ========================= */
 window.toggleSidebar = function () {
   document.getElementById("sidebar").classList.toggle("collapsed");
