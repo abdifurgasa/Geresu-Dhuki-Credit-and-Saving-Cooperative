@@ -4,15 +4,12 @@
 <head>
   <meta charset="UTF-8">
   <title>Savings System</title>
-
   <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
 
-<!-- SIDEBAR -->
 <aside class="sidebar" id="sidebar">
-
   <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
   <h2 class="logo">SACCO</h2>
 
@@ -21,12 +18,9 @@
     <a href="members.html" class="nav-item">👥 Members</a>
     <a href="savings.html" class="nav-item active">💰 Savings</a>
     <a href="loans.html" class="nav-item">🏦 Loans</a>
-    <a href="reports.html" class="nav-item">📄 Reports</a>
   </nav>
-
 </aside>
 
-<!-- MAIN -->
 <main class="main">
 
   <h2>Savings Management</h2>
@@ -35,13 +29,12 @@
   <div class="search-container">
 
     <input type="text" id="searchMember" class="search-box"
-           placeholder="Search by Name / NID / Phone">
+           placeholder="Search Name / NID / Phone">
 
     <button class="search-btn" onclick="manualSearch()">🔍 Search</button>
 
   </div>
 
-  <!-- RESULTS -->
   <div id="searchResults" class="search-results"></div>
 
   <!-- SELECTED -->
@@ -50,18 +43,14 @@
     <p id="selectedMember">None</p>
   </div>
 
-  <!-- FORM -->
+  <!-- DEPOSIT -->
   <div class="form-box">
-
     <input type="number" id="amount" placeholder="Enter Amount">
-
     <button class="add-btn" onclick="saveSaving()">Deposit</button>
-
   </div>
 
   <!-- HISTORY -->
-  <h3>Saving History</h3>
-
+  <h3>History</h3>
   <table class="table">
     <thead>
       <tr>
