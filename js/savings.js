@@ -6,28 +6,25 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 /* =========================
-   SELECTED MEMBER
+   GLOBAL STATE
 ========================= */
 let selectedMember = null;
 
 /* =========================
-   SEARCH MEMBERS
+   LIVE SEARCH (optional UX)
 ========================= */
-const searchInput = document.getElementById("searchMember");
-const resultsBox = document.getElementById("searchResults");
+document.getElementById("searchMember").addEventListener("input", liveSearch);
 
-searchInput.addEventListener("input", async function () {
-
+async function liveSearch() {
   const value = this.value.toLowerCase();
-
-  resultsBox.innerHTML = "";
-
   if (!value) return;
+
+  const resultsBox = document.getElementById("searchResults");
+  resultsBox.innerHTML = "";
 
   const snap = await getDocs(collection(db, "members"));
 
   snap.forEach(doc => {
-
     const m = doc.data();
 
     const match =
@@ -42,24 +39,78 @@ searchInput.addEventListener("input", async function () {
       div.innerText = `${m.name} | ${m.phone} | ${m.nid}`;
 
       div.onclick = () => {
-        selectedMember = m;
-
-        document.getElementById("selectedMember").innerText =
-          `${m.name} (${m.phone})`;
-
+        selectMember(m);
         resultsBox.innerHTML = "";
-        searchInput.value = "";
       };
 
       resultsBox.appendChild(div);
     }
   });
-});
+}
+
+/* =========================
+   MANUAL SEARCH BUTTON
+========================= */
+window.manualSearch = async function () {
+
+  const value = document.getElementById("searchMember").value.toLowerCase();
+  const resultsBox = document.getElementById("searchResults");
+
+  resultsBox.innerHTML = "";
+
+  if (!value) {
+    alert("Type something to search");
+    return;
+  }
+
+  const snap = await getDocs(collection(db, "members"));
+
+  let found = false;
+
+  snap.forEach(doc => {
+    const m = doc.data();
+
+    const match =
+      m.name.toLowerCase().includes(value) ||
+      m.nid.includes(value) ||
+      m.phone.includes(value);
+
+    if (match) {
+      found = true;
+
+      const div = document.createElement("div");
+      div.className = "result-item";
+
+      div.innerText = `${m.name} | ${m.phone} | ${m.nid}`;
+
+      div.onclick = () => {
+        selectMember(m);
+        resultsBox.innerHTML = "";
+      };
+
+      resultsBox.appendChild(div);
+    }
+  });
+
+  if (!found) {
+    resultsBox.innerHTML = `<div class="result-item">No member found</div>`;
+  }
+};
+
+/* =========================
+   SELECT MEMBER
+========================= */
+function selectMember(m) {
+  selectedMember = m;
+
+  document.getElementById("selectedMember").innerText =
+    `${m.name} (${m.phone})`;
+}
 
 /* =========================
    SAVE SAVINGS
 ========================= */
-window.saveSaving = async () => {
+window.saveSaving = async function () {
 
   const amount = document.getElementById("amount").value;
 
@@ -81,7 +132,7 @@ window.saveSaving = async () => {
     date: new Date()
   });
 
-  alert("Saving recorded successfully");
+  alert("Savings saved successfully");
 
   document.getElementById("amount").value = "";
 
@@ -89,7 +140,7 @@ window.saveSaving = async () => {
 };
 
 /* =========================
-   LOAD SAVINGS HISTORY
+   LOAD HISTORY
 ========================= */
 async function loadSavings() {
 
