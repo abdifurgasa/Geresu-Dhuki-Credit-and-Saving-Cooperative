@@ -2,7 +2,7 @@ import { db } from "./firebase.js";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 /* =========================
-   LOAD DASHBOARD DATA
+   FIREBASE DASHBOARD DATA
 ========================= */
 async function loadDashboard() {
   try {
@@ -17,16 +17,34 @@ async function loadDashboard() {
       document.getElementById("loans").innerText = (data.loans || 0) + " ETB";
       document.getElementById("profit").innerText = (data.profit || 0) + " ETB";
     }
-  } catch (err) {
-    console.error(err);
+  } catch (e) {
+    console.error(e);
   }
 }
 
 loadDashboard();
 
 /* =========================
-   SIDEBAR TOGGLE
+   SIDEBAR COLLAPSE (WITH MEMORY)
 ========================= */
+const sidebar = document.getElementById("sidebar");
+
+if (localStorage.getItem("sidebar") === "collapsed") {
+  sidebar.classList.add("collapsed");
+}
+
 window.toggleSidebar = function () {
-  document.querySelector(".sidebar").classList.toggle("collapsed");
+  sidebar.classList.toggle("collapsed");
+
+  localStorage.setItem(
+    "sidebar",
+    sidebar.classList.contains("collapsed") ? "collapsed" : "expanded"
+  );
 };
+
+/* ACTIVE MENU */
+document.querySelectorAll(".nav-item").forEach(link => {
+  if (link.href === window.location.href) {
+    link.classList.add("active");
+  }
+});
