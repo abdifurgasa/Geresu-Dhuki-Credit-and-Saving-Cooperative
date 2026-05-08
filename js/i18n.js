@@ -1,4 +1,6 @@
-/* LANGUAGE DATA */
+/* =========================
+   LANGUAGE DATA
+========================= */
 const translations = {
   EN: {
     dashboard: "Dashboard",
@@ -58,28 +60,43 @@ const translations = {
   }
 };
 
-/* CURRENT LANG */
+/* =========================
+   CURRENT LANGUAGE
+========================= */
 let currentLang = localStorage.getItem("lang") || "EN";
 
-/* APPLY TRANSLATION */
-function applyTranslations(){
-  document.querySelectorAll("[data-i18n]").forEach(el=>{
-    let key = el.getAttribute("data-i18n");
-    el.innerText = translations[currentLang][key] || key;
+/* =========================
+   APPLY TRANSLATION
+========================= */
+function applyTranslations() {
+  document.querySelectorAll("[data-i18n]").forEach(el => {
+    const key = el.getAttribute("data-i18n");
+    el.innerText = translations[currentLang]?.[key] || key;
   });
 
-  document.getElementById("langText").innerText = currentLang;
+  // SAFE (no crash if element not exists)
+  const langText = document.getElementById("langText");
+  if (langText) langText.innerText = currentLang;
+
+  const langSelect = document.getElementById("langSelect");
+  if (langSelect) langSelect.value = currentLang;
 }
 
-/* CHANGE LANGUAGE */
-function changeLang(){
-  if(currentLang === "EN") currentLang = "AM";
-  else if(currentLang === "AM") currentLang = "OR";
-  else currentLang = "EN";
-
-  localStorage.setItem("lang", currentLang);
+/* =========================
+   CHANGE LANGUAGE (GLOBAL)
+========================= */
+function changeLang(lang) {
+  currentLang = lang;
+  localStorage.setItem("lang", lang);
   applyTranslations();
 }
 
-/* INIT */
+/* =========================
+   INIT
+========================= */
 document.addEventListener("DOMContentLoaded", applyTranslations);
+
+/* =========================
+   MAKE GLOBAL FOR HTML
+========================= */
+window.changeLang = changeLang;
