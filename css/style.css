@@ -339,3 +339,62 @@ body {
     margin-left: 90px;
   }
 }
+body {
+  font-family: Arial;
+  background: #f1f5f9;
+}
+
+.container {
+  width: 90%;
+  margin: auto;
+}
+
+h1 {
+  text-align: center;
+  margin: 20px 0;
+}
+
+.input {
+  width: 100%;
+  padding: 10px;
+  margin: 8px 0;
+}
+
+.btn {
+  padding: 10px 15px;
+  border: none;
+  cursor: pointer;
+  margin: 5px;
+}
+
+.primary { background: #2563eb; color: white; }
+.success { background: green; color: white; }
+.danger { background: red; color: white; }
+
+.table {
+  width: 100%;
+  background: white;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+
+.table th, .table td {
+  padding: 12px;
+  border-bottom: 1px solid #ddd;
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-box {
+  background: white;
+  padding: 20px;
+  width: 320px;
+  border-radius: 10px;
+}
