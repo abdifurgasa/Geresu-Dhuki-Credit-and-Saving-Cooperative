@@ -1,86 +1,202 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <title data-i18n="dashboard">SACCO Login</title>
 
-<title>SACCO Login</title>
+  <link rel="stylesheet" href="css/style.css">
 
-<style>
-body{
-  margin:0;
-  height:100vh;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  font-family:Segoe UI;
-  background:linear-gradient(135deg,#4e73df,#1cc88a);
-}
+  <style>
+    /* =========================
+       BACKGROUND
+    ========================= */
+    body {
+      margin: 0;
+      height: 100vh;
+      font-family: Arial, sans-serif;
+      background: url("assets/images/background.jpg") no-repeat center center/cover;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
 
-.box{
-  width:350px;
-  background:#fff;
-  padding:30px;
-  border-radius:12px;
-  box-shadow:0 10px 25px rgba(0,0,0,0.2);
-}
+    /* DARK OVERLAY */
+    body::before {
+      content: "";
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.6);
+      z-index: 0;
+    }
 
-h2{
-  text-align:center;
-  margin-bottom:20px;
-}
+    /* =========================
+       FLOATING ANIMATION LAYER
+    ========================= */
+    .bg-animation {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      z-index: 0;
+    }
 
-input{
-  width:100%;
-  padding:10px;
-  margin:10px 0;
-  border:1px solid #ddd;
-  border-radius:8px;
-}
+    .bg-animation span {
+      position: absolute;
+      display: block;
+      width: 20px;
+      height: 20px;
+      background: rgba(255,255,255,0.08);
+      animation: float 20s linear infinite;
+      bottom: -150px;
+      border-radius: 50%;
+    }
 
-button{
-  width:100%;
-  padding:10px;
-  background:#4e73df;
-  border:none;
-  color:#fff;
-  border-radius:8px;
-  cursor:pointer;
-  font-size:16px;
-}
+    .bg-animation span:nth-child(1) { left: 10%; width: 40px; height: 40px; animation-delay: 0s; }
+    .bg-animation span:nth-child(2) { left: 20%; animation-delay: 2s; }
+    .bg-animation span:nth-child(3) { left: 35%; width: 60px; height: 60px; animation-delay: 4s; }
+    .bg-animation span:nth-child(4) { left: 50%; animation-delay: 0s; }
+    .bg-animation span:nth-child(5) { left: 70%; animation-delay: 3s; }
+    .bg-animation span:nth-child(6) { left: 85%; width: 30px; height: 30px; animation-delay: 5s; }
 
-button:hover{
-  background:#2e59d9;
-}
+    @keyframes float {
+      0% { transform: translateY(0) scale(1); opacity: 1; }
+      100% { transform: translateY(-1000px) scale(1.5); opacity: 0; }
+    }
 
-.msg{
-  text-align:center;
-  margin-top:10px;
-  font-size:13px;
-  color:red;
-}
-</style>
+    /* =========================
+       LOGIN CARD (GLASS STYLE)
+    ========================= */
+    .login-box {
+      position: relative;
+      z-index: 2;
+      width: 360px;
+      padding: 30px;
+      border-radius: 16px;
 
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+
+      border: 1px solid rgba(255,255,255,0.2);
+      box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+
+      text-align: center;
+
+      animation: fadeIn 1s ease;
+    }
+
+    @keyframes fadeIn {
+      from {
+        transform: translateY(30px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    /* TITLE */
+    .login-box h2 {
+      color: white;
+      margin-bottom: 10px;
+    }
+
+    .login-box p {
+      color: #ddd;
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+
+    /* INPUTS */
+    .login-box input {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      border: none;
+      border-radius: 8px;
+      outline: none;
+    }
+
+    /* BUTTON */
+    .login-btn {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      background: #0f172a;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .login-btn:hover {
+      background: #1e293b;
+      transform: scale(1.03);
+    }
+
+    /* LANGUAGE */
+    .lang {
+      margin-top: 15px;
+      color: white;
+      font-size: 13px;
+    }
+
+    .lang button {
+      margin: 3px;
+      padding: 5px 10px;
+      border: 1px solid white;
+      background: transparent;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .lang button:hover {
+      background: white;
+      color: black;
+    }
+  </style>
 </head>
 
 <body>
 
-<div class="box">
+  <!-- FLOATING BACKGROUND ELEMENTS -->
+  <div class="bg-animation">
+    <span></span><span></span><span></span>
+    <span></span><span></span><span></span>
+  </div>
 
-  <h2>SACCO Login</h2>
+  <!-- LOGIN BOX -->
+  <div class="login-box">
 
-  <input type="email" id="email" placeholder="Email">
-  <input type="password" id="password" placeholder="Password">
+    <h2 data-i18n="dashboard">SACCO LOGIN</h2>
 
-  <button onclick="login()" type="button">Login</button>
+    <p data-i18n="welcome">Welcome back</p>
 
-  <div class="msg" id="msg"></div>
+    <input type="text" placeholder="Username">
+    <input type="password" placeholder="Password">
 
-</div>
+    <button class="login-btn">Login</button>
 
-<!-- FIREBASE -->
-<script type="module" src="js/firebase.js"></script>
-<script type="module" src="js/login.js"></script>
+    <!-- LANGUAGE SWITCH -->
+    <div class="lang">
+      <button onclick="changeLang('EN')">EN</button>
+      <button onclick="changeLang('AM')">AM</button>
+      <button onclick="changeLang('OR')">OR</button>
+
+      <div>Lang: <span id="langText">EN</span></div>
+    </div>
+
+  </div>
+
+  <!-- I18N SYSTEM -->
+  <script src="js/i18n.js"></script>
 
 </body>
 </html>
