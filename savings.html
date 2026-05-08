@@ -10,63 +10,67 @@
 
 <body>
 
-  <!-- SIDEBAR -->
-  <aside class="sidebar" id="sidebar">
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
 
-    <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+  <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
 
-    <h2 class="logo">SACCO</h2>
+  <h2 class="logo">SACCO</h2>
 
-    <nav class="nav">
-      <a href="dashboard.html" class="nav-item"><span class="icon">📊</span><span class="text">Dashboard</span></a>
-      <a href="members.html" class="nav-item"><span class="icon">👥</span><span class="text">Members</span></a>
-      <a href="savings.html" class="nav-item active"><span class="icon">💰</span><span class="text">Savings</span></a>
-      <a href="loans.html" class="nav-item"><span class="icon">🏦</span><span class="text">Loans</span></a>
-      <a href="reports.html" class="nav-item"><span class="icon">📄</span><span class="text">Reports</span></a>
-    </nav>
+  <nav class="nav">
+    <a href="dashboard.html" class="nav-item">📊 Dashboard</a>
+    <a href="members.html" class="nav-item">👥 Members</a>
+    <a href="savings.html" class="nav-item active">💰 Savings</a>
+    <a href="loans.html" class="nav-item">🏦 Loans</a>
+    <a href="reports.html" class="nav-item">📄 Reports</a>
+  </nav>
 
-  </aside>
+</aside>
 
-  <!-- MAIN -->
-  <main class="main">
+<!-- MAIN -->
+<main class="main">
 
-    <h1>Savings</h1>
+  <h2>Savings Management</h2>
 
-    <!-- DEPOSIT FORM -->
-    <div class="card-form">
+  <!-- MEMBER SEARCH -->
+  <input type="text" id="searchMember" class="search-box"
+         placeholder="Search by Name / NID / Phone">
 
-      <select id="memberSelect"></select>
+  <!-- SEARCH RESULT -->
+  <div id="searchResults" class="search-results"></div>
 
-      <input type="number" id="amount" placeholder="Enter amount">
+  <!-- SELECTED MEMBER -->
+  <div class="selected-box">
+    <h3>Selected Member</h3>
+    <p id="selectedMember">None</p>
+  </div>
 
-      <button onclick="addSaving()">Deposit</button>
+  <!-- SAVING FORM -->
+  <div class="form-box">
 
-    </div>
+    <input type="number" id="amount" placeholder="Enter Amount">
 
-    <!-- TOTAL INFO -->
-    <div class="summary">
-      <h3>Total Savings: <span id="totalSavings">0 ETB</span></h3>
-    </div>
+    <button class="add-btn" onclick="saveSaving()">Deposit Savings</button>
 
-    <!-- TABLE -->
-    <table class="table">
+  </div>
 
-      <thead>
-        <tr>
-          <th>Member</th>
-          <th>Amount</th>
-          <th>Date</th>
-          <th>Action</th>
-        </tr>
-      </thead>
+  <!-- HISTORY TABLE -->
+  <h3>Saving History</h3>
 
-      <tbody id="savingsTable"></tbody>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Member</th>
+        <th>Amount</th>
+        <th>Date</th>
+      </tr>
+    </thead>
+    <tbody id="savingTable"></tbody>
+  </table>
 
-    </table>
+</main>
 
-  </main>
-
-  <script type="module" src="js/savings.js"></script>
+<script type="module" src="js/savings.js"></script>
 
 </body>
 </html>
