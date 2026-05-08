@@ -23,7 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 /* =====================
-   MODAL
+   OPEN / CLOSE MODAL
 ===================== */
 window.openModal = () => {
   editId = null;
@@ -36,25 +36,25 @@ window.closeModal = () => {
 };
 
 /* =====================
-   VALIDATION
+   VALIDATION RULES
 ===================== */
 function validate(name, phone, nid) {
 
   if (!name) return "Name is required";
 
   if (!/^[0-9]{9}$/.test(phone)) {
-    return "Phone must be 9 digits";
+    return "Phone must be exactly 9 digits";
   }
 
   if (!/^[0-9]{16}$/.test(nid)) {
-    return "National ID must be 16 digits";
+    return "NID must be exactly 16 digits";
   }
 
   return null;
 }
 
 /* =====================
-   SAVE MEMBER (ADD / EDIT)
+   SAVE MEMBER
 ===================== */
 window.saveMember = async () => {
 
@@ -80,7 +80,7 @@ window.saveMember = async () => {
   });
 
   if (duplicate) {
-    return alert("Member already exists");
+    return alert("Member already exists (Phone or NID duplicate)");
   }
 
   if (editId) {
@@ -88,8 +88,6 @@ window.saveMember = async () => {
     await updateDoc(doc(db, "members", editId), {
       name, phone, nid
     });
-
-    alert("Updated");
 
   } else {
 
@@ -99,8 +97,6 @@ window.saveMember = async () => {
       nid,
       createdAt: new Date()
     });
-
-    alert("Added");
   }
 
   closeModal();
@@ -163,7 +159,7 @@ window.editMember = (id) => {
 ===================== */
 window.deleteMember = async (id) => {
 
-  if (!confirm("Delete member?")) return;
+  if (!confirm("Delete this member?")) return;
 
   await deleteDoc(doc(db, "members", id));
 
@@ -171,7 +167,7 @@ window.deleteMember = async (id) => {
 };
 
 /* =====================
-   SEARCH
+   SEARCH SYSTEM
 ===================== */
 function searchMembers(e) {
 
