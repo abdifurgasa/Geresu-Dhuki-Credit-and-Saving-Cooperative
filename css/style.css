@@ -131,3 +131,47 @@ body {
   background: #2563eb;
   color: white;
 }
+/* TABLE */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.table th, .table td {
+  padding: 12px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+/* ADD BUTTON */
+.add-btn {
+  background: #2563eb;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* MODAL */
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  width: 320px;
+}
+
+.modal-content input {
+  width: 100%;
+  padding: 8px;
+  margin: 6px 0;
+}
