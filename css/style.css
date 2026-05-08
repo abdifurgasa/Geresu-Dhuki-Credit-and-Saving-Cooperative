@@ -1,10 +1,21 @@
-body {
+/* =========================
+   GLOBAL RESET
+========================= */
+* {
   margin: 0;
-  font-family: Arial;
-  background: linear-gradient(135deg, #e0f2fe, #f8fafc);
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Segoe UI", sans-serif;
 }
 
-/* SIDEBAR */
+body {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+/* =========================
+   SIDEBAR
+========================= */
 .sidebar {
   position: fixed;
   width: 240px;
@@ -24,9 +35,10 @@ body {
 .logo {
   text-align: center;
   margin-bottom: 20px;
+  font-size: 20px;
 }
 
-/* NAV */
+/* NAVIGATION */
 .nav {
   display: flex;
   flex-direction: column;
@@ -38,18 +50,24 @@ body {
   align-items: center;
   gap: 12px;
   padding: 10px;
+  border-radius: 10px;
   color: #cbd5e1;
   text-decoration: none;
-  border-radius: 10px;
+  transition: 0.2s;
 }
 
 .nav-item:hover {
   background: #1e293b;
 }
 
+.nav-item.active {
+  background: #2563eb;
+  color: white;
+}
+
 /* ICON */
 .icon {
-  font-size: 20px;
+  font-size: 18px;
 }
 
 /* COLLAPSE TEXT */
@@ -62,7 +80,7 @@ body {
   justify-content: center;
 }
 
-/* TOGGLE */
+/* TOGGLE BUTTON */
 .toggle-btn {
   background: #1e293b;
   color: white;
@@ -73,7 +91,9 @@ body {
   margin-bottom: 10px;
 }
 
-/* MAIN */
+/* =========================
+   MAIN AREA
+========================= */
 .main {
   margin-left: 260px;
   padding: 20px;
@@ -84,63 +104,79 @@ body {
   margin-left: 90px;
 }
 
-/* TOPBAR */
+/* =========================
+   TOPBAR
+========================= */
 .topbar {
   display: flex;
-  justify-content: flex-end;
-  gap: 15px;
+  justify-content: space-between;
+  align-items: center;
   background: white;
-  padding: 10px;
-  border-radius: 10px;
-  margin-bottom: 20px;
+  padding: 12px;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
 }
 
-.role-indicator {
-  background: #0f172a;
-  color: white;
-  padding: 6px 12px;
-  border-radius: 20px;
-}
-
-/* LANGUAGE */
-.lang-box select {
-  padding: 6px;
-  border-radius: 8px;
-}
-
-/* CARDS */
+/* =========================
+   DASHBOARD CARDS
+========================= */
 .cards {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 15px;
+  margin-top: 20px;
 }
 
 .card {
   padding: 20px;
-  border-radius: 14px;
+  border-radius: 15px;
   color: white;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+  transition: 0.2s;
 }
 
-.card:nth-child(1) { background: #2563eb; }
-.card:nth-child(2) { background: #16a34a; }
-.card:nth-child(3) { background: #f97316; }
-.card:nth-child(4) { background: #8b5cf6; }
-
-/* ACTIVE */
-.nav-item.active {
-  background: #2563eb;
-  color: white;
+.card:hover {
+  transform: translateY(-3px);
 }
-/* TABLE */
+
+.card.blue { background: linear-gradient(135deg, #2563eb, #1d4ed8); }
+.card.green { background: linear-gradient(135deg, #16a34a, #15803d); }
+.card.orange { background: linear-gradient(135deg, #f97316, #ea580c); }
+.card.purple { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+
+/* =========================
+   TABLES
+========================= */
 .table {
   width: 100%;
+  margin-top: 15px;
   border-collapse: collapse;
-  margin-top: 20px;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
 }
 
-.table th, .table td {
+.table th {
+  background: #0f172a;
+  color: white;
+  padding: 12px;
+  text-align: left;
+}
+
+.table td {
   padding: 12px;
   border-bottom: 1px solid #e2e8f0;
+}
+
+.table tr:hover {
+  background: #f8fafc;
+}
+
+/* =========================
+   BUTTONS
+========================= */
+button {
+  cursor: pointer;
 }
 
 /* ADD BUTTON */
@@ -149,57 +185,136 @@ body {
   color: white;
   padding: 10px 15px;
   border: none;
-  border-radius: 8px;
-  cursor: pointer;
+  border-radius: 10px;
+  margin: 10px 0;
+  transition: 0.2s;
 }
 
-/* MODAL */
+.add-btn:hover {
+  background: #1d4ed8;
+}
+
+/* =========================
+   SEARCH
+========================= */
+.search-box {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  outline: none;
+}
+
+/* =========================
+   MODAL (REGISTER FORM)
+========================= */
 .modal {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.5);
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(6px);
   justify-content: center;
   align-items: center;
+  animation: fadeIn 0.2s ease-in-out;
 }
 
+/* MODAL BOX */
 .modal-content {
-  background: white;
-  padding: 20px;
-  border-radius: 10px;
-  width: 320px;
+  width: 380px;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 25px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+  animation: slideUp 0.25s ease-in-out;
 }
 
-.modal-content input {
-  width: 100%;
-  padding: 8px;
-  margin: 6px 0;
-}
-.card-form {
-  display: flex;
-  gap: 10px;
+.modal-content h3 {
+  text-align: center;
   margin-bottom: 15px;
 }
 
-.card-form select,
-.card-form input {
-  padding: 10px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
+/* INPUTS */
+.modal-content input {
+  width: 100%;
+  padding: 12px;
+  margin: 8px 0;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  outline: none;
+  transition: 0.2s;
 }
 
-.card-form button {
+.modal-content input:focus {
+  border-color: #2563eb;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
+}
+
+/* SAVE BUTTON */
+.modal-content button:first-of-type {
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: white;
+  font-weight: bold;
+}
+
+.modal-content button:last-of-type {
+  width: 100%;
+  padding: 12px;
+  margin-top: 8px;
+  border: none;
+  border-radius: 10px;
+  background: #e2e8f0;
+}
+
+/* =========================
+   ANIMATIONS
+========================= */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* =========================
+   STATUS BADGE
+========================= */
+.status {
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+}
+
+.status.active {
   background: #16a34a;
   color: white;
-  border: none;
-  padding: 10px 15px;
-  border-radius: 8px;
-  cursor: pointer;
 }
 
-.summary {
-  background: #e2e8f0;
-  padding: 10px;
-  margin: 10px 0;
-  border-radius: 10px;
+.status.inactive {
+  background: #94a3b8;
+  color: white;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+@media (max-width: 768px) {
+  .cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .modal-content {
+    width: 90%;
+  }
 }
