@@ -175,3 +175,31 @@ body {
   padding: 8px;
   margin: 6px 0;
 }
+.card-form {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.card-form select,
+.card-form input {
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+.card-form button {
+  background: #16a34a;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.summary {
+  background: #e2e8f0;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 10px;
+}
