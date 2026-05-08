@@ -10,26 +10,62 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const membersRef = collection(db, "members");
+const savingsRef = collection(db, "savings");
+
+let allMembers = [];
 
 /* =========================
-   LOAD MEMBERS
+   LOAD MEMBERS + SAVINGS TOTAL
 ========================= */
 async function loadMembers() {
-  const snap = await getDocs(membersRef);
+
+  const membersSnap = await getDocs(membersRef);
+  const savingsSnap = await getDocs(savingsRef);
+
+  let savingsMap = {};
+
+  savingsSnap.forEach(s => {
+    const data = s.data();
+    savingsMap[data.memberId] = (savingsMap[data.memberId] || 0) + Number(data.amount);
+  });
+
+  allMembers = [];
+
+  membersSnap.forEach(m => {
+    allMembers.push({
+      id: m.id,
+      ...m.data(),
+      savings: savingsMap[m.id] || 0
+    });
+  });
+
+  render(allMembers);
+}
+
+loadMembers();
+
+/* =========================
+   RENDER TABLE
+========================= */
+function render(list) {
 
   let html = "";
 
-  snap.forEach(d => {
-    const data = d.data();
+  list.forEach(m => {
 
     html += `
       <tr>
-        <td>${data.fullName}</td>
-        <td>${data.email || "-"}</td>
-        <td>${data.phone}</td>
-        <td>${data.nid}</td>
+        <td onclick="viewProfile('${m.id}')">${m.fullName}</td>
+        <td>${m.phone}</td>
+        <td>${m.nid}</td>
+        <td>${m.savings} ETB</td>
         <td>
-          <button onclick="deleteMember('${d.id}')">Delete</button>
+          <span class="status ${m.savings > 0 ? 'active' : 'inactive'}">
+            ${m.savings > 0 ? 'Active' : 'New'}
+          </span>
+        </td>
+        <td>
+          <button onclick="deleteMember('${m.id}')">Delete</button>
         </td>
       </tr>
     `;
@@ -38,26 +74,24 @@ async function loadMembers() {
   document.getElementById("membersTable").innerHTML = html;
 }
 
-loadMembers();
-
 /* =========================
-   OPEN / CLOSE FORM
+   SEARCH
 ========================= */
-window.openForm = function () {
-  document.getElementById("formModal").style.display = "flex";
-};
+window.searchMembers = function () {
 
-window.closeForm = function () {
-  document.getElementById("formModal").style.display = "none";
+  const val = document.getElementById("searchInput").value.toLowerCase();
 
-  document.getElementById("fullName").value = "";
-  document.getElementById("email").value = "";
-  document.getElementById("phone").value = "";
-  document.getElementById("nid").value = "";
+  const filtered = allMembers.filter(m =>
+    m.fullName.toLowerCase().includes(val) ||
+    m.phone.includes(val) ||
+    m.nid.includes(val)
+  );
+
+  render(filtered);
 };
 
 /* =========================
-   SAVE MEMBER (STRICT UNIQUE CHECK)
+   SAVE MEMBER (VALIDATION)
 ========================= */
 window.saveMember = async function () {
 
@@ -67,29 +101,26 @@ window.saveMember = async function () {
   const nid = document.getElementById("nid").value.trim();
 
   if (!fullName || !phone || !nid) {
-    alert("Full Name, Phone, and National ID are required!");
+    alert("Required fields missing");
     return;
   }
 
-  /* CHECK NATIONAL ID */
-  const nidQuery = query(membersRef, where("nid", "==", nid));
-  const nidSnap = await getDocs(nidQuery);
-
-  if (!nidSnap.empty) {
-    alert("❌ National ID already registered!");
+  if (!/^[0-9]{9}$/.test(phone)) {
+    alert("Phone must be 9 digits");
     return;
   }
 
-  /* CHECK PHONE */
-  const phoneQuery = query(membersRef, where("phone", "==", phone));
-  const phoneSnap = await getDocs(phoneQuery);
-
-  if (!phoneSnap.empty) {
-    alert("❌ Phone number already registered!");
+  if (!/^[0-9]{16}$/.test(nid)) {
+    alert("NID must be 16 digits");
     return;
   }
 
-  /* SAVE */
+  const nidCheck = await getDocs(query(membersRef, where("nid", "==", nid)));
+  if (!nidCheck.empty) return alert("NID already exists");
+
+  const phoneCheck = await getDocs(query(membersRef, where("phone", "==", phone)));
+  if (!phoneCheck.empty) return alert("Phone already exists");
+
   await addDoc(membersRef, {
     fullName,
     email,
@@ -98,23 +129,43 @@ window.saveMember = async function () {
     createdAt: new Date()
   });
 
-  alert("✅ Member registered successfully!");
-
   closeForm();
   loadMembers();
 };
 
 /* =========================
-   DELETE MEMBER
+   DELETE
 ========================= */
 window.deleteMember = async function (id) {
+  if (!confirm("Delete this member?")) return;
+
   await deleteDoc(doc(db, "members", id));
   loadMembers();
 };
 
 /* =========================
-   SIDEBAR TOGGLE
+   PROFILE VIEW
 ========================= */
-window.toggleSidebar = function () {
-  document.getElementById("sidebar").classList.toggle("collapsed");
+window.viewProfile = function (id) {
+
+  const member = allMembers.find(m => m.id === id);
+
+  document.getElementById("profileData").innerHTML = `
+    <p><b>Name:</b> ${member.fullName}</p>
+    <p><b>Phone:</b> ${member.phone}</p>
+    <p><b>NID:</b> ${member.nid}</p>
+    <p><b>Total Savings:</b> ${member.savings} ETB</p>
+  `;
+
+  document.getElementById("profileModal").style.display = "flex";
 };
+
+window.closeProfile = function () {
+  document.getElementById("profileModal").style.display = "none";
+};
+
+/* =========================
+   MODAL CONTROL
+========================= */
+window.openForm = () => document.getElementById("formModal").style.display = "flex";
+window.closeForm = () => document.getElementById("formModal").style.display = "none";
