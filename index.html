@@ -5,8 +5,6 @@
   <meta charset="UTF-8">
   <title data-i18n="dashboard">SACCO Login</title>
 
-  <link rel="stylesheet" href="css/style.css">
-
   <style>
     /* =========================
        BACKGROUND
@@ -16,104 +14,66 @@
       height: 100vh;
       font-family: Arial, sans-serif;
       background: url("assets/images/background.jpg") no-repeat center center/cover;
-      overflow: hidden;
       display: flex;
       justify-content: center;
       align-items: center;
       position: relative;
+      overflow: hidden;
     }
 
-    /* DARK OVERLAY */
     body::before {
       content: "";
       position: absolute;
       width: 100%;
       height: 100%;
       background: rgba(0,0,0,0.6);
-      z-index: 0;
     }
 
     /* =========================
-       FLOATING ANIMATION LAYER
+       LANGUAGE SELECT (ONE PLACE)
     ========================= */
-    .bg-animation {
+    .lang-select {
       position: absolute;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      z-index: 0;
+      top: 15px;
+      right: 15px;
+      z-index: 10;
     }
 
-    .bg-animation span {
-      position: absolute;
-      display: block;
-      width: 20px;
-      height: 20px;
-      background: rgba(255,255,255,0.08);
-      animation: float 20s linear infinite;
-      bottom: -150px;
-      border-radius: 50%;
-    }
-
-    .bg-animation span:nth-child(1) { left: 10%; width: 40px; height: 40px; animation-delay: 0s; }
-    .bg-animation span:nth-child(2) { left: 20%; animation-delay: 2s; }
-    .bg-animation span:nth-child(3) { left: 35%; width: 60px; height: 60px; animation-delay: 4s; }
-    .bg-animation span:nth-child(4) { left: 50%; animation-delay: 0s; }
-    .bg-animation span:nth-child(5) { left: 70%; animation-delay: 3s; }
-    .bg-animation span:nth-child(6) { left: 85%; width: 30px; height: 30px; animation-delay: 5s; }
-
-    @keyframes float {
-      0% { transform: translateY(0) scale(1); opacity: 1; }
-      100% { transform: translateY(-1000px) scale(1.5); opacity: 0; }
+    .lang-select select {
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: none;
+      outline: none;
     }
 
     /* =========================
-       LOGIN CARD (GLASS STYLE)
+       LOGIN BOX
     ========================= */
     .login-box {
       position: relative;
       z-index: 2;
       width: 360px;
       padding: 30px;
-      border-radius: 16px;
+      border-radius: 14px;
 
       background: rgba(255,255,255,0.1);
       backdrop-filter: blur(15px);
-      -webkit-backdrop-filter: blur(15px);
-
       border: 1px solid rgba(255,255,255,0.2);
-      box-shadow: 0 10px 40px rgba(0,0,0,0.4);
 
       text-align: center;
-
-      animation: fadeIn 1s ease;
+      animation: fadeIn 0.8s ease;
     }
 
     @keyframes fadeIn {
-      from {
-        transform: translateY(30px);
-        opacity: 0;
-      }
-      to {
-        transform: translateY(0);
-        opacity: 1;
-      }
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
-    /* TITLE */
-    .login-box h2 {
+    h2, p {
       color: white;
-      margin-bottom: 10px;
     }
 
-    .login-box p {
-      color: #ddd;
-      font-size: 14px;
-      margin-bottom: 20px;
-    }
-
-    /* INPUTS */
-    .login-box input {
+    input {
       width: 100%;
       padding: 12px;
       margin: 8px 0;
@@ -122,54 +82,40 @@
       outline: none;
     }
 
-    /* BUTTON */
-    .login-btn {
+    /* 🔵 LOGIN BUTTON */
+    button {
       width: 100%;
       padding: 12px;
       margin-top: 10px;
-      background: #0f172a;
+
+      background: #2563eb;
       color: white;
+
       border: none;
       border-radius: 8px;
       cursor: pointer;
+
+      font-weight: bold;
       transition: 0.3s;
     }
 
-    .login-btn:hover {
-      background: #1e293b;
-      transform: scale(1.03);
-    }
-
-    /* LANGUAGE */
-    .lang {
-      margin-top: 15px;
-      color: white;
-      font-size: 13px;
-    }
-
-    .lang button {
-      margin: 3px;
-      padding: 5px 10px;
-      border: 1px solid white;
-      background: transparent;
-      color: white;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-
-    .lang button:hover {
-      background: white;
-      color: black;
+    button:hover {
+      background: #1d4ed8;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4);
     }
   </style>
 </head>
 
 <body>
 
-  <!-- FLOATING BACKGROUND ELEMENTS -->
-  <div class="bg-animation">
-    <span></span><span></span><span></span>
-    <span></span><span></span><span></span>
+  <!-- 🌍 LANGUAGE SELECTOR (ONLY ONE PLACE) -->
+  <div class="lang-select">
+    <select id="langSelect" onchange="changeLang(this.value)">
+      <option value="EN">English</option>
+      <option value="AM">Amharic</option>
+      <option value="OR">Afaan Oromo</option>
+    </select>
   </div>
 
   <!-- LOGIN BOX -->
@@ -179,23 +125,37 @@
 
     <p data-i18n="welcome">Welcome back</p>
 
-    <input type="text" placeholder="Username">
+    <input type="email" placeholder="Email">
     <input type="password" placeholder="Password">
 
-    <button class="login-btn">Login</button>
-
-    <!-- LANGUAGE SWITCH -->
-    <div class="lang">
-      <button onclick="changeLang('EN')">EN</button>
-      <button onclick="changeLang('AM')">AM</button>
-      <button onclick="changeLang('OR')">OR</button>
-
-      <div>Lang: <span id="langText">EN</span></div>
-    </div>
+    <button onclick="login()">Login</button>
 
   </div>
 
-  <!-- I18N SYSTEM -->
+  <!-- =========================
+       FIREBASE LOGIN
+  ========================== -->
+  <script type="module">
+    import { auth } from "./js/firebase.js";
+    import {
+      signInWithEmailAndPassword
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+    window.login = function () {
+      const email = document.querySelector("input[type='email']").value;
+      const password = document.querySelector("input[type='password']").value;
+
+      signInWithEmailAndPassword(auth, email, password)
+        .then(() => {
+          window.location.href = "dashboard.html";
+        })
+        .catch(err => alert(err.message));
+    };
+  </script>
+
+  <!-- =========================
+       GLOBAL i18n.js (USED HERE)
+  ========================== -->
   <script src="js/i18n.js"></script>
 
 </body>
