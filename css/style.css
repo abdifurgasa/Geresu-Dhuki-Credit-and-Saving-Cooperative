@@ -1,5 +1,5 @@
 /* =========================
-   GLOBAL RESET
+   GLOBAL RESET (KEEP ONLY THIS)
 ========================= */
 * {
   margin: 0;
@@ -14,23 +14,7 @@ body {
 }
 
 /* =========================
-   BACKGROUND
-========================= */
-.dashboard-bg {
-  background: url("../assets/images/background.jpg") no-repeat center center fixed;
-  background-size: cover;
-}
-
-.dashboard-bg::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  background: rgba(15, 23, 42, 0.65);
-  z-index: -1;
-}
-
-/* =========================
-   SIDEBAR
+   SIDEBAR (PRO STYLE)
 ========================= */
 .sidebar {
   position: fixed;
@@ -40,21 +24,17 @@ body {
   color: white;
   padding: 15px;
   transition: 0.3s;
-  overflow: hidden;
 }
 
 .sidebar.collapsed {
   width: 70px;
 }
 
-/* LOGO */
 .logo {
   text-align: center;
-  font-size: 18px;
   margin-bottom: 20px;
 }
 
-/* NAV */
 .nav {
   display: flex;
   flex-direction: column;
@@ -62,14 +42,10 @@ body {
 }
 
 .nav-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
   padding: 10px;
-  border-radius: 10px;
-  text-decoration: none;
   color: #cbd5e1;
-  transition: 0.2s;
+  text-decoration: none;
+  border-radius: 10px;
 }
 
 .nav-item:hover {
@@ -81,34 +57,12 @@ body {
   color: white;
 }
 
-/* COLLAPSE */
-.sidebar.collapsed .text,
-.sidebar.collapsed .logo {
-  display: none;
-}
-
-.sidebar.collapsed .nav-item {
-  justify-content: center;
-}
-
-/* TOGGLE */
-.toggle-btn {
-  background: #1e293b;
-  color: white;
-  border: none;
-  padding: 8px;
-  border-radius: 8px;
-  cursor: pointer;
-  margin-bottom: 10px;
-}
-
 /* =========================
    MAIN AREA
 ========================= */
 .main {
   margin-left: 260px;
   padding: 20px;
-  transition: 0.3s;
 }
 
 .sidebar.collapsed ~ .main {
@@ -119,28 +73,15 @@ body {
    TOPBAR
 ========================= */
 .topbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   background: white;
   padding: 12px;
   border-radius: 12px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  display: flex;
+  justify-content: space-between;
 }
 
 /* =========================
-   LANG SELECT
-========================= */
-.lang-select {
-  padding: 6px 10px;
-  border-radius: 8px;
-  border: none;
-  background: #0f172a;
-  color: white;
-}
-
-/* =========================
-   DASHBOARD CARDS
+   CARDS (ANIMATED)
 ========================= */
 .cards {
   display: grid;
@@ -153,40 +94,26 @@ body {
   padding: 22px;
   border-radius: 18px;
   color: white;
-  box-shadow: 0 15px 30px rgba(0,0,0,0.15);
-  transition: 0.2s;
-  text-decoration: none;
+  transition: 0.3s;
 }
 
 .card:hover {
   transform: translateY(-5px);
 }
 
-.card h3 {
-  font-size: 14px;
-  opacity: 0.9;
-}
-
-.card p {
-  font-size: 32px;
-  font-weight: bold;
-  margin-top: 10px;
-}
-
-/* COLORS */
 .card.blue { background: linear-gradient(135deg, #2563eb, #1d4ed8); }
 .card.green { background: linear-gradient(135deg, #16a34a, #15803d); }
 .card.orange { background: linear-gradient(135deg, #f97316, #ea580c); }
 .card.purple { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
 
 /* =========================
-   TABLE
+   TABLE (UNIFIED)
 ========================= */
 .table {
   width: 100%;
   margin-top: 15px;
-  border-collapse: collapse;
   background: white;
+  border-collapse: collapse;
   border-radius: 12px;
   overflow: hidden;
 }
@@ -202,187 +129,34 @@ body {
   border-bottom: 1px solid #e2e8f0;
 }
 
-.table tr:hover {
-  background: #f8fafc;
-}
-
 /* =========================
-   BUTTONS
+   BUTTON SYSTEM (UNIFIED)
 ========================= */
-.add-btn {
-  background: #2563eb;
-  color: white;
+.btn {
   padding: 10px 15px;
   border: none;
   border-radius: 10px;
   cursor: pointer;
 }
 
-.add-btn:hover {
-  background: #1d4ed8;
-}
+.primary { background: #2563eb; color: white; }
+.success { background: #16a34a; color: white; }
+.danger { background: #dc2626; color: white; }
 
 /* =========================
-   SEARCH SYSTEM (FIXED)
+   INPUTS
 ========================= */
-.search-container {
-  display: flex;
-  gap: 10px;
-  margin: 10px 0;
-}
-
-.search-box {
+.input {
   width: 100%;
   padding: 12px;
   border-radius: 10px;
   border: 1px solid #cbd5e1;
-}
-
-.search-results {
-  background: white;
-  border-radius: 10px;
-  max-height: 200px;
-  overflow-y: auto;
-}
-
-.result-item {
-  padding: 10px;
-  border-bottom: 1px solid #eee;
-  cursor: pointer;
-}
-
-.result-item:hover {
-  background: #f1f5f9;
-}
-
-/* =========================
-   SELECT BOX
-========================= */
-.selected-box {
-  background: #0f172a;
-  color: white;
-  padding: 15px;
-  border-radius: 10px;
-  margin: 10px 0;
-}
-
-/* =========================
-   FORM BOX
-========================= */
-.form-box {
-  display: flex;
-  gap: 10px;
-  margin: 10px 0;
-}
-
-/* =========================
-   QUICK ACTIONS
-========================= */
-.action-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 15px;
-}
-
-.action-box {
-  background: white;
-  padding: 20px;
-  border-radius: 12px;
-  text-align: center;
-  text-decoration: none;
-  color: #0f172a;
-  font-weight: bold;
-  transition: 0.2s;
-}
-
-.action-box:hover {
-  transform: translateY(-5px);
-}
-
-/* =========================
-   MODAL
-========================= */
-.modal {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.5);
-  justify-content: center;
-  align-items: center;
-}
-
-.modal-content {
-  background: white;
-  padding: 25px;
-  border-radius: 15px;
-  width: 380px;
-}
-
-/* =========================
-   RESPONSIVE
-========================= */
-@media (max-width: 768px) {
-
-  .cards {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .action-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .sidebar {
-    width: 70px;
-  }
-
-  .main {
-    margin-left: 90px;
-  }
-}
-body {
-  font-family: Arial;
-  background: #f1f5f9;
-}
-
-.container {
-  width: 90%;
-  margin: auto;
-}
-
-h1 {
-  text-align: center;
-  margin: 20px 0;
-}
-
-.input {
-  width: 100%;
-  padding: 10px;
   margin: 8px 0;
 }
 
-.btn {
-  padding: 10px 15px;
-  border: none;
-  cursor: pointer;
-  margin: 5px;
-}
-
-.primary { background: #2563eb; color: white; }
-.success { background: green; color: white; }
-.danger { background: red; color: white; }
-
-.table {
-  width: 100%;
-  background: white;
-  border-collapse: collapse;
-  margin-top: 15px;
-}
-
-.table th, .table td {
-  padding: 12px;
-  border-bottom: 1px solid #ddd;
-}
-
+/* =========================
+   MODAL (SINGLE STYLE)
+========================= */
 .modal {
   display: none;
   position: fixed;
@@ -394,7 +168,24 @@ h1 {
 
 .modal-box {
   background: white;
-  padding: 20px;
-  width: 320px;
-  border-radius: 10px;
+  padding: 25px;
+  width: 350px;
+  border-radius: 12px;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+@media (max-width: 768px) {
+  .cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .sidebar {
+    width: 70px;
+  }
+
+  .main {
+    margin-left: 90px;
+  }
 }
