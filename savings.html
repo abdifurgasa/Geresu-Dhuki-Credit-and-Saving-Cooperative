@@ -11,36 +11,64 @@
 
 <div class="container">
 
-  <h1>💰 Savings System</h1>
+  <h1>💰 Savings Management</h1>
 
-  <!-- MEMBER SEARCH -->
-  <input id="searchMember" class="input"
-         placeholder="Search Member (Name / Phone / NID)">
+  <!-- SEARCH MEMBER -->
+  <div class="search-container">
 
-  <div id="results"></div>
+    <input id="memberSearch"
+           class="input"
+           placeholder="Search member by Name / Phone / NID">
+
+    <div id="searchResults"
+         class="search-results"></div>
+
+  </div>
 
   <!-- SELECTED MEMBER -->
-  <div id="selectedBox" class="selected-box">
+  <div id="selectedMember"
+       class="selected-box">
+
     No member selected
+
   </div>
 
   <!-- DEPOSIT FORM -->
-  <input id="amount" class="input" type="number" placeholder="Enter amount">
+  <div class="form-box">
 
-  <button class="btn success" onclick="deposit()">Deposit</button>
+    <input id="amount"
+           class="input"
+           placeholder="Enter Deposit Amount">
 
-  <!-- HISTORY -->
-  <h3>Transaction History</h3>
+    <button class="btn success"
+            onclick="depositMoney()">
+
+      Deposit
+
+    </button>
+
+  </div>
+
+  <!-- SAVINGS TABLE -->
   <table class="table">
+
     <thead>
+
       <tr>
+
         <th>Member</th>
+        <th>Phone</th>
         <th>Amount</th>
         <th>Date</th>
+
       </tr>
+
     </thead>
 
-    <tbody id="historyTable"></tbody>
+    <tbody id="savingsTable">
+
+    </tbody>
+
   </table>
 
 </div>
