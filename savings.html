@@ -11,19 +11,29 @@
 
 <div class="container">
 
-  <h1>💰 Savings Management</h1>
+  <h1>💰 SAVINGS SYSTEM</h1>
 
-  <!-- SEARCH MEMBER -->
+  <!-- =========================
+       SEARCH MEMBER
+  ========================= -->
   <div class="search-container">
 
     <input id="memberSearch"
            class="input"
-           placeholder="Search member by Name / Phone / NID">
+           placeholder="Search by Name / Phone / NID">
 
-    <div id="searchResults"
-         class="search-results"></div>
+    <button class="btn primary"
+            onclick="searchMembers()">
+
+      Search
+
+    </button>
 
   </div>
+
+  <!-- RESULTS -->
+  <div id="searchResults"
+       class="search-results"></div>
 
   <!-- SELECTED MEMBER -->
   <div id="selectedMember"
@@ -33,12 +43,14 @@
 
   </div>
 
-  <!-- DEPOSIT FORM -->
+  <!-- =========================
+       DEPOSIT
+  ========================= -->
   <div class="form-box">
 
     <input id="amount"
            class="input"
-           placeholder="Enter Deposit Amount">
+           placeholder="Enter deposit amount">
 
     <button class="btn success"
             onclick="depositMoney()">
@@ -49,7 +61,9 @@
 
   </div>
 
-  <!-- SAVINGS TABLE -->
+  <!-- =========================
+       SAVINGS TABLE
+  ========================= -->
   <table class="table">
 
     <thead>
@@ -73,7 +87,10 @@
 
 </div>
 
-<script type="module" src="js/savings.js"></script>
+<script type="module"
+        src="js/savings.js">
+
+</script>
 
 </body>
 </html>
