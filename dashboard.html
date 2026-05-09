@@ -3,108 +3,372 @@
 
 <head>
   <meta charset="UTF-8">
-  <title data-i18n="dashboard">Dashboard</title>
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+  <title data-i18n="dashboard">
+    Dashboard
+  </title>
 
   <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
 
-  <!-- SIDEBAR -->
-  <aside class="sidebar" id="sidebar">
+<!-- =========================
+     SIDEBAR
+========================= -->
+<aside class="sidebar" id="sidebar">
 
-    <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+  <!-- TOGGLE -->
+  <button class="toggle-btn"
+          onclick="toggleSidebar()">
 
-    <h2 class="logo">SACCO</h2>
+    ☰
 
-    <nav class="nav">
+  </button>
 
-      <a href="dashboard.html" class="nav-item">
-        <span class="icon">📊</span>
-        <span class="text" data-i18n="dashboard"></span>
-      </a>
+  <!-- LOGO -->
+  <h2 class="logo">
+    🏦 SACCO
+  </h2>
 
-      <a href="members.html" class="nav-item">
-        <span class="icon">👥</span>
-        <span class="text" data-i18n="members"></span>
-      </a>
+  <!-- NAVIGATION -->
+  <nav class="nav">
 
-      <a href="savings.html" class="nav-item">
-        <span class="icon">💰</span>
-        <span class="text" data-i18n="savings"></span>
-      </a>
+    <a href="dashboard.html"
+       class="nav-item active">
 
-      <a href="loans.html" class="nav-item">
-        <span class="icon">🏦</span>
-        <span class="text" data-i18n="loans"></span>
-      </a>
+      <span class="icon">📊</span>
 
-      <a href="reports.html" class="nav-item">
-        <span class="icon">📄</span>
-        <span class="text" data-i18n="reports"></span>
-      </a>
+      <span class="text"
+            data-i18n="dashboard">
 
-      <a href="settings.html" class="nav-item">
-        <span class="icon">⚙️</span>
-        <span class="text" data-i18n="settings"></span>
-      </a>
+      </span>
 
-    </nav>
+    </a>
 
-  </aside>
+    <a href="members.html"
+       class="nav-item">
 
-  <!-- MAIN -->
-  <main class="main">
+      <span class="icon">👥</span>
 
-    <!-- TOP BAR -->
-    <div class="topbar">
+      <span class="text"
+            data-i18n="members">
 
-      <div class="role-indicator">Admin</div>
+      </span>
 
-      <div class="lang-box">
-        <select id="langSelect" onchange="changeLang(this.value)">
-          <option value="EN">EN</option>
-          <option value="AM">AM</option>
-          <option value="OR">OR</option>
-        </select>
-      </div>
+    </a>
+
+    <a href="savings.html"
+       class="nav-item">
+
+      <span class="icon">💰</span>
+
+      <span class="text"
+            data-i18n="savings">
+
+      </span>
+
+    </a>
+
+    <a href="loans.html"
+       class="nav-item">
+
+      <span class="icon">🏦</span>
+
+      <span class="text"
+            data-i18n="loans">
+
+      </span>
+
+    </a>
+
+    <a href="transactions.html"
+       class="nav-item">
+
+      <span class="icon">💱</span>
+
+      <span class="text">
+
+        Transactions
+
+      </span>
+
+    </a>
+
+    <a href="reports.html"
+       class="nav-item">
+
+      <span class="icon">📄</span>
+
+      <span class="text"
+            data-i18n="reports">
+
+      </span>
+
+    </a>
+
+    <a href="users.html"
+       class="nav-item">
+
+      <span class="icon">👤</span>
+
+      <span class="text">
+
+        Users
+
+      </span>
+
+    </a>
+
+    <a href="settings.html"
+       class="nav-item">
+
+      <span class="icon">⚙️</span>
+
+      <span class="text"
+            data-i18n="settings">
+
+      </span>
+
+    </a>
+
+  </nav>
+
+</aside>
+
+<!-- =========================
+     MAIN CONTENT
+========================= -->
+<main class="main">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+
+    <!-- LEFT -->
+    <div>
+
+      <h2>
+        Financial dashboard
+      </h2>
 
     </div>
 
-    <!-- HEADER -->
-    <h1 data-i18n="overview"></h1>
-    <p data-i18n="welcome"></p>
+    <!-- RIGHT -->
+    <div style="
+      display:flex;
+      gap:10px;
+      align-items:center;
+    ">
 
-    <!-- CARDS -->
-    <section class="cards">
+      <!-- ROLE -->
+      <div class="selected-box"
+           style="
+             padding:10px 15px;
+             margin:0;
+           ">
 
-      <div class="card">
-        <h3 data-i18n="totalMembers"></h3>
-        <p id="members">0</p>
+        👑 Admin
+
       </div>
 
-      <div class="card">
-        <h3 data-i18n="totalSavings"></h3>
-        <p id="savings">0 ETB</p>
-      </div>
+      <!-- LANGUAGE -->
+      <select id="langSelect"
+              class="lang-select"
+              onchange="changeLang(this.value)">
 
-      <div class="card">
-        <h3 data-i18n="totalLoans"></h3>
-        <p id="loans">0 ETB</p>
-      </div>
+        <option value="EN">EN</option>
+        <option value="AM">AM</option>
+        <option value="OR">OR</option>
 
-      <div class="card">
-        <h3 data-i18n="totalProfit"></h3>
-        <p id="profit">0 ETB</p>
-      </div>
+      </select>
 
-    </section>
+      <!-- LOGOUT -->
+      <button class="btn logout-btn">
 
-  </main>
+        Logout
 
-  <!-- JS -->
-  <script src="js/i18n.js"></script>
-  <script type="module" src="js/dashboard.js"></script>
+      </button>
+
+    </div>
+
+  </div>
+
+  <!-- PAGE TITLE -->
+  <div style="margin-top:25px;">
+
+    <h1 data-i18n="overview">
+
+      Dashboard overview
+
+    </h1>
+
+    <p data-i18n="welcome">
+
+      Welcome to SACCO Management System
+
+    </p>
+
+  </div>
+
+  <!-- =========================
+       DASHBOARD CARDS
+  ========================= -->
+  <section class="cards">
+
+    <!-- MEMBERS -->
+    <div class="card blue">
+
+      <h3 data-i18n="totalMembers">
+
+        Total Members
+
+      </h3>
+
+      <p id="members">
+
+        0
+
+      </p>
+
+    </div>
+
+    <!-- SAVINGS -->
+    <div class="card green">
+
+      <h3 data-i18n="totalSavings">
+
+        Total Savings
+
+      </h3>
+
+      <p id="savings">
+
+        0 ETB
+
+      </p>
+
+    </div>
+
+    <!-- LOANS -->
+    <div class="card orange">
+
+      <h3 data-i18n="totalLoans">
+
+        Total Loans
+
+      </h3>
+
+      <p id="loans">
+
+        0 ETB
+
+      </p>
+
+    </div>
+
+    <!-- PROFIT -->
+    <div class="card purple">
+
+      <h3 data-i18n="totalProfit">
+
+        Total Profit
+
+      </h3>
+
+      <p id="profit">
+
+        0 ETB
+
+      </p>
+
+    </div>
+
+  </section>
+
+  <!-- =========================
+       QUICK ACTIONS
+  ========================= -->
+  <section style="margin-top:30px;">
+
+    <h2>
+
+      Quick actions
+
+    </h2>
+
+    <div class="cards">
+
+      <a href="members.html"
+         class="card teal"
+         style="text-decoration:none;">
+
+        <h3>Add new member</h3>
+
+        <p>👥</p>
+
+      </a>
+
+      <a href="savings.html"
+         class="card green"
+         style="text-decoration:none;">
+
+        <h3>Deposit savings</h3>
+
+        <p>💰</p>
+
+      </a>
+
+      <a href="loans.html"
+         class="card orange"
+         style="text-decoration:none;">
+
+        <h3>Create loan</h3>
+
+        <p>🏦</p>
+
+      </a>
+
+      <a href="reports.html"
+         class="card red"
+         style="text-decoration:none;">
+
+        <h3>View reports</h3>
+
+        <p>📄</p>
+
+      </a>
+
+    </div>
+
+  </section>
+
+</main>
+
+<!-- =========================
+     SIDEBAR JS
+========================= -->
+<script>
+
+function toggleSidebar() {
+
+  document
+    .getElementById("sidebar")
+    .classList.toggle("collapsed");
+}
+
+</script>
+
+<!-- =========================
+     JS FILES
+========================= -->
+<script src="js/i18n.js"></script>
+
+<script type="module"
+        src="js/dashboard.js">
+
+</script>
 
 </body>
 </html>
