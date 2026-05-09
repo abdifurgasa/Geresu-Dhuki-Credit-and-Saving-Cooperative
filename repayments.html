@@ -1,65 +1,89 @@
 <!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>Loan Repayments</title>
+<html lang="en">
 
-<link rel="stylesheet" href="css/layout.css">
-<link rel="stylesheet" href="css/components.css">
+<head>
+  <meta charset="UTF-8">
+  <title>Loan Repayment System</title>
+  <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
 
-<div class="layout">
+<div class="container">
 
-  <aside class="sidebar"></aside>
+  <h1>💱 LOAN REPAYMENT SYSTEM</h1>
 
-  <main class="main">
+  <!-- SEARCH LOAN MEMBER -->
+  <div class="search-container">
 
-    <div class="topbar">
-      <h2>Loan Repayment</h2>
-    </div>
+    <input id="memberSearch"
+           class="input"
+           placeholder="Search member (Name / Phone / NID)">
 
-    <section class="content">
+    <button class="btn primary"
+            onclick="searchLoans()">
 
-      <!-- REPAYMENT FORM -->
-      <div class="card">
-        <h3>Make Repayment</h3>
+      Search Loan
 
-        <input id="searchInput" placeholder="Search by Name / Phone / ID">
+    </button>
 
-        <select id="loanSelect"></select>
+  </div>
 
-        <input id="amount" type="number" placeholder="Repayment Amount">
+  <!-- SEARCH RESULTS -->
+  <div id="searchResults"
+       class="search-results"></div>
 
-        <button onclick="makeRepayment()">Pay</button>
-      </div>
+  <!-- SELECTED LOAN -->
+  <div id="selectedLoan"
+       class="selected-box">
 
-      <!-- TABLE -->
-      <div class="card">
-        <h3>Repayment History</h3>
+    No loan selected
 
-        <table>
-          <thead>
-            <tr>
-              <th>Member</th>
-              <th>Amount</th>
-              <th>Date</th>
-            </tr>
-          </thead>
+  </div>
 
-          <tbody id="repaymentTable"></tbody>
-        </table>
-      </div>
+  <!-- REPAYMENT INPUT -->
+  <div class="form-box">
 
-    </section>
+    <input id="payAmount"
+           class="input"
+           placeholder="Enter repayment amount">
 
-  </main>
+    <button class="btn success"
+            onclick="makeRepayment()">
+
+      Pay
+
+    </button>
+
+  </div>
+
+  <!-- LOAN TABLE -->
+  <table class="table">
+
+    <thead>
+
+      <tr>
+
+        <th>Member</th>
+        <th>Loan</th>
+        <th>Paid</th>
+        <th>Remaining</th>
+        <th>Status</th>
+
+      </tr>
+
+    </thead>
+
+    <tbody id="loanTable">
+
+    </tbody>
+
+  </table>
 
 </div>
 
-<script type="module" src="js/repayments.js"></script>
-<script src="js/layout.js"></script>
+<script type="module"
+        src="js/repayments.js"></script>
 
 </body>
 </html>
