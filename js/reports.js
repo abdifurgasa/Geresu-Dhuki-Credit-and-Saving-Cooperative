@@ -1,96 +1,108 @@
+
 import { db } from "./firebase.js";
+
 import {
   collection,
-  onSnapshot
+  getDocs
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-let transactions = [];
+/* =========================
+   ELEMENTS
+========================= */
+const totalMembers =
+  document.getElementById("totalMembers");
+
+const totalSavings =
+  document.getElementById("totalSavings");
+
+const totalLoans =
+  document.getElementById("totalLoans");
+
+const totalRepayments =
+  document.getElementById("totalRepayments");
+
+const outstandingLoans =
+  document.getElementById("outstandingLoans");
+
+const netBalance =
+  document.getElementById("netBalance");
 
 /* =========================
-   LOAD ALL TRANSACTIONS
+   LOAD REPORT DATA
 ========================= */
-function loadData() {
+async function loadReports() {
 
-  onSnapshot(collection(db, "transactions"), (snap) => {
+  /* MEMBERS */
+  const membersSnap =
+    await getDocs(collection(db, "members"));
 
-    transactions = [];
+  const membersCount =
+    membersSnap.size;
 
-    snap.forEach(doc => {
-      transactions.push(doc.data());
-    });
+  /* SAVINGS */
+  const savingsSnap =
+    await getDocs(collection(db, "savings"));
 
-    calculateTotals(transactions);
-    renderTable(transactions);
+  let savingsTotal = 0;
 
+  savingsSnap.forEach(d => {
+
+    savingsTotal += d.data().amount || 0;
   });
+
+  /* LOANS */
+  const loansSnap =
+    await getDocs(collection(db, "loans"));
+
+  let loanTotal = 0;
+  let outstanding = 0;
+
+  loansSnap.forEach(d => {
+
+    const l = d.data();
+
+    loanTotal += l.total || 0;
+    outstanding += l.remaining || 0;
+  });
+
+  /* REPAYMENTS */
+  const repaySnap =
+    await getDocs(collection(db, "repayments"));
+
+  let repayTotal = 0;
+
+  repaySnap.forEach(d => {
+
+    repayTotal += d.data().amount || 0;
+  });
+
+  /* NET BALANCE */
+  const net =
+    savingsTotal - outstanding;
+
+  /* DISPLAY RESULTS */
+  totalMembers.innerText =
+    membersCount;
+
+  totalSavings.innerText =
+    savingsTotal + " ETB";
+
+  totalLoans.innerText =
+    loanTotal + " ETB";
+
+  totalRepayments.innerText =
+    repayTotal + " ETB";
+
+  outstandingLoans.innerText =
+    outstanding + " ETB";
+
+  netBalance.innerText =
+    net + " ETB";
 }
 
 /* =========================
-   CALCULATE TOTALS
+   AUTO REFRESH
 ========================= */
-function calculateTotals(data) {
+loadReports();
 
-  let income = 0;
-  let loans = 0;
-  let savings = 0;
-  let penalty = 0;
-
-  data.forEach(t => {
-
-    if (t.type === "Saving") savings += t.amount;
-    if (t.type === "Loan") loans += t.amount;
-    if (t.type === "Penalty") penalty += t.amount;
-
-  });
-
-  income = savings - loans;
-
-  document.getElementById("income").innerText = "$" + income;
-  document.getElementById("loans").innerText = "$" + loans;
-  document.getElementById("savings").innerText = "$" + savings;
-  document.getElementById("penalty").innerText = "$" + penalty;
-}
-
-/* =========================
-   TABLE RENDER
-========================= */
-function renderTable(data) {
-
-  const table = document.getElementById("reportTable");
-  table.innerHTML = "";
-
-  data.forEach(t => {
-
-    table.innerHTML += `
-      <tr>
-        <td>${t.type}</td>
-        <td>${t.member || "-"}</td>
-        <td>$${t.amount}</td>
-        <td>${t.date}</td>
-      </tr>
-    `;
-  });
-}
-
-/* =========================
-   DATE FILTER
-========================= */
-window.loadReport = function () {
-
-  const from = document.getElementById("fromDate").value;
-  const to = document.getElementById("toDate").value;
-
-  const filtered = transactions.filter(t => {
-
-    if (!from || !to) return true;
-
-    return t.date >= from && t.date <= to;
-
-  });
-
-  calculateTotals(filtered);
-  renderTable(filtered);
-};
-
-/* INIT */
-document.addEventListener("DOMContentLoaded", loadData);
+setInterval(loadReports, 5000);
