@@ -1,101 +1,61 @@
 <!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>Reports</title>
+<html lang="en">
 
-<link rel="stylesheet" href="css/layout.css">
-<link rel="stylesheet" href="css/components.css">
+<head>
+  <meta charset="UTF-8">
+  <title>Financial Reports</title>
+  <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
 
-<div class="layout">
+<div class="container">
 
-  <!-- SIDEBAR -->
-  <aside class="sidebar">
-    <h2>SACCO</h2>
+  <h1>📊 FINANCIAL REPORTING SYSTEM</h1>
 
-    <nav class="menu">
-      <ul>
-        <li><a href="dashboard.html">Dashboard</a></li>
-        <li><a href="members.html">Members</a></li>
-        <li><a href="savings.html">Savings</a></li>
-        <li><a href="loans.html">Loans</a></li>
-        <li><a href="transactions.html">Transactions</a></li>
-        <li class="active"><a href="reports.html">Reports</a></li>
-        <li><a href="settings.html">Settings</a></li>
-      </ul>
-    </nav>
-  </aside>
+  <!-- REPORT CARDS -->
+  <section class="cards">
 
-  <!-- MAIN -->
-  <main class="main">
-
-    <div class="topbar">
-      <h2>Financial Reports</h2>
+    <div class="card blue">
+      <h3>Total Members</h3>
+      <p id="totalMembers">0</p>
     </div>
 
-    <div class="content">
-
-      <!-- FILTER -->
-      <div class="report-filter">
-        <label>From:</label>
-        <input type="date" id="fromDate">
-
-        <label>To:</label>
-        <input type="date" id="toDate">
-
-        <button onclick="loadReport()">Generate</button>
-      </div>
-
-      <!-- CARDS -->
-      <div class="cards">
-
-        <div class="card income">
-          <p>Total Income</p>
-          <h2 id="income">$0</h2>
-        </div>
-
-        <div class="card expense">
-          <p>Total Loans</p>
-          <h2 id="loans">$0</h2>
-        </div>
-
-        <div class="card savings">
-          <p>Total Savings</p>
-          <h2 id="savings">$0</h2>
-        </div>
-
-        <div class="card penalty">
-          <p>Penalties</p>
-          <h2 id="penalty">$0</h2>
-        </div>
-
-      </div>
-
-      <!-- DETAIL TABLE -->
-      <table class="table">
-        <thead>
-          <tr>
-            <th>Type</th>
-            <th>Member</th>
-            <th>Amount</th>
-            <th>Date</th>
-          </tr>
-        </thead>
-
-        <tbody id="reportTable"></tbody>
-      </table>
-
+    <div class="card green">
+      <h3>Total Savings</h3>
+      <p id="totalSavings">0 ETB</p>
     </div>
 
-  </main>
+    <div class="card orange">
+      <h3>Total Loans</h3>
+      <p id="totalLoans">0 ETB</p>
+    </div>
+
+    <div class="card purple">
+      <h3>Total Repayments</h3>
+      <p id="totalRepayments">0 ETB</p>
+    </div>
+
+  </section>
+
+  <!-- EXTRA ANALYTICS -->
+  <section class="cards" style="margin-top:20px;">
+
+    <div class="card blue">
+      <h3>Outstanding Loans</h3>
+      <p id="outstandingLoans">0 ETB</p>
+    </div>
+
+    <div class="card green">
+      <h3>Net Balance</h3>
+      <p id="netBalance">0 ETB</p>
+    </div>
+
+  </section>
 
 </div>
 
-<script type="module" src="js/firebase.js"></script>
 <script type="module" src="js/reports.js"></script>
-<script src="js/layout.js"></script>
+
 </body>
 </html>
