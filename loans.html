@@ -1,86 +1,94 @@
 <!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>Loans System</title>
+<html lang="en">
 
-<link rel="stylesheet" href="css/layout.css">
-<link rel="stylesheet" href="css/components.css">
+<head>
+  <meta charset="UTF-8">
+  <title>Loan System</title>
+  <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
 
-<div class="layout">
+<div class="container">
 
-<aside class="sidebar"></aside>
+  <h1>🏦 LOAN MANAGEMENT SYSTEM</h1>
 
-<main class="main">
+  <!-- SEARCH MEMBER -->
+  <div class="search-container">
 
-<div class="topbar">
-  <h2>Loan Management</h2>
-</div>
+    <input id="memberSearch"
+           class="input"
+           placeholder="Search member by Name / Phone / NID">
 
-<section class="content">
+    <button class="btn primary"
+            onclick="searchMembers()">
 
-<!-- CREATE LOAN -->
-<div class="card">
-  <h3>Create Loan</h3>
+      Search
 
-  <input id="memberName" placeholder="Member Name / Phone / ID">
-  <input id="amount" type="number" placeholder="Principal">
-  <input id="rate" type="number" placeholder="Interest %">
-  <input id="months" type="number" placeholder="Months">
+    </button>
 
-  <button onclick="addLoan()">Create Loan</button>
-</div>
+  </div>
 
-<!-- LOANS TABLE -->
-<div class="card">
-  <h3>Loans</h3>
+  <!-- RESULTS -->
+  <div id="searchResults"
+       class="search-results"></div>
 
-  <table>
+  <!-- SELECTED MEMBER -->
+  <div id="selectedMember"
+       class="selected-box">
+
+    No member selected
+
+  </div>
+
+  <!-- LOAN FORM -->
+  <div class="form-box">
+
+    <input id="loanAmount"
+           class="input"
+           placeholder="Loan Amount">
+
+    <input id="interest"
+           class="input"
+           placeholder="Interest % (e.g. 10)">
+
+    <button class="btn success"
+            onclick="createLoan()">
+
+      Create Loan
+
+    </button>
+
+  </div>
+
+  <!-- LOANS TABLE -->
+  <table class="table">
+
     <thead>
+
       <tr>
+
         <th>Member</th>
-        <th>Balance</th>
-        <th>EMI</th>
-        <th>Penalty</th>
-        <th>Status</th>
-        <th>View</th>
-      </tr>
-    </thead>
-
-    <tbody id="loanTable"></tbody>
-  </table>
-</div>
-
-<!-- SCHEDULE -->
-<div class="card">
-  <h3>Repayment Schedule</h3>
-
-  <table>
-    <thead>
-      <tr>
-        <th>#</th>
-        <th>Due</th>
-        <th>EMI</th>
-        <th>Principal</th>
+        <th>Amount</th>
         <th>Interest</th>
+        <th>Total</th>
+        <th>Paid</th>
+        <th>Remaining</th>
         <th>Status</th>
+
       </tr>
+
     </thead>
 
-    <tbody id="scheduleTable"></tbody>
+    <tbody id="loanTable">
+
+    </tbody>
+
   </table>
-</div>
 
-</section>
-
-</main>
 </div>
 
 <script type="module" src="js/loans.js"></script>
-<script src="js/layout.js"></script>
 
 </body>
 </html>
