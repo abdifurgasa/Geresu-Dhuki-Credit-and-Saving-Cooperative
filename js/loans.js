@@ -1,109 +1,242 @@
+
 import { db } from "./firebase.js";
+
 import {
-  collection, addDoc, getDocs, doc, updateDoc
+  collection,
+  getDocs,
+  addDoc,
+  doc,
+  updateDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-/* ================= EMI ================= */
-function EMI(P, r, n){
-  r = r/100/12;
-  return Math.round((P*r*Math.pow(1+r,n))/(Math.pow(1+r,n)-1));
-}
+/* =========================
+   STATE
+========================= */
+let selectedMember = null;
 
-/* ================= SCHEDULE ================= */
-function createSchedule(P, rate, months, emi){
-  let balance = P;
-  const r = rate/100/12;
-  const arr = [];
+/* =========================
+   ELEMENTS
+========================= */
+const searchInput =
+  document.getElementById("memberSearch");
 
-  for(let i=1;i<=months;i++){
-    let interest = balance*r;
-    let principal = emi - interest;
+const resultsBox =
+  document.getElementById("searchResults");
 
-    balance -= principal;
-    if(balance<0) balance=0;
+const selectedBox =
+  document.getElementById("selectedMember");
 
-    let d = new Date();
-    d.setMonth(d.getMonth()+i);
+const table =
+  document.getElementById("loanTable");
 
-    arr.push({
-      installment:i,
-      dueDate:d.toISOString(),
-      emi,
-      principal:Math.round(principal),
-      interest:Math.round(interest),
-      paid:false
-    });
-  }
-  return arr;
-}
+/* =========================
+   SEARCH MEMBERS
+========================= */
+window.searchMembers = async function () {
 
-/* ================= ADD LOAN ================= */
-window.addLoan = async function(){
+  const value =
+    searchInput.value.toLowerCase();
 
-  const name = memberName.value;
-  const P = parseFloat(amount.value);
-  const rate = parseFloat(rateInput.value);
-  const n = parseInt(months.value);
+  resultsBox.innerHTML = "";
 
-  const emi = EMI(P, rate, n);
-  const schedule = createSchedule(P, rate, n, emi);
+  const snap =
+    await getDocs(collection(db, "members"));
 
-  await addDoc(collection(db,"loans"),{
-    memberName:name,
-    principal:P,
-    rate,
-    months:n,
-    emi,
-    balance:P,
-    penalty:0,
-    schedule,
-    status:"ongoing",
-    lastPaymentDate:new Date().toISOString()
+  let found = false;
+
+  snap.forEach(docSnap => {
+
+    const m = docSnap.data();
+
+    if (
+      m.name.toLowerCase().includes(value) ||
+      m.phone.includes(value) ||
+      m.nid.includes(value)
+    ) {
+
+      found = true;
+
+      const div =
+        document.createElement("div");
+
+      div.className = "result-item";
+
+      div.innerHTML = `
+        <b>${m.name}</b><br>
+        ${m.phone} | ${m.nid}
+      `;
+
+      div.onclick = () => {
+
+        selectedMember = {
+          id: docSnap.id,
+          ...m
+        };
+
+        selectedBox.innerHTML = `
+          <b>${m.name}</b><br>
+          ${m.phone}<br>
+          ${m.nid}
+        `;
+
+        resultsBox.innerHTML = "";
+        searchInput.value = "";
+      };
+
+      resultsBox.appendChild(div);
+    }
   });
 
-  alert("Loan created");
-  loadLoans();
+  if (!found) {
+
+    resultsBox.innerHTML =
+      "<div class='result-item'>No member found</div>";
+  }
 };
 
-/* ================= LOAD LOANS ================= */
-const loanTable = document.getElementById("loanTable");
+/* =========================
+   CREATE LOAN
+========================= */
+window.createLoan = async function () {
 
-async function loadLoans(){
-  const snap = await getDocs(collection(db,"loans"));
-  loanTable.innerHTML="";
+  const amount =
+    Number(document.getElementById("loanAmount").value);
 
-  snap.forEach(docSnap=>{
+  const interest =
+    Number(document.getElementById("interest").value);
+
+  if (!selectedMember) {
+
+    alert("Select member first");
+
+    return;
+  }
+
+  if (!amount || amount <= 0) {
+
+    alert("Enter valid loan amount");
+
+    return;
+  }
+
+  if (interest < 0) {
+
+    alert("Invalid interest");
+
+    return;
+  }
+
+  try {
+
+    /* CHECK ACTIVE LOAN */
+    const snap =
+      await getDocs(collection(db, "loans"));
+
+    let hasActive = false;
+
+    snap.forEach(d => {
+
+      const l = d.data();
+
+      if (
+        l.memberId === selectedMember.id &&
+        l.status === "Active"
+      ) {
+
+        hasActive = true;
+      }
+    });
+
+    if (hasActive) {
+
+      alert("Member already has active loan");
+
+      return;
+    }
+
+    const total =
+      amount + (amount * interest / 100);
+
+    await addDoc(collection(db, "loans"), {
+
+      memberId: selectedMember.id,
+      name: selectedMember.name,
+      phone: selectedMember.phone,
+
+      amount: amount,
+      interest: interest,
+      total: total,
+
+      paid: 0,
+      remaining: total,
+
+      status: "Active",
+
+      date: Date.now()
+
+    });
+
+    alert("Loan created successfully");
+
+    document.getElementById("loanAmount").value = "";
+    document.getElementById("interest").value = "";
+
+    selectedMember = null;
+
+    selectedBox.innerHTML =
+      "No member selected";
+
+    loadLoans();
+
+  } catch (err) {
+
+    console.error(err);
+
+    alert("Loan creation failed");
+  }
+};
+
+/* =========================
+   LOAD LOANS
+========================= */
+async function loadLoans() {
+
+  table.innerHTML = "";
+
+  const snap =
+    await getDocs(collection(db, "loans"));
+
+  snap.forEach(docSnap => {
+
     const l = docSnap.data();
 
-    loanTable.innerHTML+=`
+    table.innerHTML += `
       <tr>
-        <td>${l.memberName}</td>
-        <td>${l.balance}</td>
-        <td>${l.emi}</td>
-        <td class="amount red">${l.penalty||0}</td>
-        <td>${l.status}</td>
-        <td><button onclick='viewSchedule(${JSON.stringify(l.schedule)})'>View</button></td>
+
+        <td>${l.name}</td>
+
+        <td>${l.amount}</td>
+
+        <td>${l.interest}%</td>
+
+        <td>${l.total}</td>
+
+        <td>${l.paid}</td>
+
+        <td>${l.remaining}</td>
+
+        <td>
+          <span class="status ${l.status === "Active" ? "active" : "inactive"}">
+            ${l.status}
+          </span>
+        </td>
+
       </tr>
     `;
   });
 }
 
-window.viewSchedule = function(schedule){
-  const t = document.getElementById("scheduleTable");
-  t.innerHTML="";
-
-  schedule.forEach(s=>{
-    t.innerHTML+=`
-      <tr>
-        <td>${s.installment}</td>
-        <td>${new Date(s.dueDate).toLocaleDateString()}</td>
-        <td>${s.emi}</td>
-        <td>${s.principal}</td>
-        <td>${s.interest}</td>
-        <td>${s.paid?"✔":"Pending"}</td>
-      </tr>
-    `;
-  });
-};
-
+/* =========================
+   INIT
+========================= */
 loadLoans();
