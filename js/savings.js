@@ -1,3 +1,4 @@
+
 import { db } from "./firebase.js";
 
 import {
@@ -16,47 +17,39 @@ let selectedMember = null;
 /* =========================
    ELEMENTS
 ========================= */
-const searchInput = document.getElementById("memberSearch");
-const resultsBox = document.getElementById("searchResults");
-const selectedBox = document.getElementById("selectedMember");
-const table = document.getElementById("savingsTable");
+const searchInput =
+  document.getElementById("memberSearch");
+
+const resultsBox =
+  document.getElementById("searchResults");
+
+const selectedBox =
+  document.getElementById("selectedMember");
+
+const table =
+  document.getElementById("savingsTable");
 
 /* =========================
-   LOAD SAVINGS
+   SEARCH MEMBERS (BUTTON)
 ========================= */
-async function loadSavings() {
+window.searchMembers = async function () {
 
-  table.innerHTML = "";
-
-  const snap =
-    await getDocs(collection(db, "savings"));
-
-  snap.forEach(docSnap => {
-
-    const s = docSnap.data();
-
-    table.innerHTML += `
-      <tr>
-        <td>${s.name}</td>
-        <td>${s.phone}</td>
-        <td>${s.amount} ETB</td>
-        <td>${new Date(s.date).toLocaleDateString()}</td>
-      </tr>
-    `;
-  });
-}
-
-/* =========================
-   SEARCH MEMBER
-========================= */
-searchInput.addEventListener("input", async function () {
-
-  const value = this.value.toLowerCase();
+  const value =
+    searchInput.value.toLowerCase();
 
   resultsBox.innerHTML = "";
 
+  if (!value) {
+
+    alert("Please enter search text");
+
+    return;
+  }
+
   const snap =
     await getDocs(collection(db, "members"));
+
+  let found = false;
 
   snap.forEach(docSnap => {
 
@@ -68,12 +61,17 @@ searchInput.addEventListener("input", async function () {
       m.nid.includes(value)
     ) {
 
-      const div = document.createElement("div");
+      found = true;
+
+      const div =
+        document.createElement("div");
 
       div.className = "result-item";
 
-      div.innerText =
-        `${m.name} - ${m.phone}`;
+      div.innerHTML = `
+        <b>${m.name}</b><br>
+        ${m.phone} | ${m.nid}
+      `;
 
       div.onclick = () => {
 
@@ -95,7 +93,13 @@ searchInput.addEventListener("input", async function () {
       resultsBox.appendChild(div);
     }
   });
-});
+
+  if (!found) {
+
+    resultsBox.innerHTML =
+      "<div class='result-item'>No member found</div>";
+  }
+};
 
 /* =========================
    DEPOSIT MONEY
@@ -107,7 +111,7 @@ window.depositMoney = async function () {
 
   if (!selectedMember) {
 
-    alert("Please select a member");
+    alert("Select a member first");
 
     return;
   }
@@ -121,7 +125,7 @@ window.depositMoney = async function () {
 
   try {
 
-    /* 1. SAVE TRANSACTION */
+    /* SAVE SAVING RECORD */
     await addDoc(collection(db, "savings"), {
 
       memberId: selectedMember.id,
@@ -132,28 +136,27 @@ window.depositMoney = async function () {
 
     });
 
-    /* 2. UPDATE MEMBER BALANCE */
+    /* UPDATE MEMBER BALANCE */
     const memberRef =
       doc(db, "members", selectedMember.id);
 
-    const snap =
+    const allMembers =
       await getDocs(collection(db, "members"));
 
     let currentBalance = 0;
 
-    snap.forEach(d => {
+    allMembers.forEach(d => {
 
       if (d.id === selectedMember.id) {
 
         currentBalance =
-          (d.data().balance || 0);
+          d.data().balance || 0;
       }
     });
 
     await updateDoc(memberRef, {
 
-      balance:
-        currentBalance + amount
+      balance: currentBalance + amount
 
     });
 
@@ -172,9 +175,34 @@ window.depositMoney = async function () {
 
     console.error(err);
 
-    alert("Error processing deposit");
+    alert("Deposit failed");
   }
 };
+
+/* =========================
+   LOAD SAVINGS HISTORY
+========================= */
+async function loadSavings() {
+
+  table.innerHTML = "";
+
+  const snap =
+    await getDocs(collection(db, "savings"));
+
+  snap.forEach(docSnap => {
+
+    const s = docSnap.data();
+
+    table.innerHTML += `
+      <tr>
+        <td>${s.name}</td>
+        <td>${s.phone}</td>
+        <td>${s.amount} ETB</td>
+        <td>${new Date(s.date).toLocaleString()}</td>
+      </tr>
+    `;
+  });
+}
 
 /* =========================
    INIT
