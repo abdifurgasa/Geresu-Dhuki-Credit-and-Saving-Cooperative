@@ -9,6 +9,7 @@ const translations = {
     reports: "Reports",
     transactions: "Transactions",
     settings: "Settings",
+    login: "Login",
     logout: "Logout",
     totalMembers: "Total Members",
     totalSavings: "Total Savings",
@@ -26,6 +27,7 @@ const translations = {
     reports: "ሪፖርቶች",
     transactions: "ግብይቶች",
     settings: "ቅንብሮች",
+    login: "ግባ",
     logout: "ውጣ",
     totalMembers: "ጠቅላላ አባላት",
     totalSavings: "ጠቅላላ ቁጠባ",
@@ -38,16 +40,17 @@ const translations = {
     overview: "Ilaalcha Daashboordii",
     welcome: "Baga nagaan dhuftan! Kun wanta har'a raawwatamaa jiru.",
     members: "Miseensota",
-    savings: "Kuusaa",
+    savings: "Qusannaa",
     loans: "Liqii",
-    reports: "Ripoortii",
-    transactions: "Sochii",
+    reports: "Gabaasa",
+    transactions: "Sochii Daddabarsaa",
     settings: "Qindaa'ina",
+    login: "Seeni",
     logout: "Ba'i",
-    totalMembers: "Waliigala Miseensota",
-    totalSavings: "Waliigala Kuusaa",
-    totalLoans: "Waliigala Liqii",
-    totalProfit: "Waliigala Bu'aa"
+    totalMembers: "Miseensota Waliigala",
+    totalSavings: "Qusannaa Waliigala",
+    totalLoans: " Liqii Waliigala",
+    totalProfit: "Bu'aa Waliigala"
   }
 };
 
