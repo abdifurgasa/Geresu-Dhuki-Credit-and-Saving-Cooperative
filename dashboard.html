@@ -2,15 +2,17 @@
 <html lang="en">
 
 <head>
+
   <meta charset="UTF-8">
+
   <meta name="viewport"
         content="width=device-width, initial-scale=1.0">
 
-  <title data-i18n="dashboard">
-    Dashboard
-  </title>
+  <title>SACCO Dashboard</title>
 
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet"
+        href="css/style.css">
+
 </head>
 
 <body>
@@ -18,7 +20,8 @@
 <!-- =========================
      SIDEBAR
 ========================= -->
-<aside class="sidebar" id="sidebar">
+<aside class="sidebar"
+       id="sidebar">
 
   <!-- TOGGLE -->
   <button class="toggle-btn"
@@ -30,7 +33,9 @@
 
   <!-- LOGO -->
   <h2 class="logo">
+
     🏦 SACCO
+
   </h2>
 
   <!-- NAVIGATION -->
@@ -41,8 +46,9 @@
 
       <span class="icon">📊</span>
 
-      <span class="text"
-            data-i18n="dashboard">
+      <span class="text">
+
+        Dashboard
 
       </span>
 
@@ -53,8 +59,9 @@
 
       <span class="icon">👥</span>
 
-      <span class="text"
-            data-i18n="members">
+      <span class="text">
+
+        Members
 
       </span>
 
@@ -65,8 +72,9 @@
 
       <span class="icon">💰</span>
 
-      <span class="text"
-            data-i18n="savings">
+      <span class="text">
+
+        Savings
 
       </span>
 
@@ -77,8 +85,9 @@
 
       <span class="icon">🏦</span>
 
-      <span class="text"
-            data-i18n="loans">
+      <span class="text">
+
+        Loans
 
       </span>
 
@@ -102,8 +111,9 @@
 
       <span class="icon">📄</span>
 
-      <span class="text"
-            data-i18n="reports">
+      <span class="text">
+
+        Reports
 
       </span>
 
@@ -127,8 +137,9 @@
 
       <span class="icon">⚙️</span>
 
-      <span class="text"
-            data-i18n="settings">
+      <span class="text">
+
+        Settings
 
       </span>
 
@@ -141,7 +152,8 @@
 <!-- =========================
      MAIN CONTENT
 ========================= -->
-<main class="main">
+<main class="main"
+      id="main">
 
   <!-- TOPBAR -->
   <div class="topbar">
@@ -150,7 +162,9 @@
     <div>
 
       <h2>
+
         Financial dashboard
+
       </h2>
 
     </div>
@@ -158,8 +172,8 @@
     <!-- RIGHT -->
     <div style="
       display:flex;
-      gap:10px;
       align-items:center;
+      gap:10px;
     ">
 
       <!-- ROLE -->
@@ -174,13 +188,11 @@
       </div>
 
       <!-- LANGUAGE -->
-      <select id="langSelect"
-              class="lang-select"
-              onchange="changeLang(this.value)">
+      <select class="lang-select">
 
-        <option value="EN">EN</option>
-        <option value="AM">AM</option>
-        <option value="OR">OR</option>
+        <option>EN</option>
+        <option>AM</option>
+        <option>OR</option>
 
       </select>
 
@@ -195,16 +207,16 @@
 
   </div>
 
-  <!-- PAGE TITLE -->
+  <!-- PAGE HEADER -->
   <div style="margin-top:25px;">
 
-    <h1 data-i18n="overview">
+    <h1>
 
-      Dashboard overview
+      DASHBOARD OVERVIEW
 
     </h1>
 
-    <p data-i18n="welcome">
+    <p>
 
       Welcome to SACCO Management System
 
@@ -220,11 +232,7 @@
     <!-- MEMBERS -->
     <div class="card blue">
 
-      <h3 data-i18n="totalMembers">
-
-        Total Members
-
-      </h3>
+      <h3>Total Members</h3>
 
       <p id="members">
 
@@ -237,11 +245,7 @@
     <!-- SAVINGS -->
     <div class="card green">
 
-      <h3 data-i18n="totalSavings">
-
-        Total Savings
-
-      </h3>
+      <h3>Total Savings</h3>
 
       <p id="savings">
 
@@ -254,11 +258,7 @@
     <!-- LOANS -->
     <div class="card orange">
 
-      <h3 data-i18n="totalLoans">
-
-        Total Loans
-
-      </h3>
+      <h3>Total Loans</h3>
 
       <p id="loans">
 
@@ -271,11 +271,7 @@
     <!-- PROFIT -->
     <div class="card purple">
 
-      <h3 data-i18n="totalProfit">
-
-        Total Profit
-
-      </h3>
+      <h3>Total Profit</h3>
 
       <p id="profit">
 
@@ -304,7 +300,7 @@
          class="card teal"
          style="text-decoration:none;">
 
-        <h3>Add new member</h3>
+        <h3>Add Member</h3>
 
         <p>👥</p>
 
@@ -314,7 +310,7 @@
          class="card green"
          style="text-decoration:none;">
 
-        <h3>Deposit savings</h3>
+        <h3>Deposit</h3>
 
         <p>💰</p>
 
@@ -324,7 +320,7 @@
          class="card orange"
          style="text-decoration:none;">
 
-        <h3>Create loan</h3>
+        <h3>Create Loan</h3>
 
         <p>🏦</p>
 
@@ -334,7 +330,7 @@
          class="card red"
          style="text-decoration:none;">
 
-        <h3>View reports</h3>
+        <h3>Reports</h3>
 
         <p>📄</p>
 
@@ -347,24 +343,26 @@
 </main>
 
 <!-- =========================
-     SIDEBAR JS
+     SIDEBAR SCRIPT
 ========================= -->
 <script>
 
-function toggleSidebar() {
+function toggleSidebar(){
 
-  document
-    .getElementById("sidebar")
-    .classList.toggle("collapsed");
+  const sidebar =
+    document.getElementById("sidebar");
+
+  const main =
+    document.getElementById("main");
+
+  sidebar.classList.toggle("collapsed");
+
+  main.classList.toggle("expanded");
 }
 
 </script>
 
-<!-- =========================
-     JS FILES
-========================= -->
-<script src="js/i18n.js"></script>
-
+<!-- DASHBOARD JS -->
 <script type="module"
         src="js/dashboard.js">
 
