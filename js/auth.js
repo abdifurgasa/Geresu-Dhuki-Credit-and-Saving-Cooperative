@@ -46,14 +46,26 @@ window.login = async function () {
 };
 
 /* =========================
-   LOGOUT
+   LOGOUT (FIXED + GLOBAL SAFE)
 ========================= */
-window.logout = async function () {
-  await signOut(auth);
-  localStorage.clear();
-  window.location.href = "index.html";
-};
+window.logoutUser = async function () {
 
+  try {
+
+    await signOut(auth);
+
+    localStorage.removeItem("role");
+    sessionStorage.clear();
+
+    window.location.href = "index.html";
+
+  } catch (err) {
+
+    console.error(err);
+
+    alert("Logout failed");
+  }
+};
 /* =========================
    AUTH GUARD (PROTECT PAGES)
 ========================= */
