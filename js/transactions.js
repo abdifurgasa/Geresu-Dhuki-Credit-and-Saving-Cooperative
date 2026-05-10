@@ -1,44 +1,313 @@
 import { db } from "./firebase.js";
+
 import {
+
   collection,
-  onSnapshot,
+  addDoc,
+  getDocs,
+  updateDoc,
   query,
-  orderBy
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  where,
+  doc
 
-const table = document.getElementById("txnTable");
+}
 
-function loadTransactions() {
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-  const q = query(collection(db, "transactions"), orderBy("date", "desc"));
+/* =========================
+   GLOBAL
+========================= */
+let selectedMember = null;
 
-  onSnapshot(q, (snap) => {
+/* =========================
+   SEARCH MEMBERS
+========================= */
+window.searchMembers = async function () {
 
-    table.innerHTML = "";
+  const keyword =
+    document.getElementById("memberSearch")
+    .value
+    .trim()
+    .toLowerCase();
 
-    snap.forEach(doc => {
+  const resultsBox =
+    document.getElementById("searchResults");
 
-      const d = doc.data();
+  resultsBox.innerHTML = "";
 
-      let colorClass = "";
+  const snap =
+    await getDocs(
+      collection(db, "members")
+    );
 
-      if (d.type === "Loan") colorClass = "blue";
-      if (d.type === "Saving") colorClass = "green";
-      if (d.type === "Penalty") colorClass = "red";
-      if (d.type === "Repayment") colorClass = "orange";
+  snap.forEach((memberDoc) => {
 
-      table.innerHTML += `
-        <tr class="${colorClass}">
-          <td>${d.type}</td>
-          <td>${d.member || "-"}</td>
-          <td>$${d.amount}</td>
-          <td>${d.date}</td>
-          <td>${d.description || ""}</td>
-        </tr>
+    const data =
+      memberDoc.data();
+
+    const name =
+      (data.name || "")
+      .toLowerCase();
+
+    const phone =
+      (data.phone || "")
+      .toLowerCase();
+
+    const nid =
+      (data.nid || "")
+      .toLowerCase();
+
+    if (
+      name.includes(keyword) ||
+      phone.includes(keyword) ||
+      nid.includes(keyword)
+    ) {
+
+      const div =
+        document.createElement("div");
+
+      div.className =
+        "result-item";
+
+      div.innerHTML = `
+        <strong>${data.name}</strong><br>
+        ${data.phone}
       `;
-    });
 
+      div.onclick = () => {
+
+        selectedMember = {
+          id: memberDoc.id,
+          ...data
+        };
+
+        document.getElementById(
+          "selectedMember"
+        ).innerHTML = `
+          ✅ Selected:
+          <strong>${data.name}</strong>
+        `;
+
+        resultsBox.innerHTML = "";
+      };
+
+      resultsBox.appendChild(div);
+    }
+  });
+};
+
+/* =========================
+   PROCESS TRANSACTION
+========================= */
+window.processTransaction =
+async function () {
+
+  if (!selectedMember) {
+
+    alert("Select member first");
+    return;
+  }
+
+  const type =
+    document.getElementById(
+      "transactionType"
+    ).value;
+
+  const amount =
+    Number(
+      document.getElementById(
+        "amount"
+      ).value
+    );
+
+  if (!type || !amount) {
+
+    alert("Fill all fields");
+    return;
+  }
+
+  try {
+
+    /* =====================
+       SAVING DEPOSIT
+    ===================== */
+    if (type === "saving") {
+
+      await addDoc(
+        collection(db, "savings"),
+        {
+
+          memberId:
+            selectedMember.id,
+
+          memberName:
+            selectedMember.name,
+
+          amount:
+            amount,
+
+          createdAt:
+            new Date()
+        }
+      );
+    }
+
+    /* =====================
+       LOAN REPAYMENT
+    ===================== */
+    if (type === "repayment") {
+
+      const q =
+        query(
+          collection(db, "loans"),
+          where(
+            "memberId",
+            "==",
+            selectedMember.id
+          )
+        );
+
+      const loanSnap =
+        await getDocs(q);
+
+      if (loanSnap.empty) {
+
+        alert("No loan found");
+        return;
+      }
+
+      const loanDoc =
+        loanSnap.docs[0];
+
+      const loan =
+        loanDoc.data();
+
+      const newPaid =
+        Number(loan.paid || 0)
+        + amount;
+
+      const newRemaining =
+        Number(loan.totalRepayment)
+        - newPaid;
+
+      let status =
+        "Active";
+
+      if (newRemaining <= 0) {
+
+        status =
+          "Completed";
+      }
+
+      await updateDoc(
+        doc(db, "loans", loanDoc.id),
+        {
+
+          paid:
+            newPaid,
+
+          remaining:
+            newRemaining,
+
+          status:
+            status
+        }
+      );
+    }
+
+    /* =====================
+       SAVE TRANSACTION
+    ===================== */
+    await addDoc(
+      collection(db, "transactions"),
+      {
+
+        memberId:
+          selectedMember.id,
+
+        memberName:
+          selectedMember.name,
+
+        type:
+          type,
+
+        amount:
+          amount,
+
+        createdAt:
+          new Date()
+      }
+    );
+
+    alert(
+      "Transaction successful"
+    );
+
+    loadTransactions();
+
+  }
+
+  catch (err) {
+
+    console.error(err);
+
+    alert(
+      "Transaction failed"
+    );
+  }
+};
+
+/* =========================
+   LOAD TRANSACTIONS
+========================= */
+async function loadTransactions() {
+
+  const table =
+    document.getElementById(
+      "transactionTable"
+    );
+
+  table.innerHTML = "";
+
+  const snap =
+    await getDocs(
+      collection(db, "transactions")
+    );
+
+  snap.forEach((docItem) => {
+
+    const data =
+      docItem.data();
+
+    table.innerHTML += `
+
+      <tr>
+
+        <td>
+          ${data.memberName}
+        </td>
+
+        <td>
+          ${data.type}
+        </td>
+
+        <td>
+          ${Number(data.amount)
+            .toLocaleString()} ETB
+        </td>
+
+        <td>
+          ${new Date(
+            data.createdAt.seconds * 1000
+          ).toLocaleDateString()}
+        </td>
+
+      </tr>
+    `;
   });
 }
 
-document.addEventListener("DOMContentLoaded", loadTransactions);
+/* =========================
+   INITIAL LOAD
+========================= */
+loadTransactions();
