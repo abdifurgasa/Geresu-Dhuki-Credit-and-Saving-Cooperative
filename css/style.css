@@ -74,7 +74,64 @@ h2{
   margin-bottom:25px;
   color:#38bdf8;
 }
+/* =========================
+   NAV ITEMS
+========================= */
 
+.nav-item{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:14px;
+  margin-bottom:10px;
+  border-radius:12px;
+  color:white;
+  text-decoration:none;
+  transition:0.3s;
+}
+
+/* HOVER */
+.nav-item:hover{
+  background:rgba(255,255,255,0.12);
+}
+
+/* ACTIVE */
+.nav-item.active{
+  background:#2563eb;
+}
+
+/* ICON */
+.icon{
+  font-size:20px;
+  min-width:25px;
+  text-align:center;
+}
+
+/* TEXT */
+.text{
+  white-space:nowrap;
+}
+
+/* =========================
+   COLLAPSED MODE
+========================= */
+
+.sidebar.collapsed .text{
+  display:none;
+}
+
+.sidebar.collapsed .nav-item{
+  justify-content:center;
+}
+
+.sidebar.collapsed .logo{
+  font-size:0;
+}
+
+.sidebar.collapsed .logo::after{
+  content:"🏦";
+  font-size:28px;
+}
 /* =========================
    NAVIGATION
 ========================= */
