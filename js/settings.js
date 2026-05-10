@@ -1,44 +1,98 @@
+import { db }
+from "./firebase.js";
+
+import {
+
+  collection,
+  getDocs,
+  updateDoc,
+  doc
+
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 /* =========================
-   LANGUAGE SYSTEM
+   LOAD USERS
 ========================= */
-function setLang(lang) {
-  localStorage.setItem("lang", lang);
-  alert("Language set to " + lang);
+async function loadRoles() {
+
+  const table =
+    document.getElementById("roleTable");
+
+  table.innerHTML = "";
+
+  const snap =
+    await getDocs(
+      collection(db, "users")
+    );
+
+  snap.forEach((userDoc) => {
+
+    const user =
+      userDoc.data();
+
+    table.innerHTML += `
+
+      <tr>
+
+        <td>${user.fullName}</td>
+
+        <td>
+          <select onchange="changeRole('${userDoc.id}', this.value)">
+
+            <option value="admin"
+              ${user.role === "admin" ? "selected" : ""}>
+              Admin
+            </option>
+
+            <option value="teller"
+              ${user.role === "teller" ? "selected" : ""}>
+              Teller
+            </option>
+
+            <option value="auditor"
+              ${user.role === "auditor" ? "selected" : ""}>
+              Auditor
+            </option>
+
+          </select>
+        </td>
+
+        <td>Role Control</td>
+
+      </tr>
+
+    `;
+  });
 }
 
 /* =========================
-   THEME SYSTEM
+   CHANGE ROLE
 ========================= */
-function toggleTheme() {
+window.changeRole = async function (id, newRole) {
 
-  const current = localStorage.getItem("theme");
+  try {
 
-  if (current === "dark") {
-    localStorage.setItem("theme", "light");
-    document.body.classList.remove("dark");
-  } else {
-    localStorage.setItem("theme", "dark");
-    document.body.classList.add("dark");
+    await updateDoc(
+      doc(db, "users", id),
+      {
+        role: newRole
+      }
+    );
+
+    alert("Role updated successfully");
+
   }
 
-}
+  catch (err) {
 
-/* =========================
-   LOGOUT
-========================= */
-function logout() {
-  localStorage.clear();
-  window.location.href = "index.html";
-}
+    console.error(err);
 
-/* =========================
-   APPLY ON LOAD
-========================= */
-document.addEventListener("DOMContentLoaded", () => {
-
-  if (localStorage.getItem("theme") === "dark") {
-    document.body.classList.add("dark");
+    alert("Failed to update role");
   }
+};
 
-});
+/* =========================
+   INIT
+========================= */
+loadRoles();
