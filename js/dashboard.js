@@ -1,12 +1,14 @@
 import { db, auth } from "./firebase.js";
 
 import {
+
   collection,
   getDocs,
   query,
   where,
   doc,
   getDoc
+
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 /* =========================
@@ -16,36 +18,54 @@ async function loadDashboard() {
 
   try {
 
-    const uid = auth.currentUser.uid;
+    /* WAIT FOR AUTH */
+    auth.onAuthStateChanged(async (user) => {
 
-    const userRef =
-      doc(db, "users", uid);
+      if (!user) {
+        window.location.href = "index.html";
+        return;
+      }
 
-    const userSnap =
-      await getDoc(userRef);
+      const uid = user.uid;
 
-    const role =
-      userSnap.data().role;
+      /* USER ROLE */
+      const userRef =
+        doc(db, "users", uid);
 
-    /* =========================
-       ADMIN DASHBOARD
-    ========================= */
-    if (role === "admin") {
+      const userSnap =
+        await getDoc(userRef);
 
-      await loadAdminDashboard();
-    }
+      if (!userSnap.exists()) {
+        alert("User profile not found");
+        return;
+      }
 
-    /* =========================
-       MEMBER DASHBOARD
-    ========================= */
-    else {
+      const role =
+        userSnap.data().role;
 
-      await loadMemberDashboard(uid);
-    }
+      /* ROLE LABEL */
+      document.getElementById("roleBox").innerText =
+        role.toUpperCase();
+
+      /* ADMIN */
+      if (role === "admin") {
+
+        await loadAdminDashboard();
+      }
+
+      /* MEMBER */
+      else {
+
+        await loadMemberDashboard(uid);
+      }
+
+    });
 
   } catch (e) {
 
     console.error(e);
+
+    alert("Dashboard loading failed");
   }
 }
 
@@ -54,54 +74,90 @@ async function loadDashboard() {
 ========================= */
 async function loadAdminDashboard() {
 
-  /* MEMBERS */
+  /* =========================
+     MEMBERS
+  ========================= */
   const membersSnap =
     await getDocs(collection(db, "members"));
 
-  document.getElementById("members").innerText =
+  const totalMembers =
     membersSnap.size;
 
-  /* SAVINGS */
+  document.getElementById("members").innerText =
+    totalMembers;
+
+  /* =========================
+     SAVINGS
+  ========================= */
   const savingsSnap =
     await getDocs(collection(db, "savings"));
 
   let totalSavings = 0;
 
-  savingsSnap.forEach(doc => {
+  savingsSnap.forEach((doc) => {
 
     totalSavings +=
       Number(doc.data().amount || 0);
+
   });
 
   document.getElementById("savings").innerText =
     totalSavings.toLocaleString() + " ETB";
 
-  /* LOANS */
+  /* =========================
+     LOANS
+  ========================= */
   const loansSnap =
     await getDocs(collection(db, "loans"));
 
   let totalLoans = 0;
 
-  loansSnap.forEach(doc => {
+  loansSnap.forEach((doc) => {
 
     totalLoans +=
       Number(doc.data().amount || 0);
+
   });
 
   document.getElementById("loans").innerText =
     totalLoans.toLocaleString() + " ETB";
 
-  /* PROFIT */
+  /* =========================
+     REPAYMENTS
+  ========================= */
+  const transactionsSnap =
+    await getDocs(collection(db, "transactions"));
+
+  let repayments = 0;
+
+  transactionsSnap.forEach((doc) => {
+
+    const data = doc.data();
+
+    if (data.type === "loan_repayment") {
+
+      repayments +=
+        Number(data.amount || 0);
+    }
+
+  });
+
+  /* =========================
+     PROFIT
+  ========================= */
   const profit =
-    totalSavings - totalLoans;
+    totalSavings + repayments - totalLoans;
 
   document.getElementById("profit").innerText =
     profit.toLocaleString() + " ETB";
 
-  /* LOAD CHART */
-  loadChart(
+  /* =========================
+     CHARTS
+  ========================= */
+  loadCharts(
     totalSavings,
     totalLoans,
+    repayments,
     profit
   );
 }
@@ -111,15 +167,20 @@ async function loadAdminDashboard() {
 ========================= */
 async function loadMemberDashboard(uid) {
 
+  /* HIDE ADMIN MENUS */
   document.querySelectorAll(".admin-only")
     .forEach(el => {
+
       el.style.display = "none";
+
     });
 
   document.getElementById("members").innerText =
     "My Account";
 
-  /* MEMBER SAVINGS */
+  /* =========================
+     MEMBER SAVINGS
+  ========================= */
   const savingsQuery =
     query(
       collection(db, "savings"),
@@ -131,16 +192,19 @@ async function loadMemberDashboard(uid) {
 
   let totalSavings = 0;
 
-  savingsSnap.forEach(doc => {
+  savingsSnap.forEach((doc) => {
 
     totalSavings +=
       Number(doc.data().amount || 0);
+
   });
 
   document.getElementById("savings").innerText =
     totalSavings.toLocaleString() + " ETB";
 
-  /* MEMBER LOANS */
+  /* =========================
+     MEMBER LOANS
+  ========================= */
   const loansQuery =
     query(
       collection(db, "loans"),
@@ -152,91 +216,144 @@ async function loadMemberDashboard(uid) {
 
   let totalLoans = 0;
 
-  loansSnap.forEach(doc => {
+  loansSnap.forEach((doc) => {
 
     totalLoans +=
       Number(doc.data().amount || 0);
+
   });
 
   document.getElementById("loans").innerText =
     totalLoans.toLocaleString() + " ETB";
 
-  /* MEMBER PROFIT */
+  /* =========================
+     MEMBER REPAYMENTS
+  ========================= */
+  const txQuery =
+    query(
+      collection(db, "transactions"),
+      where("uid", "==", uid)
+    );
+
+  const txSnap =
+    await getDocs(txQuery);
+
+  let repayments = 0;
+
+  txSnap.forEach((doc) => {
+
+    const data = doc.data();
+
+    if (data.type === "loan_repayment") {
+
+      repayments +=
+        Number(data.amount || 0);
+    }
+
+  });
+
+  /* =========================
+     PROFIT
+  ========================= */
   const profit =
-    totalSavings - totalLoans;
+    totalSavings + repayments - totalLoans;
 
   document.getElementById("profit").innerText =
     profit.toLocaleString() + " ETB";
 
-  /* MEMBER CHART */
-  loadChart(
+  /* CHARTS */
+  loadCharts(
     totalSavings,
     totalLoans,
+    repayments,
     profit
   );
 }
 
 /* =========================
-   CHART SYSTEM
+   CHARTS
 ========================= */
-function loadChart(
+function loadCharts(
   savings,
   loans,
+  repayments,
   profit
 ) {
 
-  const ctx =
+  /* =========================
+     MAIN CHART
+  ========================= */
+  const chart1 =
     document.getElementById("dashboardChart");
 
-  if (!ctx) return;
+  if (chart1) {
 
-  new Chart(ctx, {
+    new Chart(chart1, {
 
-    type: "bar",
+      type: "bar",
 
-    data: {
+      data: {
 
-      labels: [
-        "Savings",
-        "Loans",
-        "Profit"
-      ],
+        labels: [
+          "Savings",
+          "Loans",
+          "Repayments",
+          "Profit"
+        ],
 
-      datasets: [{
+        datasets: [{
 
-        label: "SACCO Analytics",
+          label: "Financial Analytics",
 
-        data: [
-          savings,
-          loans,
-          profit
-        ]
-      }]
-    },
-
-    options: {
-
-      responsive: true,
-
-      plugins: {
-
-        legend: {
-          display: true
-        }
+          data: [
+            savings,
+            loans,
+            repayments,
+            profit
+          ]
+        }]
       }
-    }
-  });
+    });
+  }
+
+  /* =========================
+     REPAYMENT CHART
+  ========================= */
+  const chart2 =
+    document.getElementById("repaymentChart");
+
+  if (chart2) {
+
+    new Chart(chart2, {
+
+      type: "doughnut",
+
+      data: {
+
+        labels: [
+          "Loans",
+          "Repayments"
+        ],
+
+        datasets: [{
+
+          data: [
+            loans,
+            repayments
+          ]
+        }]
+      }
+    });
+  }
 }
 
 /* =========================
    SIDEBAR
 ========================= */
-const sidebar =
-  document.getElementById("sidebar");
-
 window.toggleSidebar = function () {
 
-  sidebar.classList.toggle("collapsed");
+  document.getElementById("sidebar")
+    .classList.toggle("collapsed");
 };
 
 /* =========================
