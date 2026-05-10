@@ -1,184 +1,82 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<title>Settings</title>
 
-<link rel="stylesheet" href="css/layout.css">
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <meta charset="UTF-8">
 
-<style>
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
 
-/* PAGE */
-.content{
-  max-width:800px;
-}
+  <title>System Settings</title>
 
-/* TABS */
-.tabs{
-  display:flex;
-  gap:10px;
-  margin-bottom:20px;
-}
+  <link rel="stylesheet"
+        href="css/style.css">
 
-.tab{
-  padding:10px 15px;
-  border-radius:8px;
-  cursor:pointer;
-  background:#f1f5f9;
-}
-
-.tab.active{
-  background:#2563eb;
-  color:white;
-}
-
-/* CARD */
-.settings-card{
-  background:#fff;
-  padding:20px;
-  border-radius:12px;
-  box-shadow:0 5px 15px rgba(0,0,0,0.05);
-  margin-bottom:20px;
-}
-
-.settings-card h3{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  margin-bottom:15px;
-}
-
-/* INPUT */
-.settings-card input{
-  width:100%;
-  padding:10px;
-  margin-bottom:10px;
-  border:1px solid #ddd;
-  border-radius:6px;
-}
-
-/* BUTTON */
-.settings-card button{
-  padding:10px 15px;
-  border:none;
-  border-radius:6px;
-  background:#2563eb;
-  color:white;
-  cursor:pointer;
-}
-
-.settings-card button:hover{
-  background:#1d4ed8;
-}
-
-/* LOGOUT */
-.logout-btn{
-  background:#ef4444;
-}
-
-.logout-btn:hover{
-  background:#dc2626;
-}
-
-/* HIDE */
-.hidden{
-  display:none;
-}
-
-</style>
 </head>
 
 <body>
 
-<div class="layout">
+<div class="container">
 
-  <aside class="sidebar">
-    <h2>SACCO</h2>
-  </aside>
+  <h1>⚙️ SYSTEM SETTINGS</h1>
 
-  <main class="main">
+  <!-- SYSTEM INFO -->
+  <section class="cards">
 
-    <div class="topbar">
-      <h2><i class="fa fa-gear"></i> Settings</h2>
-    </div>
+    <div class="card blue">
 
-    <div class="content">
+      <h3>System Version</h3>
 
-      <!-- TABS -->
-      <div class="tabs">
-        <div class="tab active" onclick="switchTab('general', this)">General</div>
-        <div class="tab" onclick="switchTab('security', this)">Security</div>
-        <div class="tab" onclick="switchTab('account', this)">Account</div>
-      </div>
-
-      <!-- GENERAL -->
-      <div id="general" class="tab-content">
-
-        <div class="settings-card">
-          <h3><i class="fa fa-language"></i> Language</h3>
-          <button onclick="setLang('en')">English</button>
-          <button onclick="setLang('am')">Amharic</button>
-          <button onclick="setLang('om')">Oromifa</button>
-        </div>
-
-        <div class="settings-card">
-          <h3><i class="fa fa-moon"></i> Theme</h3>
-          <button onclick="toggleTheme()">Toggle Dark Mode</button>
-        </div>
-
-      </div>
-
-      <!-- SECURITY -->
-      <div id="security" class="tab-content hidden">
-
-        <div class="settings-card">
-          <h3><i class="fa fa-lock"></i> Change Password</h3>
-
-          <input id="currentPassword" type="password" placeholder="Current Password">
-          <input id="newPassword" type="password" placeholder="New Password">
-          <input id="confirmPassword" type="password" placeholder="Confirm Password">
-
-          <button onclick="changePassword()">Update Password</button>
-
-          <p id="passMsg"></p>
-        </div>
-
-      </div>
-
-      <!-- ACCOUNT -->
-      <div id="account" class="tab-content hidden">
-
-        <div class="settings-card">
-          <h3><i class="fa fa-user"></i> Account</h3>
-
-          <button class="logout-btn" onclick="logout()">
-            <i class="fa fa-right-from-bracket"></i> Logout
-          </button>
-        </div>
-
-      </div>
+      <p>v1.0 SACCO</p>
 
     </div>
 
-  </main>
+    <div class="card green">
+
+      <h3>Database</h3>
+
+      <p>Firestore</p>
+
+    </div>
+
+    <div class="card orange">
+
+      <h3>Security Mode</h3>
+
+      <p>RBAC Enabled</p>
+
+    </div>
+
+  </section>
+
+  <!-- ROLE SETTINGS -->
+  <h2>Role Management</h2>
+
+  <table class="table">
+
+    <thead>
+
+      <tr>
+
+        <th>User</th>
+        <th>Role</th>
+        <th>Action</th>
+
+      </tr>
+
+    </thead>
+
+    <tbody id="roleTable">
+
+    </tbody>
+
+  </table>
 
 </div>
 
-<script type="module" src="js/settings.js"></script>
-<script src="js/layout.js"></script>
-
-<script>
-/* TAB SWITCH */
-function switchTab(tabId, el){
-
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  el.classList.add('active');
-
-  document.querySelectorAll('.tab-content').forEach(c=>c.classList.add('hidden'));
-  document.getElementById(tabId).classList.remove('hidden');
-}
-</script>
+<script type="module"src="js/settings.js"></script>
+<script type="module"src="js/auth-guard.js"></script>
 
 </body>
 </html>
