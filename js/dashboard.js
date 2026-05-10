@@ -1,50 +1,124 @@
 import { db } from "./firebase.js";
-import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+import {
+  collection,
+  getDocs
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 /* =========================
-   FIREBASE DASHBOARD DATA
+   LOAD DASHBOARD
 ========================= */
 async function loadDashboard() {
+
   try {
-    const ref = doc(db, "stats", "dashboard");
-    const snap = await getDoc(ref);
 
-    if (snap.exists()) {
-      const data = snap.data();
+    /* =====================
+       MEMBERS
+    ===================== */
+    const memberSnap =
+      await getDocs(collection(db, "members"));
 
-      document.getElementById("members").innerText = data.members || 0;
-      document.getElementById("savings").innerText = (data.savings || 0) + " ETB";
-      document.getElementById("loans").innerText = (data.loans || 0) + " ETB";
-      document.getElementById("profit").innerText = (data.profit || 0) + " ETB";
-    }
-  } catch (e) {
-    console.error(e);
+    const totalMembers =
+      memberSnap.size;
+
+    document.getElementById("members").innerText =
+      totalMembers;
+
+    /* =====================
+       SAVINGS
+    ===================== */
+    const savingsSnap =
+      await getDocs(collection(db, "savings"));
+
+    let totalSavings = 0;
+
+    savingsSnap.forEach((doc) => {
+
+      const data = doc.data();
+
+      totalSavings += Number(data.amount || 0);
+    });
+
+    document.getElementById("savings").innerText =
+      totalSavings.toLocaleString() + " ETB";
+
+    /* =====================
+       LOANS
+    ===================== */
+    const loanSnap =
+      await getDocs(collection(db, "loans"));
+
+    let totalLoans = 0;
+    let totalProfit = 0;
+
+    loanSnap.forEach((doc) => {
+
+      const data = doc.data();
+
+      totalLoans += Number(data.amount || 0);
+
+      totalProfit += Number(data.interest || 0);
+    });
+
+    document.getElementById("loans").innerText =
+      totalLoans.toLocaleString() + " ETB";
+
+    /* =====================
+       PROFIT
+    ===================== */
+    document.getElementById("profit").innerText =
+      totalProfit.toLocaleString() + " ETB";
+
+  }
+
+  catch (err) {
+
+    console.error("Dashboard Error:", err);
   }
 }
 
+/* =========================
+   INIT
+========================= */
 loadDashboard();
 
 /* =========================
-   SIDEBAR COLLAPSE (WITH MEMORY)
+   SIDEBAR COLLAPSE
 ========================= */
-const sidebar = document.getElementById("sidebar");
+const sidebar =
+  document.getElementById("sidebar");
 
-if (localStorage.getItem("sidebar") === "collapsed") {
+if (
+  localStorage.getItem("sidebar")
+  === "collapsed"
+) {
+
   sidebar.classList.add("collapsed");
 }
 
 window.toggleSidebar = function () {
+
   sidebar.classList.toggle("collapsed");
 
   localStorage.setItem(
     "sidebar",
-    sidebar.classList.contains("collapsed") ? "collapsed" : "expanded"
+
+    sidebar.classList.contains("collapsed")
+      ? "collapsed"
+      : "expanded"
   );
 };
 
-/* ACTIVE MENU */
-document.querySelectorAll(".nav-item").forEach(link => {
-  if (link.href === window.location.href) {
-    link.classList.add("active");
-  }
+/* =========================
+   ACTIVE MENU
+========================= */
+document.querySelectorAll(".nav-item")
+  .forEach(link => {
+
+    if (
+      link.href === window.location.href
+    ) {
+
+      link.classList.add("active");
+    }
 });
