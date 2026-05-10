@@ -1,55 +1,26 @@
+import { db, auth } from "./firebase.js";
 
-export const ROLES = {
-  ADMIN: "admin",
-  TELLER: "teller",
-  AUDITOR: "auditor"
-};
-
-/* =========================
-   CURRENT USER
-========================= */
-export let currentUser = null;
+import {
+  addDoc,
+  collection,
+  Timestamp
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 /* =========================
-   SET USER (after login)
+   AUDIT LOGGER
 ========================= */
-export function setUser(user) {
+export async function logAction(action, details) {
 
-  currentUser = user;
+  await addDoc(collection(db, "auditLogs"), {
 
-  localStorage.setItem("user", JSON.stringify(user));
-}
+    user: auth.currentUser.email,
 
-/* =========================
-   GET USER
-========================= */
-export function getUser() {
+    uid: auth.currentUser.uid,
 
-  if (currentUser) return currentUser;
+    action,
 
-  return JSON.parse(localStorage.getItem("user"));
-}
+    details,
 
-/* =========================
-   PERMISSION CHECK
-========================= */
-export function can(action) {
-
-  const user = getUser();
-
-  if (!user) return false;
-
-  if (user.role === ROLES.ADMIN) return true;
-
-  if (user.role === ROLES.TELLER) {
-
-    return ["savings", "loans", "transactions"].includes(action);
-  }
-
-  if (user.role === ROLES.AUDITOR) {
-
-    return ["reports"].includes(action);
-  }
-
-  return false;
+    timestamp: Timestamp.now()
+  });
 }
