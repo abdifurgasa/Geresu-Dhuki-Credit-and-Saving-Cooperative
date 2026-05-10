@@ -1,67 +1,117 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
+
   <meta charset="UTF-8">
+
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
   <title>Transactions</title>
 
-  <link rel="stylesheet" href="css/layout.css">
-  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet"
+        href="css/style.css">
 
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 </head>
 
 <body>
 
-<div class="layout">
+<div class="container">
 
-  <!-- SIDEBAR -->
-  <aside class="sidebar">
-    <h2>SACCO</h2>
+  <h1>💱 TRANSACTION SYSTEM</h1>
 
-    <nav class="menu">
-      <ul>
-        <li><a href="dashboard.html">Dashboard</a></li>
-        <li><a href="members.html">Members</a></li>
-        <li><a href="savings.html">Savings</a></li>
-        <li class="active"><a href="transactions.html">Transactions</a></li>
-        <li><a href="loans.html">Loans</a></li>
-        <li><a href="settings.html">Settings</a></li>
-      </ul>
-    </nav>
+  <!-- SEARCH -->
+  <div class="search-container">
 
-  </aside>
+    <input id="memberSearch"
+           class="input"
+           placeholder="Search member by Name / Phone / NID">
 
-  <!-- MAIN -->
-  <main class="main">
+    <button class="btn primary"
+            onclick="searchMembers()">
 
-    <div class="topbar">
-      <h2>Transactions</h2>
-    </div>
+      Search
 
-    <div class="content">
+    </button>
 
-      <table class="table">
-        <thead>
-          <tr>
-            <th>Type</th>
-            <th>Member</th>
-            <th>Amount</th>
-            <th>Date</th>
-            <th>Description</th>
-          </tr>
-        </thead>
+  </div>
 
-        <tbody id="txnTable"></tbody>
-      </table>
+  <!-- RESULTS -->
+  <div id="searchResults"
+       class="search-results"></div>
 
-    </div>
+  <!-- SELECTED MEMBER -->
+  <div id="selectedMember"
+       class="selected-box">
 
-  </main>
+    No member selected
+
+  </div>
+
+  <!-- TRANSACTION FORM -->
+  <div class="form-box">
+
+    <!-- TYPE -->
+    <select id="transactionType"
+            class="input">
+
+      <option value="">
+        Select Transaction Type
+      </option>
+
+      <option value="saving">
+        Saving Deposit
+      </option>
+
+      <option value="repayment">
+        Loan Repayment
+      </option>
+
+    </select>
+
+    <!-- AMOUNT -->
+    <input id="amount"
+           class="input"
+           type="number"
+           placeholder="Amount">
+
+    <!-- BUTTON -->
+    <button class="btn success"
+            onclick="processTransaction()">
+
+      Process Transaction
+
+    </button>
+
+  </div>
+
+  <!-- TABLE -->
+  <table class="table">
+
+    <thead>
+
+      <tr>
+
+        <th>Member</th>
+        <th>Type</th>
+        <th>Amount</th>
+        <th>Date</th>
+
+      </tr>
+
+    </thead>
+
+    <tbody id="transactionTable">
+
+    </tbody>
+
+  </table>
 
 </div>
 
-<script type="module" src="js/firebase.js"></script>
-<script type="module" src="js/transactions.js"></script>
-<script src="js/layout.js"></script>
+<script type="module"
+        src="js/transactions.js"></script>
+
 </body>
 </html>
