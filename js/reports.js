@@ -9,100 +9,249 @@ import {
 /* =========================
    ELEMENTS
 ========================= */
-const totalMembers =
-  document.getElementById("totalMembers");
-
-const totalSavings =
-  document.getElementById("totalSavings");
-
-const totalLoans =
-  document.getElementById("totalLoans");
-
-const totalRepayments =
-  document.getElementById("totalRepayments");
-
-const outstandingLoans =
-  document.getElementById("outstandingLoans");
-
-const netBalance =
-  document.getElementById("netBalance");
+const reportTable =
+  document.getElementById("reportTable");
 
 /* =========================
-   LOAD REPORT DATA
+   GLOBAL REPORT DATA
+========================= */
+let reportData = {
+
+  members: 0,
+  savings: 0,
+  loans: 0,
+  repayments: 0,
+  outstanding: 0,
+  balance: 0
+};
+
+/* =========================
+   LOAD REPORTS
 ========================= */
 async function loadReports() {
 
-  /* MEMBERS */
-  const membersSnap =
-    await getDocs(collection(db, "members"));
+  try {
 
-  const membersCount =
-    membersSnap.size;
+    /* MEMBERS */
+    const membersSnap =
+      await getDocs(collection(db, "members"));
 
-  /* SAVINGS */
-  const savingsSnap =
-    await getDocs(collection(db, "savings"));
+    reportData.members =
+      membersSnap.size;
 
-  let savingsTotal = 0;
+    /* SAVINGS */
+    const savingsSnap =
+      await getDocs(collection(db, "savings"));
 
-  savingsSnap.forEach(d => {
+    reportData.savings = 0;
 
-    savingsTotal += d.data().amount || 0;
-  });
+    savingsSnap.forEach(doc => {
 
-  /* LOANS */
-  const loansSnap =
-    await getDocs(collection(db, "loans"));
+      reportData.savings +=
+        doc.data().amount || 0;
+    });
 
-  let loanTotal = 0;
-  let outstanding = 0;
+    /* LOANS */
+    const loansSnap =
+      await getDocs(collection(db, "loans"));
 
-  loansSnap.forEach(d => {
+    reportData.loans = 0;
+    reportData.outstanding = 0;
 
-    const l = d.data();
+    loansSnap.forEach(doc => {
 
-    loanTotal += l.total || 0;
-    outstanding += l.remaining || 0;
-  });
+      const l = doc.data();
 
-  /* REPAYMENTS */
-  const repaySnap =
-    await getDocs(collection(db, "repayments"));
+      reportData.loans +=
+        l.total || 0;
 
-  let repayTotal = 0;
+      reportData.outstanding +=
+        l.remaining || 0;
+    });
 
-  repaySnap.forEach(d => {
+    /* REPAYMENTS */
+    const repaySnap =
+      await getDocs(collection(db, "repayments"));
 
-    repayTotal += d.data().amount || 0;
-  });
+    reportData.repayments = 0;
 
-  /* NET BALANCE */
-  const net =
-    savingsTotal - outstanding;
+    repaySnap.forEach(doc => {
 
-  /* DISPLAY RESULTS */
-  totalMembers.innerText =
-    membersCount;
+      reportData.repayments +=
+        doc.data().amount || 0;
+    });
 
-  totalSavings.innerText =
-    savingsTotal + " ETB";
+    /* NET BALANCE */
+    reportData.balance =
+      reportData.savings -
+      reportData.outstanding;
 
-  totalLoans.innerText =
-    loanTotal + " ETB";
+    /* UPDATE UI */
+    updateCards();
 
-  totalRepayments.innerText =
-    repayTotal + " ETB";
+    loadTable();
 
-  outstandingLoans.innerText =
-    outstanding + " ETB";
+    loadChart();
 
-  netBalance.innerText =
-    net + " ETB";
+  }
+
+  catch (err) {
+
+    console.error(err);
+  }
 }
 
 /* =========================
-   AUTO REFRESH
+   UPDATE CARDS
+========================= */
+function updateCards() {
+
+  document.getElementById("totalMembers").innerText =
+    reportData.members;
+
+  document.getElementById("totalSavings").innerText =
+    reportData.savings + " ETB";
+
+  document.getElementById("totalLoans").innerText =
+    reportData.loans + " ETB";
+
+  document.getElementById("totalRepayments").innerText =
+    reportData.repayments + " ETB";
+
+  document.getElementById("outstandingLoans").innerText =
+    reportData.outstanding + " ETB";
+
+  document.getElementById("netBalance").innerText =
+    reportData.balance + " ETB";
+}
+
+/* =========================
+   LOAD TABLE
+========================= */
+function loadTable() {
+
+  reportTable.innerHTML = `
+
+    <tr>
+      <td>Total Savings</td>
+      <td>${reportData.savings} ETB</td>
+    </tr>
+
+    <tr>
+      <td>Total Loans</td>
+      <td>${reportData.loans} ETB</td>
+    </tr>
+
+    <tr>
+      <td>Total Repayments</td>
+      <td>${reportData.repayments} ETB</td>
+    </tr>
+
+    <tr>
+      <td>Outstanding Loans</td>
+      <td>${reportData.outstanding} ETB</td>
+    </tr>
+
+    <tr>
+      <td>Net Balance</td>
+      <td>${reportData.balance} ETB</td>
+    </tr>
+  `;
+}
+
+/* =========================
+   LOAD CHART
+========================= */
+function loadChart() {
+
+  const ctx =
+    document.getElementById("financeChart");
+
+  new Chart(ctx, {
+
+    type: "bar",
+
+    data: {
+
+      labels: [
+        "Savings",
+        "Loans",
+        "Repayments"
+      ],
+
+      datasets: [{
+
+        label: "ETB",
+
+        data: [
+          reportData.savings,
+          reportData.loans,
+          reportData.repayments
+        ]
+      }]
+    }
+  });
+}
+
+/* =========================
+   PDF EXPORT
+========================= */
+window.downloadPDF = function () {
+
+  const { jsPDF } = window.jspdf;
+
+  const doc = new jsPDF();
+
+  doc.setFontSize(18);
+
+  doc.text(
+    "SACCO Financial Report",
+    20,
+    20
+  );
+
+  doc.setFontSize(12);
+
+  doc.text(
+    `Members: ${reportData.members}`,
+    20,
+    40
+  );
+
+  doc.text(
+    `Savings: ${reportData.savings} ETB`,
+    20,
+    50
+  );
+
+  doc.text(
+    `Loans: ${reportData.loans} ETB`,
+    20,
+    60
+  );
+
+  doc.text(
+    `Repayments: ${reportData.repayments} ETB`,
+    20,
+    70
+  );
+
+  doc.text(
+    `Outstanding: ${reportData.outstanding} ETB`,
+    20,
+    80
+  );
+
+  doc.text(
+    `Net Balance: ${reportData.balance} ETB`,
+    20,
+    90
+  );
+
+  doc.save("sacco-report.pdf");
+};
+
+/* =========================
+   INIT
 ========================= */
 loadReports();
-
-setInterval(loadReports, 5000);
