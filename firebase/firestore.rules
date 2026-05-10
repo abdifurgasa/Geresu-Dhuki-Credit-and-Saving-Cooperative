@@ -5,35 +5,41 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     /* =========================
-       HELPERS
+       AUTH CHECK
     ========================= */
-
-    function isSignedIn() {
+    function signedIn() {
       return request.auth != null;
     }
 
-    function role() {
-      return request.auth.token.role;
+    /* =========================
+       SAFE ROLE GETTER
+       (NO CRASH if doc missing)
+    ========================= */
+    function getRole() {
+
+      return get(
+        /databases/$(database)/documents/users/$(request.auth.uid)
+      ).data.role;
     }
 
     function isAdmin() {
-      return isSignedIn() && role() == "admin";
+      return signedIn() && getRole() == "admin";
     }
 
     function isTeller() {
-      return isSignedIn() && role() == "teller";
+      return signedIn() && getRole() == "teller";
     }
 
     function isAuditor() {
-      return isSignedIn() && role() == "auditor";
+      return signedIn() && getRole() == "auditor";
     }
 
     /* =========================
-       USERS COLLECTION
+       USERS (ADMIN ONLY)
     ========================= */
-    match /users/{userId} {
+    match /users/{id} {
 
-      allow read: if isSignedIn();
+      allow read: if signedIn();
 
       allow create: if isAdmin();
 
@@ -47,7 +53,7 @@ service cloud.firestore {
     ========================= */
     match /members/{id} {
 
-      allow read: if isSignedIn();
+      allow read: if signedIn();
 
       allow create: if isAdmin() || isTeller();
 
@@ -57,11 +63,11 @@ service cloud.firestore {
     }
 
     /* =========================
-       SAVINGS (DEPOSITS)
+       SAVINGS
     ========================= */
     match /savings/{id} {
 
-      allow read: if isSignedIn();
+      allow read: if signedIn();
 
       allow create: if isAdmin() || isTeller();
 
@@ -75,7 +81,7 @@ service cloud.firestore {
     ========================= */
     match /loans/{id} {
 
-      allow read: if isSignedIn();
+      allow read: if signedIn();
 
       allow create: if isAdmin();
 
@@ -89,21 +95,21 @@ service cloud.firestore {
     ========================= */
     match /transactions/{id} {
 
-      allow read: if isSignedIn();
+      allow read: if signedIn();
 
       allow create: if isAdmin() || isTeller();
 
-      allow update: if false;  // NO editing history (audit-safe)
+      allow update: if false;
 
       allow delete: if isAdmin();
     }
 
     /* =========================
-       REPORTS (READ ONLY)
+       REPORTS
     ========================= */
     match /reports/{id} {
 
-      allow read: if isSignedIn();
+      allow read: if signedIn();
 
       allow write: if isAdmin();
     }
@@ -113,23 +119,9 @@ service cloud.firestore {
     ========================= */
     match /stats/{id} {
 
-      allow read: if isSignedIn();
+      allow read: if signedIn();
 
       allow write: if isAdmin();
-    }
-
-    /* =========================
-       AUDIT LOG (VERY IMPORTANT)
-    ========================= */
-    match /auditLogs/{id} {
-
-      allow read: if isAdmin() || isAuditor();
-
-      allow create: if isAdmin() || isTeller();
-
-      allow update: if false;
-
-      allow delete: if isAdmin();
     }
   }
 }
