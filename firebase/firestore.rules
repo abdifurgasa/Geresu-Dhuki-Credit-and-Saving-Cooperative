@@ -4,41 +4,46 @@ service cloud.firestore {
 
   match /databases/{database}/documents {
 
+    /* =========================
+       CHECK AUTH
+    ========================= */
     function signedIn() {
       return request.auth != null;
     }
 
     /* =========================
-       USERS (SAFE READ FIRST)
+       SAFE USER DOC
     ========================= */
-    match /users/{userId} {
-
-      allow read: if signedIn();
-
-      allow write: if signedIn() && request.auth.uid == userId;
+    function userDoc() {
+      return get(
+        /databases/$(database)/documents/users/$(request.auth.uid)
+      );
     }
 
-    /* =========================
-       SAFE ROLE CHECK (NO CRASH)
-    ========================= */
-    function getRole() {
-
-      let userDoc =
-        get(/databases/$(database)/documents/users/$(request.auth.uid));
-
-      return userDoc.data.role;
+    function role() {
+      return signedIn() && userDoc().data.role;
     }
 
     function isAdmin() {
-      return signedIn() && getRole() == "admin";
+      return role() == "admin";
     }
 
     function isTeller() {
-      return signedIn() && getRole() == "teller";
+      return role() == "teller";
     }
 
     function isAuditor() {
-      return signedIn() && getRole() == "auditor";
+      return role() == "auditor";
+    }
+
+    /* =========================
+       USERS COLLECTION
+    ========================= */
+    match /users/{id} {
+
+      allow read: if signedIn();
+
+      allow write: if signedIn() && request.auth.uid == id;
     }
 
     /* =========================
@@ -85,6 +90,16 @@ service cloud.firestore {
        REPORTS
     ========================= */
     match /reports/{id} {
+
+      allow read: if signedIn();
+
+      allow write: if isAdmin();
+    }
+
+    /* =========================
+       STATS
+    ========================= */
+    match /stats/{id} {
 
       allow read: if signedIn();
 
