@@ -18,32 +18,174 @@
 
 <body>
 
-<div class="container">
+<!-- =========================
+     SIDEBAR
+========================= -->
+<aside class="sidebar"
+       id="sidebar">
+
+  <button class="toggle-btn"
+          onclick="toggleSidebar()">
+
+    ☰
+
+  </button>
+
+  <h2 class="logo">
+
+    🏦 SACCO
+
+  </h2>
+
+  <nav class="nav">
+
+    <a href="dashboard.html"
+       class="nav-item">
+
+      <span class="icon">📊</span>
+      <span class="text">Dashboard</span>
+
+    </a>
+
+    <a href="members.html"
+       class="nav-item">
+
+      <span class="icon">👥</span>
+      <span class="text">Members</span>
+
+    </a>
+
+    <a href="savings.html"
+       class="nav-item">
+
+      <span class="icon">💰</span>
+      <span class="text">Savings</span>
+
+    </a>
+
+    <a href="loans.html"
+       class="nav-item">
+
+      <span class="icon">🏦</span>
+      <span class="text">Loans</span>
+
+    </a>
+
+    <a href="transactions.html"
+       class="nav-item">
+
+      <span class="icon">💱</span>
+      <span class="text">Transactions</span>
+
+    </a>
+
+    <a href="reports.html"
+       class="nav-item active">
+
+      <span class="icon">📄</span>
+      <span class="text">Reports</span>
+
+    </a>
+
+    <a href="users.html"
+       class="nav-item admin-only">
+
+      <span class="icon">👤</span>
+      <span class="text">Users</span>
+
+    </a>
+
+    <a href="settings.html"
+       class="nav-item">
+
+      <span class="icon">⚙️</span>
+      <span class="text">Settings</span>
+
+    </a>
+
+  </nav>
+
+</aside>
+
+<!-- =========================
+     MAIN CONTENT
+========================= -->
+<main class="main">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+
+    <h2>
+
+      Financial Reports
+
+    </h2>
+
+    <button class="btn danger"
+            onclick="logout()">
+
+      Logout
+
+    </button>
+
+  </div>
 
   <!-- PAGE TITLE -->
-  <h1>📊 FINANCIAL REPORTING SYSTEM</h1>
+  <h1>
+
+    📊 FINANCIAL REPORTING SYSTEM
+
+  </h1>
 
   <!-- REPORT CARDS -->
   <section class="cards">
 
     <div class="card blue">
+
       <h3>Total Members</h3>
-      <p id="totalMembers">0</p>
+
+      <p id="totalMembers">
+
+        0
+
+      </p>
+
     </div>
 
     <div class="card green">
+
       <h3>Total Savings</h3>
-      <p id="totalSavings">0 ETB</p>
+
+      <p id="totalSavings">
+
+        0 ETB
+
+      </p>
+
     </div>
 
     <div class="card orange">
+
       <h3>Total Loans</h3>
-      <p id="totalLoans">0 ETB</p>
+
+      <p id="totalLoans">
+
+        0 ETB
+
+      </p>
+
     </div>
 
     <div class="card purple">
+
       <h3>Total Repayments</h3>
-      <p id="totalRepayments">0 ETB</p>
+
+      <p id="totalRepayments">
+
+        0 ETB
+
+      </p>
+
     </div>
 
   </section>
@@ -53,18 +195,32 @@
            style="margin-top:20px;">
 
     <div class="card teal">
+
       <h3>Outstanding Loans</h3>
-      <p id="outstandingLoans">0 ETB</p>
+
+      <p id="outstandingLoans">
+
+        0 ETB
+
+      </p>
+
     </div>
 
     <div class="card red">
+
       <h3>Net Balance</h3>
-      <p id="netBalance">0 ETB</p>
+
+      <p id="netBalance">
+
+        0 ETB
+
+      </p>
+
     </div>
 
   </section>
 
-  <!-- PDF BUTTON -->
+  <!-- PDF EXPORT -->
   <div style="margin-top:25px;">
 
     <button class="btn primary"
@@ -76,10 +232,14 @@
 
   </div>
 
-  <!-- REPORT TABLE -->
+  <!-- TABLE -->
   <div style="margin-top:30px;">
 
-    <h2>Financial Summary</h2>
+    <h2>
+
+      Financial Summary
+
+    </h2>
 
     <table class="table">
 
@@ -105,24 +265,39 @@
   <!-- CHART -->
   <div style="margin-top:30px;">
 
-    <h2>Financial Analytics</h2>
+    <h2>
+
+      Financial Analytics
+
+    </h2>
 
     <canvas id="financeChart"></canvas>
 
   </div>
 
-</div>
-<canvas id="financeChart"></canvas>
+</main>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<!-- CHART JS -->
+<!-- =========================
+     LIBRARIES
+========================= -->
+
+<!-- CHART -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<!-- PDF LIBRARY -->
+<!-- PDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
+<!-- AUTH -->
+<script type="module"
+        src="js/auth.js"></script>
+
+<!-- AUTH GUARD -->
+<script type="module"
+        src="js/auth-guard.js"></script>
+
 <!-- REPORT ENGINE -->
-<script type="module"src="js/reports.js"></script>
-<script type="module" src="js/auth-guard.js"></script>
+<script type="module"
+        src="js/reports.js"></script>
+
 </body>
 </html>
