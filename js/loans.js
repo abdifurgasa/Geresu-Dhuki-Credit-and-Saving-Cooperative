@@ -1,97 +1,188 @@
-
 import { db } from "./firebase.js";
 
 import {
   collection,
-  getDocs,
   addDoc,
+  getDocs,
+  updateDoc,
   doc,
-  updateDoc
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  deleteDoc,
+  query,
+  where
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 /* =========================
-   STATE
+   GLOBAL VARIABLES
 ========================= */
 let selectedMember = null;
-
-/* =========================
-   ELEMENTS
-========================= */
-const searchInput =
-  document.getElementById("memberSearch");
-
-const resultsBox =
-  document.getElementById("searchResults");
-
-const selectedBox =
-  document.getElementById("selectedMember");
-
-const table =
-  document.getElementById("loanTable");
 
 /* =========================
    SEARCH MEMBERS
 ========================= */
 window.searchMembers = async function () {
 
-  const value =
-    searchInput.value.toLowerCase();
+  const keyword =
+    document.getElementById("memberSearch")
+    .value
+    .trim()
+    .toLowerCase();
+
+  const resultsBox =
+    document.getElementById("searchResults");
 
   resultsBox.innerHTML = "";
 
-  const snap =
-    await getDocs(collection(db, "members"));
+  if (!keyword) {
 
-  let found = false;
+    alert("Enter member name or phone");
+    return;
+  }
 
-  snap.forEach(docSnap => {
+  try {
 
-    const m = docSnap.data();
+    const snap =
+      await getDocs(
+        collection(db, "members")
+      );
 
-    if (
-      m.name.toLowerCase().includes(value) ||
-      m.phone.includes(value) ||
-      m.nid.includes(value)
-    ) {
+    let found = false;
 
-      found = true;
+    snap.forEach((memberDoc) => {
 
-      const div =
-        document.createElement("div");
+      const data = memberDoc.data();
 
-      div.className = "result-item";
+      const name =
+        (data.name || "").toLowerCase();
 
-      div.innerHTML = `
-        <b>${m.name}</b><br>
-        ${m.phone} | ${m.nid}
-      `;
+      const phone =
+        (data.phone || "").toLowerCase();
 
-      div.onclick = () => {
+      const nid =
+        (data.nid || "").toLowerCase();
 
-        selectedMember = {
-          id: docSnap.id,
-          ...m
-        };
+      if (
+        name.includes(keyword) ||
+        phone.includes(keyword) ||
+        nid.includes(keyword)
+      ) {
 
-        selectedBox.innerHTML = `
-          <b>${m.name}</b><br>
-          ${m.phone}<br>
-          ${m.nid}
+        found = true;
+
+        const div =
+          document.createElement("div");
+
+        div.className =
+          "result-item";
+
+        div.innerHTML = `
+          <strong>${data.name}</strong><br>
+          ${data.phone}
         `;
 
-        resultsBox.innerHTML = "";
-        searchInput.value = "";
-      };
+        div.onclick = () => {
 
-      resultsBox.appendChild(div);
+          selectedMember = {
+            id: memberDoc.id,
+            ...data
+          };
+
+          document.getElementById(
+            "selectedMember"
+          ).innerHTML = `
+            ✅ Selected:
+            <strong>${data.name}</strong>
+            (${data.phone})
+          `;
+
+          resultsBox.innerHTML = "";
+        };
+
+        resultsBox.appendChild(div);
+      }
+    });
+
+    if (!found) {
+
+      resultsBox.innerHTML = `
+        <div class="result-item">
+          No member found
+        </div>
+      `;
     }
-  });
 
-  if (!found) {
+  } catch (err) {
 
-    resultsBox.innerHTML =
-      "<div class='result-item'>No member found</div>";
+    console.error(err);
+
+    alert("Search failed");
   }
+};
+
+/* =========================
+   CALCULATE LOAN
+========================= */
+window.calculateLoan = function () {
+
+  const amount =
+    Number(
+      document.getElementById("loanAmount").value
+    );
+
+  const rate =
+    Number(
+      document.getElementById("interestRate").value
+    );
+
+  let duration =
+    Number(
+      document.getElementById("duration").value
+    );
+
+  const type =
+    document.getElementById("durationType").value;
+
+  if (
+    !amount ||
+    !rate ||
+    !duration
+  ) {
+
+    alert("Fill all fields");
+    return;
+  }
+
+  /* CONVERT YEARS TO MONTHS */
+  if (type === "years") {
+
+    duration =
+      duration * 12;
+  }
+
+  /* SIMPLE INTEREST */
+  const interestAmount =
+    (amount * rate / 100);
+
+  const totalRepayment =
+    amount + interestAmount;
+
+  const monthlyPayment =
+    totalRepayment / duration;
+
+  document.getElementById(
+    "monthlyPayment"
+  ).innerText =
+    monthlyPayment.toFixed(2) + " ETB";
+
+  document.getElementById(
+    "totalRepayment"
+  ).innerText =
+    totalRepayment.toFixed(2) + " ETB";
+
+  document.getElementById(
+    "totalInterest"
+  ).innerText =
+    interestAmount.toFixed(2) + " ETB";
 };
 
 /* =========================
@@ -99,96 +190,117 @@ window.searchMembers = async function () {
 ========================= */
 window.createLoan = async function () {
 
-  const amount =
-    Number(document.getElementById("loanAmount").value);
-
-  const interest =
-    Number(document.getElementById("interest").value);
-
   if (!selectedMember) {
 
     alert("Select member first");
-
     return;
   }
 
-  if (!amount || amount <= 0) {
+  const amount =
+    Number(
+      document.getElementById("loanAmount").value
+    );
 
-    alert("Enter valid loan amount");
+  const rate =
+    Number(
+      document.getElementById("interestRate").value
+    );
 
+  let duration =
+    Number(
+      document.getElementById("duration").value
+    );
+
+  const type =
+    document.getElementById("durationType").value;
+
+  if (
+    !amount ||
+    !rate ||
+    !duration
+  ) {
+
+    alert("Fill all fields");
     return;
   }
 
-  if (interest < 0) {
+  if (type === "years") {
 
-    alert("Invalid interest");
-
-    return;
+    duration =
+      duration * 12;
   }
+
+  /* CALCULATIONS */
+  const interestAmount =
+    (amount * rate / 100);
+
+  const total =
+    amount + interestAmount;
+
+  const monthly =
+    total / duration;
+
+  const dueDate =
+    new Date();
+
+  dueDate.setMonth(
+    dueDate.getMonth() + duration
+  );
 
   try {
 
-    /* CHECK ACTIVE LOAN */
-    const snap =
-      await getDocs(collection(db, "loans"));
+    await addDoc(
+      collection(db, "loans"),
+      {
 
-    let hasActive = false;
+        memberId:
+          selectedMember.id,
 
-    snap.forEach(d => {
+        memberName:
+          selectedMember.name,
 
-      const l = d.data();
+        amount:
+          amount,
 
-      if (
-        l.memberId === selectedMember.id &&
-        l.status === "Active"
-      ) {
+        interestRate:
+          rate,
 
-        hasActive = true;
+        interest:
+          interestAmount,
+
+        duration:
+          duration,
+
+        monthlyPayment:
+          monthly,
+
+        totalRepayment:
+          total,
+
+        paid:
+          0,
+
+        remaining:
+          total,
+
+        status:
+          "Active",
+
+        createdAt:
+          new Date(),
+
+        dueDate:
+          dueDate.toISOString()
       }
-    });
-
-    if (hasActive) {
-
-      alert("Member already has active loan");
-
-      return;
-    }
-
-    const total =
-      amount + (amount * interest / 100);
-
-    await addDoc(collection(db, "loans"), {
-
-      memberId: selectedMember.id,
-      name: selectedMember.name,
-      phone: selectedMember.phone,
-
-      amount: amount,
-      interest: interest,
-      total: total,
-
-      paid: 0,
-      remaining: total,
-
-      status: "Active",
-
-      date: Date.now()
-
-    });
+    );
 
     alert("Loan created successfully");
 
-    document.getElementById("loanAmount").value = "";
-    document.getElementById("interest").value = "";
-
-    selectedMember = null;
-
-    selectedBox.innerHTML =
-      "No member selected";
-
     loadLoans();
 
-  } catch (err) {
+  }
+
+  catch (err) {
 
     console.error(err);
 
@@ -201,42 +313,78 @@ window.createLoan = async function () {
 ========================= */
 async function loadLoans() {
 
+  const table =
+    document.getElementById("loanTable");
+
   table.innerHTML = "";
 
-  const snap =
-    await getDocs(collection(db, "loans"));
+  try {
 
-  snap.forEach(docSnap => {
+    const snap =
+      await getDocs(
+        collection(db, "loans")
+      );
 
-    const l = docSnap.data();
+    snap.forEach((loanDoc) => {
 
-    table.innerHTML += `
-      <tr>
+      const loan =
+        loanDoc.data();
 
-        <td>${l.name}</td>
+      table.innerHTML += `
 
-        <td>${l.amount}</td>
+        <tr>
 
-        <td>${l.interest}%</td>
+          <td>
+            ${loan.memberName}
+          </td>
 
-        <td>${l.total}</td>
+          <td>
+            ${loan.amount.toLocaleString()} ETB
+          </td>
 
-        <td>${l.paid}</td>
+          <td>
+            ${loan.interestRate}%
+          </td>
 
-        <td>${l.remaining}</td>
+          <td>
+            ${loan.duration} Months
+          </td>
 
-        <td>
-          <span class="status ${l.status === "Active" ? "active" : "inactive"}">
-            ${l.status}
-          </span>
-        </td>
+          <td>
+            ${loan.monthlyPayment.toFixed(2)} ETB
+          </td>
 
-      </tr>
-    `;
-  });
+          <td>
+            ${loan.totalRepayment.toLocaleString()} ETB
+          </td>
+
+          <td>
+            ${loan.paid.toLocaleString()} ETB
+          </td>
+
+          <td>
+            ${loan.remaining.toLocaleString()} ETB
+          </td>
+
+          <td>
+            <span class="status active">
+              ${loan.status}
+            </span>
+          </td>
+
+        </tr>
+      `;
+    });
+
+  }
+
+  catch (err) {
+
+    console.error(err);
+  }
 }
 
 /* =========================
-   INIT
+   INITIAL LOAD
 ========================= */
 loadLoans();
