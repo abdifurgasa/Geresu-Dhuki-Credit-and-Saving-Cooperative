@@ -2,18 +2,27 @@
 <html lang="en">
 
 <head>
+
   <meta charset="UTF-8">
+
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
   <title>Loan System</title>
-  <link rel="stylesheet" href="css/style.css">
+
+  <link rel="stylesheet"
+        href="css/style.css">
+
 </head>
 
 <body>
 
 <div class="container">
 
+  <!-- PAGE TITLE -->
   <h1>🏦 LOAN MANAGEMENT SYSTEM</h1>
 
-  <!-- SEARCH MEMBER -->
+  <!-- SEARCH -->
   <div class="search-container">
 
     <input id="memberSearch"
@@ -29,7 +38,7 @@
 
   </div>
 
-  <!-- RESULTS -->
+  <!-- SEARCH RESULTS -->
   <div id="searchResults"
        class="search-results"></div>
 
@@ -42,26 +51,85 @@
   </div>
 
   <!-- LOAN FORM -->
-  <div class="form-box">
+  <div class="loan-form">
 
+    <!-- AMOUNT -->
     <input id="loanAmount"
            class="input"
+           type="number"
            placeholder="Loan Amount">
 
-    <input id="interest"
+    <!-- INTEREST -->
+    <input id="interestRate"
            class="input"
-           placeholder="Interest % (e.g. 10)">
+           type="number"
+           placeholder="Interest Rate %">
 
-    <button class="btn success"
-            onclick="createLoan()">
+    <!-- DURATION -->
+    <input id="duration"
+           class="input"
+           type="number"
+           placeholder="Loan Duration">
 
-      Create Loan
+    <!-- PERIOD TYPE -->
+    <select id="durationType"
+            class="input">
+
+      <option value="months">
+        Months
+      </option>
+
+      <option value="years">
+        Years
+      </option>
+
+    </select>
+
+    <!-- CALCULATE BUTTON -->
+    <button class="btn blue-btn"
+            onclick="calculateLoan()">
+
+      Calculate Loan
 
     </button>
 
   </div>
 
-  <!-- LOANS TABLE -->
+  <!-- LOAN SUMMARY -->
+  <div class="selected-box">
+
+    <p>
+      Monthly Payment:
+      <strong id="monthlyPayment">
+        0 ETB
+      </strong>
+    </p>
+
+    <p>
+      Total Repayment:
+      <strong id="totalRepayment">
+        0 ETB
+      </strong>
+    </p>
+
+    <p>
+      Total Interest:
+      <strong id="totalInterest">
+        0 ETB
+      </strong>
+    </p>
+
+  </div>
+
+  <!-- CREATE -->
+  <button class="btn success"
+          onclick="createLoan()">
+
+    Create Loan
+
+  </button>
+
+  <!-- TABLE -->
   <table class="table">
 
     <thead>
@@ -71,6 +139,8 @@
         <th>Member</th>
         <th>Amount</th>
         <th>Interest</th>
+        <th>Duration</th>
+        <th>Monthly</th>
         <th>Total</th>
         <th>Paid</th>
         <th>Remaining</th>
@@ -88,7 +158,8 @@
 
 </div>
 
-<script type="module" src="js/loans.js"></script>
+<script type="module"
+        src="js/loans.js"></script>
 
 </body>
 </html>
