@@ -6,29 +6,33 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 /* =========================
-   LOAD DASHBOARD
+   LOAD DASHBOARD DATA
 ========================= */
 async function loadDashboard() {
 
   try {
 
     /* =====================
-       MEMBERS
+       TOTAL MEMBERS
     ===================== */
-    const memberSnap =
-      await getDocs(collection(db, "members"));
+    const membersSnap =
+      await getDocs(
+        collection(db, "members")
+      );
 
     const totalMembers =
-      memberSnap.size;
+      membersSnap.size;
 
     document.getElementById("members").innerText =
       totalMembers;
 
     /* =====================
-       SAVINGS
+       TOTAL SAVINGS
     ===================== */
     const savingsSnap =
-      await getDocs(collection(db, "savings"));
+      await getDocs(
+        collection(db, "savings")
+      );
 
     let totalSavings = 0;
 
@@ -36,35 +40,43 @@ async function loadDashboard() {
 
       const data = doc.data();
 
-      totalSavings += Number(data.amount || 0);
+      totalSavings += Number(
+        data.amount || 0
+      );
     });
 
     document.getElementById("savings").innerText =
       totalSavings.toLocaleString() + " ETB";
 
     /* =====================
-       LOANS
+       TOTAL LOANS
     ===================== */
-    const loanSnap =
-      await getDocs(collection(db, "loans"));
+    const loansSnap =
+      await getDocs(
+        collection(db, "loans")
+      );
 
     let totalLoans = 0;
     let totalProfit = 0;
 
-    loanSnap.forEach((doc) => {
+    loansSnap.forEach((doc) => {
 
       const data = doc.data();
 
-      totalLoans += Number(data.amount || 0);
+      totalLoans += Number(
+        data.amount || 0
+      );
 
-      totalProfit += Number(data.interest || 0);
+      totalProfit += Number(
+        data.interest || 0
+      );
     });
 
     document.getElementById("loans").innerText =
       totalLoans.toLocaleString() + " ETB";
 
     /* =====================
-       PROFIT
+       TOTAL PROFIT
     ===================== */
     document.getElementById("profit").innerText =
       totalProfit.toLocaleString() + " ETB";
@@ -73,12 +85,19 @@ async function loadDashboard() {
 
   catch (err) {
 
-    console.error("Dashboard Error:", err);
+    console.error(
+      "Dashboard Error:",
+      err
+    );
+
+    alert(
+      "Failed to load dashboard data"
+    );
   }
 }
 
 /* =========================
-   INIT
+   LOAD DASHBOARD
 ========================= */
 loadDashboard();
 
@@ -88,37 +107,65 @@ loadDashboard();
 const sidebar =
   document.getElementById("sidebar");
 
+/* LOAD SAVED STATE */
 if (
   localStorage.getItem("sidebar")
   === "collapsed"
 ) {
 
-  sidebar.classList.add("collapsed");
+  sidebar.classList.add(
+    "collapsed"
+  );
 }
 
+/* TOGGLE SIDEBAR */
 window.toggleSidebar = function () {
 
-  sidebar.classList.toggle("collapsed");
+  sidebar.classList.toggle(
+    "collapsed"
+  );
 
   localStorage.setItem(
+
     "sidebar",
 
-    sidebar.classList.contains("collapsed")
-      ? "collapsed"
-      : "expanded"
+    sidebar.classList.contains(
+      "collapsed"
+    )
+
+    ? "collapsed"
+
+    : "expanded"
   );
 };
 
 /* =========================
-   ACTIVE MENU
+   ACTIVE NAVIGATION
 ========================= */
-document.querySelectorAll(".nav-item")
-  .forEach(link => {
+document
+  .querySelectorAll(".nav-item")
+  .forEach((link) => {
 
     if (
-      link.href === window.location.href
+      link.href ===
+      window.location.href
     ) {
 
-      link.classList.add("active");
+      link.classList.add(
+        "active"
+      );
     }
 });
+
+/* =========================
+   LOGOUT SYSTEM
+========================= */
+window.logoutUser = function () {
+
+  localStorage.clear();
+
+  sessionStorage.clear();
+
+  window.location.href =
+    "index.html";
+};
