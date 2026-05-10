@@ -9,7 +9,9 @@
         content="width=device-width, initial-scale=1.0">
 
   <title data-i18n="dashboard">
+
     Dashboard
+
   </title>
 
   <!-- CSS -->
@@ -44,14 +46,12 @@
   <!-- NAVIGATION -->
   <nav class="nav">
 
-    <!-- DASHBOARD -->
     <a href="dashboard.html"
        class="nav-item active">
 
       <span class="icon">📊</span>
 
-      <span class="text"
-            data-i18n="dashboard">
+      <span class="text">
 
         Dashboard
 
@@ -59,14 +59,12 @@
 
     </a>
 
-    <!-- MEMBERS -->
     <a href="members.html"
-       class="nav-item">
+       class="nav-item admin-only">
 
       <span class="icon">👥</span>
 
-      <span class="text"
-            data-i18n="members">
+      <span class="text">
 
         Members
 
@@ -74,14 +72,12 @@
 
     </a>
 
-    <!-- SAVINGS -->
     <a href="savings.html"
        class="nav-item">
 
       <span class="icon">💰</span>
 
-      <span class="text"
-            data-i18n="savings">
+      <span class="text">
 
         Savings
 
@@ -89,14 +85,12 @@
 
     </a>
 
-    <!-- LOANS -->
     <a href="loans.html"
        class="nav-item">
 
       <span class="icon">🏦</span>
 
-      <span class="text"
-            data-i18n="loans">
+      <span class="text">
 
         Loans
 
@@ -104,9 +98,8 @@
 
     </a>
 
-    <!-- TRANSACTIONS -->
     <a href="transactions.html"
-       class="nav-item">
+       class="nav-item admin-only">
 
       <span class="icon">💱</span>
 
@@ -118,14 +111,12 @@
 
     </a>
 
-    <!-- REPORTS -->
     <a href="reports.html"
-       class="nav-item">
+       class="nav-item admin-only">
 
       <span class="icon">📄</span>
 
-      <span class="text"
-            data-i18n="reports">
+      <span class="text">
 
         Reports
 
@@ -133,9 +124,8 @@
 
     </a>
 
-    <!-- USERS -->
     <a href="users.html"
-       class="nav-item">
+       class="nav-item admin-only">
 
       <span class="icon">👤</span>
 
@@ -147,14 +137,12 @@
 
     </a>
 
-    <!-- SETTINGS -->
     <a href="settings.html"
        class="nav-item">
 
       <span class="icon">⚙️</span>
 
-      <span class="text"
-            data-i18n="settings">
+      <span class="text">
 
         Settings
 
@@ -172,23 +160,19 @@
 <main class="main"
       id="main">
 
-  <!-- =========================
-       TOPBAR
-  ========================= -->
+  <!-- TOPBAR -->
   <div class="topbar">
 
-    <!-- LEFT -->
     <div>
 
       <h2>
 
-        Financial dashboard
+        Financial Dashboard
 
       </h2>
 
     </div>
 
-    <!-- RIGHT -->
     <div style="
       display:flex;
       align-items:center;
@@ -197,10 +181,7 @@
 
       <!-- ROLE -->
       <div class="selected-box"
-           style="
-             padding:10px 15px;
-             margin:0;
-           ">
+           id="roleBox">
 
         👑 Admin
 
@@ -212,37 +193,33 @@
               onchange="changeLang(this.value)">
 
         <option value="EN">EN</option>
-
         <option value="AM">AM</option>
-
         <option value="OR">OR</option>
 
       </select>
 
       <!-- LOGOUT -->
-      <button class="btn logout-btn"
-        onclick="logoutUser()">
+      <button class="btn danger"
+              onclick="logoutUser()">
 
-  Logout
+        Logout
 
-</button>
+      </button>
 
     </div>
 
   </div>
 
-  <!-- =========================
-       PAGE HEADER
-  ========================= -->
+  <!-- HEADER -->
   <div style="margin-top:25px;">
 
-    <h1 data-i18n="overview">
+    <h1>
 
       DASHBOARD OVERVIEW
 
     </h1>
 
-    <p data-i18n="welcome">
+    <p>
 
       Welcome to SACCO Management System
 
@@ -250,15 +227,13 @@
 
   </div>
 
-  <!-- =========================
-       DASHBOARD CARDS
-  ========================= -->
+  <!-- DASHBOARD CARDS -->
   <section class="cards">
 
     <!-- MEMBERS -->
     <div class="card blue">
 
-      <h3 data-i18n="totalMembers">
+      <h3>
 
         Total Members
 
@@ -275,7 +250,7 @@
     <!-- SAVINGS -->
     <div class="card green">
 
-      <h3 data-i18n="totalSavings">
+      <h3>
 
         Total Savings
 
@@ -292,7 +267,7 @@
     <!-- LOANS -->
     <div class="card orange">
 
-      <h3 data-i18n="totalLoans">
+      <h3>
 
         Total Loans
 
@@ -309,9 +284,9 @@
     <!-- PROFIT -->
     <div class="card purple">
 
-      <h3 data-i18n="totalProfit">
+      <h3>
 
-        Total Profit
+        Net Profit
 
       </h3>
 
@@ -325,22 +300,19 @@
 
   </section>
 
-  <!-- =========================
-       QUICK ACTIONS
-  ========================= -->
+  <!-- QUICK ACTIONS -->
   <section style="margin-top:30px;">
 
     <h2>
 
-      Quick actions
+      Quick Actions
 
     </h2>
 
     <div class="cards">
 
-      <!-- ADD MEMBER -->
       <a href="members.html"
-         class="card teal"
+         class="card teal admin-only"
          style="text-decoration:none;">
 
         <h3>
@@ -353,7 +325,6 @@
 
       </a>
 
-      <!-- SAVINGS -->
       <a href="savings.html"
          class="card green"
          style="text-decoration:none;">
@@ -368,7 +339,6 @@
 
       </a>
 
-      <!-- LOANS -->
       <a href="loans.html"
          class="card orange"
          style="text-decoration:none;">
@@ -383,9 +353,8 @@
 
       </a>
 
-      <!-- REPORTS -->
       <a href="reports.html"
-         class="card red"
+         class="card red admin-only"
          style="text-decoration:none;">
 
         <h3>
@@ -402,14 +371,66 @@
 
   </section>
 
+  <!-- =========================
+       FINANCIAL ANALYTICS
+  ========================= -->
+  <section style="margin-top:40px;">
+
+    <h2>
+
+      Financial Analytics
+
+    </h2>
+
+    <div class="card">
+
+      <canvas id="dashboardChart"></canvas>
+
+    </div>
+
+  </section>
+
+  <!-- =========================
+       REPAYMENT ANALYTICS
+  ========================= -->
+  <section style="margin-top:40px;">
+
+    <h2>
+
+      Loans vs Repayments
+
+    </h2>
+
+    <div class="card">
+
+      <canvas id="repaymentChart"></canvas>
+
+    </div>
+
+  </section>
+
 </main>
 
 <!-- =========================
-     LANGUAGE + SIDEBAR + LOGOUT
+     LIBRARIES
 ========================= -->
+
+<!-- CHART JS -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- LANGUAGE -->
 <script src="js/i18n.js"></script>
+
+<!-- AUTH -->
 <script src="js/global-auth.js"></script>
-<script type="module" src="js/dashboard.js"></script>
-<script type="module" src="js/session-timeout.js"></script>
+
+<!-- DASHBOARD -->
+<script type="module"
+        src="js/dashboard.js"></script>
+
+<!-- SESSION -->
+<script type="module"
+        src="js/session-timeout.js"></script>
+
 </body>
 </html>
