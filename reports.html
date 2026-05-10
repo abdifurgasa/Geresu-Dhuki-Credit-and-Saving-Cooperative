@@ -2,15 +2,25 @@
 <html lang="en">
 
 <head>
+
   <meta charset="UTF-8">
+
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
   <title>Financial Reports</title>
-  <link rel="stylesheet" href="css/style.css">
+
+  <!-- CSS -->
+  <link rel="stylesheet"
+        href="css/style.css">
+
 </head>
 
 <body>
 
 <div class="container">
 
+  <!-- PAGE TITLE -->
   <h1>📊 FINANCIAL REPORTING SYSTEM</h1>
 
   <!-- REPORT CARDS -->
@@ -39,41 +49,79 @@
   </section>
 
   <!-- EXTRA ANALYTICS -->
-  <section class="cards" style="margin-top:20px;">
+  <section class="cards"
+           style="margin-top:20px;">
 
-    <div class="card blue">
+    <div class="card teal">
       <h3>Outstanding Loans</h3>
       <p id="outstandingLoans">0 ETB</p>
     </div>
 
-    <div class="card green">
+    <div class="card red">
       <h3>Net Balance</h3>
       <p id="netBalance">0 ETB</p>
     </div>
 
   </section>
 
+  <!-- PDF BUTTON -->
+  <div style="margin-top:25px;">
+
+    <button class="btn primary"
+            onclick="downloadPDF()">
+
+      Export PDF
+
+    </button>
+
+  </div>
+
+  <!-- REPORT TABLE -->
+  <div style="margin-top:30px;">
+
+    <h2>Financial Summary</h2>
+
+    <table class="table">
+
+      <thead>
+
+        <tr>
+
+          <th>Category</th>
+          <th>Amount</th>
+
+        </tr>
+
+      </thead>
+
+      <tbody id="reportTable">
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+  <!-- CHART -->
+  <div style="margin-top:30px;">
+
+    <h2>Financial Analytics</h2>
+
+    <canvas id="financeChart"></canvas>
+
+  </div>
+
 </div>
-<div class="container">
 
-  <h1>📊 FINANCIAL REPORTING SYSTEM</h1>
-
-  <!-- REPORT CARDS HERE -->
-  <section class="cards">
-    ...
-  </section>
-
-  <!-- 📌 PDF EXPORT BUTTON (ADD HERE) -->
-  <button class="btn primary" onclick="downloadPDF()">
-    Export PDF
-  </button>
-
-  <!-- CHARTS -->
-  <canvas id="financeChart"></canvas>
-
-</div>
-<script type="module" src="js/reports.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<!-- CHART JS -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- PDF LIBRARY -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<!-- REPORT ENGINE -->
+<script type="module"
+        src="js/reports.js"></script>
+
 </body>
 </html>
