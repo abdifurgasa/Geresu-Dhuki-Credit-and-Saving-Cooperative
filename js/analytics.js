@@ -2,123 +2,63 @@ import { db } from "./firebase.js";
 
 import {
   collection,
-  onSnapshot
+  getDocs
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-let charts = {};
+async function loadAnalytics() {
 
-/* =========================
-   SAVINGS CHART
-========================= */
-function savingsChart(){
+  const savings =
+    await getDocs(collection(db, "savings"));
 
-  onSnapshot(collection(db, "savings"), snap => {
+  const loans =
+    await getDocs(collection(db, "loans"));
 
-    let labels = [];
-    let data = [];
+  const transactions =
+    await getDocs(collection(db, "transactions"));
 
-    snap.forEach(d => {
-      labels.push(d.data().date || "");
-      data.push(d.data().amount || 0);
-    });
-
-    if(charts.savings) charts.savings.destroy();
-
-    charts.savings = new Chart(
-      document.getElementById("savingsChart"),
-      {
-        type: "line",
-        data: {
-          labels,
-          datasets: [{
-            label: "Savings",
-            data,
-            borderColor: "#1cc88a"
-          }]
-        }
-      }
-    );
-
-  });
-
-}
-
-/* =========================
-   LOANS VS REPAYMENTS
-========================= */
-function loanChart(){
-
-  let loans = 0;
+  let savingsTotal = 0;
+  let loansTotal = 0;
   let repayments = 0;
 
-  onSnapshot(collection(db, "loans"), snap => {
-    loans = 0;
-    snap.forEach(d => loans += d.data().amount || 0);
-    update();
+  savings.forEach(d => {
+    savingsTotal += d.data().amount;
   });
 
-  onSnapshot(collection(db, "transactions"), snap => {
-    repayments = 0;
-    snap.forEach(d => {
-      if(d.data().type === "Repayment"){
-        repayments += d.data().amount || 0;
-      }
-    });
-    update();
+  loans.forEach(d => {
+    loansTotal += d.data().amount;
   });
 
-  function update(){
+  transactions.forEach(d => {
 
-    if(charts.loan) charts.loan.destroy();
+    if (d.data().type === "loan_repayment") {
+      repayments += d.data().amount;
+    }
+  });
 
-    charts.loan = new Chart(
-      document.getElementById("loanChart"),
-      {
-        type: "bar",
-        data: {
-          labels: ["Loans", "Repayments"],
-          datasets: [{
-            data: [loans, repayments],
-            backgroundColor: ["#f6c23e", "#1cc88a"]
-          }]
-        }
-      }
-    );
+  new Chart(document.getElementById("financeChart"), {
 
-  }
+    type: "bar",
 
+    data: {
+
+      labels: [
+        "Savings",
+        "Loans",
+        "Repayments"
+      ],
+
+      datasets: [{
+
+        label: "Financial Analytics",
+
+        data: [
+          savingsTotal,
+          loansTotal,
+          repayments
+        ]
+      }]
+    }
+  });
 }
 
-/* =========================
-   MEMBERS CHART
-========================= */
-function memberChart(){
-
-  onSnapshot(collection(db, "members"), snap => {
-
-    if(charts.member) charts.member.destroy();
-
-    charts.member = new Chart(
-      document.getElementById("memberChart"),
-      {
-        type: "doughnut",
-        data: {
-          labels: ["Members"],
-          datasets: [{
-            data: [snap.size],
-            backgroundColor: ["#4e73df"]
-          }]
-        }
-      }
-    );
-
-  });
-
-}
-
-/* INIT */
-document.addEventListener("DOMContentLoaded", () => {
-  savingsChart();
-  loanChart();
-  memberChart();
-});
+loadAnalytics();
