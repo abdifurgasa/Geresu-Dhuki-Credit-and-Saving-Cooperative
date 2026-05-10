@@ -1,171 +1,98 @@
-import { db } from "./firebase.js";
-
+import { db, auth } from "./firebase.js";
 import {
-  collection,
-  getDocs
+  doc, getDoc,
+  collection, getDocs,
+  query, where
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 /* =========================
-   LOAD DASHBOARD DATA
+   MAIN DASHBOARD
 ========================= */
 async function loadDashboard() {
 
-  try {
+  const uid = auth.currentUser.uid;
 
-    /* =====================
-       TOTAL MEMBERS
-    ===================== */
-    const membersSnap =
-      await getDocs(
-        collection(db, "members")
-      );
+  const userSnap =
+    await getDoc(doc(db, "users", uid));
 
-    const totalMembers =
-      membersSnap.size;
+  const role = userSnap.data().role;
 
-    document.getElementById("members").innerText =
-      totalMembers;
-
-    /* =====================
-       TOTAL SAVINGS
-    ===================== */
-    const savingsSnap =
-      await getDocs(
-        collection(db, "savings")
-      );
-
-    let totalSavings = 0;
-
-    savingsSnap.forEach((doc) => {
-
-      const data = doc.data();
-
-      totalSavings += Number(
-        data.amount || 0
-      );
-    });
-
-    document.getElementById("savings").innerText =
-      totalSavings.toLocaleString() + " ETB";
-
-    /* =====================
-       TOTAL LOANS
-    ===================== */
-    const loansSnap =
-      await getDocs(
-        collection(db, "loans")
-      );
-
-    let totalLoans = 0;
-    let totalProfit = 0;
-
-    loansSnap.forEach((doc) => {
-
-      const data = doc.data();
-
-      totalLoans += Number(
-        data.amount || 0
-      );
-
-      totalProfit += Number(
-        data.interest || 0
-      );
-    });
-
-    document.getElementById("loans").innerText =
-      totalLoans.toLocaleString() + " ETB";
-
-    /* =====================
-       TOTAL PROFIT
-    ===================== */
-    document.getElementById("profit").innerText =
-      totalProfit.toLocaleString() + " ETB";
-
-  }
-
-  catch (err) {
-
-    console.error(
-      "Dashboard Error:",
-      err
-    );
-
-    alert(
-      "Failed to load dashboard data"
-    );
+  if (role === "admin") {
+    loadAdmin();
+  } else {
+    loadMember(uid);
   }
 }
 
 /* =========================
-   LOAD DASHBOARD
+   ADMIN DASHBOARD
 ========================= */
+async function loadAdmin() {
+
+  const membersSnap =
+    await getDocs(collection(db, "members"));
+
+  const savingsSnap =
+    await getDocs(collection(db, "savings"));
+
+  const loansSnap =
+    await getDocs(collection(db, "loans"));
+
+  let savings = 0;
+  savingsSnap.forEach(d => savings += d.data().amount);
+
+  let loans = 0;
+  loansSnap.forEach(d => loans += d.data().amount);
+
+  document.getElementById("members").innerText =
+    membersSnap.size;
+
+  document.getElementById("savings").innerText =
+    savings + " ETB";
+
+  document.getElementById("loans").innerText =
+    loans + " ETB";
+
+  document.getElementById("profit").innerText =
+    (savings - loans) + " ETB";
+}
+
+/* =========================
+   MEMBER DASHBOARD
+========================= */
+async function loadMember(uid) {
+
+  const savingsQ =
+    query(collection(db, "savings"),
+      where("uid", "==", uid));
+
+  const loansQ =
+    query(collection(db, "loans"),
+      where("uid", "==", uid));
+
+  const savingsSnap =
+    await getDocs(savingsQ);
+
+  const loansSnap =
+    await getDocs(loansQ);
+
+  let savings = 0;
+  savingsSnap.forEach(d => savings += d.data().amount);
+
+  let loans = 0;
+  loansSnap.forEach(d => loans += d.data().amount);
+
+  document.getElementById("members").innerText =
+    "My Account";
+
+  document.getElementById("savings").innerText =
+    savings + " ETB";
+
+  document.getElementById("loans").innerText =
+    loans + " ETB";
+
+  document.getElementById("profit").innerText =
+    (savings - loans) + " ETB";
+}
+
 loadDashboard();
-
-/* =========================
-   SIDEBAR COLLAPSE
-========================= */
-const sidebar =
-  document.getElementById("sidebar");
-
-/* LOAD SAVED STATE */
-if (
-  localStorage.getItem("sidebar")
-  === "collapsed"
-) {
-
-  sidebar.classList.add(
-    "collapsed"
-  );
-}
-
-/* TOGGLE SIDEBAR */
-window.toggleSidebar = function () {
-
-  sidebar.classList.toggle(
-    "collapsed"
-  );
-
-  localStorage.setItem(
-
-    "sidebar",
-
-    sidebar.classList.contains(
-      "collapsed"
-    )
-
-    ? "collapsed"
-
-    : "expanded"
-  );
-};
-
-/* =========================
-   ACTIVE NAVIGATION
-========================= */
-document
-  .querySelectorAll(".nav-item")
-  .forEach((link) => {
-
-    if (
-      link.href ===
-      window.location.href
-    ) {
-
-      link.classList.add(
-        "active"
-      );
-    }
-});
-
-/* =========================
-   LOGOUT SYSTEM
-========================= */
-window.logoutUser = function () {
-
-  localStorage.clear();
-
-  sessionStorage.clear();
-
-  window.location.href =
-    "index.html";
-};
