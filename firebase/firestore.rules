@@ -5,172 +5,131 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     /* =========================
-       AUTH CHECK
+       HELPERS
     ========================= */
-    function isLoggedIn() {
+
+    function isSignedIn() {
       return request.auth != null;
     }
 
-    /* =========================
-       GET USER ROLE
-    ========================= */
-    function getRole() {
-
-      return get(
-        /databases/$(database)/documents/users/$(request.auth.uid)
-      ).data.role;
+    function role() {
+      return request.auth.token.role;
     }
 
-    /* =========================
-       ROLE CHECKS
-    ========================= */
     function isAdmin() {
-      return isLoggedIn() &&
-             getRole() == "ADMIN";
+      return isSignedIn() && role() == "admin";
     }
 
-    function isCashier() {
-      return isLoggedIn() &&
-             getRole() == "CASHIER";
+    function isTeller() {
+      return isSignedIn() && role() == "teller";
     }
 
-    function isViewer() {
-      return isLoggedIn() &&
-             getRole() == "VIEWER";
+    function isAuditor() {
+      return isSignedIn() && role() == "auditor";
+    }
+
+    /* =========================
+       USERS COLLECTION
+    ========================= */
+    match /users/{userId} {
+
+      allow read: if isSignedIn();
+
+      allow create: if isAdmin();
+
+      allow update: if isAdmin();
+
+      allow delete: if isAdmin();
     }
 
     /* =========================
        MEMBERS
     ========================= */
-    match /members/{memberId} {
+    match /members/{id} {
 
-      allow read:
-        if isAdmin() ||
-           isCashier() ||
-           isViewer();
+      allow read: if isSignedIn();
 
-      allow create, update:
-        if isAdmin() ||
-           isCashier();
+      allow create: if isAdmin() || isTeller();
 
-      allow delete:
-        if isAdmin();
+      allow update: if isAdmin() || isTeller();
+
+      allow delete: if isAdmin();
     }
 
     /* =========================
-       SAVINGS
+       SAVINGS (DEPOSITS)
     ========================= */
-    match /savings/{savingId} {
+    match /savings/{id} {
 
-      allow read:
-        if isAdmin() ||
-           isCashier() ||
-           isViewer();
+      allow read: if isSignedIn();
 
-      allow create:
-        if isAdmin() ||
-           isCashier();
+      allow create: if isAdmin() || isTeller();
 
-      allow update:
-        if false;
+      allow update: if isAdmin();
 
-      allow delete:
-        if isAdmin();
+      allow delete: if isAdmin();
     }
 
     /* =========================
        LOANS
     ========================= */
-    match /loans/{loanId} {
+    match /loans/{id} {
 
-      allow read:
-        if isAdmin() ||
-           isCashier() ||
-           isViewer();
+      allow read: if isSignedIn();
 
-      allow create:
-        if isAdmin() ||
-           isCashier();
+      allow create: if isAdmin();
 
-      allow update:
-        if isAdmin() ||
-           isCashier();
+      allow update: if isAdmin() || isTeller();
 
-      allow delete:
-        if isAdmin();
+      allow delete: if isAdmin();
     }
 
     /* =========================
        TRANSACTIONS
     ========================= */
-    match /transactions/{transactionId} {
+    match /transactions/{id} {
 
-      allow read:
-        if isAdmin() ||
-           isCashier() ||
-           isViewer();
+      allow read: if isSignedIn();
 
-      allow create:
-        if isAdmin() ||
-           isCashier();
+      allow create: if isAdmin() || isTeller();
 
-      /* NEVER EDIT TRANSACTIONS */
-      allow update:
-        if false;
+      allow update: if false;  // NO editing history (audit-safe)
 
-      allow delete:
-        if isAdmin();
+      allow delete: if isAdmin();
     }
 
     /* =========================
-       REPORTS
+       REPORTS (READ ONLY)
     ========================= */
-    match /reports/{reportId} {
+    match /reports/{id} {
 
-      allow read:
-        if isAdmin() ||
-           isCashier() ||
-           isViewer();
+      allow read: if isSignedIn();
 
-      allow write:
-        if isAdmin();
+      allow write: if isAdmin();
     }
 
     /* =========================
-       USERS
+       DASHBOARD STATS
     ========================= */
-    match /users/{userId} {
+    match /stats/{id} {
 
-      allow read:
-        if isAdmin();
+      allow read: if isSignedIn();
 
-      allow create:
-        if isAdmin();
-
-      allow update:
-        if isAdmin();
-
-      allow delete:
-        if isAdmin();
+      allow write: if isAdmin();
     }
 
     /* =========================
-       SETTINGS
+       AUDIT LOG (VERY IMPORTANT)
     ========================= */
-    match /settings/{settingId} {
+    match /auditLogs/{id} {
 
-      allow read:
-        if isAdmin();
+      allow read: if isAdmin() || isAuditor();
 
-      allow write:
-        if isAdmin();
-    }
+      allow create: if isAdmin() || isTeller();
 
-    /* =========================
-       BLOCK EVERYTHING ELSE
-    ========================= */
-    match /{document=**} {
-      allow read, write: if false;
+      allow update: if false;
+
+      allow delete: if isAdmin();
     }
   }
 }
