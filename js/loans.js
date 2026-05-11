@@ -40,9 +40,7 @@ window.searchMembers = async function () {
   if (!keyword) return;
 
   const snapshot =
-    await getDocs(
-      collection(db, "members")
-    );
+    await getDocs(collection(db, "members"));
 
   snapshot.forEach(docSnap => {
 
@@ -100,31 +98,24 @@ function selectMember(id, m) {
 }
 
 /* =========================
-   LOAN CALCULATION ENGINE
+   LOAN CALCULATION
 ========================= */
 
 window.calculateLoan = function () {
 
   const amount =
-    Number(
-      document.getElementById("loanAmount").value
-    );
+    Number(document.getElementById("loanAmount").value);
 
   const interest =
-    Number(
-      document.getElementById("interestRate").value
-    );
+    Number(document.getElementById("interestRate").value);
 
   const duration =
-    Number(
-      document.getElementById("duration").value
-    );
+    Number(document.getElementById("duration").value);
 
   const type =
     document.getElementById("durationType").value;
 
   if (!amount || !interest || !duration) {
-
     alert("Fill all fields");
     return;
   }
@@ -149,51 +140,73 @@ window.calculateLoan = function () {
     interest: totalInterest
   };
 
-  document.getElementById(
-    "monthlyPayment"
-  ).innerText =
+  document.getElementById("monthlyPayment").innerText =
     monthly.toFixed(2) + " ETB";
 
-  document.getElementById(
-    "totalRepayment"
-  ).innerText =
+  document.getElementById("totalRepayment").innerText =
     total.toFixed(2) + " ETB";
 
-  document.getElementById(
-    "totalInterest"
-  ).innerText =
+  document.getElementById("totalInterest").innerText =
     totalInterest.toFixed(2) + " ETB";
 };
 
 /* =========================
-   CREATE LOAN
+   CREATE LOAN (WITH BLOCKING)
 ========================= */
 
 window.createLoan = async function () {
 
   if (!selectedMember) {
-
     alert("Select member first");
     return;
   }
 
   const amount =
-    Number(
-      document.getElementById("loanAmount").value
-    );
+    Number(document.getElementById("loanAmount").value);
 
   const interest =
-    Number(
-      document.getElementById("interestRate").value
-    );
+    Number(document.getElementById("interestRate").value);
 
   const duration =
-    Number(
-      document.getElementById("duration").value
-    );
+    Number(document.getElementById("duration").value);
 
   const type =
     document.getElementById("durationType").value;
+
+  if (!amount || !interest || !duration) {
+    alert("Fill all fields");
+    return;
+  }
+
+  /* =========================
+     CHECK ACTIVE LOAN
+  ========================= */
+
+  const snapshot =
+    await getDocs(collection(db, "loans"));
+
+  let hasActiveLoan = false;
+
+  snapshot.forEach(docSnap => {
+
+    const l = docSnap.data();
+
+    if (
+      l.memberId === selectedMember.id &&
+      l.status === "active"
+    ) {
+      hasActiveLoan = true;
+    }
+  });
+
+  if (hasActiveLoan) {
+    alert("❌ Please Finish Your Loan First");
+    return;
+  }
+
+  /* =========================
+     CALCULATION
+  ========================= */
 
   let months =
     type === "years"
@@ -209,30 +222,32 @@ window.createLoan = async function () {
   let monthly =
     total / months;
 
-  await addDoc(
-    collection(db, "loans"),
-    {
-      memberId: selectedMember.id,
-      memberName: selectedMember.name,
-      phone: selectedMember.phone,
+  /* =========================
+     SAVE LOAN
+  ========================= */
 
-      principal: amount,
-      interest,
-      durationMonths: months,
+  await addDoc(collection(db, "loans"), {
 
-      monthlyPayment: monthly,
-      totalInterest,
-      totalAmount: total,
+    memberId: selectedMember.id,
+    memberName: selectedMember.name,
+    phone: selectedMember.phone,
 
-      paid: 0,
-      remaining: total,
+    principal: amount,
+    interest,
+    durationMonths: months,
 
-      status: "active",
+    monthlyPayment: monthly,
+    totalInterest,
+    totalAmount: total,
 
-      createdAt: serverTimestamp(),
-      date: new Date().toISOString()
-    }
-  );
+    paid: 0,
+    remaining: total,
+
+    status: "active",
+
+    createdAt: serverTimestamp(),
+    date: new Date().toISOString()
+  });
 
   alert("Loan created successfully");
 
@@ -255,7 +270,7 @@ function clearForm() {
 }
 
 /* =========================
-   REALTIME LOAN TABLE
+   REALTIME TABLE
 ========================= */
 
 function loadLoans() {
@@ -263,40 +278,37 @@ function loadLoans() {
   const table =
     document.getElementById("loanTable");
 
-  onSnapshot(
-    collection(db, "loans"),
-    (snapshot) => {
+  onSnapshot(collection(db, "loans"), (snapshot) => {
 
-      table.innerHTML = "";
+    table.innerHTML = "";
 
-      snapshot.forEach(docSnap => {
+    snapshot.forEach(docSnap => {
 
-        const l = docSnap.data();
+      const l = docSnap.data();
 
-        table.innerHTML += `
-          <tr>
-            <td>${l.memberName}</td>
-            <td>${l.principal} ETB</td>
-            <td>${l.interest}%</td>
-            <td>${l.durationMonths} mo</td>
-            <td>${l.monthlyPayment.toFixed(2)}</td>
-            <td>${l.totalAmount.toFixed(2)}</td>
-            <td>${l.paid || 0}</td>
-            <td>${l.remaining.toFixed(2)}</td>
-            <td>
-              <span class="status ${
-                l.status === "active"
-                  ? "pending"
-                  : "active"
-              }">
-                ${l.status}
-              </span>
-            </td>
-          </tr>
-        `;
-      });
-    }
-  );
+      table.innerHTML += `
+        <tr>
+          <td>${l.memberName}</td>
+          <td>${l.principal} ETB</td>
+          <td>${l.interest}%</td>
+          <td>${l.durationMonths} mo</td>
+          <td>${l.monthlyPayment.toFixed(2)}</td>
+          <td>${l.totalAmount.toFixed(2)}</td>
+          <td>${l.paid || 0}</td>
+          <td>${l.remaining.toFixed(2)}</td>
+          <td>
+            <span class="status ${
+              l.status === "active"
+                ? "pending"
+                : "active"
+            }">
+              ${l.status}
+            </span>
+          </td>
+        </tr>
+      `;
+    });
+  });
 }
 
 /* =========================
