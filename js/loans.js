@@ -1,66 +1,78 @@
-import { db, auth } from "./firebase.js";
-
-import {
-  collection,
-  addDoc,
-  Timestamp
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-/* =========================
-   CREATE LOAN
-========================= */
 window.createLoan = async function () {
 
-  const memberId =
-    selectedMember.id;
-
-  const amount =
-    Number(document.getElementById("loanAmount").value);
-
-  const interest =
-    Number(document.getElementById("interest").value);
-
-  const months =
-    Number(document.getElementById("months").value);
-
-  if (!amount || !interest || !months) {
-    return alert("All fields required");
+  if (!selectedMember) {
+    alert("Select member first");
+    return;
   }
 
-  /* =========================
-     BANK CALCULATION
-  ========================= */
+  const principal = Number(
+    document.getElementById("loanAmount").value
+  );
 
-  const interestAmount =
-    amount * (interest / 100);
+  const interest = Number(
+    document.getElementById("interest").value
+  );
 
-  const totalRepayment =
-    amount + interestAmount;
+  const durationMonths = Number(
+    document.getElementById("durationMonths").value
+  );
 
-  const monthlyPayment =
-    totalRepayment / months;
+  if (
+    principal <= 0 ||
+    interest < 0 ||
+    durationMonths <= 0
+  ) {
+    alert("Invalid loan data");
+    return;
+  }
+
+  const interestAmount = principal * (interest / 100);
+
+  const totalAmount = principal + interestAmount;
+
+  const monthlyPayment = totalAmount / durationMonths;
+
+  const nextDueDate = new Date();
+
+  nextDueDate.setMonth(nextDueDate.getMonth() + 1);
 
   await addDoc(collection(db, "loans"), {
 
-    uid: memberId,
+    memberId: selectedMember.id,
+    memberName: selectedMember.name,
 
-    amount,
+    principal,
     interest,
-    months,
+    durationMonths,
 
-    interestAmount,
-    totalRepayment,
+    totalAmount,
     monthlyPayment,
 
     paid: 0,
-    remaining: totalRepayment,
+    remaining: totalAmount,
+
+    penalty: 0,
+
+    nextDueDate: nextDueDate.toISOString(),
 
     status: "active",
 
-    createdAt: Timestamp.now(),
+    createdAt: serverTimestamp()
 
-    createdBy: auth.currentUser.uid
   });
 
-  alert("Loan created");
+  await addDoc(collection(db, "transactions"), {
+
+    type: "loan",
+    memberId: selectedMember.id,
+    memberName: selectedMember.name,
+    amount: principal,
+    status: "completed",
+    createdBy: auth.currentUser?.email,
+    date: new Date().toISOString(),
+    createdAt: serverTimestamp()
+
+  });
+
+  alert("Loan created successfully");
 };
