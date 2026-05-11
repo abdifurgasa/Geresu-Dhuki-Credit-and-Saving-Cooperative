@@ -1,174 +1,306 @@
-import { db } from "./firebase.js";
+import { db, auth } from "./firebase.js";
 
 import {
   collection,
   addDoc,
-  doc,
-  getDoc,
-  updateDoc,
+  getDocs,
+  onSnapshot,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 /* =========================
    GLOBAL STATE
 ========================= */
+
 let selectedMember = null;
 
+let calculated = {
+  monthly: 0,
+  total: 0,
+  interest: 0
+};
+
 /* =========================
-   SEARCH MEMBER
+   SEARCH MEMBERS
 ========================= */
+
 window.searchMembers = async function () {
 
-  const keyword = document.getElementById("memberSearch").value.toLowerCase();
+  const keyword =
+    document.getElementById("memberSearch")
+      .value
+      .toLowerCase()
+      .trim();
 
-  const snap = await getDocs(collection(db, "members"));
+  const box =
+    document.getElementById("searchResults");
 
-  const results = document.getElementById("searchResults");
-  results.innerHTML = "";
+  box.innerHTML = "";
 
-  snap.forEach(docSnap => {
+  if (!keyword) return;
+
+  const snapshot =
+    await getDocs(
+      collection(db, "members")
+    );
+
+  snapshot.forEach(docSnap => {
 
     const m = docSnap.data();
 
-    if (
-      m.name.toLowerCase().includes(keyword) ||
-      m.phone?.includes(keyword) ||
-      m.nid?.includes(keyword)
-    ) {
+    const text = `
+      ${m.name}
+      ${m.phone}
+      ${m.nid}
+    `.toLowerCase();
 
-      const div = document.createElement("div");
+    if (text.includes(keyword)) {
+
+      const div =
+        document.createElement("div");
+
       div.className = "result-item";
 
-      div.innerText = `${m.name} - ${m.phone}`;
+      div.innerHTML = `
+        👤 ${m.name}<br>
+        📱 ${m.phone}<br>
+        🆔 ${m.nid}
+      `;
 
-      div.onclick = () => {
+      div.onclick = () =>
+        selectMember(docSnap.id, m);
 
-        selectedMember = {
-          id: docSnap.id,
-          ...m
-        };
-
-        document.getElementById("selectedMember").innerText =
-          "Selected: " + m.name;
-
-        results.innerHTML = "";
-      };
-
-      results.appendChild(div);
+      box.appendChild(div);
     }
   });
 };
 
 /* =========================
+   SELECT MEMBER
+========================= */
+
+function selectMember(id, m) {
+
+  selectedMember = {
+    id,
+    ...m
+  };
+
+  document.getElementById(
+    "selectedMember"
+  ).innerHTML = `
+    👤 ${m.name}<br>
+    📱 ${m.phone}<br>
+    🆔 ${m.nid}
+  `;
+
+  document.getElementById(
+    "searchResults"
+  ).innerHTML = "";
+}
+
+/* =========================
+   LOAN CALCULATION ENGINE
+========================= */
+
+window.calculateLoan = function () {
+
+  const amount =
+    Number(
+      document.getElementById("loanAmount").value
+    );
+
+  const interest =
+    Number(
+      document.getElementById("interestRate").value
+    );
+
+  const duration =
+    Number(
+      document.getElementById("duration").value
+    );
+
+  const type =
+    document.getElementById("durationType").value;
+
+  if (!amount || !interest || !duration) {
+
+    alert("Fill all fields");
+    return;
+  }
+
+  let months =
+    type === "years"
+      ? duration * 12
+      : duration;
+
+  let totalInterest =
+    (amount * interest * months) / 100;
+
+  let total =
+    amount + totalInterest;
+
+  let monthly =
+    total / months;
+
+  calculated = {
+    monthly,
+    total,
+    interest: totalInterest
+  };
+
+  document.getElementById(
+    "monthlyPayment"
+  ).innerText =
+    monthly.toFixed(2) + " ETB";
+
+  document.getElementById(
+    "totalRepayment"
+  ).innerText =
+    total.toFixed(2) + " ETB";
+
+  document.getElementById(
+    "totalInterest"
+  ).innerText =
+    totalInterest.toFixed(2) + " ETB";
+};
+
+/* =========================
    CREATE LOAN
 ========================= */
+
 window.createLoan = async function () {
 
   if (!selectedMember) {
-    alert("Select a member first");
+
+    alert("Select member first");
     return;
   }
 
-  const principal = Number(document.getElementById("loanAmount").value);
-  const interestRate = Number(document.getElementById("interest").value);
-  const durationMonths = 12; // fixed (can upgrade later)
+  const amount =
+    Number(
+      document.getElementById("loanAmount").value
+    );
 
-  if (!principal || principal <= 0) {
-    alert("Invalid loan amount");
-    return;
-  }
+  const interest =
+    Number(
+      document.getElementById("interestRate").value
+    );
 
-  if (!interestRate || interestRate < 0) {
-    alert("Invalid interest rate");
-    return;
-  }
+  const duration =
+    Number(
+      document.getElementById("duration").value
+    );
 
-  try {
+  const type =
+    document.getElementById("durationType").value;
 
-    /* =========================
-       CALCULATIONS
-    ========================= */
+  let months =
+    type === "years"
+      ? duration * 12
+      : duration;
 
-    const interestAmount =
-      (principal * interestRate) / 100;
+  let totalInterest =
+    (amount * interest * months) / 100;
 
-    const totalRepayable =
-      principal + interestAmount;
+  let total =
+    amount + totalInterest;
 
-    const monthlyPayment =
-      totalRepayable / durationMonths;
+  let monthly =
+    total / months;
 
-    /* =========================
-       SAVE LOAN
-    ========================= */
-
-    const loanRef = await addDoc(collection(db, "loans"), {
-
+  await addDoc(
+    collection(db, "loans"),
+    {
       memberId: selectedMember.id,
       memberName: selectedMember.name,
+      phone: selectedMember.phone,
 
-      principal,
-      interest: interestRate,
+      principal: amount,
+      interest,
+      durationMonths: months,
 
-      durationMonths,
-
-      totalAmount: totalRepayable,
+      monthlyPayment: monthly,
+      totalInterest,
+      totalAmount: total,
 
       paid: 0,
-      remaining: totalRepayable,
-
-      monthlyPayment,
+      remaining: total,
 
       status: "active",
 
-      createdAt: serverTimestamp()
+      createdAt: serverTimestamp(),
+      date: new Date().toISOString()
+    }
+  );
 
-    });
+  alert("Loan created successfully");
 
-    /* =========================
-       UPDATE MEMBER
-    ========================= */
+  clearForm();
+};
 
-    const memberRef = doc(db, "members", selectedMember.id);
-    const memberSnap = await getDoc(memberRef);
+/* =========================
+   CLEAR FORM
+========================= */
 
-    if (memberSnap.exists()) {
+function clearForm() {
 
-      const m = memberSnap.data();
+  document.getElementById("loanAmount").value = "";
+  document.getElementById("interestRate").value = "";
+  document.getElementById("duration").value = "";
 
-      await updateDoc(memberRef, {
+  document.getElementById("monthlyPayment").innerText = "0 ETB";
+  document.getElementById("totalRepayment").innerText = "0 ETB";
+  document.getElementById("totalInterest").innerText = "0 ETB";
+}
 
-        totalLoans:
-          (m.totalLoans || 0) + principal,
+/* =========================
+   REALTIME LOAN TABLE
+========================= */
 
-        walletBalance:
-          (m.walletBalance || 0) - principal
+function loadLoans() {
 
+  const table =
+    document.getElementById("loanTable");
+
+  onSnapshot(
+    collection(db, "loans"),
+    (snapshot) => {
+
+      table.innerHTML = "";
+
+      snapshot.forEach(docSnap => {
+
+        const l = docSnap.data();
+
+        table.innerHTML += `
+          <tr>
+            <td>${l.memberName}</td>
+            <td>${l.principal} ETB</td>
+            <td>${l.interest}%</td>
+            <td>${l.durationMonths} mo</td>
+            <td>${l.monthlyPayment.toFixed(2)}</td>
+            <td>${l.totalAmount.toFixed(2)}</td>
+            <td>${l.paid || 0}</td>
+            <td>${l.remaining.toFixed(2)}</td>
+            <td>
+              <span class="status ${
+                l.status === "active"
+                  ? "pending"
+                  : "active"
+              }">
+                ${l.status}
+              </span>
+            </td>
+          </tr>
+        `;
       });
     }
+  );
+}
 
-    /* =========================
-       TRANSACTION LOG
-    ========================= */
+/* =========================
+   INIT
+========================= */
 
-    await addDoc(collection(db, "transactions"), {
-
-      type: "loan",
-      memberId: selectedMember.id,
-      amount: principal,
-      date: serverTimestamp()
-
-    });
-
-    alert("Loan created successfully");
-
-    document.getElementById("loanAmount").value = "";
-    document.getElementById("interest").value = "";
-
-  } catch (err) {
-
-    console.error(err);
-    alert("Loan creation failed");
-
-  }
-};
+loadLoans();
