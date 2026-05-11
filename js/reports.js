@@ -6,124 +6,144 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 /* =========================
-   GLOBAL STATE
+   GLOBAL DATA STORE
 ========================= */
 
 let report = {
-  members: 0,
-  savings: 0,
-  loans: 0,
-  repayments: 0,
-  outstanding: 0,
-  netBalance: 0,
-  risk: 0
+  savings: [],
+  loans: [],
+  repayments: [],
+  labels: []
 };
 
 /* =========================
-   REAL-TIME REPORT ENGINE
+   INIT REAL-TIME DATA
 ========================= */
 
-function initReports() {
-
-  /* MEMBERS */
-  onSnapshot(collection(db, "members"), snap => {
-    report.members = snap.size;
-    updateUI();
-  });
+function initAdvancedReports() {
 
   /* SAVINGS */
   onSnapshot(collection(db, "savings"), snap => {
 
-    report.savings = 0;
+    let total = 0;
 
-    snap.forEach(d => {
-      report.savings += Number(d.data().amount || 0);
-    });
+    snap.forEach(d => total += d.data().amount || 0);
 
-    updateUI();
+    report.savings.push(total);
+
+    updateCharts();
   });
 
   /* LOANS */
   onSnapshot(collection(db, "loans"), snap => {
 
-    report.loans = 0;
-    report.outstanding = 0;
+    let total = 0;
+    let outstanding = 0;
 
     snap.forEach(d => {
-
-      const l = d.data();
-
-      report.loans += Number(l.totalAmount || 0);
-
-      report.outstanding += Number(l.remaining || 0);
+      total += d.data().totalAmount || 0;
+      outstanding += d.data().remaining || 0;
     });
 
-    updateUI();
+    report.loans.push(total);
+    report.labels.push(new Date().toLocaleDateString());
+
+    report.outstanding = outstanding;
+
+    updateCharts();
   });
 
   /* REPAYMENTS */
   onSnapshot(collection(db, "repayments"), snap => {
 
-    report.repayments = 0;
+    let total = 0;
 
-    snap.forEach(d => {
-      report.repayments += Number(d.data().amount || 0);
-    });
+    snap.forEach(d => total += d.data().amount || 0);
 
-    updateUI();
+    report.repayments.push(total);
+
+    updateCharts();
   });
 }
 
 /* =========================
-   FINANCIAL ANALYSIS ENGINE
+   MAIN CHART ENGINE
 ========================= */
 
-function updateUI() {
+let trendChart;
+let barChart;
+let pieChart;
 
-  /* NET BALANCE */
-  report.netBalance =
-    report.savings - report.outstanding;
+/* =========================
+   UPDATE ALL CHARTS
+========================= */
 
-  /* RISK CALCULATION */
-  report.risk =
-    report.loans > 0
-      ? ((report.outstanding / report.loans) * 100)
-      : 0;
+function updateCharts() {
 
-  /* UI UPDATES */
-  document.getElementById("totalMembers").innerText =
-    report.members;
-
-  document.getElementById("totalSavings").innerText =
-    report.savings.toLocaleString() + " ETB";
-
-  document.getElementById("totalLoans").innerText =
-    report.loans.toLocaleString() + " ETB";
-
-  document.getElementById("totalRepayments").innerText =
-    report.repayments.toLocaleString() + " ETB";
-
-  document.getElementById("outstandingLoans").innerText =
-    report.outstanding.toLocaleString() + " ETB";
-
-  document.getElementById("netBalance").innerText =
-    report.netBalance.toLocaleString() + " ETB";
-
-  document.getElementById("riskLevel").innerText =
-    report.risk.toFixed(2) + "%";
+  renderTrendChart();
+  renderBarChart();
+  renderPieChart();
 }
 
 /* =========================
-   CHART SYSTEM (FIXED)
+   1. TREND LINE CHART
 ========================= */
 
-function loadChart() {
+function renderTrendChart() {
 
-  const ctx = document.getElementById("financeChart");
+  const ctx = document.getElementById("trendChart");
 
-  new Chart(ctx, {
+  if (trendChart) trendChart.destroy();
 
-    type: "doughnut",
+  trendChart = new Chart(ctx, {
+
+    type: "line",
+
+    data: {
+
+      labels: report.labels,
+
+      datasets: [
+
+        {
+          label: "Savings Trend",
+          data: report.savings,
+          borderColor: "green",
+          fill: false
+        },
+
+        {
+          label: "Loans Trend",
+          data: report.loans,
+          borderColor: "red",
+          fill: false
+        },
+
+        {
+          label: "Repayments Trend",
+          data: report.repayments,
+          borderColor: "blue",
+          fill: false
+        }
+
+      ]
+    }
+  });
+}
+
+/* =========================
+   2. BAR PERFORMANCE CHART
+========================= */
+
+function renderBarChart() {
+
+  const ctx = document.getElementById("barChart");
+
+  if (barChart) barChart.destroy();
+
+  barChart = new Chart(ctx, {
+
+    type: "bar",
 
     data: {
 
@@ -131,10 +151,12 @@ function loadChart() {
 
       datasets: [{
 
+        label: "Financial Overview",
+
         data: [
-          report.savings,
-          report.loans,
-          report.repayments
+          report.savings.at(-1) || 0,
+          report.loans.at(-1) || 0,
+          report.repayments.at(-1) || 0
         ]
       }]
     }
@@ -142,33 +164,41 @@ function loadChart() {
 }
 
 /* =========================
-   PDF EXPORT (ENHANCED)
+   3. PIE CHART (PORTFOLIO)
 ========================= */
 
-window.downloadPDF = function () {
+function renderPieChart() {
 
-  const { jsPDF } = window.jspdf;
+  const ctx = document.getElementById("pieChart");
 
-  const doc = new jsPDF();
+  if (pieChart) pieChart.destroy();
 
-  doc.setFontSize(18);
-  doc.text("SACCO Financial Report", 20, 20);
+  pieChart = new Chart(ctx, {
 
-  doc.setFontSize(12);
+    type: "pie",
 
-  doc.text(`Members: ${report.members}`, 20, 40);
-  doc.text(`Savings: ${report.savings} ETB`, 20, 50);
-  doc.text(`Loans: ${report.loans} ETB`, 20, 60);
-  doc.text(`Repayments: ${report.repayments} ETB`, 20, 70);
-  doc.text(`Outstanding: ${report.outstanding} ETB`, 20, 80);
-  doc.text(`Net Balance: ${report.netBalance} ETB`, 20, 90);
-  doc.text(`Risk Level: ${report.risk.toFixed(2)}%`, 20, 100);
+    data: {
 
-  doc.save("sacco-report.pdf");
-};
+      labels: [
+        "Healthy Loans",
+        "Outstanding Loans",
+        "Completed Portion"
+      ],
+
+      datasets: [{
+
+        data: [
+          (report.loans.at(-1) || 0) - (report.outstanding || 0),
+          report.outstanding || 0,
+          report.repayments.at(-1) || 0
+        ]
+      }]
+    }
+  });
+}
 
 /* =========================
    INIT SYSTEM
 ========================= */
 
-initReports();
+initAdvancedReports();
