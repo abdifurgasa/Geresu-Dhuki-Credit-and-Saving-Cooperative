@@ -6,13 +6,12 @@ import {
   doc,
   updateDoc,
   onSnapshot,
-  query,
-  where,
+  addDoc,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 /* =========================
-   GLOBAL SELECTED LOAN
+   GLOBAL STATE
 ========================= */
 
 let selectedLoan = null;
@@ -47,7 +46,7 @@ window.searchLoans = async function () {
 
     const text = `
       ${loan.memberName}
-      ${loan.phone}
+      ${loan.phone || ""}
     `.toLowerCase();
 
     if (text.includes(keyword)) {
@@ -124,7 +123,7 @@ window.makeRepayment = async function () {
     Number(selectedLoan.paid || 0);
 
   let remaining =
-    Number(selectedLoan.remaining);
+    Number(selectedLoan.remaining || 0);
 
   let newPaid = paid + amount;
 
@@ -149,12 +148,11 @@ window.makeRepayment = async function () {
     paid: newPaid,
     remaining: newRemaining,
     status,
-
     updatedAt: serverTimestamp()
   });
 
   /* =========================
-     LOG REPAYMENT
+     SAVE REPAYMENT RECORD
   ========================= */
 
   await addDoc(
