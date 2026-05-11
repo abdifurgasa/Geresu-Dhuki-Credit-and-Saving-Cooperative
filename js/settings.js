@@ -1,98 +1,84 @@
-import { db }
-from "./firebase.js";
+import { auth, db } from "./firebase.js";
+import {
+  updatePassword
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 import {
-
-  collection,
-  getDocs,
-  updateDoc,
-  doc
-
-}
-from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  doc,
+  getDoc
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 /* =========================
-   LOAD USERS
+   LOAD USER INFO
 ========================= */
-async function loadRoles() {
 
-  const table =
-    document.getElementById("roleTable");
+async function loadUser() {
 
-  table.innerHTML = "";
+  const user = auth.currentUser;
 
-  const snap =
-    await getDocs(
-      collection(db, "users")
-    );
+  if (!user) {
+    window.location.href = "index.html";
+    return;
+  }
 
-  snap.forEach((userDoc) => {
+  const ref = doc(db, "users", user.uid);
+  const snap = await getDoc(ref);
 
-    const user =
-      userDoc.data();
+  if (snap.exists()) {
 
-    table.innerHTML += `
+    const data = snap.data();
 
-      <tr>
+    document.getElementById("userName").innerText =
+      "Name: " + (data.name || "-");
 
-        <td>${user.fullName}</td>
+    document.getElementById("userEmail").innerText =
+      "Email: " + user.email;
 
-        <td>
-          <select onchange="changeRole('${userDoc.id}', this.value)">
-
-            <option value="admin"
-              ${user.role === "admin" ? "selected" : ""}>
-              Admin
-            </option>
-
-            <option value="teller"
-              ${user.role === "teller" ? "selected" : ""}>
-              Teller
-            </option>
-
-            <option value="auditor"
-              ${user.role === "auditor" ? "selected" : ""}>
-              Auditor
-            </option>
-
-          </select>
-        </td>
-
-        <td>Role Control</td>
-
-      </tr>
-
-    `;
-  });
+    document.getElementById("userRole").innerText =
+      "Role: " + (data.role || "-");
+  }
 }
 
+auth.onAuthStateChanged(() => {
+  loadUser();
+});
+
 /* =========================
-   CHANGE ROLE
+   CHANGE PASSWORD
 ========================= */
-window.changeRole = async function (id, newRole) {
+
+window.changePassword = async function () {
+
+  const user = auth.currentUser;
+
+  const newPass = document.getElementById("newPassword").value;
+
+  if (!newPass || newPass.length < 6) {
+    alert("Password must be at least 6 characters");
+    return;
+  }
 
   try {
 
-    await updateDoc(
-      doc(db, "users", id),
-      {
-        role: newRole
-      }
-    );
+    await updatePassword(user, newPass);
 
-    alert("Role updated successfully");
+    alert("Password updated successfully");
 
-  }
-
-  catch (err) {
-
+  } catch (err) {
     console.error(err);
-
-    alert("Failed to update role");
+    alert("Error updating password");
   }
 };
 
 /* =========================
-   INIT
+   LOGOUT
 ========================= */
-loadRoles();
+
+window.logoutUser = async function () {
+
+  await auth.signOut();
+
+  localStorage.clear();
+
+  window.location.href = "index.html";
+};
