@@ -1,4 +1,4 @@
-import { db, auth } from "./firebase.js";
+import { db } from "./firebase.js";
 
 import {
   collection,
@@ -6,6 +6,7 @@ import {
   query,
   where,
   doc,
+  getDoc,
   updateDoc,
   addDoc,
   onSnapshot,
@@ -19,16 +20,12 @@ import {
 let selectedLoan = null;
 
 /* =========================
-   SEARCH ACTIVE LOANS
+   SEARCH LOANS (BY MEMBER)
 ========================= */
 
 window.searchLoans = async function () {
 
-  const keyword = document
-    .getElementById("memberSearch")
-    .value
-    .toLowerCase()
-    .trim();
+  const keyword = document.getElementById("memberSearch").value.toLowerCase().trim();
 
   const box = document.getElementById("searchResults");
 
@@ -55,8 +52,8 @@ window.searchLoans = async function () {
 
       div.innerHTML = `
         👤 ${l.memberName}<br>
-        💰 Loan: ${l.totalAmount} ETB<br>
-        📱 ${l.phone}
+        📱 ${l.phone}<br>
+        💰 Remaining: ${l.remaining}
       `;
 
       div.onclick = () => selectLoan(docSnap.id, l);
@@ -72,22 +69,45 @@ window.searchLoans = async function () {
 
 function selectLoan(id, loan) {
 
-  selectedLoan = {
-    id,
-    ...loan
-  };
+  selectedLoan = { id, ...loan };
 
   document.getElementById("selectedLoan").innerHTML = `
     👤 ${loan.memberName}<br>
-    💰 Remaining: ${loan.remaining} ETB<br>
-    📊 Status: ${loan.status}
+    💰 Remaining: ${loan.remaining.toFixed(2)} ETB<br>
+    📊 Monthly: ${loan.monthlyPayment.toFixed(2)} ETB
   `;
 
   document.getElementById("searchResults").innerHTML = "";
 }
 
 /* =========================
-   REPAYMENT ENGINE (WITH PENALTY)
+   CHECK PENALTY (AUTO)
+========================= */
+
+function calculatePenalty(loan) {
+
+  const now = new Date();
+
+  const due = new Date(loan.schedule.nextDueDate);
+
+  const penaltyRate = loan.schedule.penaltyRate || 2;
+
+  if (now > due) {
+
+    const monthsLate =
+      Math.floor((now - due) / (1000 * 60 * 60 * 24 * 30));
+
+    const penalty =
+      loan.remaining * (penaltyRate / 100) * (monthsLate || 1);
+
+    return penalty;
+  }
+
+  return 0;
+}
+
+/* =========================
+   MAKE REPAYMENT
 ========================= */
 
 window.makeRepayment = async function () {
@@ -97,130 +117,112 @@ window.makeRepayment = async function () {
     return;
   }
 
-  const amount = Number(
-    document.getElementById("payAmount").value
-  );
+  const amount = Number(document.getElementById("payAmount").value);
 
   if (!amount || amount <= 0) {
     alert("Invalid amount");
     return;
   }
 
-  let now = new Date();
-
-  let dueDate = selectedLoan.schedule?.nextDueDate
-    ? new Date(selectedLoan.schedule.nextDueDate)
-    : null;
-
-  let penalty = 0;
-
-  let remaining = Number(selectedLoan.remaining);
-
   /* =========================
-     PENALTY CALCULATION
+     GET FRESH LOAN DATA
   ========================= */
 
-  if (dueDate && now > dueDate && remaining > 0) {
+  const loanRef = doc(db, "loans", selectedLoan.id);
 
-    let daysLate =
-      Math.floor((now - dueDate) / (1000 * 60 * 60 * 24));
+  const loanSnap = await getDoc(loanRef);
 
-    let rate = 0.02; // 2% per month equivalent
-
-    penalty = remaining * rate * (daysLate / 30);
-
-    remaining += penalty;
+  if (!loanSnap.exists()) {
+    alert("Loan not found");
+    return;
   }
 
-  let paid = Number(selectedLoan.paid || 0);
+  const loan = loanSnap.data();
 
-  let newPaid = paid + amount;
+  /* =========================
+     APPLY PENALTY
+  ========================= */
 
-  let newRemaining = remaining - amount;
+  const penalty = calculatePenalty(loan);
 
-  if (newRemaining < 0) newRemaining = 0;
+  let updatedRemaining =
+    loan.remaining + penalty - amount;
 
-  let status = newRemaining === 0 ? "completed" : "active";
+  if (updatedRemaining < 0) {
+    updatedRemaining = 0;
+  }
+
+  let status = updatedRemaining === 0 ? "completed" : "active";
 
   /* =========================
      UPDATE LOAN
   ========================= */
 
-  const loanRef = doc(db, "loans", selectedLoan.id);
-
   await updateDoc(loanRef, {
 
-    paid: newPaid,
-    remaining: newRemaining,
-    status,
+    remaining: updatedRemaining,
+    paid: (loan.paid || 0) + amount,
+    status: status,
 
-    "schedule.lastPaymentDate": new Date().toISOString(),
-
-    updatedAt: serverTimestamp()
+    "schedule.lastPaymentDate": new Date().toISOString()
   });
 
   /* =========================
-     SAVE REPAYMENT
+     SAVE REPAYMENT RECORD
   ========================= */
 
   await addDoc(collection(db, "repayments"), {
 
     loanId: selectedLoan.id,
-    memberId: selectedLoan.memberId,
-    memberName: selectedLoan.memberName,
+    memberId: loan.memberId,
+    memberName: loan.memberName,
 
     amount,
     penalty,
+
+    remainingAfter: updatedRemaining,
 
     date: new Date().toISOString(),
     createdAt: serverTimestamp()
   });
 
-  alert(
-    penalty > 0
-      ? `Paid with penalty: ${penalty.toFixed(2)} ETB`
-      : "Payment successful"
-  );
+  alert("Payment successful");
 
   document.getElementById("payAmount").value = "";
+
+  selectedLoan = null;
+
+  document.getElementById("selectedLoan").innerHTML =
+    "No loan selected";
 };
 
 /* =========================
    REALTIME TABLE
 ========================= */
 
-function loadLoans() {
+function loadRepayments() {
 
   const table = document.getElementById("loanTable");
 
-  onSnapshot(collection(db, "loans"), (snapshot) => {
+  onSnapshot(collection(db, "repayments"), (snap) => {
 
     table.innerHTML = "";
 
-    snapshot.forEach(docSnap => {
+    snap.forEach(docSnap => {
 
-      const l = docSnap.data();
+      const r = docSnap.data();
 
       table.innerHTML += `
         <tr>
-          <td>${l.memberName}</td>
-          <td>${l.principal}</td>
-          <td>${l.paid || 0}</td>
-          <td>${l.remaining}</td>
-          <td>${l.schedule?.penaltyRate || 0}%</td>
-          <td>
-            <span class="status ${
-              l.status === "active"
-                ? "pending"
-                : "active"
-            }">
-              ${l.status}
-            </span>
-          </td>
+          <td>${r.memberName}</td>
+          <td>${r.amount}</td>
+          <td>${r.penalty || 0}</td>
+          <td>${r.remainingAfter}</td>
+          <td>${r.date}</td>
         </tr>
       `;
     });
   });
 }
 
-loadLoans();
+loadRepayments();
