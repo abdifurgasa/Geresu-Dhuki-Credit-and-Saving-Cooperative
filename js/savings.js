@@ -1,76 +1,48 @@
-
 import { db } from "./firebase.js";
 
 import {
   collection,
-  getDocs,
   addDoc,
   doc,
-  updateDoc
+  updateDoc,
+  getDoc,
+  serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 /* =========================
-   STATE
+   SELECTED MEMBER
 ========================= */
 let selectedMember = null;
 
 /* =========================
-   ELEMENTS
-========================= */
-const searchInput =
-  document.getElementById("memberSearch");
-
-const resultsBox =
-  document.getElementById("searchResults");
-
-const selectedBox =
-  document.getElementById("selectedMember");
-
-const table =
-  document.getElementById("savingsTable");
-
-/* =========================
-   SEARCH MEMBERS (BUTTON)
+   SEARCH MEMBER
 ========================= */
 window.searchMembers = async function () {
 
-  const value =
-    searchInput.value.toLowerCase();
+  const keyword = document.getElementById("searchInput").value.toLowerCase();
 
-  resultsBox.innerHTML = "";
+  const snap = await getDocs(collection(db, "members"));
 
-  if (!value) {
+  const results = document.getElementById("searchResults");
 
-    alert("Please enter search text");
-
-    return;
-  }
-
-  const snap =
-    await getDocs(collection(db, "members"));
-
-  let found = false;
+  results.innerHTML = "";
 
   snap.forEach(docSnap => {
 
     const m = docSnap.data();
 
     if (
-      m.name.toLowerCase().includes(value) ||
-      m.phone.includes(value) ||
-      m.nid.includes(value)
+      m.name.toLowerCase().includes(keyword) ||
+      m.phone.includes(keyword) ||
+      m.nid.includes(keyword)
     ) {
 
-      found = true;
-
-      const div =
-        document.createElement("div");
+      const div = document.createElement("div");
 
       div.className = "result-item";
 
       div.innerHTML = `
-        <b>${m.name}</b><br>
-        ${m.phone} | ${m.nid}
+        ${m.name} - ${m.phone}
       `;
 
       div.onclick = () => {
@@ -80,83 +52,72 @@ window.searchMembers = async function () {
           ...m
         };
 
-        selectedBox.innerHTML = `
-          <b>${m.name}</b><br>
-          ${m.phone}<br>
-          ${m.nid}
-        `;
+        document.getElementById("selectedMember").innerText =
+          "Selected: " + m.name;
 
-        resultsBox.innerHTML = "";
-        searchInput.value = "";
+        results.innerHTML = "";
       };
 
-      resultsBox.appendChild(div);
+      results.appendChild(div);
     }
   });
-
-  if (!found) {
-
-    resultsBox.innerHTML =
-      "<div class='result-item'>No member found</div>";
-  }
 };
 
 /* =========================
-   DEPOSIT MONEY
+   DEPOSIT SAVINGS
 ========================= */
-window.depositMoney = async function () {
-
-  const amount =
-    Number(document.getElementById("amount").value);
+window.depositSaving = async function () {
 
   if (!selectedMember) {
-
     alert("Select a member first");
-
     return;
   }
 
+  const amount = Number(document.getElementById("amount").value);
+
   if (!amount || amount <= 0) {
-
-    alert("Enter valid amount");
-
+    alert("Invalid amount");
     return;
   }
 
   try {
 
-    /* SAVE SAVING RECORD */
+    /* 1. GET MEMBER */
+    const memberRef = doc(db, "members", selectedMember.id);
+    const memberSnap = await getDoc(memberRef);
+
+    if (!memberSnap.exists()) return;
+
+    const member = memberSnap.data();
+
+    const newBalance =
+      Number(member.walletBalance || 0) + amount;
+
+    /* 2. UPDATE MEMBER WALLET */
+    await updateDoc(memberRef, {
+      walletBalance: newBalance,
+      totalSavings: (member.totalSavings || 0) + amount
+    });
+
+    /* 3. SAVE SAVING RECORD */
     await addDoc(collection(db, "savings"), {
 
       memberId: selectedMember.id,
-      name: selectedMember.name,
-      phone: selectedMember.phone,
+      memberName: selectedMember.name,
       amount: amount,
-      date: Date.now()
+      balanceAfter: newBalance,
+      createdAt: serverTimestamp(),
+      createdBy: "teller"
 
     });
 
-    /* UPDATE MEMBER BALANCE */
-    const memberRef =
-      doc(db, "members", selectedMember.id);
+    /* 4. TRANSACTION LOG */
+    await addDoc(collection(db, "transactions"), {
 
-    const allMembers =
-      await getDocs(collection(db, "members"));
-
-    let currentBalance = 0;
-
-    allMembers.forEach(d => {
-
-      if (d.id === selectedMember.id) {
-
-        currentBalance =
-          d.data().balance || 0;
-      }
-    });
-
-    await updateDoc(memberRef, {
-
-      balance: currentBalance + amount
+      type: "saving",
+      memberId: selectedMember.id,
+      amount: amount,
+      date: serverTimestamp()
 
     });
 
@@ -164,47 +125,10 @@ window.depositMoney = async function () {
 
     document.getElementById("amount").value = "";
 
-    selectedMember = null;
-
-    selectedBox.innerHTML =
-      "No member selected";
-
-    loadSavings();
-
   } catch (err) {
 
     console.error(err);
-
     alert("Deposit failed");
+
   }
 };
-
-/* =========================
-   LOAD SAVINGS HISTORY
-========================= */
-async function loadSavings() {
-
-  table.innerHTML = "";
-
-  const snap =
-    await getDocs(collection(db, "savings"));
-
-  snap.forEach(docSnap => {
-
-    const s = docSnap.data();
-
-    table.innerHTML += `
-      <tr>
-        <td>${s.name}</td>
-        <td>${s.phone}</td>
-        <td>${s.amount} ETB</td>
-        <td>${new Date(s.date).toLocaleString()}</td>
-      </tr>
-    `;
-  });
-}
-
-/* =========================
-   INIT
-========================= */
-loadSavings();
