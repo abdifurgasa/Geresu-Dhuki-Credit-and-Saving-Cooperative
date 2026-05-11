@@ -1,57 +1,79 @@
-import { auth, db } from "./firebase.js";
-
+import { db } from "./firebase.js";
 import {
-  createUserWithEmailAndPassword
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-
-import {
+  collection,
+  getDocs,
   doc,
-  setDoc
+  updateDoc,
+  deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 /* =========================
-   SAVE USER
+   LOAD USERS
 ========================= */
-window.saveUser = async function () {
 
-  const fullName =
-    document.getElementById("fullName").value;
+async function loadUsers() {
 
-  const email =
-    document.getElementById("email").value;
+  const table = document.getElementById("usersTable");
 
-  const password =
-    document.getElementById("password").value;
+  const snap = await getDocs(collection(db, "users"));
 
-  const role =
-    document.getElementById("role").value;
+  table.innerHTML = "";
 
-  try {
+  snap.forEach((docSnap) => {
 
-    /* 1. CREATE AUTH USER */
-    const userCred =
-      await createUserWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
+    const u = docSnap.data();
 
-    /* 2. SAVE TO FIRESTORE (THIS IS YOUR CODE) */
-    await setDoc(
-      doc(db, "users", userCred.user.uid),
-      {
-        uid: userCred.user.uid,
-        email: userCred.user.email,
-        name: fullName,
-        role: role
-      }
-    );
+    table.innerHTML += `
+      <tr>
+        <td>${u.name || "-"}</td>
+        <td>${u.email}</td>
+        <td>${u.role}</td>
 
-    alert("User created successfully");
+        <td>
+          <select onchange="changeRole('${docSnap.id}', this.value)">
+            <option value="admin" ${u.role === "admin" ? "selected" : ""}>Admin</option>
+            <option value="teller" ${u.role === "teller" ? "selected" : ""}>Teller</option>
+            <option value="member" ${u.role === "member" ? "selected" : ""}>Member</option>
+          </select>
+        </td>
 
-  } catch (err) {
+        <td>
+          <button class="btn danger"
+                  onclick="deleteUser('${docSnap.id}')">
+            Delete
+          </button>
+        </td>
+      </tr>
+    `;
+  });
+}
 
-    console.error(err);
-    alert(err.message);
-  }
+loadUsers();
+
+/* =========================
+   CHANGE ROLE
+========================= */
+
+window.changeRole = async function (uid, newRole) {
+
+  await updateDoc(doc(db, "users", uid), {
+    role: newRole
+  });
+
+  alert("Role updated");
+};
+
+/* =========================
+   DELETE USER
+========================= */
+
+window.deleteUser = async function (uid) {
+
+  if (!confirm("Delete this user?")) return;
+
+  await deleteDoc(doc(db, "users", uid));
+
+  alert("User deleted");
+
+  loadUsers();
 };
