@@ -11,7 +11,8 @@
   <title>Dashboard</title>
 
   <!-- CSS -->
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet"
+        href="css/style.css">
 
 </head>
 
@@ -20,7 +21,8 @@
 <!-- =========================
      SIDEBAR
 ========================= -->
-<aside class="sidebar" id="sidebar">
+<aside class="sidebar"
+       id="sidebar">
 
   <!-- TOGGLE -->
   <button class="toggle-btn"
@@ -40,105 +42,93 @@
   <!-- NAVIGATION -->
   <nav class="nav">
 
+    <!-- DASHBOARD -->
     <a href="dashboard.html"
        class="nav-item active">
 
       <span class="icon">📊</span>
-      <span class="text"
-            data-i18n="dashboard">
 
-        Dashboard
-
-      </span>
+      <span class="text">Dashboard</span>
 
     </a>
 
+    <!-- MEMBERS -->
     <a href="members.html"
        class="nav-item admin-only">
 
       <span class="icon">👥</span>
-      <span class="text"
-            data-i18n="members">
 
-        Members
-
-      </span>
+      <span class="text">Members</span>
 
     </a>
 
+    <!-- SAVINGS -->
     <a href="savings.html"
        class="nav-item">
 
       <span class="icon">💰</span>
-      <span class="text"
-            data-i18n="savings">
 
-        Savings
-
-      </span>
+      <span class="text">Savings</span>
 
     </a>
 
+    <!-- LOANS -->
     <a href="loans.html"
        class="nav-item">
 
       <span class="icon">🏦</span>
-      <span class="text"
-            data-i18n="loans">
 
-        Loans
-
-      </span>
+      <span class="text">Loans</span>
 
     </a>
 
+    <!-- REPAYMENTS -->
+    <a href="repayments.html"
+       class="nav-item">
+
+      <span class="icon">💵</span>
+
+      <span class="text">Repayments</span>
+
+    </a>
+
+    <!-- TRANSACTIONS -->
     <a href="transactions.html"
        class="nav-item admin-only">
 
       <span class="icon">💱</span>
-      <span class="text">
 
-        Transactions
-
-      </span>
+      <span class="text">Transactions</span>
 
     </a>
 
+    <!-- REPORTS -->
     <a href="reports.html"
        class="nav-item admin-only">
 
       <span class="icon">📄</span>
-      <span class="text"
-            data-i18n="reports">
 
-        Reports
-
-      </span>
+      <span class="text">Reports</span>
 
     </a>
 
+    <!-- USERS -->
     <a href="users.html"
        class="nav-item admin-only">
 
       <span class="icon">👤</span>
-      <span class="text">
 
-        Users
-
-      </span>
+      <span class="text">Users</span>
 
     </a>
 
+    <!-- SETTINGS -->
     <a href="settings.html"
        class="nav-item">
 
       <span class="icon">⚙️</span>
-      <span class="text"
-            data-i18n="settings">
 
-        Settings
-
-      </span>
+      <span class="text">Settings</span>
 
     </a>
 
@@ -147,13 +137,17 @@
 </aside>
 
 <!-- =========================
-     MAIN CONTENT
+     MAIN
 ========================= -->
-<main class="main">
+<main class="main"
+      id="main">
 
-  <!-- TOPBAR -->
+  <!-- =========================
+       TOPBAR
+  ========================= -->
   <div class="topbar">
 
+    <!-- TITLE -->
     <div>
 
       <h2>
@@ -164,6 +158,7 @@
 
     </div>
 
+    <!-- RIGHT -->
     <div style="
       display:flex;
       align-items:center;
@@ -174,13 +169,14 @@
       <div class="selected-box"
            id="roleBox">
 
-        👑 Admin
+        👑 ADMIN
 
       </div>
 
       <!-- LANGUAGE -->
       <select id="langSelect"
-              class="lang-select">
+              class="lang-select"
+              onchange="changeLang(this.value)">
 
         <option value="EN">EN</option>
         <option value="AM">AM</option>
@@ -189,8 +185,8 @@
       </select>
 
       <!-- LOGOUT -->
-      <button class="btn logout-btn"
-              id="logoutBtn">
+      <button class="btn danger"
+              onclick="logoutUser()">
 
         Logout
 
@@ -200,29 +196,38 @@
 
   </div>
 
-  <!-- HEADER -->
+  <!-- =========================
+       HEADER
+  ========================= -->
   <div style="margin-top:25px;">
 
-    <h1 data-i18n="overview">
+    <h1>
 
-      Dashboard Overview
+      DASHBOARD OVERVIEW
 
     </h1>
 
-    <p data-i18n="welcome">
+    <p>
 
-      Welcome to SACCO Management System
+      Welcome to SACCO Banking System
 
     </p>
 
   </div>
 
-  <!-- DASHBOARD CARDS -->
+  <!-- =========================
+       DASHBOARD CARDS
+  ========================= -->
   <section class="cards">
 
+    <!-- MEMBERS -->
     <div class="card blue">
 
-      <h3>Total Members</h3>
+      <h3>
+
+        Total Members
+
+      </h3>
 
       <p id="members">
 
@@ -232,9 +237,14 @@
 
     </div>
 
+    <!-- SAVINGS -->
     <div class="card green">
 
-      <h3>Total Savings</h3>
+      <h3>
+
+        Total Savings
+
+      </h3>
 
       <p id="savings">
 
@@ -244,9 +254,14 @@
 
     </div>
 
+    <!-- LOANS -->
     <div class="card orange">
 
-      <h3>Total Loans</h3>
+      <h3>
+
+        Total Loans
+
+      </h3>
 
       <p id="loans">
 
@@ -256,9 +271,14 @@
 
     </div>
 
+    <!-- PROFIT -->
     <div class="card purple">
 
-      <h3>Net Profit</h3>
+      <h3>
+
+        Net Profit
+
+      </h3>
 
       <p id="profit">
 
@@ -270,8 +290,10 @@
 
   </section>
 
-  <!-- QUICK ACTIONS -->
-  <section style="margin-top:30px;">
+  <!-- =========================
+       QUICK ACTIONS
+  ========================= -->
+  <section style="margin-top:35px;">
 
     <h2>
 
@@ -281,38 +303,62 @@
 
     <div class="cards">
 
+      <!-- ADD MEMBER -->
       <a href="members.html"
          class="card teal admin-only"
          style="text-decoration:none;">
 
-        <h3>Add Member</h3>
+        <h3>
+
+          Add Member
+
+        </h3>
+
         <p>👥</p>
 
       </a>
 
+      <!-- SAVINGS -->
       <a href="savings.html"
          class="card green"
          style="text-decoration:none;">
 
-        <h3>Deposit Savings</h3>
+        <h3>
+
+          Deposit Savings
+
+        </h3>
+
         <p>💰</p>
 
       </a>
 
+      <!-- LOAN -->
       <a href="loans.html"
          class="card orange"
          style="text-decoration:none;">
 
-        <h3>Create Loan</h3>
+        <h3>
+
+          Create Loan
+
+        </h3>
+
         <p>🏦</p>
 
       </a>
 
+      <!-- REPORTS -->
       <a href="reports.html"
          class="card red admin-only"
          style="text-decoration:none;">
 
-        <h3>View Reports</h3>
+        <h3>
+
+          Reports
+
+        </h3>
+
         <p>📄</p>
 
       </a>
@@ -321,7 +367,9 @@
 
   </section>
 
-  <!-- CHART -->
+  <!-- =========================
+       CHARTS
+  ========================= -->
   <section style="margin-top:40px;">
 
     <h2>
@@ -338,7 +386,9 @@
 
   </section>
 
-  <!-- REPAYMENT CHART -->
+  <!-- =========================
+       REPAYMENT CHART
+  ========================= -->
   <section style="margin-top:40px;">
 
     <h2>
@@ -361,20 +411,26 @@
      LIBRARIES
 ========================= -->
 
-<!-- CHART -->
+<!-- CHART JS -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <!-- LANGUAGE -->
 <script src="js/i18n.js"></script>
 
 <!-- AUTH -->
-<script type="module" src="js/global-auth.js"></script>
+<script src="js/global-auth.js"></script>
 
 <!-- DASHBOARD -->
-<script type="module" src="js/dashboard.js"></script>
+<script type="module"
+        src="js/dashboard.js"></script>
 
 <!-- SESSION -->
-<script type="module" src="js/session-timeout.js"></script>
+<script type="module"
+        src="js/session-timeout.js"></script>
+
+<!-- PENALTY ENGINE -->
+<script type="module"
+        src="js/penalty-engine.js"></script>
 
 </body>
 </html>
