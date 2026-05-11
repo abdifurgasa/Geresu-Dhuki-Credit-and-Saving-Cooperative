@@ -1,78 +1,174 @@
+import { db } from "./firebase.js";
+
+import {
+  collection,
+  addDoc,
+  doc,
+  getDoc,
+  updateDoc,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+/* =========================
+   GLOBAL STATE
+========================= */
+let selectedMember = null;
+
+/* =========================
+   SEARCH MEMBER
+========================= */
+window.searchMembers = async function () {
+
+  const keyword = document.getElementById("memberSearch").value.toLowerCase();
+
+  const snap = await getDocs(collection(db, "members"));
+
+  const results = document.getElementById("searchResults");
+  results.innerHTML = "";
+
+  snap.forEach(docSnap => {
+
+    const m = docSnap.data();
+
+    if (
+      m.name.toLowerCase().includes(keyword) ||
+      m.phone?.includes(keyword) ||
+      m.nid?.includes(keyword)
+    ) {
+
+      const div = document.createElement("div");
+      div.className = "result-item";
+
+      div.innerText = `${m.name} - ${m.phone}`;
+
+      div.onclick = () => {
+
+        selectedMember = {
+          id: docSnap.id,
+          ...m
+        };
+
+        document.getElementById("selectedMember").innerText =
+          "Selected: " + m.name;
+
+        results.innerHTML = "";
+      };
+
+      results.appendChild(div);
+    }
+  });
+};
+
+/* =========================
+   CREATE LOAN
+========================= */
 window.createLoan = async function () {
 
   if (!selectedMember) {
-    alert("Select member first");
+    alert("Select a member first");
     return;
   }
 
-  const principal = Number(
-    document.getElementById("loanAmount").value
-  );
+  const principal = Number(document.getElementById("loanAmount").value);
+  const interestRate = Number(document.getElementById("interest").value);
+  const durationMonths = 12; // fixed (can upgrade later)
 
-  const interest = Number(
-    document.getElementById("interest").value
-  );
-
-  const durationMonths = Number(
-    document.getElementById("durationMonths").value
-  );
-
-  if (
-    principal <= 0 ||
-    interest < 0 ||
-    durationMonths <= 0
-  ) {
-    alert("Invalid loan data");
+  if (!principal || principal <= 0) {
+    alert("Invalid loan amount");
     return;
   }
 
-  const interestAmount = principal * (interest / 100);
+  if (!interestRate || interestRate < 0) {
+    alert("Invalid interest rate");
+    return;
+  }
 
-  const totalAmount = principal + interestAmount;
+  try {
 
-  const monthlyPayment = totalAmount / durationMonths;
+    /* =========================
+       CALCULATIONS
+    ========================= */
 
-  const nextDueDate = new Date();
+    const interestAmount =
+      (principal * interestRate) / 100;
 
-  nextDueDate.setMonth(nextDueDate.getMonth() + 1);
+    const totalRepayable =
+      principal + interestAmount;
 
-  await addDoc(collection(db, "loans"), {
+    const monthlyPayment =
+      totalRepayable / durationMonths;
 
-    memberId: selectedMember.id,
-    memberName: selectedMember.name,
+    /* =========================
+       SAVE LOAN
+    ========================= */
 
-    principal,
-    interest,
-    durationMonths,
+    const loanRef = await addDoc(collection(db, "loans"), {
 
-    totalAmount,
-    monthlyPayment,
+      memberId: selectedMember.id,
+      memberName: selectedMember.name,
 
-    paid: 0,
-    remaining: totalAmount,
+      principal,
+      interest: interestRate,
 
-    penalty: 0,
+      durationMonths,
 
-    nextDueDate: nextDueDate.toISOString(),
+      totalAmount: totalRepayable,
 
-    status: "active",
+      paid: 0,
+      remaining: totalRepayable,
 
-    createdAt: serverTimestamp()
+      monthlyPayment,
 
-  });
+      status: "active",
 
-  await addDoc(collection(db, "transactions"), {
+      createdAt: serverTimestamp()
 
-    type: "loan",
-    memberId: selectedMember.id,
-    memberName: selectedMember.name,
-    amount: principal,
-    status: "completed",
-    createdBy: auth.currentUser?.email,
-    date: new Date().toISOString(),
-    createdAt: serverTimestamp()
+    });
 
-  });
+    /* =========================
+       UPDATE MEMBER
+    ========================= */
 
-  alert("Loan created successfully");
+    const memberRef = doc(db, "members", selectedMember.id);
+    const memberSnap = await getDoc(memberRef);
+
+    if (memberSnap.exists()) {
+
+      const m = memberSnap.data();
+
+      await updateDoc(memberRef, {
+
+        totalLoans:
+          (m.totalLoans || 0) + principal,
+
+        walletBalance:
+          (m.walletBalance || 0) - principal
+
+      });
+    }
+
+    /* =========================
+       TRANSACTION LOG
+    ========================= */
+
+    await addDoc(collection(db, "transactions"), {
+
+      type: "loan",
+      memberId: selectedMember.id,
+      amount: principal,
+      date: serverTimestamp()
+
+    });
+
+    alert("Loan created successfully");
+
+    document.getElementById("loanAmount").value = "";
+    document.getElementById("interest").value = "";
+
+  } catch (err) {
+
+    console.error(err);
+    alert("Loan creation failed");
+
+  }
 };
