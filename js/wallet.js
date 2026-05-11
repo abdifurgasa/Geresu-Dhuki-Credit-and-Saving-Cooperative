@@ -1,114 +1,85 @@
 import { db } from "./firebase.js";
-
 import {
-  collection,
-  getDocs,
   doc,
   getDoc,
-  query,
-  where,
-  onSnapshot
+  setDoc,
+  updateDoc,
+  serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-let selectedMember = null;
-
 /* =========================
-   SEARCH MEMBER
+   GET WALLET BALANCE
 ========================= */
-window.searchWalletMember = async function () {
+export async function getWallet(memberId) {
+  const ref = doc(db, "wallets", memberId);
+  const snap = await getDoc(ref);
 
-  const keyword = document.getElementById("memberSearch").value.toLowerCase();
-
-  const results = document.getElementById("searchResults");
-  results.innerHTML = "";
-
-  const snap = await getDocs(collection(db, "members"));
-
-  snap.forEach(docSnap => {
-
-    const m = docSnap.data();
-
-    if (
-      m.name.toLowerCase().includes(keyword) ||
-      m.phone?.includes(keyword)
-    ) {
-
-      const div = document.createElement("div");
-      div.className = "result-item";
-
-      div.innerHTML = `<b>${m.name}</b><br>${m.phone}`;
-
-      div.onclick = () => loadWallet(docSnap.id, m);
-
-      results.appendChild(div);
-    }
-  });
-};
-
-/* =========================
-   LOAD WALLET
-========================= */
-async function loadWallet(memberId, member) {
-
-  selectedMember = { memberId, ...member };
-
-  document.getElementById("selectedMember").innerHTML =
-    `👤 ${member.name}`;
-
-  const walletRef = doc(db, "wallets", memberId);
-  const walletSnap = await getDoc(walletRef);
-
-  if (walletSnap.exists()) {
-
-    const w = walletSnap.data();
-
-    document.getElementById("walletSavings").innerText =
-      w.savingsBalance || 0;
-
-    document.getElementById("walletLoans").innerText =
-      w.loanBalance || 0;
-
-    document.getElementById("walletNet").innerText =
-      w.netBalance || 0;
-
-  } else {
-
-    document.getElementById("walletSavings").innerText = 0;
-    document.getElementById("walletLoans").innerText = 0;
-    document.getElementById("walletNet").innerText = 0;
+  if (snap.exists()) {
+    return snap.data();
   }
 
-  loadHistory(memberId);
+  return {
+    memberId,
+    balance: 0
+  };
 }
 
 /* =========================
-   WALLET HISTORY
+   CREATE WALLET (IF NOT EXISTS)
 ========================= */
-function loadHistory(memberId) {
-
-  const table = document.getElementById("walletHistory");
-
-  const q = query(
-    collection(db, "transactions"),
-    where("memberId", "==", memberId)
-  );
-
-  onSnapshot(q, (snap) => {
-
-    table.innerHTML = "";
-
-    snap.forEach(docSnap => {
-
-      const t = docSnap.data();
-
-      table.innerHTML += `
-        <tr>
-          <td>${t.type}</td>
-          <td>${t.amount}</td>
-          <td>${new Date(t.date).toLocaleString()}</td>
-        </tr>
-      `;
-    });
-
+export async function createWallet(memberId, memberName) {
+  await setDoc(doc(db, "wallets", memberId), {
+    memberId,
+    memberName,
+    balance: 0,
+    createdAt: serverTimestamp()
   });
+}
+
+/* =========================
+   DEPOSIT (SAVINGS)
+========================= */
+export async function deposit(memberId, memberName, amount) {
+
+  const walletRef = doc(db, "wallets", memberId);
+  const snap = await getDoc(walletRef);
+
+  if (!snap.exists()) {
+    await createWallet(memberId, memberName);
+  }
+
+  const current = (snap.data()?.balance || 0);
+
+  await updateDoc(walletRef, {
+    balance: current + amount,
+    updatedAt: serverTimestamp()
+  });
+
+  return current + amount;
+}
+
+/* =========================
+   REPAYMENT (LOAN PAYMENT)
+========================= */
+export async function repay(memberId, memberName, amount) {
+
+  const walletRef = doc(db, "wallets", memberId);
+  const snap = await getDoc(walletRef);
+
+  if (!snap.exists()) {
+    await createWallet(memberId, memberName);
+  }
+
+  const current = (snap.data()?.balance || 0);
+
+  let newBalance = current - amount;
+
+  if (newBalance < 0) newBalance = 0;
+
+  await updateDoc(walletRef, {
+    balance: newBalance,
+    updatedAt: serverTimestamp()
+  });
+
+  return newBalance;
 }
