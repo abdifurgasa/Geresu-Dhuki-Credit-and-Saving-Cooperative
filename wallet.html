@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Member Wallet</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+<div class="container">
+
+  <h1>💳 MEMBER WALLET SYSTEM</h1>
+
+  <!-- SEARCH MEMBER -->
+  <div class="search-container">
+
+    <input id="memberSearch"
+           class="input"
+           placeholder="Search member">
+
+    <button class="btn primary" onclick="searchWalletMember()">
+      Search
+    </button>
+
+    <div id="searchResults" class="search-results"></div>
+
+  </div>
+
+  <!-- SELECTED MEMBER -->
+  <div id="selectedMember" class="selected-box">
+    No member selected
+  </div>
+
+  <!-- WALLET CARD -->
+  <section class="cards">
+
+    <div class="card blue">
+      <h3>Savings Balance</h3>
+      <p id="walletSavings">0</p>
+    </div>
+
+    <div class="card orange">
+      <h3>Loan Balance</h3>
+      <p id="walletLoans">0</p>
+    </div>
+
+    <div class="card green">
+      <h3>Net Balance</h3>
+      <p id="walletNet">0</p>
+    </div>
+
+  </section>
+
+  <!-- HISTORY -->
+  <h2>Wallet History</h2>
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Amount</th>
+        <th>Date</th>
+      </tr>
+    </thead>
+
+    <tbody id="walletHistory"></tbody>
+
+  </table>
+
+</div>
+
+<script type="module" src="js/wallet.js"></script>
+
+</body>
+</html>
