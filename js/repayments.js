@@ -1,62 +1,147 @@
 import { db } from "./firebase.js";
 
 import {
-  doc,
-  updateDoc,
-  getDoc,
+  collection,
   addDoc,
-  collection
+  doc,
+  getDoc,
+  updateDoc,
+  serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 /* =========================
-   REPAY LOAN
+   SELECTED LOAN
 ========================= */
-window.repayLoan = async function (loanId) {
+let selectedLoan = null;
 
-  const amount =
-    Number(prompt("Repayment amount"));
+/* =========================
+   SEARCH LOANS
+========================= */
+window.searchLoans = async function () {
 
-  if (!amount) return;
+  const keyword = document.getElementById("loanSearch").value.toLowerCase();
 
-  const ref =
-    doc(db, "loans", loanId);
+  const snap = await getDocs(collection(db, "loans"));
 
-  const snap =
-    await getDoc(ref);
+  const results = document.getElementById("searchResults");
+  results.innerHTML = "";
 
-  const loan =
-    snap.data();
+  snap.forEach(docSnap => {
 
-  const paid =
-    loan.paid + amount;
+    const l = docSnap.data();
 
-  const remaining =
-    loan.remaining - amount;
+    if (
+      l.memberName?.toLowerCase().includes(keyword) ||
+      l.memberId?.includes(keyword)
+    ) {
 
-  let status = "active";
+      const div = document.createElement("div");
+      div.className = "result-item";
 
-  if (remaining <= 0) {
-    status = "completed";
+      div.innerText =
+        `${l.memberName} - Remaining: ${l.remaining} ETB`;
+
+      div.onclick = () => {
+
+        selectedLoan = {
+          id: docSnap.id,
+          ...l
+        };
+
+        document.getElementById("selectedLoan").innerText =
+          "Selected Loan: " + l.memberName;
+
+        results.innerHTML = "";
+      };
+
+      results.appendChild(div);
+    }
+  });
+};
+
+/* =========================
+   MAKE REPAYMENT
+========================= */
+window.makeRepayment = async function () {
+
+  if (!selectedLoan) {
+    alert("Select a loan first");
+    return;
   }
 
-  await updateDoc(ref, {
+  const amount = Number(document.getElementById("repayAmount").value);
 
-    paid,
-    remaining,
-    status
-  });
+  if (!amount || amount <= 0) {
+    alert("Invalid repayment amount");
+    return;
+  }
 
-  /* SAVE TRANSACTION */
-  await addDoc(collection(db, "transactions"), {
+  try {
 
-    uid: loan.uid,
+    const loanRef = doc(db, "loans", selectedLoan.id);
+    const loanSnap = await getDoc(loanRef);
 
-    type: "loan_repayment",
+    if (!loanSnap.exists()) return;
 
-    amount,
+    const loan = loanSnap.data();
 
-    date: new Date()
-  });
+    let newPaid = (loan.paid || 0) + amount;
+    let newRemaining = (loan.remaining || 0) - amount;
 
-  alert("Repayment successful");
+    if (newRemaining < 0) newRemaining = 0;
+
+    let status = "active";
+
+    if (newRemaining === 0) {
+      status = "paid";
+    }
+
+    /* =========================
+       UPDATE LOAN
+    ========================= */
+
+    await updateDoc(loanRef, {
+
+      paid: newPaid,
+      remaining: newRemaining,
+      status: status
+
+    });
+
+    /* =========================
+       REPAYMENT RECORD
+    ========================= */
+
+    await addDoc(collection(db, "repayments"), {
+
+      loanId: selectedLoan.id,
+      memberId: loan.memberId,
+      amount: amount,
+      date: serverTimestamp()
+
+    });
+
+    /* =========================
+       TRANSACTION LOG
+    ========================= */
+
+    await addDoc(collection(db, "transactions"), {
+
+      type: "repayment",
+      memberId: loan.memberId,
+      amount: amount,
+      date: serverTimestamp()
+
+    });
+
+    alert("Repayment successful");
+
+    document.getElementById("repayAmount").value = "";
+
+  } catch (err) {
+
+    console.error(err);
+    alert("Repayment failed");
+
+  }
 };
