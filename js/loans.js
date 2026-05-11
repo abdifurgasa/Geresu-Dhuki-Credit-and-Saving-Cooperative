@@ -17,12 +17,13 @@ import {
 let selectedMember = null;
 
 /* =========================
-   SEARCH MEMBER
+   SEARCH MEMBERS
 ========================= */
 
 window.searchMembers = async function () {
 
   const keyword = document.getElementById("memberSearch").value.toLowerCase().trim();
+
   const box = document.getElementById("searchResults");
 
   box.innerHTML = "";
@@ -74,7 +75,7 @@ function selectMember(id, m) {
 }
 
 /* =========================
-   CHECK ACTIVE LOAN
+   CHECK ACTIVE LOAN (STRICT RULE)
 ========================= */
 
 async function hasActiveLoan(memberId) {
@@ -91,25 +92,26 @@ async function hasActiveLoan(memberId) {
 }
 
 /* =========================
-   COMPOUND INTEREST ENGINE
+   COMPOUND INTEREST (CORRECT FORMULA)
 ========================= */
 
-function calculateCompound(principal, rate, years) {
+function compoundInterest(P, r, t) {
 
-  const n = 12; // monthly compounding
+  // P = principal
+  // r = yearly interest rate (%)
+  // t = years
 
-  const r = rate / 100;
+  const rate = r / 100;
 
-  const amount =
-    principal * Math.pow((1 + r / n), (n * years));
+  const A = P * Math.pow((1 + rate), t);
 
-  const interest = amount - principal;
+  const interest = A - P;
 
-  return { amount, interest };
+  return { total: A, interest };
 }
 
 /* =========================
-   CREATE LOAN (COMPOUND + PENALTY)
+   CREATE LOAN (SAFE VERSION)
 ========================= */
 
 window.createLoan = async function () {
@@ -129,7 +131,7 @@ window.createLoan = async function () {
     return;
   }
 
-  /* ❌ ONE LOAN RULE */
+  /* ❌ STRICT ONE LOAN RULE */
   if (await hasActiveLoan(selectedMember.id)) {
     alert("❌ Please finish your existing loan first");
     return;
@@ -138,21 +140,23 @@ window.createLoan = async function () {
   const years = type === "years" ? duration : duration / 12;
 
   /* =========================
-     COMPOUND INTEREST CALC
+     COMPOUND CALCULATION
   ========================= */
 
-  const result = calculateCompound(principal, rate, years);
+  const result = compoundInterest(principal, rate, years);
 
-  const total = result.amount;
+  const total = result.total;
   const interest = result.interest;
 
-  const monthly = total / (duration * (type === "years" ? 12 : 1));
+  const months = type === "years" ? duration * 12 : duration;
+
+  const monthlyPayment = total / months;
 
   /* =========================
      PENALTY SYSTEM SETUP
   ========================= */
 
-  const startDate = new Date();
+  const now = new Date();
 
   const nextDue = new Date();
   nextDue.setMonth(nextDue.getMonth() + 1);
@@ -166,22 +170,22 @@ window.createLoan = async function () {
     principal,
     interestRate: rate,
 
-    durationMonths: duration * (type === "years" ? 12 : 1),
+    durationMonths: months,
 
     totalAmount: total,
     totalInterest: interest,
 
-    monthlyPayment: monthly,
+    monthlyPayment,
 
     paid: 0,
     remaining: total,
 
     status: "active",
 
-    schedule: {
-      startDate: startDate.toISOString(),
-      nextDueDate: nextDue.toISOString(),
-      penaltyRate: 2 // 2% monthly penalty
+    penalty: {
+      rate: 2, // 2% per month
+      lastChecked: now.toISOString(),
+      nextDueDate: nextDue.toISOString()
     },
 
     createdAt: serverTimestamp()
@@ -208,7 +212,7 @@ function clearForm() {
 }
 
 /* =========================
-   LOANS TABLE
+   LOANS TABLE (REALTIME)
 ========================= */
 
 function loadLoans() {
@@ -223,16 +227,18 @@ function loadLoans() {
 
       const l = docSnap.data();
 
+      const remaining = l.remaining || 0;
+
       table.innerHTML += `
         <tr>
           <td>${l.memberName}</td>
           <td>${l.principal}</td>
           <td>${l.interestRate}%</td>
           <td>${l.durationMonths}</td>
-          <td>${l.monthlyPayment.toFixed(2)}</td>
-          <td>${l.totalAmount.toFixed(2)}</td>
-          <td>${l.paid}</td>
-          <td>${l.remaining.toFixed(2)}</td>
+          <td>${(l.monthlyPayment || 0).toFixed(2)}</td>
+          <td>${(l.totalAmount || 0).toFixed(2)}</td>
+          <td>${l.paid || 0}</td>
+          <td>${remaining.toFixed(2)}</td>
           <td>
             <span class="status ${
               l.status === "active" ? "pending" : "active"
