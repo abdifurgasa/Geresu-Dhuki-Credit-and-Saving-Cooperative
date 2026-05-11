@@ -8,89 +8,67 @@ import {
 
 import {
   doc,
-  getDoc
+  getDoc,
+  updateDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-/* =========================
-   LOGIN
-========================= */
-window.login = async function () {
+window.login = async function(){
 
-  let email = document.getElementById("email").value;
-  let password = document.getElementById("password").value;
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
 
-  try {
+  try{
 
-    const userCred = await signInWithEmailAndPassword(auth, email, password);
+    const userCred = await signInWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
 
     const uid = userCred.user.uid;
 
     const userRef = doc(db, "users", uid);
+
     const snap = await getDoc(userRef);
 
-    if (!snap.exists()) {
-      alert("No role assigned!");
+    if(!snap.exists()){
+      alert("User role missing");
       return;
     }
 
-    const role = snap.data().role;
+    const data = snap.data();
 
-    localStorage.setItem("role", role);
+    localStorage.setItem("role", data.role);
+    localStorage.setItem("uid", uid);
+    localStorage.setItem("name", data.fullName || "User");
+
+    await updateDoc(userRef, {
+      lastLogin: new Date().toISOString()
+    });
 
     window.location.href = "dashboard.html";
 
-  } catch (err) {
+  }catch(err){
+
+    console.error(err);
     alert("Login failed");
-    console.error(err);
   }
 };
 
-/* =========================
-   LOGOUT (FIXED + GLOBAL SAFE)
-========================= */
-window.logoutUser = async function () {
+window.logoutUser = async function(){
 
-  try {
+  await signOut(auth);
 
-    await signOut(auth);
+  localStorage.clear();
 
-    localStorage.removeItem("role");
-    sessionStorage.clear();
+  window.location.href = "index.html";
+};
 
+onAuthStateChanged(auth, user => {
+
+  const currentPage = window.location.pathname;
+
+  if(!user && !currentPage.includes("index.html")){
     window.location.href = "index.html";
-
-  } catch (err) {
-
-    console.error(err);
-
-    alert("Logout failed");
   }
-};
-/* =========================
-   AUTH GUARD (PROTECT PAGES)
-========================= */
-export function protectPage(){
-
-  onAuthStateChanged(auth, (user) => {
-
-    if (!user) {
-      window.location.href = "index.html";
-    }
-
-  });
-
-}
-
-/* =========================
-   ROLE CHECK
-========================= */
-export function requireRole(roleRequired){
-
-  let role = localStorage.getItem("role");
-
-  if (role !== roleRequired && role !== "admin") {
-    alert("Access denied");
-    window.location.href = "dashboard.html";
-  }
-
-}
+});
