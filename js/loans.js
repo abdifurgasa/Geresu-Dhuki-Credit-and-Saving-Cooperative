@@ -1,9 +1,11 @@
-import { db, auth } from "./firebase.js";
+import { db } from "./firebase.js";
 
 import {
   collection,
   addDoc,
   getDocs,
+  query,
+  where,
   onSnapshot,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
@@ -14,48 +16,30 @@ import {
 
 let selectedMember = null;
 
-let calculated = {
-  monthly: 0,
-  total: 0,
-  interest: 0
-};
-
 /* =========================
-   SEARCH MEMBERS
+   SEARCH MEMBER
 ========================= */
 
 window.searchMembers = async function () {
 
-  const keyword =
-    document.getElementById("memberSearch")
-      .value
-      .toLowerCase()
-      .trim();
-
-  const box =
-    document.getElementById("searchResults");
+  const keyword = document.getElementById("memberSearch").value.toLowerCase().trim();
+  const box = document.getElementById("searchResults");
 
   box.innerHTML = "";
 
   if (!keyword) return;
 
-  const snapshot =
-    await getDocs(collection(db, "members"));
+  const snapshot = await getDocs(collection(db, "members"));
 
   snapshot.forEach(docSnap => {
 
     const m = docSnap.data();
 
-    const text = `
-      ${m.name}
-      ${m.phone}
-      ${m.nid}
-    `.toLowerCase();
+    const text = `${m.name} ${m.phone} ${m.nid}`.toLowerCase();
 
     if (text.includes(keyword)) {
 
-      const div =
-        document.createElement("div");
+      const div = document.createElement("div");
 
       div.className = "result-item";
 
@@ -65,8 +49,7 @@ window.searchMembers = async function () {
         🆔 ${m.nid}
       `;
 
-      div.onclick = () =>
-        selectMember(docSnap.id, m);
+      div.onclick = () => selectMember(docSnap.id, m);
 
       box.appendChild(div);
     }
@@ -79,79 +62,54 @@ window.searchMembers = async function () {
 
 function selectMember(id, m) {
 
-  selectedMember = {
-    id,
-    ...m
-  };
+  selectedMember = { id, ...m };
 
-  document.getElementById(
-    "selectedMember"
-  ).innerHTML = `
+  document.getElementById("selectedMember").innerHTML = `
     👤 ${m.name}<br>
     📱 ${m.phone}<br>
     🆔 ${m.nid}
   `;
 
-  document.getElementById(
-    "searchResults"
-  ).innerHTML = "";
+  document.getElementById("searchResults").innerHTML = "";
 }
 
 /* =========================
-   LOAN CALCULATION
+   CHECK ACTIVE LOAN
 ========================= */
 
-window.calculateLoan = function () {
+async function hasActiveLoan(memberId) {
 
-  const amount =
-    Number(document.getElementById("loanAmount").value);
+  const q = query(
+    collection(db, "loans"),
+    where("memberId", "==", memberId),
+    where("status", "==", "active")
+  );
 
-  const interest =
-    Number(document.getElementById("interestRate").value);
+  const snap = await getDocs(q);
 
-  const duration =
-    Number(document.getElementById("duration").value);
-
-  const type =
-    document.getElementById("durationType").value;
-
-  if (!amount || !interest || !duration) {
-    alert("Fill all fields");
-    return;
-  }
-
-  let months =
-    type === "years"
-      ? duration * 12
-      : duration;
-
-  let totalInterest =
-    (amount * interest * months) / 100;
-
-  let total =
-    amount + totalInterest;
-
-  let monthly =
-    total / months;
-
-  calculated = {
-    monthly,
-    total,
-    interest: totalInterest
-  };
-
-  document.getElementById("monthlyPayment").innerText =
-    monthly.toFixed(2) + " ETB";
-
-  document.getElementById("totalRepayment").innerText =
-    total.toFixed(2) + " ETB";
-
-  document.getElementById("totalInterest").innerText =
-    totalInterest.toFixed(2) + " ETB";
-};
+  return !snap.empty;
+}
 
 /* =========================
-   CREATE LOAN (WITH BLOCKING)
+   COMPOUND INTEREST ENGINE
+========================= */
+
+function calculateCompound(principal, rate, years) {
+
+  const n = 12; // monthly compounding
+
+  const r = rate / 100;
+
+  const amount =
+    principal * Math.pow((1 + r / n), (n * years));
+
+  const interest = amount - principal;
+
+  return { amount, interest };
+}
+
+/* =========================
+   CREATE LOAN (COMPOUND + PENALTY)
 ========================= */
 
 window.createLoan = async function () {
@@ -161,70 +119,43 @@ window.createLoan = async function () {
     return;
   }
 
-  const amount =
-    Number(document.getElementById("loanAmount").value);
+  const principal = Number(document.getElementById("loanAmount").value);
+  const rate = Number(document.getElementById("interestRate").value);
+  const duration = Number(document.getElementById("duration").value);
+  const type = document.getElementById("durationType").value;
 
-  const interest =
-    Number(document.getElementById("interestRate").value);
-
-  const duration =
-    Number(document.getElementById("duration").value);
-
-  const type =
-    document.getElementById("durationType").value;
-
-  if (!amount || !interest || !duration) {
+  if (!principal || !rate || !duration) {
     alert("Fill all fields");
     return;
   }
 
-  /* =========================
-     CHECK ACTIVE LOAN
-  ========================= */
-
-  const snapshot =
-    await getDocs(collection(db, "loans"));
-
-  let hasActiveLoan = false;
-
-  snapshot.forEach(docSnap => {
-
-    const l = docSnap.data();
-
-    if (
-      l.memberId === selectedMember.id &&
-      l.status === "active"
-    ) {
-      hasActiveLoan = true;
-    }
-  });
-
-  if (hasActiveLoan) {
-    alert("❌ Please Finish Your Loan First");
+  /* ❌ ONE LOAN RULE */
+  if (await hasActiveLoan(selectedMember.id)) {
+    alert("❌ Please finish your existing loan first");
     return;
   }
 
-  /* =========================
-     CALCULATION
-  ========================= */
-
-  let months =
-    type === "years"
-      ? duration * 12
-      : duration;
-
-  let totalInterest =
-    (amount * interest * months) / 100;
-
-  let total =
-    amount + totalInterest;
-
-  let monthly =
-    total / months;
+  const years = type === "years" ? duration : duration / 12;
 
   /* =========================
-     SAVE LOAN
+     COMPOUND INTEREST CALC
   ========================= */
+
+  const result = calculateCompound(principal, rate, years);
+
+  const total = result.amount;
+  const interest = result.interest;
+
+  const monthly = total / (duration * (type === "years" ? 12 : 1));
+
+  /* =========================
+     PENALTY SYSTEM SETUP
+  ========================= */
+
+  const startDate = new Date();
+
+  const nextDue = new Date();
+  nextDue.setMonth(nextDue.getMonth() + 1);
 
   await addDoc(collection(db, "loans"), {
 
@@ -232,24 +163,31 @@ window.createLoan = async function () {
     memberName: selectedMember.name,
     phone: selectedMember.phone,
 
-    principal: amount,
-    interest,
-    durationMonths: months,
+    principal,
+    interestRate: rate,
+
+    durationMonths: duration * (type === "years" ? 12 : 1),
+
+    totalAmount: total,
+    totalInterest: interest,
 
     monthlyPayment: monthly,
-    totalInterest,
-    totalAmount: total,
 
     paid: 0,
     remaining: total,
 
     status: "active",
 
-    createdAt: serverTimestamp(),
-    date: new Date().toISOString()
+    schedule: {
+      startDate: startDate.toISOString(),
+      nextDueDate: nextDue.toISOString(),
+      penaltyRate: 2 // 2% monthly penalty
+    },
+
+    createdAt: serverTimestamp()
   });
 
-  alert("Loan created successfully");
+  alert("Loan created successfully (Compound + Penalty enabled)");
 
   clearForm();
 };
@@ -270,37 +208,34 @@ function clearForm() {
 }
 
 /* =========================
-   REALTIME TABLE
+   LOANS TABLE
 ========================= */
 
 function loadLoans() {
 
-  const table =
-    document.getElementById("loanTable");
+  const table = document.getElementById("loanTable");
 
-  onSnapshot(collection(db, "loans"), (snapshot) => {
+  onSnapshot(collection(db, "loans"), (snap) => {
 
     table.innerHTML = "";
 
-    snapshot.forEach(docSnap => {
+    snap.forEach(docSnap => {
 
       const l = docSnap.data();
 
       table.innerHTML += `
         <tr>
           <td>${l.memberName}</td>
-          <td>${l.principal} ETB</td>
-          <td>${l.interest}%</td>
-          <td>${l.durationMonths} mo</td>
+          <td>${l.principal}</td>
+          <td>${l.interestRate}%</td>
+          <td>${l.durationMonths}</td>
           <td>${l.monthlyPayment.toFixed(2)}</td>
           <td>${l.totalAmount.toFixed(2)}</td>
-          <td>${l.paid || 0}</td>
+          <td>${l.paid}</td>
           <td>${l.remaining.toFixed(2)}</td>
           <td>
             <span class="status ${
-              l.status === "active"
-                ? "pending"
-                : "active"
+              l.status === "active" ? "pending" : "active"
             }">
               ${l.status}
             </span>
@@ -310,9 +245,5 @@ function loadLoans() {
     });
   });
 }
-
-/* =========================
-   INIT
-========================= */
 
 loadLoans();
