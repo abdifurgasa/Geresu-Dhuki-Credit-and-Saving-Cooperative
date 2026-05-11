@@ -1,115 +1,66 @@
 <!DOCTYPE html>
-<html lang="en">
+      class="input"
+      placeholder="Search member by name / phone / NID"
+    >
 
-<head>
-
-  <meta charset="UTF-8">
-
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1.0">
-
-  <title>Transactions</title>
-
-  <link rel="stylesheet"
-        href="css/style.css">
-
-</head>
-
-<body>
-
-<div class="container">
-
-  <h1>💱 TRANSACTION SYSTEM</h1>
-
-  <!-- SEARCH -->
-  <div class="search-container">
-
-    <input id="memberSearch"
-           class="input"
-           placeholder="Search member by Name / Phone / NID">
-
-    <button class="btn primary"
-            onclick="searchMembers()">
-
+    <button class="btn primary" onclick="searchMembers()">
       Search
-
     </button>
 
   </div>
 
-  <!-- RESULTS -->
-  <div id="searchResults"
-       class="search-results"></div>
+  <!-- SEARCH RESULTS -->
+  <div id="searchResults" class="search-results"></div>
 
   <!-- SELECTED MEMBER -->
-  <div id="selectedMember"
-       class="selected-box">
-
+  <div id="selectedMember" class="selected-box">
     No member selected
-
   </div>
 
   <!-- TRANSACTION FORM -->
   <div class="form-box">
 
-    <!-- TYPE -->
-    <select id="transactionType"
-            class="input">
-
-      <option value="">
-        Select Transaction Type
-      </option>
-
-      <option value="saving">
-        Saving Deposit
-      </option>
-
-      <option value="repayment">
-        Loan Repayment
-      </option>
-
+    <select id="transactionType" class="input">
+      <option value="saving">Saving Deposit</option>
+      <option value="repayment">Loan Repayment</option>
     </select>
 
-    <!-- AMOUNT -->
-    <input id="amount"
-           class="input"
-           type="number"
-           placeholder="Amount">
+    <input
+      type="number"
+      id="amount"
+      class="input"
+      placeholder="Amount"
+    >
 
-    <!-- BUTTON -->
-    <button class="btn success"
-            onclick="processTransaction()">
-
-      Process Transaction
-
+    <button class="btn success" onclick="submitTransaction()">
+      Submit Transaction
     </button>
 
   </div>
 
-  <!-- TABLE -->
+  <!-- TRANSACTION LEDGER -->
+  <h2 style="margin-top:30px;">Realtime Ledger</h2>
+
   <table class="table">
 
     <thead>
-
       <tr>
-
         <th>Member</th>
         <th>Type</th>
         <th>Amount</th>
         <th>Date</th>
-
+        <th>Status</th>
       </tr>
-
     </thead>
 
-    <tbody id="transactionTable">
-
-    </tbody>
+    <tbody id="transactionTable"></tbody>
 
   </table>
 
 </div>
 
-<script type="module"src="js/transactions.js"></script>
+<script type="module" src="js/transactions.js"></script>
+<script type="module" src="js/auth-guard.js"></script>
+
 </body>
 </html>
