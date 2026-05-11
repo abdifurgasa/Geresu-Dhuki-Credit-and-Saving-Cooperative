@@ -15,20 +15,14 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 /* =========================
-   GLOBAL STATE
+   STATE
 ========================= */
 
-let currentRole = null;
-let uid = null;
+let role = null;
+let chartsInitialized = false;
 
 /* =========================
-   DASHBOARD LISTENERS (CLEAN CONTROL)
-========================= */
-
-let unsubscribers = [];
-
-/* =========================
-   AUTH STATE (STABLE VERSION)
+   AUTH + ROLE LOCK (FIXED)
 ========================= */
 
 onAuthStateChanged(auth, async (user) => {
@@ -38,48 +32,30 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
 
-  uid = user.uid;
+  const userRef = doc(db, "users", user.uid);
+  const snap = await getDoc(userRef);
 
-  const userSnap = await getDoc(doc(db, "users", uid));
-
-  if (!userSnap.exists()) {
-    alert("User role not found");
+  if (!snap.exists()) {
+    alert("User not found");
     return;
   }
 
-  currentRole = userSnap.data().role;
+  role = snap.data().role;
+
+  localStorage.setItem("role", role);
 
   document.getElementById("roleBox").innerText =
-    currentRole === "admin" ? "👑 Admin" : "👤 Member";
+    role === "admin" ? "👑 Admin" : "👤 Member";
 
-  if (currentRole === "admin") {
+  if (role === "admin") {
     loadAdminDashboard();
   } else {
-    loadMemberDashboard(uid);
-    hideAdminMenus();
+    loadMemberDashboard(user.uid);
+
+    document.querySelectorAll(".admin-only")
+      .forEach(el => el.style.display = "none");
   }
-
-  startSessionTimer();
 });
-
-/* =========================
-   CLEAN OLD LISTENERS
-========================= */
-
-function clearListeners() {
-  unsubscribers.forEach(unsub => unsub());
-  unsubscribers = [];
-}
-
-/* =========================
-   HIDE ADMIN UI
-========================= */
-
-function hideAdminMenus() {
-
-  document.querySelectorAll(".admin-only")
-    .forEach(el => el.style.display = "none");
-}
 
 /* =========================
    ADMIN DASHBOARD
@@ -87,47 +63,67 @@ function hideAdminMenus() {
 
 function loadAdminDashboard() {
 
-  clearListeners();
+  let stats = {
+    members: 0,
+    savings: 0,
+    loans: 0,
+    repayments: 0,
+    outstanding: 0
+  };
 
   /* MEMBERS */
-  const unsub1 = onSnapshot(collection(db, "members"), snap => {
-    document.getElementById("members").innerText = snap.size;
+  onSnapshot(collection(db, "members"), snap => {
+    stats.members = snap.size;
+    document.getElementById("members").innerText = stats.members;
   });
 
   /* SAVINGS */
-  const unsub2 = onSnapshot(collection(db, "savings"), snap => {
+  onSnapshot(collection(db, "savings"), snap => {
 
-    let total = 0;
+    stats.savings = 0;
 
-    snap.forEach(d => total += Number(d.data().amount || 0));
+    snap.forEach(d => {
+      stats.savings += Number(d.data().amount || 0);
+    });
 
     document.getElementById("savings").innerText =
-      total.toLocaleString() + " ETB";
+      stats.savings.toLocaleString() + " ETB";
+
+    updateCharts(stats);
   });
 
   /* LOANS */
-  const unsub3 = onSnapshot(collection(db, "loans"), snap => {
+  onSnapshot(collection(db, "loans"), snap => {
 
-    let total = 0;
+    stats.loans = 0;
+    stats.outstanding = 0;
 
-    snap.forEach(d => total += Number(d.data().totalAmount || 0));
+    snap.forEach(d => {
+      const l = d.data();
+      stats.loans += Number(l.totalAmount || 0);
+      stats.outstanding += Number(l.remaining || 0);
+    });
 
     document.getElementById("loans").innerText =
-      total.toLocaleString() + " ETB";
+      stats.loans.toLocaleString() + " ETB";
+
+    updateCharts(stats);
   });
 
   /* REPAYMENTS */
-  const unsub4 = onSnapshot(collection(db, "repayments"), snap => {
+  onSnapshot(collection(db, "repayments"), snap => {
 
-    let total = 0;
+    stats.repayments = 0;
 
-    snap.forEach(d => total += Number(d.data().amount || 0));
+    snap.forEach(d => {
+      stats.repayments += Number(d.data().amount || 0);
+    });
 
     document.getElementById("profit").innerText =
-      total.toLocaleString() + " ETB";
-  });
+      stats.repayments.toLocaleString() + " ETB";
 
-  unsubscribers.push(unsub1, unsub2, unsub3, unsub4);
+    updateCharts(stats);
+  });
 }
 
 /* =========================
@@ -136,14 +132,10 @@ function loadAdminDashboard() {
 
 function loadMemberDashboard(uid) {
 
-  clearListeners();
-
-  const unsub1 = onSnapshot(
+  onSnapshot(
     query(collection(db, "savings"), where("memberId", "==", uid)),
     snap => {
-
       let total = 0;
-
       snap.forEach(d => total += Number(d.data().amount || 0));
 
       document.getElementById("savings").innerText =
@@ -151,12 +143,10 @@ function loadMemberDashboard(uid) {
     }
   );
 
-  const unsub2 = onSnapshot(
+  onSnapshot(
     query(collection(db, "loans"), where("memberId", "==", uid)),
     snap => {
-
       let total = 0;
-
       snap.forEach(d => total += Number(d.data().totalAmount || 0));
 
       document.getElementById("loans").innerText =
@@ -164,20 +154,107 @@ function loadMemberDashboard(uid) {
     }
   );
 
-  const unsub3 = onSnapshot(
+  onSnapshot(
     query(collection(db, "repayments"), where("memberId", "==", uid)),
     snap => {
-
       let total = 0;
-
       snap.forEach(d => total += Number(d.data().amount || 0));
 
       document.getElementById("profit").innerText =
         total.toLocaleString() + " ETB";
     }
   );
+}
 
-  unsubscribers.push(unsub1, unsub2, unsub3);
+/* =========================
+   FINANCE RISK ENGINE
+========================= */
+
+function calculateRisk(loans, outstanding) {
+
+  if (loans === 0) return 0;
+
+  return (outstanding / loans) * 100;
+}
+
+/* =========================
+   CHART SYSTEM (ADVANCED)
+========================= */
+
+let financeChart;
+let repaymentChart;
+
+/* =========================
+   UPDATE CHARTS
+========================= */
+
+function updateCharts(stats) {
+
+  if (!chartsInitialized) {
+    initCharts();
+    chartsInitialized = true;
+  }
+
+  const risk = calculateRisk(stats.loans, stats.outstanding);
+
+  /* UPDATE MAIN CHART */
+  financeChart.data.datasets[0].data = [
+    stats.savings,
+    stats.loans,
+    stats.repayments
+  ];
+
+  financeChart.update();
+
+  /* UPDATE REPAYMENT CHART */
+  repaymentChart.data.datasets[0].data = [
+    stats.loans,
+    stats.repayments,
+    stats.outstanding
+  ];
+
+  repaymentChart.update();
+
+  /* OPTIONAL RISK DISPLAY */
+  const riskBox = document.getElementById("riskLevel");
+  if (riskBox) riskBox.innerText = risk.toFixed(2) + "%";
+}
+
+/* =========================
+   INIT CHARTS
+========================= */
+
+function initCharts() {
+
+  const ctx1 = document.getElementById("dashboardChart");
+  const ctx2 = document.getElementById("repaymentChart");
+
+  financeChart = new Chart(ctx1, {
+
+    type: "bar",
+
+    data: {
+      labels: ["Savings", "Loans", "Repayments"],
+
+      datasets: [{
+        label: "ETB Overview",
+        data: [0, 0, 0]
+      }]
+    }
+  });
+
+  repaymentChart = new Chart(ctx2, {
+
+    type: "doughnut",
+
+    data: {
+      labels: ["Loans", "Repayments", "Outstanding"],
+
+      datasets: [{
+        data: [0, 0, 0]
+      }]
+    }
+  });
 }
 
 /* =========================
@@ -187,35 +264,6 @@ function loadMemberDashboard(uid) {
 window.logoutUser = async function () {
 
   await signOut(auth);
-
-  clearListeners();
-
   localStorage.clear();
-
   window.location.href = "index.html";
 };
-
-/* =========================
-   SESSION TIMEOUT (SAFE VERSION)
-========================= */
-
-let sessionTimeout;
-
-function startSessionTimer() {
-
-  if (sessionTimeout) clearTimeout(sessionTimeout);
-
-  sessionTimeout = setTimeout(async () => {
-
-    alert("Session expired. Please login again.");
-
-    await signOut(auth);
-
-    clearListeners();
-
-    localStorage.clear();
-
-    window.location.href = "index.html";
-
-  }, 1000 * 60 * 30);
-          }
