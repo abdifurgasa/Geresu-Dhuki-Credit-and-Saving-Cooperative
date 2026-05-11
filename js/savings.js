@@ -1,17 +1,17 @@
-import { db, auth } from "./firebase.js";
+import { db } from "./firebase.js";
 
 import {
   collection,
   addDoc,
   getDocs,
-  query,
-  where,
   onSnapshot,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+import { deposit } from "./wallet.js";
+
 /* =========================
-   GLOBAL SELECTED MEMBER
+   GLOBAL STATE
 ========================= */
 
 let selectedMember = null;
@@ -22,42 +22,29 @@ let selectedMember = null;
 
 window.searchMembers = async function () {
 
-  const keyword =
-    document.getElementById("memberSearch")
-      .value
-      .toLowerCase()
-      .trim();
+  const keyword = document.getElementById("memberSearch")
+    .value.toLowerCase().trim();
 
-  const box =
-    document.getElementById("searchResults");
+  const box = document.getElementById("searchResults");
 
   box.innerHTML = "";
 
   if (!keyword) {
-
     alert("Enter search keyword");
     return;
   }
 
-  const snapshot =
-    await getDocs(
-      collection(db, "members")
-    );
+  const snapshot = await getDocs(collection(db, "members"));
 
   snapshot.forEach(docSnap => {
 
     const member = docSnap.data();
 
-    const text = `
-      ${member.name}
-      ${member.phone}
-      ${member.nid}
-    `.toLowerCase();
+    const text = `${member.name} ${member.phone} ${member.nid}`.toLowerCase();
 
     if (text.includes(keyword)) {
 
-      const div =
-        document.createElement("div");
+      const div = document.createElement("div");
 
       div.className = "result-item";
 
@@ -67,8 +54,7 @@ window.searchMembers = async function () {
         🆔 ${member.nid}
       `;
 
-      div.onclick = () =>
-        selectMember(docSnap.id, member);
+      div.onclick = () => selectMember(docSnap.id, member);
 
       box.appendChild(div);
     }
@@ -86,113 +72,67 @@ function selectMember(id, member) {
     ...member
   };
 
-  document.getElementById(
-    "selectedMember"
-  ).innerHTML = `
+  document.getElementById("selectedMember").innerHTML = `
     👤 ${member.name}<br>
     📱 ${member.phone}<br>
     🆔 ${member.nid}
   `;
 
-  document.getElementById(
-    "searchResults"
-  ).innerHTML = "";
+  document.getElementById("searchResults").innerHTML = "";
 }
 
 /* =========================
-   DEPOSIT MONEY
+   DEPOSIT SAVINGS
 ========================= */
 
 window.depositMoney = async function () {
 
   if (!selectedMember) {
-
     alert("Select member first");
     return;
   }
 
-  const amount =
-    Number(
-      document.getElementById("amount").value
-    );
+  const amount = Number(document.getElementById("amount").value);
 
-  if (amount <= 0) {
-
+  if (!amount || amount <= 0) {
     alert("Invalid amount");
     return;
   }
 
   /* =========================
-     SAVE TO SAVINGS
+     SAVE SAVINGS RECORD
   ========================= */
 
-  await addDoc(
-    collection(db, "savings"),
-    {
-      memberId: selectedMember.id,
-      memberName: selectedMember.name,
-      phone: selectedMember.phone,
-      amount,
-      type: "saving",
-      createdAt: serverTimestamp(),
-      date: new Date().toISOString()
-    }
-  );
+  await addDoc(collection(db, "savings"), {
+    memberId: selectedMember.id,
+    memberName: selectedMember.name,
+    phone: selectedMember.phone,
+    amount,
+    type: "saving",
+    createdAt: serverTimestamp(),
+    date: new Date().toISOString()
+  });
 
   /* =========================
-     UPDATE WALLET (OPTIONAL)
+     TRANSACTION LOG
   ========================= */
 
-  await addDoc(
-    collection(db, "transactions"),
-    {
-      memberId: selectedMember.id,
-      memberName: selectedMember.name,
-      type: "saving",
-      amount,
-      createdAt: serverTimestamp()
-    }
-  );
+  await addDoc(collection(db, "transactions"), {
+    memberId: selectedMember.id,
+    memberName: selectedMember.name,
+    type: "saving",
+    amount,
+    createdAt: serverTimestamp(),
+    date: new Date().toISOString()
+  });
+
+  /* =========================
+     WALLET UPDATE (IMPORTANT FIX)
+  ========================= */
+
+  await deposit(selectedMember.id, selectedMember.name, amount);
 
   alert("Deposit successful");
 
   document.getElementById("amount").value = "";
 };
-
-/* =========================
-   REALTIME SAVINGS TABLE
-========================= */
-
-function loadSavingsTable() {
-
-  const table =
-    document.getElementById("savingsTable");
-
-  onSnapshot(
-    collection(db, "savings"),
-    (snapshot) => {
-
-      table.innerHTML = "";
-
-      snapshot.forEach(docSnap => {
-
-        const data = docSnap.data();
-
-        table.innerHTML += `
-          <tr>
-            <td>${data.memberName || ""}</td>
-            <td>${data.phone || ""}</td>
-            <td>${data.amount} ETB</td>
-            <td>${new Date(data.date).toLocaleString()}</td>
-          </tr>
-        `;
-      });
-    }
-  );
-}
-
-/* =========================
-   INIT
-========================= */
-
-loadSavingsTable();
