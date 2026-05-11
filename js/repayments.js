@@ -1,12 +1,14 @@
-import { db } from "./firebase.js";
+import { db, auth } from "./firebase.js";
 
 import {
   collection,
   getDocs,
+  query,
+  where,
   doc,
   updateDoc,
-  onSnapshot,
   addDoc,
+  onSnapshot,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -17,53 +19,47 @@ import {
 let selectedLoan = null;
 
 /* =========================
-   SEARCH LOANS
+   SEARCH ACTIVE LOANS
 ========================= */
 
 window.searchLoans = async function () {
 
-  const keyword =
-    document.getElementById("memberSearch")
-      .value
-      .toLowerCase()
-      .trim();
+  const keyword = document
+    .getElementById("memberSearch")
+    .value
+    .toLowerCase()
+    .trim();
 
-  const box =
-    document.getElementById("searchResults");
+  const box = document.getElementById("searchResults");
 
   box.innerHTML = "";
 
   if (!keyword) return;
 
-  const snapshot =
-    await getDocs(
-      collection(db, "loans")
-    );
+  const snapshot = await getDocs(collection(db, "loans"));
 
   snapshot.forEach(docSnap => {
 
-    const loan = docSnap.data();
+    const l = docSnap.data();
 
     const text = `
-      ${loan.memberName}
-      ${loan.phone || ""}
+      ${l.memberName}
+      ${l.phone}
     `.toLowerCase();
 
-    if (text.includes(keyword)) {
+    if (text.includes(keyword) && l.status === "active") {
 
-      const div =
-        document.createElement("div");
+      const div = document.createElement("div");
 
       div.className = "result-item";
 
       div.innerHTML = `
-        👤 ${loan.memberName}<br>
-        🏦 Loan: ${loan.totalAmount} ETB<br>
-        💰 Remaining: ${loan.remaining} ETB
+        👤 ${l.memberName}<br>
+        💰 Loan: ${l.totalAmount} ETB<br>
+        📱 ${l.phone}
       `;
 
-      div.onclick = () =>
-        selectLoan(docSnap.id, loan);
+      div.onclick = () => selectLoan(docSnap.id, l);
 
       box.appendChild(div);
     }
@@ -81,49 +77,62 @@ function selectLoan(id, loan) {
     ...loan
   };
 
-  document.getElementById(
-    "selectedLoan"
-  ).innerHTML = `
+  document.getElementById("selectedLoan").innerHTML = `
     👤 ${loan.memberName}<br>
-    🏦 Loan: ${loan.totalAmount} ETB<br>
-    💰 Paid: ${loan.paid || 0} ETB<br>
-    📉 Remaining: ${loan.remaining} ETB<br>
+    💰 Remaining: ${loan.remaining} ETB<br>
     📊 Status: ${loan.status}
   `;
 
-  document.getElementById(
-    "searchResults"
-  ).innerHTML = "";
+  document.getElementById("searchResults").innerHTML = "";
 }
 
 /* =========================
-   MAKE REPAYMENT
+   REPAYMENT ENGINE (WITH PENALTY)
 ========================= */
 
 window.makeRepayment = async function () {
 
   if (!selectedLoan) {
-
     alert("Select loan first");
     return;
   }
 
-  const amount =
-    Number(
-      document.getElementById("payAmount").value
-    );
+  const amount = Number(
+    document.getElementById("payAmount").value
+  );
 
   if (!amount || amount <= 0) {
-
     alert("Invalid amount");
     return;
   }
 
-  let paid =
-    Number(selectedLoan.paid || 0);
+  let now = new Date();
 
-  let remaining =
-    Number(selectedLoan.remaining || 0);
+  let dueDate = selectedLoan.schedule?.nextDueDate
+    ? new Date(selectedLoan.schedule.nextDueDate)
+    : null;
+
+  let penalty = 0;
+
+  let remaining = Number(selectedLoan.remaining);
+
+  /* =========================
+     PENALTY CALCULATION
+  ========================= */
+
+  if (dueDate && now > dueDate && remaining > 0) {
+
+    let daysLate =
+      Math.floor((now - dueDate) / (1000 * 60 * 60 * 24));
+
+    let rate = 0.02; // 2% per month equivalent
+
+    penalty = remaining * rate * (daysLate / 30);
+
+    remaining += penalty;
+  }
+
+  let paid = Number(selectedLoan.paid || 0);
 
   let newPaid = paid + amount;
 
@@ -131,91 +140,87 @@ window.makeRepayment = async function () {
 
   if (newRemaining < 0) newRemaining = 0;
 
-  let status =
-    newRemaining === 0
-      ? "completed"
-      : "active";
+  let status = newRemaining === 0 ? "completed" : "active";
 
   /* =========================
      UPDATE LOAN
   ========================= */
 
-  const loanRef =
-    doc(db, "loans", selectedLoan.id);
+  const loanRef = doc(db, "loans", selectedLoan.id);
 
   await updateDoc(loanRef, {
 
     paid: newPaid,
     remaining: newRemaining,
     status,
+
+    "schedule.lastPaymentDate": new Date().toISOString(),
+
     updatedAt: serverTimestamp()
   });
 
   /* =========================
-     SAVE REPAYMENT RECORD
+     SAVE REPAYMENT
   ========================= */
 
-  await addDoc(
-    collection(db, "repayments"),
-    {
-      loanId: selectedLoan.id,
-      memberId: selectedLoan.memberId,
-      memberName: selectedLoan.memberName,
+  await addDoc(collection(db, "repayments"), {
 
-      amount,
-      date: new Date().toISOString(),
-      createdAt: serverTimestamp()
-    }
+    loanId: selectedLoan.id,
+    memberId: selectedLoan.memberId,
+    memberName: selectedLoan.memberName,
+
+    amount,
+    penalty,
+
+    date: new Date().toISOString(),
+    createdAt: serverTimestamp()
+  });
+
+  alert(
+    penalty > 0
+      ? `Paid with penalty: ${penalty.toFixed(2)} ETB`
+      : "Payment successful"
   );
-
-  alert("Repayment successful");
 
   document.getElementById("payAmount").value = "";
 };
 
 /* =========================
-   REALTIME LOAN TABLE
+   REALTIME TABLE
 ========================= */
 
 function loadLoans() {
 
-  const table =
-    document.getElementById("loanTable");
+  const table = document.getElementById("loanTable");
 
-  onSnapshot(
-    collection(db, "loans"),
-    (snapshot) => {
+  onSnapshot(collection(db, "loans"), (snapshot) => {
 
-      table.innerHTML = "";
+    table.innerHTML = "";
 
-      snapshot.forEach(docSnap => {
+    snapshot.forEach(docSnap => {
 
-        const l = docSnap.data();
+      const l = docSnap.data();
 
-        table.innerHTML += `
-          <tr>
-            <td>${l.memberName}</td>
-            <td>${l.totalAmount} ETB</td>
-            <td>${l.paid || 0}</td>
-            <td>${l.remaining}</td>
-            <td>
-              <span class="status ${
-                l.status === "completed"
-                  ? "active"
-                  : "pending"
-              }">
-                ${l.status}
-              </span>
-            </td>
-          </tr>
-        `;
-      });
-    }
-  );
+      table.innerHTML += `
+        <tr>
+          <td>${l.memberName}</td>
+          <td>${l.principal}</td>
+          <td>${l.paid || 0}</td>
+          <td>${l.remaining}</td>
+          <td>${l.schedule?.penaltyRate || 0}%</td>
+          <td>
+            <span class="status ${
+              l.status === "active"
+                ? "pending"
+                : "active"
+            }">
+              ${l.status}
+            </span>
+          </td>
+        </tr>
+      `;
+    });
+  });
 }
-
-/* =========================
-   INIT
-========================= */
 
 loadLoans();
