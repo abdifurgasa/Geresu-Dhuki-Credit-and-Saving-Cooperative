@@ -8,74 +8,69 @@ import {
   where,
   doc,
   getDoc,
+  setDoc,
   updateDoc,
   onSnapshot,
   serverTimestamp
-
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 /* =========================
    ROLE CONTROL
 ========================= */
-
 const role = localStorage.getItem("role");
 
-if (role !== "admin" && role !== "teller") {
-  alert("Access denied");
-  window.location.href = "dashboard.html";
+if (!role) {
+  window.location.href = "index.html";
 }
 
 /* =========================
-   GLOBALS
+   GLOBAL MEMBER
 ========================= */
-
 let selectedMember = null;
 
 /* =========================
    SEARCH MEMBERS
 ========================= */
-
 window.searchMembers = async function () {
 
-  const keyword = document
-    .getElementById("memberSearch")
-    .value
-    .toLowerCase()
-    .trim();
+  const keyword = document.getElementById("memberSearch").value.toLowerCase();
 
   const resultsBox = document.getElementById("searchResults");
-
   resultsBox.innerHTML = "";
-
-  if (!keyword) {
-    alert("Enter search keyword");
-    return;
-  }
 
   const snapshot = await getDocs(collection(db, "members"));
 
   snapshot.forEach((docSnap) => {
 
-    const member = docSnap.data();
+    const m = docSnap.data();
 
-    const searchable = `
-      ${member.name}
-      ${member.phone}
-      ${member.nid}
-    `.toLowerCase();
+    const match =
+      m.name?.toLowerCase().includes(keyword) ||
+      m.phone?.includes(keyword) ||
+      m.nid?.includes(keyword);
 
-    if (searchable.includes(keyword)) {
+    if (match) {
 
       const div = document.createElement("div");
 
       div.className = "result-item";
 
       div.innerHTML = `
-        <strong>${member.name}</strong><br>
-        ${member.phone}
+        <strong>${m.name}</strong><br>
+        ${m.phone}
       `;
 
-      div.onclick = () => selectMember(docSnap.id, member);
+      div.onclick = () => {
+        selectedMember = { id: docSnap.id, ...m };
+
+        document.getElementById("selectedMember").innerHTML = `
+          👤 ${m.name}<br>
+          📱 ${m.phone}<br>
+          🆔 ${m.nid}
+        `;
+
+        resultsBox.innerHTML = "";
+      };
 
       resultsBox.appendChild(div);
     }
@@ -83,29 +78,8 @@ window.searchMembers = async function () {
 };
 
 /* =========================
-   SELECT MEMBER
+   TRANSACTION ENGINE
 ========================= */
-
-function selectMember(id, member) {
-
-  selectedMember = {
-    id,
-    ...member
-  };
-
-  document.getElementById("selectedMember").innerHTML = `
-    👤 ${member.name}<br>
-    📱 ${member.phone}<br>
-    🆔 ${member.nid}
-  `;
-
-  document.getElementById("searchResults").innerHTML = "";
-}
-
-/* =========================
-   SUBMIT TRANSACTION
-========================= */
-
 window.submitTransaction = async function () {
 
   if (!selectedMember) {
@@ -114,136 +88,91 @@ window.submitTransaction = async function () {
   }
 
   const type = document.getElementById("transactionType").value;
+  const amount = Number(document.getElementById("amount").value);
 
-  const amount = Number(
-    document.getElementById("amount").value
-  );
-
-  if (amount <= 0) {
+  if (!amount || amount <= 0) {
     alert("Invalid amount");
     return;
   }
 
-  /* =========================
-     SAVING DEPOSIT
-  ========================= */
+  const walletRef = doc(db, "wallets", selectedMember.id);
+  const walletSnap = await getDoc(walletRef);
 
+  let balance = walletSnap.exists()
+    ? Number(walletSnap.data().balance)
+    : 0;
+
+  /* =========================
+     SAVING
+  ========================= */
   if (type === "saving") {
+    balance += amount;
 
     await addDoc(collection(db, "savings"), {
-
       memberId: selectedMember.id,
-      memberName: selectedMember.name,
       amount,
-      date: new Date().toISOString(),
-      createdAt: serverTimestamp()
-
+      date: serverTimestamp()
     });
   }
 
   /* =========================
-     LOAN REPAYMENT
+     REPAYMENT
   ========================= */
-
   if (type === "repayment") {
+    balance -= amount;
 
-    const loansSnapshot = await getDocs(
-      query(
-        collection(db, "loans"),
-        where("memberId", "==", selectedMember.id),
-        where("status", "==", "active")
-      )
+    const loansQ = query(
+      collection(db, "loans"),
+      where("memberId", "==", selectedMember.id),
+      where("status", "==", "active")
     );
 
-    if (loansSnapshot.empty) {
-      alert("No active loan found");
-      return;
+    const loansSnap = await getDocs(loansQ);
+
+    if (!loansSnap.empty) {
+
+      const loanDoc = loansSnap.docs[0];
+
+      const loan = loanDoc.data();
+
+      const newPaid = (loan.paid || 0) + amount;
+      const remaining = (loan.totalAmount || loan.principal) - newPaid;
+
+      await updateDoc(doc(db, "loans", loanDoc.id), {
+        paid: newPaid,
+        remaining,
+        status: remaining <= 0 ? "completed" : "active"
+      });
     }
 
-    let loanDoc = loansSnapshot.docs[0];
-    let loan = loanDoc.data();
-
-    let paid = Number(loan.paid || 0);
-    let total = Number(loan.totalAmount || 0);
-
-    let newPaid = paid + amount;
-    let remaining = total - newPaid;
-
-    let status = remaining <= 0
-      ? "completed"
-      : "active";
-
-    await updateDoc(doc(db, "loans", loanDoc.id), {
-      paid: newPaid,
-      remaining,
-      status
-    });
-
     await addDoc(collection(db, "repayments"), {
-
-      loanId: loanDoc.id,
       memberId: selectedMember.id,
-      memberName: selectedMember.name,
       amount,
-      date: new Date().toISOString(),
-      createdAt: serverTimestamp()
-
+      date: serverTimestamp()
     });
   }
 
   /* =========================
-     CENTRAL TRANSACTION LEDGER
+     WALLET UPDATE (FIXED)
   ========================= */
+  await setDoc(walletRef, {
+    memberId: selectedMember.id,
+    balance
+  }, { merge: true });
 
+  /* =========================
+     CENTRAL LEDGER
+  ========================= */
   await addDoc(collection(db, "transactions"), {
-
     type,
     memberId: selectedMember.id,
     memberName: selectedMember.name,
     amount,
-    status: "completed",
-    createdBy: auth.currentUser?.email || "Unknown",
-    date: new Date().toISOString(),
-    createdAt: serverTimestamp()
-
+    createdBy: auth.currentUser?.email || "system",
+    date: serverTimestamp()
   });
 
-  /* =========================
-     UPDATE MEMBER WALLET
-  ========================= */
-
-  const walletRef = doc(db, "wallets", selectedMember.id);
-
-  const walletSnap = await getDoc(walletRef);
-
-  let currentBalance = 0;
-
-  if (walletSnap.exists()) {
-    currentBalance = Number(walletSnap.data().balance || 0);
-  }
-
-  let newBalance = currentBalance;
-
-  if (type === "saving") {
-    newBalance += amount;
-  }
-
-  if (type === "repayment") {
-    newBalance -= amount;
-  }
-
-  await updateDoc(walletRef, {
-    balance: newBalance
-  }).catch(async () => {
-
-    await addDoc(collection(db, "wallets"), {
-      memberId: selectedMember.id,
-      memberName: selectedMember.name,
-      balance: newBalance
-    });
-  });
-
-  alert("Transaction completed successfully");
+  alert("Transaction completed");
 
   document.getElementById("amount").value = "";
 };
@@ -251,30 +180,24 @@ window.submitTransaction = async function () {
 /* =========================
    REALTIME LEDGER
 ========================= */
-
 function loadLedger() {
 
   const table = document.getElementById("transactionTable");
 
-  onSnapshot(collection(db, "transactions"), (snapshot) => {
+  onSnapshot(collection(db, "transactions"), (snap) => {
 
     table.innerHTML = "";
 
-    snapshot.forEach((docSnap) => {
+    snap.forEach(doc => {
 
-      const tx = docSnap.data();
+      const t = doc.data();
 
       table.innerHTML += `
         <tr>
-          <td>${tx.memberName}</td>
-          <td>${tx.type}</td>
-          <td>${tx.amount} ETB</td>
-          <td>${new Date(tx.date).toLocaleString()}</td>
-          <td>
-            <span class="status active">
-              ${tx.status}
-            </span>
-          </td>
+          <td>${t.memberName}</td>
+          <td>${t.type}</td>
+          <td>${t.amount}</td>
+          <td>${t.date?.toDate ? new Date(t.date.toDate()).toLocaleString() : ""}</td>
         </tr>
       `;
     });
