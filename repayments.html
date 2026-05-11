@@ -3,6 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Loan Repayment System</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
@@ -11,14 +12,17 @@
 
 <div class="container">
 
+  <!-- PAGE TITLE -->
   <h1>💱 LOAN REPAYMENT SYSTEM</h1>
 
-  <!-- SEARCH LOAN MEMBER -->
+  <!-- =========================
+       SEARCH LOAN
+  ========================= -->
   <div class="search-container">
 
     <input id="memberSearch"
            class="input"
-           placeholder="Search member (Name / Phone / NID)">
+           placeholder="Search by Name / Phone / NID">
 
     <button class="btn primary"
             onclick="searchLoans()">
@@ -41,23 +45,28 @@
 
   </div>
 
-  <!-- REPAYMENT INPUT -->
+  <!-- =========================
+       REPAYMENT FORM
+  ========================= -->
   <div class="form-box">
 
     <input id="payAmount"
            class="input"
+           type="number"
            placeholder="Enter repayment amount">
 
     <button class="btn success"
             onclick="makeRepayment()">
 
-      Pay
+      Pay Loan
 
     </button>
 
   </div>
 
-  <!-- LOAN TABLE -->
+  <!-- =========================
+       LOAN SUMMARY TABLE
+  ========================= -->
   <table class="table">
 
     <thead>
@@ -65,7 +74,7 @@
       <tr>
 
         <th>Member</th>
-        <th>Loan</th>
+        <th>Total Loan</th>
         <th>Paid</th>
         <th>Remaining</th>
         <th>Status</th>
@@ -74,14 +83,16 @@
 
     </thead>
 
-    <tbody id="loanTable">
-
-    </tbody>
+    <tbody id="loanTable"></tbody>
 
   </table>
 
 </div>
 
-<script type="module"src="js/repayments.js"></script>
+<!-- =========================
+     SCRIPT
+========================= -->
+<script type="module" src="js/repayments.js"></script>
+
 </body>
 </html>
