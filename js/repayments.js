@@ -2,146 +2,222 @@ import { db } from "./firebase.js";
 
 import {
   collection,
-  addDoc,
+  getDocs,
   doc,
-  getDoc,
   updateDoc,
+  onSnapshot,
+  query,
+  where,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 /* =========================
-   SELECTED LOAN
+   GLOBAL SELECTED LOAN
 ========================= */
+
 let selectedLoan = null;
 
 /* =========================
    SEARCH LOANS
 ========================= */
+
 window.searchLoans = async function () {
 
-  const keyword = document.getElementById("loanSearch").value.toLowerCase();
+  const keyword =
+    document.getElementById("memberSearch")
+      .value
+      .toLowerCase()
+      .trim();
 
-  const snap = await getDocs(collection(db, "loans"));
+  const box =
+    document.getElementById("searchResults");
 
-  const results = document.getElementById("searchResults");
-  results.innerHTML = "";
+  box.innerHTML = "";
 
-  snap.forEach(docSnap => {
+  if (!keyword) return;
 
-    const l = docSnap.data();
+  const snapshot =
+    await getDocs(
+      collection(db, "loans")
+    );
 
-    if (
-      l.memberName?.toLowerCase().includes(keyword) ||
-      l.memberId?.includes(keyword)
-    ) {
+  snapshot.forEach(docSnap => {
 
-      const div = document.createElement("div");
+    const loan = docSnap.data();
+
+    const text = `
+      ${loan.memberName}
+      ${loan.phone}
+    `.toLowerCase();
+
+    if (text.includes(keyword)) {
+
+      const div =
+        document.createElement("div");
+
       div.className = "result-item";
 
-      div.innerText =
-        `${l.memberName} - Remaining: ${l.remaining} ETB`;
+      div.innerHTML = `
+        👤 ${loan.memberName}<br>
+        🏦 Loan: ${loan.totalAmount} ETB<br>
+        💰 Remaining: ${loan.remaining} ETB
+      `;
 
-      div.onclick = () => {
+      div.onclick = () =>
+        selectLoan(docSnap.id, loan);
 
-        selectedLoan = {
-          id: docSnap.id,
-          ...l
-        };
-
-        document.getElementById("selectedLoan").innerText =
-          "Selected Loan: " + l.memberName;
-
-        results.innerHTML = "";
-      };
-
-      results.appendChild(div);
+      box.appendChild(div);
     }
   });
 };
 
 /* =========================
+   SELECT LOAN
+========================= */
+
+function selectLoan(id, loan) {
+
+  selectedLoan = {
+    id,
+    ...loan
+  };
+
+  document.getElementById(
+    "selectedLoan"
+  ).innerHTML = `
+    👤 ${loan.memberName}<br>
+    🏦 Loan: ${loan.totalAmount} ETB<br>
+    💰 Paid: ${loan.paid || 0} ETB<br>
+    📉 Remaining: ${loan.remaining} ETB<br>
+    📊 Status: ${loan.status}
+  `;
+
+  document.getElementById(
+    "searchResults"
+  ).innerHTML = "";
+}
+
+/* =========================
    MAKE REPAYMENT
 ========================= */
+
 window.makeRepayment = async function () {
 
   if (!selectedLoan) {
-    alert("Select a loan first");
+
+    alert("Select loan first");
     return;
   }
 
-  const amount = Number(document.getElementById("repayAmount").value);
+  const amount =
+    Number(
+      document.getElementById("payAmount").value
+    );
 
   if (!amount || amount <= 0) {
-    alert("Invalid repayment amount");
+
+    alert("Invalid amount");
     return;
   }
 
-  try {
+  let paid =
+    Number(selectedLoan.paid || 0);
 
-    const loanRef = doc(db, "loans", selectedLoan.id);
-    const loanSnap = await getDoc(loanRef);
+  let remaining =
+    Number(selectedLoan.remaining);
 
-    if (!loanSnap.exists()) return;
+  let newPaid = paid + amount;
 
-    const loan = loanSnap.data();
+  let newRemaining = remaining - amount;
 
-    let newPaid = (loan.paid || 0) + amount;
-    let newRemaining = (loan.remaining || 0) - amount;
+  if (newRemaining < 0) newRemaining = 0;
 
-    if (newRemaining < 0) newRemaining = 0;
+  let status =
+    newRemaining === 0
+      ? "completed"
+      : "active";
 
-    let status = "active";
+  /* =========================
+     UPDATE LOAN
+  ========================= */
 
-    if (newRemaining === 0) {
-      status = "paid";
-    }
+  const loanRef =
+    doc(db, "loans", selectedLoan.id);
 
-    /* =========================
-       UPDATE LOAN
-    ========================= */
+  await updateDoc(loanRef, {
 
-    await updateDoc(loanRef, {
+    paid: newPaid,
+    remaining: newRemaining,
+    status,
 
-      paid: newPaid,
-      remaining: newRemaining,
-      status: status
+    updatedAt: serverTimestamp()
+  });
 
-    });
+  /* =========================
+     LOG REPAYMENT
+  ========================= */
 
-    /* =========================
-       REPAYMENT RECORD
-    ========================= */
-
-    await addDoc(collection(db, "repayments"), {
-
+  await addDoc(
+    collection(db, "repayments"),
+    {
       loanId: selectedLoan.id,
-      memberId: loan.memberId,
-      amount: amount,
-      date: serverTimestamp()
+      memberId: selectedLoan.memberId,
+      memberName: selectedLoan.memberName,
 
-    });
+      amount,
+      date: new Date().toISOString(),
+      createdAt: serverTimestamp()
+    }
+  );
 
-    /* =========================
-       TRANSACTION LOG
-    ========================= */
+  alert("Repayment successful");
 
-    await addDoc(collection(db, "transactions"), {
-
-      type: "repayment",
-      memberId: loan.memberId,
-      amount: amount,
-      date: serverTimestamp()
-
-    });
-
-    alert("Repayment successful");
-
-    document.getElementById("repayAmount").value = "";
-
-  } catch (err) {
-
-    console.error(err);
-    alert("Repayment failed");
-
-  }
+  document.getElementById("payAmount").value = "";
 };
+
+/* =========================
+   REALTIME LOAN TABLE
+========================= */
+
+function loadLoans() {
+
+  const table =
+    document.getElementById("loanTable");
+
+  onSnapshot(
+    collection(db, "loans"),
+    (snapshot) => {
+
+      table.innerHTML = "";
+
+      snapshot.forEach(docSnap => {
+
+        const l = docSnap.data();
+
+        table.innerHTML += `
+          <tr>
+            <td>${l.memberName}</td>
+            <td>${l.totalAmount} ETB</td>
+            <td>${l.paid || 0}</td>
+            <td>${l.remaining}</td>
+            <td>
+              <span class="status ${
+                l.status === "completed"
+                  ? "active"
+                  : "pending"
+              }">
+                ${l.status}
+              </span>
+            </td>
+          </tr>
+        `;
+      });
+    }
+  );
+}
+
+/* =========================
+   INIT
+========================= */
+
+loadLoans();
