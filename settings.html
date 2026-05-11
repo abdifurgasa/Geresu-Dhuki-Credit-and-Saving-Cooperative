@@ -2,80 +2,62 @@
 <html lang="en">
 
 <head>
-
   <meta charset="UTF-8">
-
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1.0">
-
-  <title>System Settings</title>
-
-  <link rel="stylesheet"
-        href="css/style.css">
-
+  <title>Settings</title>
+  <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
 
 <div class="container">
 
-  <h1>⚙️ SYSTEM SETTINGS</h1>
+  <h1>⚙️ SETTINGS</h1>
 
-  <!-- SYSTEM INFO -->
-  <section class="cards">
+  <!-- USER INFO -->
+  <div class="selected-box">
 
-    <div class="card blue">
+    <h3>👤 Account Info</h3>
 
-      <h3>System Version</h3>
+    <p id="userName">Loading...</p>
+    <p id="userEmail">Loading...</p>
+    <p id="userRole">Loading...</p>
 
-      <p>v1.0 SACCO</p>
+  </div>
 
-    </div>
+  <!-- PASSWORD RESET -->
+  <div class="form-box">
 
-    <div class="card green">
+    <h3>🔐 Change Password</h3>
 
-      <h3>Database</h3>
+    <input id="newPassword"
+           type="password"
+           class="input"
+           placeholder="New Password">
 
-      <p>Firestore</p>
+    <button class="btn primary"
+            onclick="changePassword()">
 
-    </div>
+      Update Password
 
-    <div class="card orange">
+    </button>
 
-      <h3>Security Mode</h3>
+  </div>
 
-      <p>RBAC Enabled</p>
+  <!-- ACTIONS -->
+  <div style="margin-top:20px;">
 
-    </div>
+    <button class="btn danger"
+            onclick="logoutUser()">
 
-  </section>
+      Logout
 
-  <!-- ROLE SETTINGS -->
-  <h2>Role Management</h2>
+    </button>
 
-  <table class="table">
-
-    <thead>
-
-      <tr>
-
-        <th>User</th>
-        <th>Role</th>
-        <th>Action</th>
-
-      </tr>
-
-    </thead>
-
-    <tbody id="roleTable">
-
-    </tbody>
-
-  </table>
+  </div>
 
 </div>
 
-<script type="module"src="js/settings.js"></script>
+<script type="module" src="js/settings.js"></script>
 
 </body>
 </html>
