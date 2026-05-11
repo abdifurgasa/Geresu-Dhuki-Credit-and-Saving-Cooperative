@@ -7,74 +7,79 @@ import {
   onSnapshot,
   query,
   where
-
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 import {
   onAuthStateChanged,
   signOut
-
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 /* =========================
-   AUTH STATE
+   GLOBAL STATE
+========================= */
+
+let currentRole = null;
+let uid = null;
+
+/* =========================
+   DASHBOARD LISTENERS (CLEAN CONTROL)
+========================= */
+
+let unsubscribers = [];
+
+/* =========================
+   AUTH STATE (STABLE VERSION)
 ========================= */
 
 onAuthStateChanged(auth, async (user) => {
 
   if (!user) {
-
     window.location.href = "index.html";
     return;
   }
 
-  /* =========================
-     GET ROLE FROM FIRESTORE
-  ========================= */
+  uid = user.uid;
 
-  const userRef = doc(db, "users", user.uid);
-
-  const userSnap = await getDoc(userRef);
+  const userSnap = await getDoc(doc(db, "users", uid));
 
   if (!userSnap.exists()) {
-
     alert("User role not found");
     return;
   }
 
-  const userData = userSnap.data();
+  currentRole = userSnap.data().role;
 
-  const role = userData.role;
+  document.getElementById("roleBox").innerText =
+    currentRole === "admin" ? "👑 Admin" : "👤 Member";
 
-  /* SAVE */
-  localStorage.setItem("role", role);
-
-  /* ROLE DISPLAY */
-
-  const roleBox =
-    document.getElementById("roleBox");
-
-  if (role === "admin") {
-
-    roleBox.innerHTML = "👑 Admin";
-
+  if (currentRole === "admin") {
     loadAdminDashboard();
-
   } else {
-
-    roleBox.innerHTML = "👤 Member";
-
-    loadMemberDashboard(user.uid);
-
-    /* HIDE ADMIN MENUS */
-
-    document.querySelectorAll(".admin-only")
-      .forEach(el => {
-
-        el.style.display = "none";
-      });
+    loadMemberDashboard(uid);
+    hideAdminMenus();
   }
+
+  startSessionTimer();
 });
+
+/* =========================
+   CLEAN OLD LISTENERS
+========================= */
+
+function clearListeners() {
+  unsubscribers.forEach(unsub => unsub());
+  unsubscribers = [];
+}
+
+/* =========================
+   HIDE ADMIN UI
+========================= */
+
+function hideAdminMenus() {
+
+  document.querySelectorAll(".admin-only")
+    .forEach(el => el.style.display = "none");
+}
 
 /* =========================
    ADMIN DASHBOARD
@@ -82,96 +87,47 @@ onAuthStateChanged(auth, async (user) => {
 
 function loadAdminDashboard() {
 
-  let totalMembers = 0;
-  let totalSavings = 0;
-  let totalLoans = 0;
-  let totalRepayments = 0;
+  clearListeners();
 
   /* MEMBERS */
-
-  onSnapshot(
-    collection(db, "members"),
-
-    (snapshot) => {
-
-      totalMembers = snapshot.size;
-
-      document.getElementById("members")
-        .innerText = totalMembers;
-    }
-  );
+  const unsub1 = onSnapshot(collection(db, "members"), snap => {
+    document.getElementById("members").innerText = snap.size;
+  });
 
   /* SAVINGS */
+  const unsub2 = onSnapshot(collection(db, "savings"), snap => {
 
-  onSnapshot(
-    collection(db, "savings"),
+    let total = 0;
 
-    (snapshot) => {
+    snap.forEach(d => total += Number(d.data().amount || 0));
 
-      totalSavings = 0;
-
-      snapshot.forEach(doc => {
-
-        totalSavings += Number(
-          doc.data().amount || 0
-        );
-      });
-
-      document.getElementById("savings")
-        .innerText =
-
-        totalSavings.toLocaleString()
-        + " ETB";
-    }
-  );
+    document.getElementById("savings").innerText =
+      total.toLocaleString() + " ETB";
+  });
 
   /* LOANS */
+  const unsub3 = onSnapshot(collection(db, "loans"), snap => {
 
-  onSnapshot(
-    collection(db, "loans"),
+    let total = 0;
 
-    (snapshot) => {
+    snap.forEach(d => total += Number(d.data().totalAmount || 0));
 
-      totalLoans = 0;
-
-      snapshot.forEach(doc => {
-
-        totalLoans += Number(
-          doc.data().totalAmount || 0
-        );
-      });
-
-      document.getElementById("loans")
-        .innerText =
-
-        totalLoans.toLocaleString()
-        + " ETB";
-    }
-  );
+    document.getElementById("loans").innerText =
+      total.toLocaleString() + " ETB";
+  });
 
   /* REPAYMENTS */
+  const unsub4 = onSnapshot(collection(db, "repayments"), snap => {
 
-  onSnapshot(
-    collection(db, "repayments"),
+    let total = 0;
 
-    (snapshot) => {
+    snap.forEach(d => total += Number(d.data().amount || 0));
 
-      totalRepayments = 0;
+    document.getElementById("profit").innerText =
+      total.toLocaleString() + " ETB";
+  });
 
-      snapshot.forEach(doc => {
-
-        totalRepayments += Number(
-          doc.data().amount || 0
-        );
-      });
-
-      document.getElementById("profit")
-        .innerText =
-
-        totalRepayments.toLocaleString()
-        + " ETB";
-    }
-  );
+  unsubscribers.push(unsub1, unsub2, unsub3, unsub4);
 }
 
 /* =========================
@@ -180,94 +136,48 @@ function loadAdminDashboard() {
 
 function loadMemberDashboard(uid) {
 
-  /* PRIVATE MEMBERS */
+  clearListeners();
 
-  document.getElementById("members")
-    .innerText = "Private";
-
-  /* MEMBER SAVINGS */
-
-  onSnapshot(
-
-    query(
-      collection(db, "savings"),
-      where("memberId", "==", uid)
-    ),
-
-    (snapshot) => {
+  const unsub1 = onSnapshot(
+    query(collection(db, "savings"), where("memberId", "==", uid)),
+    snap => {
 
       let total = 0;
 
-      snapshot.forEach(doc => {
+      snap.forEach(d => total += Number(d.data().amount || 0));
 
-        total += Number(
-          doc.data().amount || 0
-        );
-      });
-
-      document.getElementById("savings")
-        .innerText =
-
-        total.toLocaleString()
-        + " ETB";
+      document.getElementById("savings").innerText =
+        total.toLocaleString() + " ETB";
     }
   );
 
-  /* MEMBER LOANS */
-
-  onSnapshot(
-
-    query(
-      collection(db, "loans"),
-      where("memberId", "==", uid)
-    ),
-
-    (snapshot) => {
+  const unsub2 = onSnapshot(
+    query(collection(db, "loans"), where("memberId", "==", uid)),
+    snap => {
 
       let total = 0;
 
-      snapshot.forEach(doc => {
+      snap.forEach(d => total += Number(d.data().totalAmount || 0));
 
-        total += Number(
-          doc.data().totalAmount || 0
-        );
-      });
-
-      document.getElementById("loans")
-        .innerText =
-
-        total.toLocaleString()
-        + " ETB";
+      document.getElementById("loans").innerText =
+        total.toLocaleString() + " ETB";
     }
   );
 
-  /* MEMBER REPAYMENTS */
-
-  onSnapshot(
-
-    query(
-      collection(db, "repayments"),
-      where("memberId", "==", uid)
-    ),
-
-    (snapshot) => {
+  const unsub3 = onSnapshot(
+    query(collection(db, "repayments"), where("memberId", "==", uid)),
+    snap => {
 
       let total = 0;
 
-      snapshot.forEach(doc => {
+      snap.forEach(d => total += Number(d.data().amount || 0));
 
-        total += Number(
-          doc.data().amount || 0
-        );
-      });
-
-      document.getElementById("profit")
-        .innerText =
-
-        total.toLocaleString()
-        + " ETB";
+      document.getElementById("profit").innerText =
+        total.toLocaleString() + " ETB";
     }
   );
+
+  unsubscribers.push(unsub1, unsub2, unsub3);
 }
 
 /* =========================
@@ -278,62 +188,34 @@ window.logoutUser = async function () {
 
   await signOut(auth);
 
+  clearListeners();
+
   localStorage.clear();
 
   window.location.href = "index.html";
 };
+
 /* =========================
-   SESSION TIMEOUT
+   SESSION TIMEOUT (SAFE VERSION)
 ========================= */
 
 let sessionTimeout;
 
-/* =========================
-   RESET TIMER
-========================= */
+function startSessionTimer() {
 
-function resetSessionTimer() {
+  if (sessionTimeout) clearTimeout(sessionTimeout);
 
-  clearTimeout(sessionTimeout);
+  sessionTimeout = setTimeout(async () => {
 
-  sessionTimeout = setTimeout(
+    alert("Session expired. Please login again.");
 
-    async () => {
+    await signOut(auth);
 
-      alert(
-        "Session expired. Please login again."
-      );
+    clearListeners();
 
-      await signOut(auth);
+    localStorage.clear();
 
-      localStorage.clear();
+    window.location.href = "index.html";
 
-      window.location.href =
-        "index.html";
-
-    },
-
-    1000 * 60 * 30
-  );
-}
-
-/* =========================
-   USER ACTIVITY
-========================= */
-
-document.addEventListener(
-  "DOMContentLoaded",
-  resetSessionTimer
-);
-
-document.onmousemove =
-  resetSessionTimer;
-
-document.onkeypress =
-  resetSessionTimer;
-
-document.onclick =
-  resetSessionTimer;
-
-document.onscroll =
-  resetSessionTimer;
+  }, 1000 * 60 * 30);
+          }
