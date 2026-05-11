@@ -1,120 +1,80 @@
 import { db, auth } from "./firebase.js";
 
 import {
+  doc,
+  getDoc,
   collection,
   onSnapshot,
   query,
   where
+
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 import {
-  signOut,
-  onAuthStateChanged
+  onAuthStateChanged,
+  signOut
+
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 /* =========================
-   GLOBALS
-========================= */
-
-let savingsChart;
-let repaymentChart;
-
-const sidebar =
-  document.getElementById("sidebar");
-
-/* =========================
-   AUTH GUARD
+   AUTH STATE
 ========================= */
 
 onAuthStateChanged(auth, async (user) => {
 
   if (!user) {
 
-    window.location.href =
-      "index.html";
-
+    window.location.href = "index.html";
     return;
   }
 
-  loadDashboard(user);
-});
-
-/* =========================
-   LOAD DASHBOARD
-========================= */
-
-async function loadDashboard(user) {
-
-  const role =
-    localStorage.getItem("role");
-
   /* =========================
-     ROLE DISPLAY
+     GET ROLE FROM FIRESTORE
   ========================= */
+
+  const userRef = doc(db, "users", user.uid);
+
+  const userSnap = await getDoc(userRef);
+
+  if (!userSnap.exists()) {
+
+    alert("User role not found");
+    return;
+  }
+
+  const userData = userSnap.data();
+
+  const role = userData.role;
+
+  /* SAVE */
+  localStorage.setItem("role", role);
+
+  /* ROLE DISPLAY */
 
   const roleBox =
     document.getElementById("roleBox");
 
-  if (roleBox) {
+  if (role === "admin") {
 
-    if (role === "admin") {
+    roleBox.innerHTML = "👑 Admin";
 
-      roleBox.innerHTML =
-        "👑 Admin";
+    loadAdminDashboard();
 
-    } else {
+  } else {
 
-      roleBox.innerHTML =
-        "👤 Member";
-    }
-  }
+    roleBox.innerHTML = "👤 Member";
 
-  /* =========================
-     ADMIN CONTROL
-  ========================= */
+    loadMemberDashboard(user.uid);
 
-  if (role !== "admin") {
+    /* HIDE ADMIN MENUS */
 
-    document
-      .querySelectorAll(".admin-only")
+    document.querySelectorAll(".admin-only")
       .forEach(el => {
 
         el.style.display = "none";
       });
   }
-
-  /* =========================
-     LOAD DASHBOARD TYPE
-  ========================= */
-
-  if (role === "member") {
-
-    loadMemberDashboard(user.uid);
-
-  } else {
-
-    loadAdminDashboard();
-  }
-
-  /* =========================
-     ACTIVE MENU
-  ========================= */
-
-  document
-    .querySelectorAll(".nav-item")
-    .forEach(link => {
-
-      if (
-        link.href ===
-        window.location.href
-      ) {
-
-        link.classList.add(
-          "active"
-        );
-      }
-    });
-}
+});
 
 /* =========================
    ADMIN DASHBOARD
@@ -134,13 +94,10 @@ function loadAdminDashboard() {
 
     (snapshot) => {
 
-      totalMembers =
-        snapshot.size;
+      totalMembers = snapshot.size;
 
-      document.getElementById(
-        "members"
-      ).innerText =
-        totalMembers.toLocaleString();
+      document.getElementById("members")
+        .innerText = totalMembers;
     }
   );
 
@@ -160,23 +117,11 @@ function loadAdminDashboard() {
         );
       });
 
-      document.getElementById(
-        "savings"
-      ).innerText =
+      document.getElementById("savings")
+        .innerText =
 
         totalSavings.toLocaleString()
         + " ETB";
-
-      updateProfit(
-        totalLoans,
-        totalRepayments
-      );
-
-      updateCharts(
-        totalSavings,
-        totalLoans,
-        totalRepayments
-      );
     }
   );
 
@@ -196,23 +141,11 @@ function loadAdminDashboard() {
         );
       });
 
-      document.getElementById(
-        "loans"
-      ).innerText =
+      document.getElementById("loans")
+        .innerText =
 
         totalLoans.toLocaleString()
         + " ETB";
-
-      updateProfit(
-        totalLoans,
-        totalRepayments
-      );
-
-      updateCharts(
-        totalSavings,
-        totalLoans,
-        totalRepayments
-      );
     }
   );
 
@@ -232,16 +165,11 @@ function loadAdminDashboard() {
         );
       });
 
-      updateProfit(
-        totalLoans,
-        totalRepayments
-      );
+      document.getElementById("profit")
+        .innerText =
 
-      updateCharts(
-        totalSavings,
-        totalLoans,
-        totalRepayments
-      );
+        totalRepayments.toLocaleString()
+        + " ETB";
     }
   );
 }
@@ -252,13 +180,12 @@ function loadAdminDashboard() {
 
 function loadMemberDashboard(uid) {
 
-  /* MEMBERS PRIVATE */
+  /* PRIVATE MEMBERS */
 
-  document.getElementById(
-    "members"
-  ).innerText = "Private";
+  document.getElementById("members")
+    .innerText = "Private";
 
-  /* SAVINGS */
+  /* MEMBER SAVINGS */
 
   onSnapshot(
 
@@ -269,31 +196,24 @@ function loadMemberDashboard(uid) {
 
     (snapshot) => {
 
-      let mySavings = 0;
+      let total = 0;
 
       snapshot.forEach(doc => {
 
-        mySavings += Number(
+        total += Number(
           doc.data().amount || 0
         );
       });
 
-      document.getElementById(
-        "savings"
-      ).innerText =
+      document.getElementById("savings")
+        .innerText =
 
-        mySavings.toLocaleString()
+        total.toLocaleString()
         + " ETB";
-
-      updateMemberCharts(
-        mySavings,
-        0,
-        0
-      );
     }
   );
 
-  /* LOANS */
+  /* MEMBER LOANS */
 
   onSnapshot(
 
@@ -304,31 +224,24 @@ function loadMemberDashboard(uid) {
 
     (snapshot) => {
 
-      let myLoans = 0;
+      let total = 0;
 
       snapshot.forEach(doc => {
 
-        myLoans += Number(
+        total += Number(
           doc.data().totalAmount || 0
         );
       });
 
-      document.getElementById(
-        "loans"
-      ).innerText =
+      document.getElementById("loans")
+        .innerText =
 
-        myLoans.toLocaleString()
+        total.toLocaleString()
         + " ETB";
-
-      updateMemberCharts(
-        0,
-        myLoans,
-        0
-      );
     }
   );
 
-  /* REPAYMENTS */
+  /* MEMBER REPAYMENTS */
 
   onSnapshot(
 
@@ -339,266 +252,56 @@ function loadMemberDashboard(uid) {
 
     (snapshot) => {
 
-      let myRepayments = 0;
+      let total = 0;
 
       snapshot.forEach(doc => {
 
-        myRepayments += Number(
+        total += Number(
           doc.data().amount || 0
         );
       });
 
-      document.getElementById(
-        "profit"
-      ).innerText =
+      document.getElementById("profit")
+        .innerText =
 
-        myRepayments.toLocaleString()
+        total.toLocaleString()
         + " ETB";
-
-      updateMemberCharts(
-        0,
-        0,
-        myRepayments
-      );
     }
   );
 }
-
-/* =========================
-   PROFIT ENGINE
-========================= */
-
-function updateProfit(
-  loans,
-  repayments
-) {
-
-  const profit =
-    repayments - loans;
-
-  document.getElementById(
-    "profit"
-  ).innerText =
-
-    profit.toLocaleString()
-    + " ETB";
-}
-
-/* =========================
-   ADMIN CHARTS
-========================= */
-
-function updateCharts(
-  savings,
-  loans,
-  repayments
-) {
-
-  /* BAR CHART */
-
-  const ctx1 =
-    document.getElementById(
-      "dashboardChart"
-    );
-
-  if (ctx1) {
-
-    if (savingsChart) {
-      savingsChart.destroy();
-    }
-
-    savingsChart =
-      new Chart(ctx1, {
-
-        type: "bar",
-
-        data: {
-
-          labels: [
-            "Savings",
-            "Loans"
-          ],
-
-          datasets: [{
-
-            label:
-              "Financial Analytics",
-
-            data: [
-              savings,
-              loans
-            ],
-
-            borderWidth: 1
-          }]
-        },
-
-        options: {
-          responsive: true
-        }
-      });
-  }
-
-  /* DOUGHNUT */
-
-  const ctx2 =
-    document.getElementById(
-      "repaymentChart"
-    );
-
-  if (ctx2) {
-
-    if (repaymentChart) {
-      repaymentChart.destroy();
-    }
-
-    repaymentChart =
-      new Chart(ctx2, {
-
-        type: "doughnut",
-
-        data: {
-
-          labels: [
-            "Loans",
-            "Repayments"
-          ],
-
-          datasets: [{
-
-            label:
-              "Repayment Analytics",
-
-            data: [
-              loans,
-              repayments
-            ],
-
-            borderWidth: 1
-          }]
-        },
-
-        options: {
-          responsive: true
-        }
-      });
-  }
-}
-
-/* =========================
-   MEMBER CHARTS
-========================= */
-
-function updateMemberCharts(
-  savings,
-  loans,
-  repayments
-) {
-
-  const ctx =
-    document.getElementById(
-      "dashboardChart"
-    );
-
-  if (!ctx) return;
-
-  if (savingsChart) {
-    savingsChart.destroy();
-  }
-
-  savingsChart =
-    new Chart(ctx, {
-
-      type: "pie",
-
-      data: {
-
-        labels: [
-          "Savings",
-          "Loans",
-          "Repayments"
-        ],
-
-        datasets: [{
-
-          data: [
-            savings,
-            loans,
-            repayments
-          ]
-        }]
-      },
-
-      options: {
-        responsive: true
-      }
-    });
-}
-
-/* =========================
-   SIDEBAR TOGGLE
-========================= */
-
-if (
-  localStorage.getItem("sidebar")
-  === "collapsed"
-) {
-
-  sidebar.classList.add(
-    "collapsed"
-  );
-}
-
-window.toggleSidebar =
-function () {
-
-  sidebar.classList.toggle(
-    "collapsed"
-  );
-
-  localStorage.setItem(
-
-    "sidebar",
-
-    sidebar.classList.contains(
-      "collapsed"
-    )
-      ? "collapsed"
-      : "expanded"
-  );
-};
 
 /* =========================
    LOGOUT
 ========================= */
 
-window.logoutUser =
-async function () {
+window.logoutUser = async function () {
 
   await signOut(auth);
 
   localStorage.clear();
 
-  window.location.href =
-    "index.html";
+  window.location.href = "index.html";
 };
-
 /* =========================
    SESSION TIMEOUT
 ========================= */
 
-let timeout;
+let sessionTimeout;
 
-function resetTimeout() {
+/* =========================
+   RESET TIMER
+========================= */
 
-  clearTimeout(timeout);
+function resetSessionTimer() {
 
-  timeout = setTimeout(
+  clearTimeout(sessionTimeout);
+
+  sessionTimeout = setTimeout(
 
     async () => {
 
       alert(
-        "Session expired"
+        "Session expired. Please login again."
       );
 
       await signOut(auth);
@@ -614,11 +317,23 @@ function resetTimeout() {
   );
 }
 
-window.onload =
-  resetTimeout;
+/* =========================
+   USER ACTIVITY
+========================= */
+
+document.addEventListener(
+  "DOMContentLoaded",
+  resetSessionTimer
+);
 
 document.onmousemove =
-  resetTimeout;
+  resetSessionTimer;
 
 document.onkeypress =
-  resetTimeout;
+  resetSessionTimer;
+
+document.onclick =
+  resetSessionTimer;
+
+document.onscroll =
+  resetSessionTimer;
