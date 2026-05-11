@@ -8,67 +8,79 @@ import {
 
 import {
   doc,
-  getDoc,
-  updateDoc
+  getDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-window.login = async function(){
+/* =========================
+   LOGIN
+========================= */
+window.login = async function () {
 
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
-  try{
+  try {
 
-    const userCred = await signInWithEmailAndPassword(
-      auth,
-      email,
-      password
-    );
+    const userCred = await signInWithEmailAndPassword(auth, email, password);
 
     const uid = userCred.user.uid;
 
-    const userRef = doc(db, "users", uid);
+    const userSnap = await getDoc(doc(db, "users", uid));
 
-    const snap = await getDoc(userRef);
-
-    if(!snap.exists()){
-      alert("User role missing");
+    if (!userSnap.exists()) {
+      alert("User profile not found");
       return;
     }
 
-    const data = snap.data();
+    const userData = userSnap.data();
 
-    localStorage.setItem("role", data.role);
-    localStorage.setItem("uid", uid);
-    localStorage.setItem("name", data.fullName || "User");
+    const role = userData.role || "member";
 
-    await updateDoc(userRef, {
-      lastLogin: new Date().toISOString()
-    });
+    // STORE SESSION
+    sessionStorage.setItem("uid", uid);
+    sessionStorage.setItem("role", role);
+    sessionStorage.setItem("email", email);
 
+    // REDIRECT
     window.location.href = "dashboard.html";
 
-  }catch(err){
-
+  } catch (err) {
     console.error(err);
-    alert("Login failed");
+    alert("Login failed: wrong email or password");
   }
 };
 
-window.logoutUser = async function(){
+/* =========================
+   LOGOUT (FIXED)
+========================= */
+window.logoutUser = async function () {
 
   await signOut(auth);
 
+  sessionStorage.clear();
   localStorage.clear();
 
   window.location.href = "index.html";
 };
 
-onAuthStateChanged(auth, user => {
+/* =========================
+   AUTH GUARD (PROTECT PAGES)
+========================= */
+export function protectPage() {
 
-  const currentPage = window.location.pathname;
+  onAuthStateChanged(auth, (user) => {
 
-  if(!user && !currentPage.includes("index.html")){
-    window.location.href = "index.html";
-  }
-});
+    if (!user) {
+      window.location.href = "index.html";
+    }
+
+  });
+
+}
+
+/* =========================
+   ROLE HELPER (FIXED)
+========================= */
+export function getRole() {
+  return sessionStorage.getItem("role") || "member";
+}
