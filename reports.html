@@ -4,15 +4,17 @@
 <head>
 
   <meta charset="UTF-8">
-
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>Financial Reports</title>
 
-  <!-- CSS -->
-  <link rel="stylesheet"
-        href="css/style.css">
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- CHART LIBRARY -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- PDF EXPORT -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 </head>
 
@@ -21,87 +23,24 @@
 <!-- =========================
      SIDEBAR
 ========================= -->
-<aside class="sidebar"
-       id="sidebar">
+<aside class="sidebar" id="sidebar">
 
-  <button class="toggle-btn"
-          onclick="toggleSidebar()">
+  <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
 
-    ☰
-
-  </button>
-
-  <h2 class="logo">
-
-    🏦 SACCO
-
-  </h2>
+  <h2 class="logo">🏦 SACCO</h2>
 
   <nav class="nav">
 
-    <a href="dashboard.html"
-       class="nav-item">
+    <a href="dashboard.html" class="nav-item">📊 Dashboard</a>
+    <a href="members.html" class="nav-item">👥 Members</a>
+    <a href="savings.html" class="nav-item">💰 Savings</a>
+    <a href="loans.html" class="nav-item">🏦 Loans</a>
+    <a href="transactions.html" class="nav-item">💱 Transactions</a>
 
-      <span class="icon">📊</span>
-      <span class="text">Dashboard</span>
+    <a href="reports.html" class="nav-item active">📄 Reports</a>
 
-    </a>
-
-    <a href="members.html"
-       class="nav-item">
-
-      <span class="icon">👥</span>
-      <span class="text">Members</span>
-
-    </a>
-
-    <a href="savings.html"
-       class="nav-item">
-
-      <span class="icon">💰</span>
-      <span class="text">Savings</span>
-
-    </a>
-
-    <a href="loans.html"
-       class="nav-item">
-
-      <span class="icon">🏦</span>
-      <span class="text">Loans</span>
-
-    </a>
-
-    <a href="transactions.html"
-       class="nav-item">
-
-      <span class="icon">💱</span>
-      <span class="text">Transactions</span>
-
-    </a>
-
-    <a href="reports.html"
-       class="nav-item active">
-
-      <span class="icon">📄</span>
-      <span class="text">Reports</span>
-
-    </a>
-
-    <a href="users.html"
-       class="nav-item admin-only">
-
-      <span class="icon">👤</span>
-      <span class="text">Users</span>
-
-    </a>
-
-    <a href="settings.html"
-       class="nav-item">
-
-      <span class="icon">⚙️</span>
-      <span class="text">Settings</span>
-
-    </a>
+    <a href="users.html" class="nav-item admin-only">👤 Users</a>
+    <a href="settings.html" class="nav-item">⚙️ Settings</a>
 
   </nav>
 
@@ -115,185 +54,129 @@
   <!-- TOPBAR -->
   <div class="topbar">
 
-    <h2>
+    <h2>Financial Reports</h2>
 
-      Financial Reports
-
-    </h2>
-
-    <button class="btn danger"
-            onclick="logout()">
-
-      Logout
-
-    </button>
+    <button class="btn danger" onclick="logout()">Logout</button>
 
   </div>
 
-  <!-- PAGE TITLE -->
-  <h1>
+  <h1>📊 FINANCIAL REPORTING SYSTEM</h1>
 
-    📊 FINANCIAL REPORTING SYSTEM
-
-  </h1>
-
-  <!-- REPORT CARDS -->
+  <!-- =========================
+       KPI CARDS (MAIN)
+  ========================== -->
   <section class="cards">
 
     <div class="card blue">
-
       <h3>Total Members</h3>
-
-      <p id="totalMembers">
-
-        0
-
-      </p>
-
+      <p id="totalMembers">0</p>
     </div>
 
     <div class="card green">
-
       <h3>Total Savings</h3>
-
-      <p id="totalSavings">
-
-        0 ETB
-
-      </p>
-
+      <p id="totalSavings">0 ETB</p>
     </div>
 
     <div class="card orange">
-
       <h3>Total Loans</h3>
-
-      <p id="totalLoans">
-
-        0 ETB
-
-      </p>
-
+      <p id="totalLoans">0 ETB</p>
     </div>
 
     <div class="card purple">
-
       <h3>Total Repayments</h3>
-
-      <p id="totalRepayments">
-
-        0 ETB
-
-      </p>
-
+      <p id="totalRepayments">0 ETB</p>
     </div>
 
   </section>
 
-  <!-- EXTRA ANALYTICS -->
-  <section class="cards"
-           style="margin-top:20px;">
+  <!-- =========================
+       EXTRA FINANCIAL KPIs
+  ========================== -->
+  <section class="cards" style="margin-top:20px;">
 
     <div class="card teal">
-
       <h3>Outstanding Loans</h3>
-
-      <p id="outstandingLoans">
-
-        0 ETB
-
-      </p>
-
+      <p id="outstandingLoans">0 ETB</p>
     </div>
 
     <div class="card red">
-
       <h3>Net Balance</h3>
+      <p id="netBalance">0 ETB</p>
+    </div>
 
-      <p id="netBalance">
-
-        0 ETB
-
-      </p>
-
+    <div class="card yellow">
+      <h3>Risk Level</h3>
+      <p id="riskLevel">0%</p>
     </div>
 
   </section>
 
-  <!-- PDF EXPORT -->
+  <!-- =========================
+       CHART SECTION (ADVANCED)
+  ========================== -->
+
+  <section style="margin-top:30px;">
+
+    <h2>📈 Financial Analytics</h2>
+    <canvas id="financeChart"></canvas>
+
+  </section>
+
+  <section style="margin-top:30px;">
+
+    <h2>📊 Trend Analysis</h2>
+    <canvas id="trendChart"></canvas>
+
+  </section>
+
+  <section style="margin-top:30px;">
+
+    <h2>🥧 Portfolio Distribution</h2>
+    <canvas id="pieChart"></canvas>
+
+  </section>
+
+  <!-- =========================
+       PDF EXPORT
+  ========================== -->
   <div style="margin-top:25px;">
 
-    <button class="btn primary"
-            onclick="downloadPDF()">
-
+    <button class="btn primary" onclick="downloadPDF()">
       Export PDF
-
     </button>
 
   </div>
 
-  <!-- TABLE -->
+  <!-- =========================
+       TABLE SUMMARY
+  ========================== -->
   <div style="margin-top:30px;">
 
-    <h2>
-
-      Financial Summary
-
-    </h2>
+    <h2>Financial Summary</h2>
 
     <table class="table">
 
       <thead>
-
         <tr>
-
           <th>Category</th>
           <th>Amount</th>
-
         </tr>
-
       </thead>
 
-      <tbody id="reportTable">
-
-      </tbody>
+      <tbody id="reportTable"></tbody>
 
     </table>
-
-  </div>
-
-  <!-- CHART -->
-  <div style="margin-top:30px;">
-
-    <h2>
-
-      Financial Analytics
-
-    </h2>
-
-    <canvas id="financeChart"></canvas>
 
   </div>
 
 </main>
 
 <!-- =========================
-     LIBRARIES
+     SCRIPTS
 ========================= -->
 
-<!-- CHART -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<!-- PDF -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
-<!-- AUTH -->
-<script type="module"
-        src="js/auth.js"></script>
-  
-<!-- REPORT ENGINE -->
-<script type="module"
-        src="js/reports.js"></script>
+<script type="module" src="js/auth.js"></script>
+<script type="module" src="js/reports.js"></script>
 
 </body>
 </html>
