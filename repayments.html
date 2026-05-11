@@ -3,8 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Loan Repayment System</title>
+  <title>Repayment System</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 
@@ -12,11 +11,10 @@
 
 <div class="container">
 
-  <!-- PAGE TITLE -->
   <h1>💱 LOAN REPAYMENT SYSTEM</h1>
 
   <!-- =========================
-       SEARCH LOAN
+       SEARCH MEMBER LOAN
   ========================= -->
   <div class="search-container">
 
@@ -27,7 +25,7 @@
     <button class="btn primary"
             onclick="searchLoans()">
 
-      Search Loan
+      Search
 
     </button>
 
@@ -46,7 +44,7 @@
   </div>
 
   <!-- =========================
-       REPAYMENT FORM
+       REPAYMENT INPUT
   ========================= -->
   <div class="form-box">
 
@@ -58,27 +56,26 @@
     <button class="btn success"
             onclick="makeRepayment()">
 
-      Pay Loan
+      Pay Now
 
     </button>
 
   </div>
 
   <!-- =========================
-       LOAN SUMMARY TABLE
+       LOAN TABLE
   ========================= -->
   <table class="table">
 
     <thead>
 
       <tr>
-
         <th>Member</th>
-        <th>Total Loan</th>
+        <th>Loan</th>
         <th>Paid</th>
         <th>Remaining</th>
+        <th>Penalty</th>
         <th>Status</th>
-
       </tr>
 
     </thead>
@@ -89,9 +86,6 @@
 
 </div>
 
-<!-- =========================
-     SCRIPT
-========================= -->
 <script type="module" src="js/repayments.js"></script>
 
 </body>
