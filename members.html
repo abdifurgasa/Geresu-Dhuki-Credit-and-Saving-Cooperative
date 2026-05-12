@@ -2,19 +2,16 @@
 <html lang="en">
 
 <head>
-
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <title>Members Module</title>
 
   <link rel="stylesheet" href="css/style.css">
-
 </head>
 
 <body>
 
-<!-- ========================= SIDEBAR ========================= -->
+<!-- SIDEBAR -->
 <aside class="sidebar" id="sidebar">
 
   <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
@@ -33,19 +30,18 @@
 
 </aside>
 
-<!-- ========================= MAIN ========================= -->
+<!-- MAIN -->
 <main class="main">
 
-  <!-- TOPBAR -->
   <div class="topbar">
-
     <h2>👥 Members Management</h2>
 
-    <button class="btn add-btn" onclick="openModal()">+ Add Member</button>
-
+    <button class="btn add-btn" onclick="openModal()">
+      + Add Member
+    </button>
   </div>
 
-  <!-- ========================= CARDS ========================= -->
+  <!-- CARDS -->
   <section class="cards">
 
     <div class="card blue">
@@ -70,22 +66,16 @@
 
   </section>
 
-  <!-- ========================= SEARCH ========================= -->
+  <!-- SEARCH -->
   <div class="topbar" style="margin-top:20px;">
-
-    <input id="searchBox"
-           class="input"
-           placeholder="Search by Name / Phone / NID">
-
+    <input id="searchBox" class="input" placeholder="Search members...">
   </div>
 
-  <!-- ========================= TABLE ========================= -->
+  <!-- TABLE -->
   <table class="table">
 
     <thead>
-
       <tr>
-
         <th>Photo</th>
         <th>Name</th>
         <th>Phone</th>
@@ -95,9 +85,7 @@
         <th>Remaining</th>
         <th>Status</th>
         <th>Actions</th>
-
       </tr>
-
     </thead>
 
     <tbody id="memberTable"></tbody>
@@ -106,7 +94,7 @@
 
 </main>
 
-<!-- ========================= MODAL ========================= -->
+<!-- MODAL -->
 <div id="modal" class="modal">
 
   <div class="modal-box">
@@ -114,21 +102,15 @@
     <h2 id="formTitle">Add Member</h2>
 
     <input id="name" class="input" placeholder="Full Name">
-    <input id="phone" class="input" placeholder="Phone (9 digits)">
-    <input id="nid" class="input" placeholder="National ID (16 digits)">
+    <input id="phone" class="input" placeholder="Phone">
+    <input id="nid" class="input" placeholder="National ID">
 
-    <!-- ✅ PHOTO UPLOAD (IMPORTANT FIX) -->
-    <input id="photo" class="input" type="file" accept="image/*">
+    <input id="photo" type="file" class="input">
 
     <div style="display:flex; gap:10px; margin-top:15px;">
 
-      <button class="btn add-btn" style="flex:1;" onclick="saveMember()">
-        Save
-      </button>
-
-      <button class="btn danger" style="flex:1;" onclick="closeModal()">
-        Cancel
-      </button>
+      <button class="btn add-btn" onclick="saveMember()">Save</button>
+      <button class="btn danger" onclick="closeModal()">Cancel</button>
 
     </div>
 
@@ -136,10 +118,7 @@
 
 </div>
 
-<!-- ========================= SCRIPTS ========================= -->
-
-<script src="js/i18n.js"></script>
-
+<!-- JS -->
 <script type="module" src="js/members.js"></script>
 
 </body>
