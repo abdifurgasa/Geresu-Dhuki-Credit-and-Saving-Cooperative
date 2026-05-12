@@ -21,15 +21,12 @@ import {
 const storage = getStorage();
 
 /* =========================
-   ELEMENTS
+   STATE
 ========================= */
 const table = document.getElementById("memberTable");
 const searchBox = document.getElementById("searchBox");
 const modal = document.getElementById("modal");
 
-/* =========================
-   STATE
-========================= */
 let editId = null;
 let cache = [];
 
@@ -39,20 +36,11 @@ let cache = [];
 window.openModal = () => {
   modal.style.display = "flex";
   editId = null;
-  clearForm();
 };
 
 window.closeModal = () => {
   modal.style.display = "none";
-  clearForm();
 };
-
-function clearForm() {
-  document.getElementById("name").value = "";
-  document.getElementById("phone").value = "";
-  document.getElementById("nid").value = "";
-  document.getElementById("photo").value = "";
-}
 
 /* =========================
    PHOTO UPLOAD
@@ -64,13 +52,41 @@ async function uploadPhoto(file, id) {
 }
 
 /* =========================
+   CALCULATE FINANCE (REAL BANKING LOGIC)
+========================= */
+async function getFinance(memberId) {
+
+  let savings = 0;
+  let loans = 0;
+  let remaining = 0;
+
+  const sSnap = await getDocs(collection(db, "savings"));
+  sSnap.forEach(d => {
+    if (d.data().memberId === memberId) {
+      savings += Number(d.data().amount || 0);
+    }
+  });
+
+  const lSnap = await getDocs(collection(db, "loans"));
+  lSnap.forEach(d => {
+    const data = d.data();
+    if (data.memberId === memberId) {
+      loans += Number(data.totalAmount || 0);
+      remaining += Number(data.remaining || 0);
+    }
+  });
+
+  return { savings, loans, remaining };
+}
+
+/* =========================
    SAVE MEMBER
 ========================= */
 window.saveMember = async () => {
 
-  const name = document.getElementById("name").value;
-  const phone = document.getElementById("phone").value;
-  const nid = document.getElementById("nid").value;
+  const name = nameInput();
+  const phone = phoneInput();
+  const nid = nidInput();
   const file = document.getElementById("photo").files[0];
 
   if (!name || !phone || !nid) {
@@ -80,60 +96,53 @@ window.saveMember = async () => {
 
   let photoURL = "";
 
-  try {
-
-    if (file) {
-      photoURL = await uploadPhoto(file, editId || Date.now());
-    }
-
-    if (editId) {
-
-      await updateDoc(doc(db, "members", editId), {
-        name,
-        phone,
-        nid,
-        ...(photoURL && { photoURL })
-      });
-
-      alert("Updated successfully");
-
-    } else {
-
-      await addDoc(collection(db, "members"), {
-        name,
-        phone,
-        nid,
-        photoURL,
-        savings: 0,
-        loans: 0,
-        remaining: 0,
-        status: "Active",
-        createdAt: serverTimestamp()
-      });
-
-      alert("Saved successfully");
-    }
-
-    closeModal();
-
-  } catch (e) {
-    alert("Error saving member");
+  if (file) {
+    photoURL = await uploadPhoto(file, editId || Date.now());
   }
+
+  if (editId) {
+
+    await updateDoc(doc(db, "members", editId), {
+      name,
+      phone,
+      nid,
+      ...(photoURL && { photoURL })
+    });
+
+    alert("Updated successfully");
+
+  } else {
+
+    await addDoc(collection(db, "members"), {
+      name,
+      phone,
+      nid,
+      photoURL,
+      status: "Active",
+      createdAt: serverTimestamp()
+    });
+
+    alert("Saved successfully");
+  }
+
+  closeModal();
 };
 
 /* =========================
-   LOAD MEMBERS
+   LOAD MEMBERS (REALTIME)
 ========================= */
 function loadMembers() {
 
-  onSnapshot(collection(db, "members"), snap => {
+  onSnapshot(collection(db, "members"), async snap => {
 
     cache = [];
     table.innerHTML = "";
 
-    snap.forEach(d => {
+    for (const d of snap.docs) {
 
       const m = d.data();
+      const finance = await getFinance(d.id);
+
       cache.push({ id: d.id, ...m });
 
       table.innerHTML += `
@@ -141,8 +150,7 @@ function loadMembers() {
 
           <td>
             <img src="${m.photoURL || 'https://via.placeholder.com/40'}"
-                 width="40"
-                 height="40"
+                 width="40" height="40"
                  style="border-radius:50%">
           </td>
 
@@ -150,22 +158,20 @@ function loadMembers() {
           <td>${m.phone}</td>
           <td>${m.nid}</td>
 
-          <td>${m.savings || 0}</td>
-          <td>${m.loans || 0}</td>
-          <td>${m.remaining || 0}</td>
+          <td>${finance.savings}</td>
+          <td>${finance.loans}</td>
+          <td>${finance.remaining}</td>
 
           <td>${m.status || "Active"}</td>
 
           <td>
-
             <button onclick="editMember('${d.id}')">Edit</button>
             <button onclick="deleteMember('${d.id}')">Delete</button>
-
           </td>
 
         </tr>
       `;
-    });
+    }
   });
 }
 
@@ -173,7 +179,6 @@ function loadMembers() {
    EDIT
 ========================= */
 window.editMember = (id) => {
-
   const m = cache.find(x => x.id === id);
   if (!m) return;
 
@@ -190,9 +195,7 @@ window.editMember = (id) => {
 ========================= */
 window.deleteMember = async (id) => {
   if (!confirm("Delete member?")) return;
-
   await deleteDoc(doc(db, "members", id));
-  alert("Deleted");
 };
 
 /* =========================
@@ -208,15 +211,16 @@ searchBox.addEventListener("input", () => {
     m.name.toLowerCase().includes(val) ||
     m.phone.includes(val) ||
     m.nid.includes(val)
-  ).forEach(m => {
+  ).forEach(async m => {
+
+    const finance = await getFinance(m.id);
 
     table.innerHTML += `
       <tr>
 
         <td>
           <img src="${m.photoURL || 'https://via.placeholder.com/40'}"
-               width="40"
-               height="40"
+               width="40" height="40"
                style="border-radius:50%">
         </td>
 
@@ -224,9 +228,9 @@ searchBox.addEventListener("input", () => {
         <td>${m.phone}</td>
         <td>${m.nid}</td>
 
-        <td>${m.savings || 0}</td>
-        <td>${m.loans || 0}</td>
-        <td>${m.remaining || 0}</td>
+        <td>${finance.savings}</td>
+        <td>${finance.loans}</td>
+        <td>${finance.remaining}</td>
 
         <td>${m.status || "Active"}</td>
 
@@ -239,6 +243,21 @@ searchBox.addEventListener("input", () => {
     `;
   });
 });
+
+/* =========================
+   HELPERS
+========================= */
+function nameInput() {
+  return document.getElementById("name").value.trim();
+}
+
+function phoneInput() {
+  return document.getElementById("phone").value.trim();
+}
+
+function nidInput() {
+  return document.getElementById("nid").value.trim();
+}
 
 /* =========================
    INIT
