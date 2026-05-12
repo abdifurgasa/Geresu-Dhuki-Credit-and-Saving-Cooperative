@@ -26,85 +26,44 @@ const modal = document.getElementById("modal");
 let editId = null;
 
 /* =========================
-   OPEN MODAL
+   OPEN / CLOSE MODAL
 ========================= */
 
 window.openModal = function () {
-
   modal.style.display = "flex";
-  document.getElementById("formTitle").innerText = "Add Member";
   clearForm();
   editId = null;
 };
-
-/* =========================
-   CLOSE MODAL
-========================= */
 
 window.closeModal = function () {
-
   modal.style.display = "none";
   clearForm();
-  editId = null;
 };
 
-/* =========================
-   CLEAR FORM
-========================= */
-
 function clearForm() {
-
   document.getElementById("name").value = "";
   document.getElementById("phone").value = "";
   document.getElementById("nid").value = "";
+  document.getElementById("photo").value = "";
 }
 
 /* =========================
-   VALIDATION
+   UPLOAD PHOTO (SIMPLIFIED)
 ========================= */
 
-function validate(name, phone, nid) {
+async function uploadPhoto(file) {
 
-  if (!name || !phone || !nid) {
-    alert("All fields required");
-    return false;
-  }
+  if (!file) return "";
 
-  if (!/^[0-9]{9}$/.test(phone)) {
-    alert("Phone must be 9 digits");
-    return false;
-  }
+  // TEMP: convert to base64 (for now)
+  return new Promise(resolve => {
 
-  if (!/^[0-9]{16}$/.test(nid)) {
-    alert("NID must be 16 digits");
-    return false;
-  }
+    const reader = new FileReader();
 
-  return true;
-}
+    reader.onload = () => resolve(reader.result);
 
-/* =========================
-   DUPLICATE CHECK
-========================= */
-
-async function isDuplicate(phone, nid, ignoreId = null) {
-
-  const snap = await getDocs(collection(db, "members"));
-
-  let found = false;
-
-  snap.forEach(d => {
-
-    if (ignoreId && d.id === ignoreId) return;
-
-    const m = d.data();
-
-    if (m.phone === phone || m.nid === nid) {
-      found = true;
-    }
+    reader.readAsDataURL(file);
   });
-
-  return found;
 }
 
 /* =========================
@@ -116,125 +75,126 @@ window.saveMember = async function () {
   const name = document.getElementById("name").value.trim();
   const phone = document.getElementById("phone").value.trim();
   const nid = document.getElementById("nid").value.trim();
+  const photo = document.getElementById("photo").files[0];
 
-  if (!validate(name, phone, nid)) return;
-
-  if (await isDuplicate(phone, nid, editId)) {
-    alert("Duplicate member found");
+  if (!name || !phone || !nid) {
+    alert("Fill all fields");
     return;
   }
 
-  try {
+  const photoURL = await uploadPhoto(photo);
 
-    if (editId) {
+  if (editId) {
 
-      await updateDoc(doc(db, "members", editId), {
-        name,
-        phone,
-        nid,
-        updatedAt: serverTimestamp()
-      });
+    await updateDoc(doc(db, "members", editId), {
+      name,
+      phone,
+      nid,
+      photoURL
+    });
 
-      alert("Member updated successfully");
+    alert("Member updated");
 
-    } else {
+  } else {
 
-      await addDoc(collection(db, "members"), {
-        name,
-        phone,
-        nid,
-        status: "active",
-        verified: false,
-        createdAt: serverTimestamp()
-      });
+    await addDoc(collection(db, "members"), {
+      name,
+      phone,
+      nid,
+      photoURL,
+      status: "active",
+      createdAt: serverTimestamp(),
 
-      alert("Member added successfully");
-    }
+      totalSavings: 0,
+      totalLoans: 0,
+      remainingLoans: 0
+    });
 
-    closeModal();
-
-  } catch (err) {
-
-    console.error(err);
-    alert("Error saving member");
+    alert("Member added");
   }
+
+  closeModal();
 };
 
 /* =========================
-   LOAD MEMBERS TABLE (REALTIME FIX)
+   REAL FINANCIAL CALCULATION
+========================= */
+
+async function calculateMemberFinance(memberId) {
+
+  const savingsSnap = await getDocs(collection(db, "savings"));
+  const loansSnap = await getDocs(collection(db, "loans"));
+
+  let savings = 0;
+  let loans = 0;
+  let remaining = 0;
+
+  savingsSnap.forEach(d => {
+    const s = d.data();
+    if (s.memberId === memberId) {
+      savings += Number(s.amount || 0);
+    }
+  });
+
+  loansSnap.forEach(d => {
+    const l = d.data();
+    if (l.memberId === memberId) {
+      loans += Number(l.totalAmount || 0);
+      remaining += Number(l.remaining || 0);
+    }
+  });
+
+  return { savings, loans, remaining };
+}
+
+/* =========================
+   LOAD MEMBERS TABLE
 ========================= */
 
 function loadMembers() {
 
-  onSnapshot(collection(db, "members"), (snap) => {
+  onSnapshot(collection(db, "members"), async (snap) => {
 
     table.innerHTML = "";
 
-    snap.forEach(d => {
+    for (const d of snap.docs) {
 
       const m = d.data();
 
+      const finance = await calculateMemberFinance(d.id);
+
       table.innerHTML += `
         <tr>
-          <td>${m.name}</td>
-          <td>${m.phone}</td>
-          <td>${m.nid}</td>
-          <td>${m.status || "active"}</td>
 
           <td>
-            <button class="btn success"
-              onclick="editMember('${d.id}',
-              '${m.name}',
-              '${m.phone}',
-              '${m.nid}')">
-
-              Edit
-
-            </button>
-
-            <button class="btn danger"
-              onclick="deleteMember('${d.id}')">
-
-              Delete
-
-            </button>
+            <img src="${m.photoURL || ''}"
+                 width="40"
+                 height="40"
+                 style="border-radius:50%;object-fit:cover;">
+            ${m.name}
           </td>
+
+          <td>${m.phone}</td>
+          <td>${m.nid}</td>
+
+          <td>${finance.savings} ETB</td>
+          <td>${finance.loans} ETB</td>
+          <td>${finance.remaining} ETB</td>
+
+          <td>
+            <span class="status ${m.status}">
+              ${m.status}
+            </span>
+          </td>
+
         </tr>
       `;
-    });
+    }
   });
 }
 
 /* =========================
-   EDIT MEMBER
-========================= */
-
-window.editMember = function (id, name, phone, nid) {
-
-  editId = id;
-
-  modal.style.display = "flex";
-
-  document.getElementById("formTitle").innerText = "Edit Member";
-
-  document.getElementById("name").value = name;
-  document.getElementById("phone").value = phone;
-  document.getElementById("nid").value = nid;
-};
-
-/* =========================
-   DELETE MEMBER
-========================= */
-
-window.deleteMember = async function (id) {
-
-  if (!confirm("Delete this member?")) return;
-
-  await deleteDoc(doc(db, "members", id));
-};
-
-/* =========================
-   SEARCH (OPTIMIZED)
+   SEARCH
 ========================= */
 
 searchBox.addEventListener("input", async function () {
@@ -257,29 +217,24 @@ searchBox.addEventListener("input", async function () {
 
       table.innerHTML += `
         <tr>
-          <td>${m.name}</td>
-          <td>${m.phone}</td>
-          <td>${m.nid}</td>
-          <td>${m.status || "active"}</td>
 
           <td>
-            <button class="btn success"
-              onclick="editMember('${d.id}',
-              '${m.name}',
-              '${m.phone}',
-              '${m.nid}')">
-
-              Edit
-
-            </button>
-
-            <button class="btn danger"
-              onclick="deleteMember('${d.id}')">
-
-              Delete
-
-            </button>
+            <img src="${m.photoURL || ''}"
+                 width="40"
+                 height="40"
+                 style="border-radius:50%;">
+            ${m.name}
           </td>
+
+          <td>${m.phone}</td>
+          <td>${m.nid}</td>
+
+          <td>--</td>
+          <td>--</td>
+          <td>--</td>
+
+          <td>${m.status}</td>
+
         </tr>
       `;
     }
