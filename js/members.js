@@ -4,8 +4,8 @@ import {
   collection,
   addDoc,
   getDocs,
-  updateDoc,
   deleteDoc,
+  updateDoc,
   doc,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
@@ -19,36 +19,76 @@ import {
 
 const storage = getStorage(app);
 
-const table = document.getElementById("memberTable");
-const modal = document.getElementById("modal");
+/* =========================
+   SAFE DOM CHECK (IMPORTANT FIX)
+========================= */
+let table, modal;
 
-let editId = null;
+window.addEventListener("DOMContentLoaded", () => {
+
+  table = document.getElementById("memberTable");
+  modal = document.getElementById("modal");
+
+  if (!modal) {
+    console.error("❌ Modal not found in HTML!");
+  }
+
+  if (!table) {
+    console.error("❌ Table not found in HTML!");
+  }
+
+  loadMembers();
+});
 
 /* =========================
-   OPEN / CLOSE MODAL (FIXED)
+   OPEN MODAL (FIXED 100%)
 ========================= */
 window.openModal = function () {
+
+  if (!modal) {
+    modal = document.getElementById("modal");
+  }
+
+  if (!modal) {
+    alert("Modal missing in HTML!");
+    return;
+  }
+
   modal.style.display = "flex";
+
   clearForm();
-  editId = null;
 };
 
+/* =========================
+   CLOSE MODAL
+========================= */
 window.closeModal = function () {
+
+  if (!modal) return;
+
   modal.style.display = "none";
+
   clearForm();
 };
 
+/* =========================
+   FORM CLEAR
+========================= */
 function clearForm() {
-  document.getElementById("name").value = "";
-  document.getElementById("phone").value = "";
-  document.getElementById("nid").value = "";
-  document.getElementById("photo").value = "";
+
+  const el = (id) => document.getElementById(id);
+
+  el("name").value = "";
+  el("phone").value = "";
+  el("nid").value = "";
+  el("photo").value = "";
 }
 
 /* =========================
-   VALIDATION
+   VALIDATION (SAFE)
 ========================= */
 function validate(name, phone, nid) {
+
   if (!name || !phone || !nid) {
     alert("All fields required");
     return false;
@@ -71,13 +111,16 @@ function validate(name, phone, nid) {
    DUPLICATE CHECK
 ========================= */
 async function isDuplicate(phone, nid, ignoreId = null) {
+
   const snap = await getDocs(collection(db, "members"));
 
   let found = false;
 
   snap.forEach(d => {
-    const m = d.data();
+
     if (ignoreId && d.id === ignoreId) return;
+
+    const m = d.data();
 
     if (m.phone === phone || m.nid === nid) {
       found = true;
@@ -88,7 +131,7 @@ async function isDuplicate(phone, nid, ignoreId = null) {
 }
 
 /* =========================
-   SAVE MEMBER (FIXED)
+   SAVE MEMBER (SAFE)
 ========================= */
 window.saveMember = async function () {
 
@@ -99,12 +142,13 @@ window.saveMember = async function () {
 
   if (!validate(name, phone, nid)) return;
 
-  if (await isDuplicate(phone, nid, editId)) {
-    alert("Duplicate Phone or NID");
+  if (await isDuplicate(phone, nid)) {
+    alert("Duplicate phone or NID");
     return;
   }
 
   try {
+
     let photoURL = "";
 
     if (file) {
@@ -113,65 +157,40 @@ window.saveMember = async function () {
       photoURL = await getDownloadURL(storageRef);
     }
 
-    if (editId) {
-      await updateDoc(doc(db, "members", editId), {
-        name, phone, nid, photo: photoURL
-      });
+    await addDoc(collection(db, "members"), {
+      name,
+      phone,
+      nid,
+      photo: photoURL,
+      status: "Active",
+      createdAt: serverTimestamp()
+    });
 
-      alert("Updated Successfully");
-    } else {
-      await addDoc(collection(db, "members"), {
-        name,
-        phone,
-        nid,
-        photo: photoURL,
-        status: "Active",
-        createdAt: serverTimestamp()
-      });
-
-      alert("Member Saved Successfully");
-    }
+    alert("Member Saved Successfully");
 
     closeModal();
     loadMembers();
 
-  } catch (e) {
-    console.error(e);
+  } catch (err) {
+    console.error(err);
     alert("Error saving member");
   }
 };
 
 /* =========================
-   LOAD MEMBERS + FINANCIAL DATA
+   LOAD MEMBERS (SAFE)
 ========================= */
 async function loadMembers() {
 
+  if (!table) table = document.getElementById("memberTable");
+
   table.innerHTML = "";
 
-  const members = await getDocs(collection(db, "members"));
-  const savings = await getDocs(collection(db, "savings"));
-  const loans = await getDocs(collection(db, "loans"));
+  const snap = await getDocs(collection(db, "members"));
 
-  members.forEach(mdoc => {
+  snap.forEach(docSnap => {
 
-    const m = mdoc.data();
-
-    let totalSavings = 0;
-    let totalLoans = 0;
-    let remaining = 0;
-
-    savings.forEach(s => {
-      if (s.data().memberId === mdoc.id) {
-        totalSavings += Number(s.data().amount || 0);
-      }
-    });
-
-    loans.forEach(l => {
-      if (l.data().memberId === mdoc.id) {
-        totalLoans += Number(l.data().amount || 0);
-        remaining += Number(l.data().remaining || 0);
-      }
-    });
+    const m = docSnap.data();
 
     table.innerHTML += `
       <tr>
@@ -182,12 +201,9 @@ async function loadMembers() {
         </td>
         <td>${m.phone}</td>
         <td>${m.nid}</td>
-        <td>${totalSavings}</td>
-        <td>${totalLoans}</td>
-        <td>${remaining}</td>
-        <td>${m.status}</td>
+        <td>${m.status || "Active"}</td>
         <td>
-          <button onclick="deleteMember('${mdoc.id}')">Delete</button>
+          <button onclick="deleteMember('${docSnap.id}')">Delete</button>
         </td>
       </tr>
     `;
@@ -195,15 +211,13 @@ async function loadMembers() {
 }
 
 /* =========================
-   DELETE
+   DELETE MEMBER
 ========================= */
 window.deleteMember = async function (id) {
+
   await deleteDoc(doc(db, "members", id));
-  alert("Deleted");
+
+  alert("Deleted Successfully");
+
   loadMembers();
 };
-
-/* =========================
-   INIT
-========================= */
-loadMembers();
