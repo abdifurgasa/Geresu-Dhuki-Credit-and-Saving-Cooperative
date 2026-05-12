@@ -1,189 +1,309 @@
-import { db } from "./firebase.js";
+import { db, app } from "./firebase.js";
+
 import {
   collection,
   addDoc,
   getDocs,
-  updateDoc,
   deleteDoc,
-  doc
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  updateDoc,
+  doc,
+  onSnapshot,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 import {
   getStorage,
   ref,
   uploadBytes,
   getDownloadURL
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
-const storage = getStorage();
+/* =========================
+   STORAGE
+========================= */
+const storage = getStorage(app);
 
-let currentEditId = null;
-let uploadedImageURL = "";
+/* =========================
+   STATE
+========================= */
+let editId = null;
 
-/* ================= TOAST ================= */
-function toast(msg) {
-  const t = document.getElementById("toast");
-  t.innerText = msg;
-  t.classList.add("show");
-  setTimeout(() => t.classList.remove("show"), 2000);
-}
+let membersCache = [];
+let savingsCache = [];
 
-/* ================= MODAL ================= */
+/* =========================
+   DOM SAFE INIT
+========================= */
+let table, modal;
+
+window.addEventListener("DOMContentLoaded", () => {
+
+  table = document.getElementById("memberTable");
+  modal = document.getElementById("modal");
+
+  initRealtime();
+});
+
+/* =========================
+   OPEN MODAL
+========================= */
 window.openModal = function () {
-  document.getElementById("modal").classList.add("show");
-  document.getElementById("formTitle").innerText =
-    currentEditId ? "Edit Member" : "Add Member";
-};
 
-window.closeModal = function () {
-  document.getElementById("modal").classList.remove("show");
+  modal.style.display = "flex";
+
+  document.getElementById("formTitle").innerText = "Add Member";
+
   clearForm();
+
+  editId = null;
 };
 
+/* =========================
+   CLOSE MODAL
+========================= */
+window.closeModal = function () {
+
+  modal.style.display = "none";
+
+  clearForm();
+
+  editId = null;
+};
+
+/* =========================
+   CLEAR FORM
+========================= */
 function clearForm() {
-  currentEditId = null;
-  uploadedImageURL = "";
 
   document.getElementById("name").value = "";
   document.getElementById("phone").value = "";
   document.getElementById("nid").value = "";
-  document.getElementById("preview").src =
-    "https://via.placeholder.com/100";
+  document.getElementById("photo").value = "";
 }
 
-/* ================= IMAGE UPLOAD ================= */
-document.getElementById("photo").addEventListener("change", async (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-
-  const storageRef = ref(storage, "members/" + file.name);
-  await uploadBytes(storageRef, file);
-  uploadedImageURL = await getDownloadURL(storageRef);
-
-  document.getElementById("preview").src = uploadedImageURL;
-  toast("Image uploaded");
-});
-
-/* ================= SAVE MEMBER ================= */
-window.saveMember = async function () {
-  const name = document.getElementById("name").value;
-  const phone = document.getElementById("phone").value;
-  const nid = document.getElementById("nid").value;
+/* =========================
+   VALIDATION
+========================= */
+function validate(name, phone, nid) {
 
   if (!name || !phone || !nid) {
-    toast("Fill all fields");
+    alert("All fields required");
+    return false;
+  }
+
+  if (!/^[0-9]{9}$/.test(phone)) {
+    alert("Phone must be 9 digits");
+    return false;
+  }
+
+  if (!/^[0-9]{16}$/.test(nid)) {
+    alert("NID must be 16 digits");
+    return false;
+  }
+
+  return true;
+}
+
+/* =========================
+   DUPLICATE CHECK
+========================= */
+function isDuplicate(phone, nid) {
+
+  return membersCache.some(m =>
+    m.phone === phone || m.nid === nid
+  );
+}
+
+/* =========================
+   SAVE MEMBER
+========================= */
+window.saveMember = async function () {
+
+  const name = document.getElementById("name").value.trim();
+  const phone = document.getElementById("phone").value.trim();
+  const nid = document.getElementById("nid").value.trim();
+  const file = document.getElementById("photo").files[0];
+
+  if (!validate(name, phone, nid)) return;
+
+  if (!editId && isDuplicate(phone, nid)) {
+    alert("Duplicate Phone or NID");
     return;
   }
 
-  if (currentEditId) {
-    await updateDoc(doc(db, "members", currentEditId), {
-      name,
-      phone,
-      nid,
-      photo: uploadedImageURL
-    });
-    toast("Member updated");
-  } else {
-    await addDoc(collection(db, "members"), {
-      name,
-      phone,
-      nid,
-      photo: uploadedImageURL,
-      savings: 0,
-      loans: 0,
-      status: "Active",
-      createdAt: new Date()
-    });
-    toast("Member added");
+  try {
+
+    let photoURL = "";
+
+    if (file) {
+
+      const storageRef = ref(storage, "members/" + Date.now() + "_" + file.name);
+
+      await uploadBytes(storageRef, file);
+
+      photoURL = await getDownloadURL(storageRef);
+    }
+
+    if (editId) {
+
+      await updateDoc(doc(db, "members", editId), {
+        name,
+        phone,
+        nid,
+        ...(photoURL && { photo: photoURL })
+      });
+
+      alert("Member Updated Successfully");
+    }
+
+    else {
+
+      await addDoc(collection(db, "members"), {
+        name,
+        phone,
+        nid,
+        photo: photoURL,
+        status: "Active",
+        createdAt: serverTimestamp()
+      });
+
+      alert("Member Saved Successfully");
+    }
+
+    closeModal();
+
+  } catch (err) {
+
+    console.error(err);
+
+    alert("Error saving member");
   }
-
-  closeModal();
-  loadMembers();
-  loadCounts();
 };
 
-/* ================= EDIT ================= */
-window.openEdit = function (id, m) {
-  currentEditId = id;
+/* =========================
+   REAL-TIME SYSTEM (CORE FIX)
+========================= */
+function initRealtime() {
 
-  document.getElementById("name").value = m.name;
-  document.getElementById("phone").value = m.phone;
-  document.getElementById("nid").value = m.nid;
+  /* MEMBERS LIVE */
+  onSnapshot(collection(db, "members"), snap => {
 
-  if (m.photo) {
-    document.getElementById("preview").src = m.photo;
-    uploadedImageURL = m.photo;
-  }
+    membersCache = [];
 
-  openModal();
-};
+    snap.forEach(d => {
+      membersCache.push({ id: d.id, ...d.data() });
+    });
 
-/* ================= DELETE ================= */
-window.deleteMember = async function (id) {
-  if (!confirm("Are you sure you want to delete this member?")) return;
+    renderMembers();
+    updateCards();
+  });
 
-  await deleteDoc(doc(db, "members", id));
-  toast("Member deleted");
+  /* SAVINGS LIVE */
+  onSnapshot(collection(db, "savings"), snap => {
 
-  loadMembers();
-  loadCounts();
-};
+    savingsCache = [];
 
-/* ================= VIEW ================= */
-window.viewMember = function (m) {
-  alert(`
-Name: ${m.name}
-Phone: ${m.phone}
-NID: ${m.nid}
-Savings: ${m.savings || 0}
-Loans: ${m.loans || 0}
-  `);
-};
+    snap.forEach(d => {
+      savingsCache.push({ id: d.id, ...d.data() });
+    });
 
-/* ================= LOAD MEMBERS ================= */
-export async function loadMembers() {
-  const table = document.getElementById("memberTable");
+    renderMembers();
+    updateCards();
+  });
+}
+
+/* =========================
+   CALCULATE SAVINGS
+========================= */
+function getSavings(memberId) {
+
+  return savingsCache
+    .filter(s => s.memberId === memberId)
+    .reduce((sum, s) => sum + Number(s.amount || 0), 0);
+}
+
+/* =========================
+   RENDER TABLE
+========================= */
+function renderMembers() {
+
+  if (!table) return;
+
   table.innerHTML = "";
 
-  const snap = await getDocs(collection(db, "members"));
+  membersCache.forEach(m => {
 
-  snap.forEach((d) => {
-    const m = d.data();
+    const savings = getSavings(m.id);
 
     table.innerHTML += `
       <tr>
         <td>
-          ${m.photo ? `<img src="${m.photo}" width="40" style="border-radius:50%">` : ""}
+          <img src="${m.photo || 'https://via.placeholder.com/40'}"
+               style="width:40px;height:40px;border-radius:50%;">
           ${m.name}
         </td>
+
         <td>${m.phone}</td>
         <td>${m.nid}</td>
-        <td>${m.savings || 0}</td>
-        <td>${m.loans || 0}</td>
-        <td>${(m.savings || 0) - (m.loans || 0)}</td>
-        <td>${m.status}</td>
+
+        <td>${savings.toLocaleString()} ETB</td>
+
+        <td>${m.status || "Active"}</td>
+
         <td>
-          <button class="btn view-btn" onclick='viewMember(${JSON.stringify(m)})'>View</button>
-          <button class="btn edit-btn" onclick='openEdit("${d.id}",${JSON.stringify(m)})'>Edit</button>
-          <button class="btn delete-btn" onclick='deleteMember("${d.id}")'>Delete</button>
+          <button onclick="editMember('${m.id}')">Edit</button>
+          <button onclick="deleteMember('${m.id}')">Delete</button>
         </td>
       </tr>
     `;
   });
 }
 
-/* ================= DASHBOARD COUNTS ================= */
-export async function loadCounts() {
-  const snap = await getDocs(collection(db, "members"));
+/* =========================
+   DASHBOARD CARDS
+========================= */
+function updateCards() {
 
-  let total = 0;
-  let active = 0;
+  let totalSavings = savingsCache.reduce(
+    (sum, s) => sum + Number(s.amount || 0),
+    0
+  );
 
-  snap.forEach((d) => {
-    total++;
-    if (d.data().status === "Active") active++;
-  });
+  const el = document.getElementById("savings");
 
-  document.getElementById("memberCount").innerText = total;
-  document.getElementById("activeCount").innerText = active;
+  if (el) {
+    el.innerText = totalSavings.toLocaleString() + " ETB";
+  }
 }
+
+/* =========================
+   EDIT MEMBER
+========================= */
+window.editMember = function (id) {
+
+  const m = membersCache.find(x => x.id === id);
+
+  if (!m) return;
+
+  editId = id;
+
+  modal.style.display = "flex";
+
+  document.getElementById("formTitle").innerText = "Edit Member";
+
+  document.getElementById("name").value = m.name;
+  document.getElementById("phone").value = m.phone;
+  document.getElementById("nid").value = m.nid;
+};
+
+/* =========================
+   DELETE MEMBER
+========================= */
+window.deleteMember = async function (id) {
+
+  if (!confirm("Delete this member?")) return;
+
+  await deleteDoc(doc(db, "members", id));
+
+  alert("Deleted Successfully");
+};
