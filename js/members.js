@@ -6,12 +6,15 @@ import {
   getDocs,
   deleteDoc,
   updateDoc,
-  doc
+  doc,
+  onSnapshot,
+  serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 /* =========================
    ELEMENTS
 ========================= */
+
 const table = document.getElementById("memberTable");
 const searchBox = document.getElementById("searchBox");
 const modal = document.getElementById("modal");
@@ -19,38 +22,36 @@ const modal = document.getElementById("modal");
 /* =========================
    STATE
 ========================= */
+
 let editId = null;
 
 /* =========================
    OPEN MODAL
 ========================= */
+
 window.openModal = function () {
 
   modal.style.display = "flex";
-
-  document.getElementById("formTitle").innerText =
-    "Add Member";
-
+  document.getElementById("formTitle").innerText = "Add Member";
   clearForm();
-
   editId = null;
 };
 
 /* =========================
    CLOSE MODAL
 ========================= */
+
 window.closeModal = function () {
 
   modal.style.display = "none";
-
   clearForm();
-
   editId = null;
 };
 
 /* =========================
    CLEAR FORM
 ========================= */
+
 function clearForm() {
 
   document.getElementById("name").value = "";
@@ -61,10 +62,11 @@ function clearForm() {
 /* =========================
    VALIDATION
 ========================= */
+
 function validate(name, phone, nid) {
 
   if (!name || !phone || !nid) {
-    alert("All fields are required");
+    alert("All fields required");
     return false;
   }
 
@@ -84,6 +86,7 @@ function validate(name, phone, nid) {
 /* =========================
    DUPLICATE CHECK
 ========================= */
+
 async function isDuplicate(phone, nid, ignoreId = null) {
 
   const snap = await getDocs(collection(db, "members"));
@@ -92,9 +95,9 @@ async function isDuplicate(phone, nid, ignoreId = null) {
 
   snap.forEach(d => {
 
-    const m = d.data();
-
     if (ignoreId && d.id === ignoreId) return;
+
+    const m = d.data();
 
     if (m.phone === phone || m.nid === nid) {
       found = true;
@@ -105,26 +108,19 @@ async function isDuplicate(phone, nid, ignoreId = null) {
 }
 
 /* =========================
-   SAVE (ADD / EDIT)
+   SAVE MEMBER
 ========================= */
+
 window.saveMember = async function () {
 
-  const name =
-    document.getElementById("name").value.trim();
-
-  const phone =
-    document.getElementById("phone").value.trim();
-
-  const nid =
-    document.getElementById("nid").value.trim();
+  const name = document.getElementById("name").value.trim();
+  const phone = document.getElementById("phone").value.trim();
+  const nid = document.getElementById("nid").value.trim();
 
   if (!validate(name, phone, nid)) return;
 
-  const duplicate =
-    await isDuplicate(phone, nid, editId);
-
-  if (duplicate) {
-    alert("Member already exists (Phone or NID duplicate)");
+  if (await isDuplicate(phone, nid, editId)) {
+    alert("Duplicate member found");
     return;
   }
 
@@ -135,7 +131,8 @@ window.saveMember = async function () {
       await updateDoc(doc(db, "members", editId), {
         name,
         phone,
-        nid
+        nid,
+        updatedAt: serverTimestamp()
       });
 
       alert("Member updated successfully");
@@ -146,8 +143,9 @@ window.saveMember = async function () {
         name,
         phone,
         nid,
-        status: "Active",
-        createdAt: new Date()
+        status: "active",
+        verified: false,
+        createdAt: serverTimestamp()
       });
 
       alert("Member added successfully");
@@ -155,132 +153,35 @@ window.saveMember = async function () {
 
     closeModal();
 
-    loadMembers();
+  } catch (err) {
 
-  } catch (error) {
-
-    console.error(error);
-
+    console.error(err);
     alert("Error saving member");
   }
 };
 
 /* =========================
-   LOAD MEMBERS
+   LOAD MEMBERS TABLE (REALTIME FIX)
 ========================= */
-async function loadMembers() {
 
-  table.innerHTML = "";
+function loadMembers() {
 
-  const snap =
-    await getDocs(collection(db, "members"));
+  onSnapshot(collection(db, "members"), (snap) => {
 
-  snap.forEach(d => {
+    table.innerHTML = "";
 
-    const m = d.data();
+    snap.forEach(d => {
 
-    table.innerHTML += `
-      <tr>
-        <td>${m.name}</td>
-        <td>${m.phone}</td>
-        <td>${m.nid}</td>
-
-        <td>
-          <span class="status active">
-            ${m.status || "Active"}
-          </span>
-        </td>
-
-        <td>
-
-          <button class="btn success"
-            onclick="editMember('${d.id}',
-            '${m.name}',
-            '${m.phone}',
-            '${m.nid}')">
-
-            Edit
-
-          </button>
-
-          <button class="btn danger"
-            onclick="deleteMember('${d.id}')">
-
-            Delete
-
-          </button>
-
-        </td>
-      </tr>
-    `;
-  });
-}
-
-/* =========================
-   EDIT MEMBER
-========================= */
-window.editMember = function (id, name, phone, nid) {
-
-  editId = id;
-
-  modal.style.display = "flex";
-
-  document.getElementById("formTitle").innerText =
-    "Edit Member";
-
-  document.getElementById("name").value = name;
-  document.getElementById("phone").value = phone;
-  document.getElementById("nid").value = nid;
-};
-
-/* =========================
-   DELETE MEMBER
-========================= */
-window.deleteMember = async function (id) {
-
-  if (!confirm("Are you sure to delete this member?")) return;
-
-  await deleteDoc(doc(db, "members", id));
-
-  loadMembers();
-};
-
-/* =========================
-   SEARCH (REAL TIME)
-========================= */
-searchBox.addEventListener("input", async function () {
-
-  const value = this.value.toLowerCase();
-
-  table.innerHTML = "";
-
-  const snap =
-    await getDocs(collection(db, "members"));
-
-  snap.forEach(d => {
-
-    const m = d.data();
-
-    if (
-      m.name.toLowerCase().includes(value) ||
-      m.phone.includes(value) ||
-      m.nid.includes(value)
-    ) {
+      const m = d.data();
 
       table.innerHTML += `
         <tr>
           <td>${m.name}</td>
           <td>${m.phone}</td>
           <td>${m.nid}</td>
+          <td>${m.status || "active"}</td>
 
           <td>
-            <span class="status active">
-              ${m.status || "Active"}
-            </span>
-          </td>
-
-          <td>
-
             <button class="btn success"
               onclick="editMember('${d.id}',
               '${m.name}',
@@ -297,7 +198,87 @@ searchBox.addEventListener("input", async function () {
               Delete
 
             </button>
+          </td>
+        </tr>
+      `;
+    });
+  });
+}
 
+/* =========================
+   EDIT MEMBER
+========================= */
+
+window.editMember = function (id, name, phone, nid) {
+
+  editId = id;
+
+  modal.style.display = "flex";
+
+  document.getElementById("formTitle").innerText = "Edit Member";
+
+  document.getElementById("name").value = name;
+  document.getElementById("phone").value = phone;
+  document.getElementById("nid").value = nid;
+};
+
+/* =========================
+   DELETE MEMBER
+========================= */
+
+window.deleteMember = async function (id) {
+
+  if (!confirm("Delete this member?")) return;
+
+  await deleteDoc(doc(db, "members", id));
+};
+
+/* =========================
+   SEARCH (OPTIMIZED)
+========================= */
+
+searchBox.addEventListener("input", async function () {
+
+  const value = this.value.toLowerCase();
+
+  const snap = await getDocs(collection(db, "members"));
+
+  table.innerHTML = "";
+
+  snap.forEach(d => {
+
+    const m = d.data();
+
+    if (
+      m.name.toLowerCase().includes(value) ||
+      m.phone.includes(value) ||
+      m.nid.includes(value)
+    ) {
+
+      table.innerHTML += `
+        <tr>
+          <td>${m.name}</td>
+          <td>${m.phone}</td>
+          <td>${m.nid}</td>
+          <td>${m.status || "active"}</td>
+
+          <td>
+            <button class="btn success"
+              onclick="editMember('${d.id}',
+              '${m.name}',
+              '${m.phone}',
+              '${m.nid}')">
+
+              Edit
+
+            </button>
+
+            <button class="btn danger"
+              onclick="deleteMember('${d.id}')">
+
+              Delete
+
+            </button>
           </td>
         </tr>
       `;
@@ -308,4 +289,5 @@ searchBox.addEventListener("input", async function () {
 /* =========================
    INIT
 ========================= */
+
 loadMembers();
