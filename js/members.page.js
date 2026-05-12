@@ -1,109 +1,219 @@
-import { db } from "./firebase.js";
+import { db, storage } from "./firebase.js";
+
 import {
   collection,
-  getDocs
+  addDoc,
+  getDocs,
+  deleteDoc,
+  doc,
+  updateDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+import {
+  ref,
+  uploadBytes,
+  getDownloadURL
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+
+/* =========================
+   ELEMENTS
+========================= */
 const table = document.getElementById("memberTable");
-
-let members = [];
-let savings = [];
-let loans = [];
-let repayments = [];
+const modal = document.getElementById("modal");
+const searchBox = document.getElementById("searchBox");
 
 /* =========================
-   LOAD ALL DATA
+   STATE
 ========================= */
-
-async function loadData() {
-
-  const mSnap = await getDocs(collection(db, "members"));
-  const sSnap = await getDocs(collection(db, "savings"));
-  const lSnap = await getDocs(collection(db, "loans"));
-  const rSnap = await getDocs(collection(db, "repayments"));
-
-  members = mSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-  savings = sSnap.docs.map(d => d.data());
-  loans = lSnap.docs.map(d => d.data());
-  repayments = rSnap.docs.map(d => d.data());
-
-  renderTable();
-}
+let editId = null;
 
 /* =========================
-   CALCULATIONS
+   INIT AFTER DOM LOAD
 ========================= */
+document.addEventListener("DOMContentLoaded", () => {
 
-function getSavings(memberId) {
-  return savings
-    .filter(s => s.memberId === memberId)
-    .reduce((sum, s) => sum + Number(s.amount || 0), 0);
-}
+  // OPEN MODAL
+  document.getElementById("btnOpenModal")
+    .addEventListener("click", () => {
+      modal.classList.remove("hidden");
+      clearForm();
+      editId = null;
+    });
 
-function getLoans(memberId) {
-  return loans
-    .filter(l => l.memberId === memberId)
-    .reduce((sum, l) => sum + Number(l.amount || 0), 0);
-}
+  // CLOSE MODAL
+  document.getElementById("btnClose")
+    .addEventListener("click", () => {
+      modal.classList.add("hidden");
+    });
 
-function getRepayments(memberId) {
-  return repayments
-    .filter(r => r.memberId === memberId)
-    .reduce((sum, r) => sum + Number(r.amount || 0), 0);
-}
+  // SAVE MEMBER
+  document.getElementById("btnSave")
+    .addEventListener("click", saveMember);
 
-function getRemaining(memberId) {
+  loadMembers();
+});
 
-  const loan = getLoans(memberId);
-  const paid = getRepayments(memberId);
-
-  return loan - paid;
+/* =========================
+   CLEAR FORM
+========================= */
+function clearForm() {
+  document.getElementById("name").value = "";
+  document.getElementById("phone").value = "";
+  document.getElementById("nid").value = "";
+  document.getElementById("photo").value = "";
 }
 
 /* =========================
-   RENDER TABLE
+   VALIDATION
 ========================= */
+function validate(name, phone, nid) {
 
-function renderTable() {
+  if (!name || !phone || !nid) {
+    alert("All fields are required");
+    return false;
+  }
+
+  if (!/^[0-9]{9}$/.test(phone)) {
+    alert("Phone must be 9 digits");
+    return false;
+  }
+
+  if (!/^[0-9]{16}$/.test(nid)) {
+    alert("NID must be 16 digits");
+    return false;
+  }
+
+  return true;
+}
+
+/* =========================
+   DUPLICATE CHECK
+========================= */
+async function checkDuplicate(phone, nid, ignoreId = null) {
+
+  const snap = await getDocs(collection(db, "members"));
+
+  let exists = false;
+
+  snap.forEach(d => {
+
+    if (ignoreId && d.id === ignoreId) return;
+
+    const m = d.data();
+
+    if (m.phone === phone || m.nid === nid) {
+      exists = true;
+    }
+  });
+
+  return exists;
+}
+
+/* =========================
+   SAVE MEMBER
+========================= */
+async function saveMember() {
+
+  const name = document.getElementById("name").value.trim();
+  const phone = document.getElementById("phone").value.trim();
+  const nid = document.getElementById("nid").value.trim();
+  const photo = document.getElementById("photo").files[0];
+
+  if (!validate(name, phone, nid)) return;
+
+  const duplicate = await checkDuplicate(phone, nid, editId);
+
+  if (duplicate) {
+    alert("Phone or NID already exists");
+    return;
+  }
+
+  let photoURL = "";
+
+  try {
+
+    // ================= PHOTO UPLOAD =================
+    if (photo) {
+
+      const imgRef = ref(storage, "members/" + Date.now() + "_" + photo.name);
+
+      await uploadBytes(imgRef, photo);
+
+      photoURL = await getDownloadURL(imgRef);
+    }
+
+    // ================= CREATE =================
+    if (!editId) {
+
+      await addDoc(collection(db, "members"), {
+        name,
+        phone,
+        nid,
+        photo: photoURL,
+        status: "Active",
+        createdAt: new Date()
+      });
+
+      alert("Member Saved Successfully"); // ✅ FIXED
+    }
+
+    // ================= UPDATE =================
+    else {
+
+      await updateDoc(doc(db, "members", editId), {
+        name,
+        phone,
+        nid,
+        photo: photoURL || null
+      });
+
+      alert("Member Updated Successfully");
+    }
+
+    modal.classList.add("hidden");
+
+    loadMembers();
+
+  } catch (err) {
+
+    console.error(err);
+    alert("Error saving member");
+  }
+}
+
+/* =========================
+   LOAD MEMBERS
+========================= */
+async function loadMembers() {
 
   table.innerHTML = "";
 
-  members.forEach(m => {
+  const snap = await getDocs(collection(db, "members"));
 
-    const savingsTotal = getSavings(m.id);
-    const loansTotal = getLoans(m.id);
-    const paidTotal = getRepayments(m.id);
-    const remaining = getRemaining(m.id);
+  snap.forEach(docSnap => {
+
+    const m = docSnap.data();
 
     const row = document.createElement("tr");
 
     row.innerHTML = `
-      <td style="display:flex;align-items:center;gap:10px;">
+      <td>
         <img src="${m.photo || 'https://via.placeholder.com/40'}"
              style="width:40px;height:40px;border-radius:50%;">
-        <b>${m.name}</b>
+        ${m.name}
       </td>
 
       <td>${m.phone}</td>
       <td>${m.nid}</td>
 
-      <td>${savingsTotal.toLocaleString()} ETB</td>
-      <td>${loansTotal.toLocaleString()} ETB</td>
-      <td>${paidTotal.toLocaleString()} ETB</td>
-      <td>${remaining.toLocaleString()} ETB</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+
+      <td>${m.status || "Active"}</td>
 
       <td>
-        <span class="status ${remaining <= 0 ? "active" : "warning"}">
-          ${remaining <= 0 ? "Clear" : "Ongoing"}
-        </span>
-      </td>
-
-      <td>
-        <button class="btn success" onclick="editMember('${m.id}')">
-          Edit
-        </button>
-
-        <button class="btn danger" onclick="deleteMember('${m.id}')">
+        <button class="btn danger" data-id="${docSnap.id}">
           Delete
         </button>
       </td>
@@ -114,7 +224,18 @@ function renderTable() {
 }
 
 /* =========================
-   INIT
+   DELETE MEMBER
 ========================= */
+table.addEventListener("click", async (e) => {
 
-loadData();
+  if (e.target.dataset.id) {
+
+    const id = e.target.dataset.id;
+
+    await deleteDoc(doc(db, "members", id));
+
+    alert("Member Deleted");
+
+    loadMembers();
+  }
+});
