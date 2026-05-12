@@ -1,289 +1,149 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>Members Management</title>
 
   <link rel="stylesheet" href="css/style.css">
 
-  <style>
-    .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);justify-content:center;align-items:center;}
-    .modal.show{display:flex;}
-    .modal-box{background:#fff;padding:20px;border-radius:10px;width:380px;}
-    .input{width:100%;padding:10px;margin:5px 0;}
-    .btn{padding:10px 15px;cursor:pointer;margin:5px;border:none;border-radius:5px;}
-    .add-btn{background:green;color:white;}
-    .danger{background:red;color:white;}
-    .edit-btn{background:orange;color:white;}
-    .delete-btn{background:#c0392b;color:white;}
-    .view-btn{background:#2980b9;color:white;}
-
-    .toast{
-      position:fixed;
-      bottom:20px;
-      right:20px;
-      background:#333;
-      color:white;
-      padding:12px 18px;
-      border-radius:6px;
-      opacity:0;
-      transform:translateY(20px);
-      transition:0.3s;
-    }
-    .toast.show{opacity:1;transform:translateY(0);}
-  </style>
 </head>
 
 <body>
 
+<!-- ================= SIDEBAR ================= -->
 <aside class="sidebar" id="sidebar">
+
   <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+
   <h2 class="logo">🏦 SACCO</h2>
+
   <nav class="nav">
+
     <a href="dashboard.html" class="nav-item">📊 Dashboard</a>
     <a href="members.html" class="nav-item active">👥 Members</a>
     <a href="savings.html" class="nav-item">💰 Savings</a>
     <a href="loans.html" class="nav-item">🏦 Loans</a>
+
   </nav>
+
 </aside>
 
-<main class="main">
+<!-- ================= MAIN ================= -->
+<main class="main" id="main">
 
   <h1>👥 MEMBERS MANAGEMENT</h1>
 
+  <!-- ================= CARDS ================= -->
   <section class="cards">
-    <div class="card blue"><h3>Total Members</h3><p id="memberCount">0</p></div>
-    <div class="card green"><h3>Active</h3><p id="activeCount">0</p></div>
-    <div class="card orange"><h3>New This Month</h3><p id="newCount">0</p></div>
-    <div class="card purple"><h3>Verified</h3><p id="verifiedCount">0</p></div>
+
+    <div class="card blue">
+      <h3>Total Members</h3>
+      <p id="memberCount">0</p>
+    </div>
+
+    <div class="card green">
+      <h3>Total Savings</h3>
+      <p id="savings">0 ETB</p>
+    </div>
+
+    <div class="card orange">
+      <h3>Active Members</h3>
+      <p id="activeCount">0</p>
+    </div>
+
+    <div class="card purple">
+      <h3>Verified</h3>
+      <p id="verifiedCount">0</p>
+    </div>
+
   </section>
 
-  <div class="topbar">
-    <button class="btn add-btn" onclick="openModal()">+ Add Member</button>
-    <input id="searchBox" class="input" placeholder="Search member...">
+  <!-- ================= ACTION BAR ================= -->
+  <div class="topbar" style="margin-top:20px;">
+
+    <button class="btn add-btn" onclick="openModal()">
+      + Add Member
+    </button>
+
+    <input id="searchBox"
+           class="input"
+           placeholder="Search by name / phone / NID">
+
   </div>
 
-  <table class="table">
-    <thead>
-      <tr>
-        <th>Member</th>
-        <th>Phone</th>
-        <th>NID</th>
-        <th>Savings</th>
-        <th>Loans</th>
-        <th>Remaining</th>
-        <th>Status</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody id="memberTable"></tbody>
-  </table>
+  <!-- ================= TABLE ================= -->
+  <div style="overflow-x:auto; margin-top:20px;">
+
+    <table class="table">
+
+      <thead>
+        <tr>
+          <th>Member</th>
+          <th>Phone</th>
+          <th>NID</th>
+          <th>Total Savings</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+
+      <tbody id="memberTable"></tbody>
+
+    </table>
+
+  </div>
 
 </main>
 
+<!-- ================= MODAL ================= -->
 <div id="modal" class="modal">
+
   <div class="modal-box">
 
     <h2 id="formTitle">Add Member</h2>
 
-    <img id="preview" src="https://via.placeholder.com/100" style="width:100px;height:100px;border-radius:50%;">
+    <!-- PHOTO -->
+    <input type="file" id="photo" class="input" accept="image/*">
 
-    <input type="file" id="photo" class="input">
-
+    <!-- FORM FIELDS -->
     <input id="name" class="input" placeholder="Full Name">
-    <input id="phone" class="input" placeholder="Phone (9 digits)">
-    <input id="nid" class="input" placeholder="NID (16 digits)">
 
-    <button class="btn add-btn" onclick="saveMember()">Save Member</button>
-    <button class="btn danger" onclick="closeModal()">Close</button>
+    <input id="phone" class="input" placeholder="Phone (9 digits)" maxlength="9">
+
+    <input id="nid" class="input" placeholder="National ID (16 digits)" maxlength="16">
+
+    <!-- BUTTONS -->
+    <div style="display:flex; gap:10px; margin-top:15px;">
+
+      <button class="btn add-btn" onclick="saveMember()">
+        Save Member
+      </button>
+
+      <button class="btn danger" onclick="closeModal()">
+        Cancel
+      </button>
+
+    </div>
 
   </div>
+
 </div>
 
-<div id="toast" class="toast"></div>
+<!-- ================= JS ================= -->
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc, query, where } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+<script src="js/i18n.js"></script>
 
-/* =========================
-   FIREBASE CONFIG
-========================= */
-const firebaseConfig = {
-  apiKey: "AIzaSyCS-3e_WqGHNycDgvlXVkInaynTnvnplYE",
-  authDomain: "geresu-dhuki-sacco.firebaseapp.com",
-  projectId: "geresu-dhuki-sacco",
-  storageBucket: "geresu-dhuki-sacco.appspot.com",
-  messagingSenderId: "944934938425",
-  appId: "1:944934938425:web:caef23f2f3bb34c843eae8"
-};
+<script type="module" src="js/members.js"></script>
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const storage = getStorage(app);
-
-let currentEditId = null;
-let uploadedImageURL = "";
-
-function toast(msg){
-  const t = document.getElementById("toast");
-  t.innerText = msg;
-  t.classList.add("show");
-  setTimeout(()=>t.classList.remove("show"),2000);
+<!-- sidebar toggle -->
+<script>
+function toggleSidebar() {
+  document.getElementById("sidebar").classList.toggle("collapsed");
 }
-
-function success(msg){
-  toast("SUCCESS: " + msg);
-  alert("SUCCESS: " + msg);
-}
-
-window.openModal = function(){
-  document.getElementById("modal").classList.add("show");
-};
-
-window.closeModal = function(){
-  document.getElementById("modal").classList.remove("show");
-  clearForm();
-};
-
-function clearForm(){
-  currentEditId = null;
-  uploadedImageURL = "";
-  document.getElementById("name").value="";
-  document.getElementById("phone").value="";
-  document.getElementById("nid").value="";
-  document.getElementById("preview").src="https://via.placeholder.com/100";
-}
-
-window.onload = () => {
-  document.getElementById("photo").addEventListener("change", async (e)=>{
-    const file = e.target.files[0];
-    if(!file) return;
-
-    const storageRef = ref(storage, "members/" + file.name);
-    await uploadBytes(storageRef, file);
-    uploadedImageURL = await getDownloadURL(storageRef);
-
-    document.getElementById("preview").src = uploadedImageURL;
-    toast("Image uploaded");
-  });
-
-  document.getElementById("searchBox").addEventListener("input", function(){
-    const val = this.value.toLowerCase();
-    document.querySelectorAll("#memberTable tr").forEach(row=>{
-      row.style.display = row.innerText.toLowerCase().includes(val) ? "" : "none";
-    });
-  });
-};
-
-async function isDuplicate(phone,nid){
-  const q1=query(collection(db,"members"),where("phone","==",phone));
-  const q2=query(collection(db,"members"),where("nid","==",nid));
-
-  const [s1,s2]=await Promise.all([getDocs(q1),getDocs(q2)]);
-  return (!s1.empty || !s2.empty);
-}
-
-window.saveMember = async function(){
-  const name=document.getElementById("name").value;
-  const phone=document.getElementById("phone").value;
-  const nid=document.getElementById("nid").value;
-
-  if(phone.length!==9){toast("Phone must be 9 digits");return;}
-  if(nid.length!==16){toast("NID must be 16 digits");return;}
-  if(!name||!phone||!nid){toast("Fill all fields");return;}
-
-  if(!currentEditId){
-    if(await isDuplicate(phone,nid)){
-      toast("Duplicate phone or NID");
-      return;
-    }
-  }
-
-  if(currentEditId){
-    await updateDoc(doc(db,"members",currentEditId),{
-      name,phone,nid,photo:uploadedImageURL
-    });
-    success("Member updated");
-  } else {
-    await addDoc(collection(db,"members"),{
-      name,phone,nid,
-      photo:uploadedImageURL,
-      savings:0,loans:0,status:"Active"
-    });
-    success("Member added");
-  }
-
-  closeModal();
-  loadMembers();
-  loadCounts();
-};
-
-window.deleteMember = async function(id){
-  if(!confirm("Delete this member?")) return;
-  await deleteDoc(doc(db,"members",id));
-  success("Member deleted");
-  loadMembers();
-  loadCounts();
-};
-
-window.viewMember = function(m){
-  alert(`Name: ${m.name}\nPhone: ${m.phone}\nNID: ${m.nid}`);
-};
-
-window.openEdit = function(id,m){
-  currentEditId=id;
-  document.getElementById("name").value=m.name;
-  document.getElementById("phone").value=m.phone;
-  document.getElementById("nid").value=m.nid;
-  if(m.photo) document.getElementById("preview").src=m.photo;
-  openModal();
-};
-
-async function loadMembers(){
-  const table=document.getElementById("memberTable");
-  table.innerHTML="";
-  const snap=await getDocs(collection(db,"members"));
-
-  snap.forEach(d=>{
-    const m=d.data();
-    table.innerHTML+=`
-      <tr>
-        <td>${m.photo?`<img src='${m.photo}' width='40' style='border-radius:50%'>`:""} ${m.name}</td>
-        <td>${m.phone}</td>
-        <td>${m.nid}</td>
-        <td>${m.savings||0}</td>
-        <td>${m.loans||0}</td>
-        <td>${(m.savings||0)-(m.loans||0)}</td>
-        <td>${m.status}</td>
-        <td>
-          <button class='btn view-btn' onclick='viewMember(${JSON.stringify(m)})'>View</button>
-          <button class='btn edit-btn' onclick='openEdit("${d.id}",${JSON.stringify(m)})'>Edit</button>
-          <button class='btn delete-btn' onclick='deleteMember("${d.id}")'>Delete</button>
-        </td>
-      </tr>
-    `;
-  });
-}
-
-async function loadCounts(){
-  const snap=await getDocs(collection(db,"members"));
-  let total=0,active=0;
-
-  snap.forEach(d=>{
-    total++;
-    if(d.data().status=="Active") active++;
-  });
-
-  document.getElementById("memberCount").innerText=total;
-  document.getElementById("activeCount").innerText=active;
-}
-
-loadMembers();
-loadCounts();
-
 </script>
 
 </body>
