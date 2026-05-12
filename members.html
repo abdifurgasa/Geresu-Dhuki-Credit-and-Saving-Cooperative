@@ -134,6 +134,11 @@ function toast(msg){
   setTimeout(()=>t.classList.remove("show"),2000);
 }
 
+function success(msg){
+  toast("SUCCESS: " + msg);
+  alert("SUCCESS: " + msg);
+}
+
 window.openModal = function(){
   document.getElementById("modal").classList.add("show");
 };
@@ -152,7 +157,6 @@ function clearForm(){
   document.getElementById("preview").src="https://via.placeholder.com/100";
 }
 
-// IMAGE UPLOAD
 window.onload = () => {
   document.getElementById("photo").addEventListener("change", async (e)=>{
     const file = e.target.files[0];
@@ -174,50 +178,59 @@ window.onload = () => {
   });
 };
 
-// VALIDATION + DUPLICATE CHECK
-async function isDuplicate(phone, nid){
-  const q1 = query(collection(db,"members"), where("phone","==",phone));
-  const q2 = query(collection(db,"members"), where("nid","==",nid));
+async function isDuplicate(phone,nid){
+  const q1=query(collection(db,"members"),where("phone","==",phone));
+  const q2=query(collection(db,"members"),where("nid","==",nid));
 
-  const [snap1, snap2] = await Promise.all([getDocs(q1), getDocs(q2)]);
-
-  return (!snap1.empty || !snap2.empty);
+  const [s1,s2]=await Promise.all([getDocs(q1),getDocs(q2)]);
+  return (!s1.empty || !s2.empty);
 }
 
 window.saveMember = async function(){
-  const name = document.getElementById("name").value;
-  const phone = document.getElementById("phone").value;
-  const nid = document.getElementById("nid").value;
+  const name=document.getElementById("name").value;
+  const phone=document.getElementById("phone").value;
+  const nid=document.getElementById("nid").value;
 
-  // LENGTH VALIDATION
-  if(phone.length !== 9){ toast("Phone must be 9 digits"); return; }
-  if(nid.length !== 16){ toast("NID must be 16 digits"); return; }
+  if(phone.length!==9){toast("Phone must be 9 digits");return;}
+  if(nid.length!==16){toast("NID must be 16 digits");return;}
+  if(!name||!phone||!nid){toast("Fill all fields");return;}
 
-  if(!name || !phone || !nid){ toast("Fill all fields"); return; }
-
-  // DUPLICATE CHECK (only for new member or changed data)
   if(!currentEditId){
-    const dup = await isDuplicate(phone,nid);
-    if(dup){ toast("Phone or NID already exists"); return; }
+    if(await isDuplicate(phone,nid)){
+      toast("Duplicate phone or NID");
+      return;
+    }
   }
 
   if(currentEditId){
     await updateDoc(doc(db,"members",currentEditId),{
       name,phone,nid,photo:uploadedImageURL
     });
-    toast("Updated");
+    success("Member updated");
   } else {
     await addDoc(collection(db,"members"),{
       name,phone,nid,
       photo:uploadedImageURL,
       savings:0,loans:0,status:"Active"
     });
-    toast("Added");
+    success("Member added");
   }
 
   closeModal();
   loadMembers();
   loadCounts();
+};
+
+window.deleteMember = async function(id){
+  if(!confirm("Delete this member?")) return;
+  await deleteDoc(doc(db,"members",id));
+  success("Member deleted");
+  loadMembers();
+  loadCounts();
+};
+
+window.viewMember = function(m){
+  alert(`Name: ${m.name}\nPhone: ${m.phone}\nNID: ${m.nid}`);
 };
 
 window.openEdit = function(id,m){
@@ -229,22 +242,10 @@ window.openEdit = function(id,m){
   openModal();
 };
 
-window.deleteMember = async function(id){
-  if(!confirm("Are you sure?")) return;
-  await deleteDoc(doc(db,"members",id));
-  toast("Deleted");
-  loadMembers();
-  loadCounts();
-};
-
-window.viewMember = function(m){
-  alert(`Name: ${m.name}\nPhone: ${m.phone}\nNID: ${m.nid}`);
-};
-
 async function loadMembers(){
-  const table = document.getElementById("memberTable");
+  const table=document.getElementById("memberTable");
   table.innerHTML="";
-  const snap = await getDocs(collection(db,"members"));
+  const snap=await getDocs(collection(db,"members"));
 
   snap.forEach(d=>{
     const m=d.data();
@@ -268,12 +269,14 @@ async function loadMembers(){
 }
 
 async function loadCounts(){
-  const snap = await getDocs(collection(db,"members"));
+  const snap=await getDocs(collection(db,"members"));
   let total=0,active=0;
+
   snap.forEach(d=>{
     total++;
     if(d.data().status=="Active") active++;
   });
+
   document.getElementById("memberCount").innerText=total;
   document.getElementById("activeCount").innerText=active;
 }
