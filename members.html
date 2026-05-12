@@ -2,56 +2,39 @@
 <html lang="en">
 
 <head>
-
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <title>Members Management</title>
-
+  <title>Members</title>
   <link rel="stylesheet" href="css/style.css">
-
 </head>
 
 <body>
 
-<!-- ================= SIDEBAR ================= -->
-<aside class="sidebar" id="sidebar">
+<main>
 
-  <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+  <h1>Members Management</h1>
 
-  <h2 class="logo">🏦 SACCO</h2>
+  <!-- ACTIONS -->
+  <div class="topbar">
 
-  <nav class="nav">
+    <button id="btnOpenModal" class="btn add-btn">
+      + Add Member
+    </button>
 
-    <a href="dashboard.html" class="nav-item">📊 Dashboard</a>
-    <a href="members.html" class="nav-item active">👥 Members</a>
-    <a href="savings.html" class="nav-item">💰 Savings</a>
-    <a href="loans.html" class="nav-item">🏦 Loans</a>
+    <input id="searchBox" class="input"
+           placeholder="Search members...">
 
-  </nav>
+  </div>
 
-</aside>
-
-<!-- ================= MAIN ================= -->
-<main class="main" id="main">
-
-  <h1>👥 MEMBERS MANAGEMENT</h1>
-
-  <!-- ================= CARDS ================= -->
+  <!-- CARDS -->
   <section class="cards">
 
     <div class="card blue">
-      <h3>Total Members</h3>
+      <h3>Total</h3>
       <p id="memberCount">0</p>
     </div>
 
     <div class="card green">
-      <h3>Total Savings</h3>
-      <p id="savings">0 ETB</p>
-    </div>
-
-    <div class="card orange">
-      <h3>Active Members</h3>
+      <h3>Active</h3>
       <p id="activeCount">0</p>
     </div>
 
@@ -62,70 +45,43 @@
 
   </section>
 
-  <!-- ================= ACTION BAR ================= -->
-  <div class="topbar" style="margin-top:20px;">
+  <!-- TABLE -->
+  <table class="table">
 
-    <button class="btn add-btn" onclick="openModal()">
-      + Add Member
-    </button>
+    <thead>
+      <tr>
+        <th>Member</th>
+        <th>Phone</th>
+        <th>NID</th>
+        <th>Savings</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
 
-    <input id="searchBox"
-           class="input"
-           placeholder="Search by name / phone / NID">
+    <tbody id="memberTable"></tbody>
 
-  </div>
-
-  <!-- ================= TABLE ================= -->
-  <div style="overflow-x:auto; margin-top:20px;">
-
-    <table class="table">
-
-      <thead>
-        <tr>
-          <th>Member</th>
-          <th>Phone</th>
-          <th>NID</th>
-          <th>Total Savings</th>
-          <th>Status</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-
-      <tbody id="memberTable"></tbody>
-
-    </table>
-
-  </div>
+  </table>
 
 </main>
 
-<!-- ================= MODAL ================= -->
-<div id="modal" class="modal">
+<!-- MODAL -->
+<div id="modal" class="modal hidden">
 
   <div class="modal-box">
 
-    <h2 id="formTitle">Add Member</h2>
+    <h2 id="modalTitle">Add Member</h2>
 
-    <!-- PHOTO -->
-    <input type="file" id="photo" class="input" accept="image/*">
+    <input id="name" class="input" placeholder="Name">
+    <input id="phone" class="input" placeholder="Phone (9 digits)">
+    <input id="nid" class="input" placeholder="NID (16 digits)">
 
-    <!-- FORM FIELDS -->
-    <input id="name" class="input" placeholder="Full Name">
+    <input type="file" id="photo" class="input">
 
-    <input id="phone" class="input" placeholder="Phone (9 digits)" maxlength="9">
+    <div class="row">
 
-    <input id="nid" class="input" placeholder="National ID (16 digits)" maxlength="16">
-
-    <!-- BUTTONS -->
-    <div style="display:flex; gap:10px; margin-top:15px;">
-
-      <button class="btn add-btn" onclick="saveMember()">
-        Save Member
-      </button>
-
-      <button class="btn danger" onclick="closeModal()">
-        Cancel
-      </button>
+      <button id="btnSave" class="btn add-btn">Save</button>
+      <button id="btnClose" class="btn danger">Close</button>
 
     </div>
 
@@ -133,18 +89,7 @@
 
 </div>
 
-<!-- ================= JS ================= -->
-
-<script src="js/i18n.js"></script>
-
-<script type="module" src="js/members.js"></script>
-
-<!-- sidebar toggle -->
-<script>
-function toggleSidebar() {
-  document.getElementById("sidebar").classList.toggle("collapsed");
-}
-</script>
+<script type="module" src="js/members.page.js"></script>
 
 </body>
 </html>
