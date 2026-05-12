@@ -2,588 +2,82 @@
 <html lang="en">
 
 <head>
-
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Members Management</title>
 
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1.0">
-
-  <title>
-
-    Members Management
-
-  </title>
-
-  <!-- CSS -->
-  <link rel="stylesheet"
-        href="css/style.css">
-
+  <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
 
-<!-- =========================
-     SIDEBAR
-========================= -->
-<aside class="sidebar"
-       id="sidebar">
+<aside class="sidebar" id="sidebar">
+  <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+  <h2 class="logo">🏦 SACCO</h2>
 
-  <!-- TOGGLE -->
-  <button class="toggle-btn"
-          onclick="toggleSidebar()">
-
-    ☰
-
-  </button>
-
-  <!-- LOGO -->
-  <h2 class="logo">
-
-    🏦 SACCO
-
-  </h2>
-
-  <!-- NAVIGATION -->
   <nav class="nav">
-
-    <!-- DASHBOARD -->
-    <a href="dashboard.html"
-       class="nav-item">
-
-      <span class="icon">📊</span>
-
-      <span class="text">
-
-        Dashboard
-
-      </span>
-
-    </a>
-
-    <!-- MEMBERS -->
-    <a href="members.html"
-       class="nav-item active">
-
-      <span class="icon">👥</span>
-
-      <span class="text">
-
-        Members
-
-      </span>
-
-    </a>
-
-    <!-- SAVINGS -->
-    <a href="savings.html"
-       class="nav-item">
-
-      <span class="icon">💰</span>
-
-      <span class="text">
-
-        Savings
-
-      </span>
-
-    </a>
-
-    <!-- LOANS -->
-    <a href="loans.html"
-       class="nav-item">
-
-      <span class="icon">🏦</span>
-
-      <span class="text">
-
-        Loans
-
-      </span>
-
-    </a>
-
-    <!-- TRANSACTIONS -->
-    <a href="transactions.html"
-       class="nav-item">
-
-      <span class="icon">💱</span>
-
-      <span class="text">
-
-        Transactions
-
-      </span>
-
-    </a>
-
-    <!-- REPORTS -->
-    <a href="reports.html"
-       class="nav-item">
-
-      <span class="icon">📄</span>
-
-      <span class="text">
-
-        Reports
-
-      </span>
-
-    </a>
-
-    <!-- USERS -->
-    <a href="users.html"
-       class="nav-item">
-
-      <span class="icon">👤</span>
-
-      <span class="text">
-
-        Users
-
-      </span>
-
-    </a>
-
-    <!-- SETTINGS -->
-    <a href="settings.html"
-       class="nav-item">
-
-      <span class="icon">⚙️</span>
-
-      <span class="text">
-
-        Settings
-
-      </span>
-
-    </a>
-
+    <a href="dashboard.html" class="nav-item">📊 Dashboard</a>
+    <a href="members.html" class="nav-item active">👥 Members</a>
   </nav>
-
 </aside>
 
-<!-- =========================
-     MAIN CONTENT
-========================= -->
-<main class="main"
-      id="main">
+<main class="main">
 
-  <!-- =========================
-       TOPBAR
-  ========================= -->
-  <div class="topbar">
+  <h1>👥 MEMBERS MANAGEMENT</h1>
 
-    <!-- LEFT -->
-    <div>
-
-      <h2>
-
-        Members Management
-
-      </h2>
-
-    </div>
-
-    <!-- RIGHT -->
-    <div style="
-      display:flex;
-      align-items:center;
-      gap:10px;
-    ">
-
-      <!-- ROLE -->
-      <div class="selected-box"
-           style="
-             padding:10px 15px;
-             margin:0;
-           ">
-
-        👑 Admin
-
-      </div>
-
-      <!-- LANGUAGE -->
-      <select id="langSelect"
-              class="lang-select">
-
-        <option value="EN">
-
-          EN
-
-        </option>
-
-        <option value="AM">
-
-          AM
-
-        </option>
-
-        <option value="OR">
-
-          OR
-
-        </option>
-
-      </select>
-
-      <!-- LOGOUT -->
-      <button class="btn logout-btn"
-              onclick="logoutUser()">
-
-        Logout
-
-      </button>
-
-    </div>
-
-  </div>
-
-  <!-- =========================
-       PAGE HEADER
-  ========================= -->
-  <div style="margin-top:25px;">
-
-    <h1>
-
-      👥 MEMBERS MANAGEMENT
-
-    </h1>
-
-  </div>
-
-  <!-- =========================
-       DASHBOARD CARDS
-  ========================= -->
+  <!-- CARDS -->
   <section class="cards">
-
-    <!-- TOTAL MEMBERS -->
-    <div class="card blue">
-
-      <h3>
-
-        Total Members
-
-      </h3>
-
-      <p id="memberCount">
-
-        0
-
-      </p>
-
-    </div>
-
-    <!-- ACTIVE -->
-    <div class="card green">
-
-      <h3>
-
-        Active Members
-
-      </h3>
-
-      <p id="activeCount">
-
-        0
-
-      </p>
-
-    </div>
-
-    <!-- NEW -->
-    <div class="card orange">
-
-      <h3>
-
-        New This Month
-
-      </h3>
-
-      <p id="newCount">
-
-        0
-
-      </p>
-
-    </div>
-
-    <!-- VERIFIED -->
-    <div class="card purple">
-
-      <h3>
-
-        Verified IDs
-
-      </h3>
-
-      <p id="verifiedCount">
-
-        0
-
-      </p>
-
-    </div>
-
+    <div class="card blue"><h3>Total</h3><p id="memberCount">0</p></div>
+    <div class="card green"><h3>Active</h3><p id="activeCount">0</p></div>
+    <div class="card orange"><h3>New</h3><p id="newCount">0</p></div>
+    <div class="card purple"><h3>Verified</h3><p id="verifiedCount">0</p></div>
   </section>
 
-  <!-- =========================
-       ACTION BAR
-  ========================= -->
-  <div class="topbar"
-       style="margin-top:25px;">
-
-    <!-- ADD BUTTON -->
-    <button class="btn add-btn"
-            onclick="openModal()">
-
-      + Add Member
-
-    </button>
-
-    <!-- SEARCH -->
-    <input id="searchBox"
-           class="input"
-
-           placeholder="Search by Name / Phone / National ID"
-
-           style="
-             width:350px;
-             margin:0;
-           ">
-
+  <!-- ACTION -->
+  <div style="margin-top:20px;">
+    <button class="btn add-btn" onclick="openModal()">+ Add Member</button>
+    <input id="searchBox" class="input" placeholder="Search members">
   </div>
 
-  <!-- =========================
-       TABLE
-  ========================= -->
-  <div style="
-    overflow-x:auto;
-    margin-top:20px;
-  ">
-
+  <!-- TABLE -->
+  <div style="overflow-x:auto; margin-top:20px;">
     <table class="table">
-
       <thead>
-
         <tr>
-
-          <th>
-
-            Member
-
-          </th>
-
-          <th>
-
-            Phone
-
-          </th>
-
-          <th>
-
-            National ID
-
-          </th>
-
-          <th>
-
-            Total Savings
-
-          </th>
-
-          <th>
-
-            Total Loans
-
-          </th>
-
-          <th>
-
-            Remaining Loans
-
-          </th>
-
-          <th>
-
-            Status
-
-          </th>
-
-          <th>
-
-            Actions
-
-          </th>
-
+          <th>Member</th>
+          <th>Phone</th>
+          <th>NID</th>
+          <th>Savings</th>
+          <th>Loans</th>
+          <th>Remaining</th>
+          <th>Status</th>
+          <th>Action</th>
         </tr>
-
       </thead>
-
-      <tbody id="memberTable">
-
-      </tbody>
-
+      <tbody id="memberTable"></tbody>
     </table>
-
   </div>
 
 </main>
 
-<!-- =========================
-     MODAL
-========================= -->
-<div id="modal"
-     class="modal">
+<!-- MODAL -->
+<div id="modal" class="modal">
+  <div class="modal-box">
 
-  <div class="modal-box"
-       style="
-         max-width:500px;
-       ">
+    <h2 id="formTitle">Add Member</h2>
 
-    <!-- TITLE -->
-    <h2 id="formTitle">
+    <input type="file" id="photo">
+    <input id="name" class="input" placeholder="Full Name">
+    <input id="phone" class="input" placeholder="Phone (9 digits)">
+    <input id="nid" class="input" placeholder="NID (16 digits)">
 
-      Add Member
-
-    </h2>
-
-    <!-- PHOTO -->
-    <div style="
-      text-align:center;
-      margin-bottom:15px;
-    ">
-
-      <img id="previewImage"
-
-           src="https://via.placeholder.com/100"
-
-           style="
-             width:100px;
-             height:100px;
-             border-radius:50%;
-             object-fit:cover;
-             border:3px solid #ddd;
-           ">
-
-    </div>
-
-    <!-- PHOTO INPUT -->
-    <input id="photo"
-           type="file"
-           accept="image/*"
-           class="input">
-
-    <!-- FULL NAME -->
-    <input id="name"
-           class="input"
-
-           placeholder="Full Name">
-
-    <!-- PHONE -->
-    <input id="phone"
-           class="input"
-
-           placeholder="Phone Number (9 digits)"
-
-           maxlength="9">
-
-    <!-- NATIONAL ID -->
-    <input id="nid"
-           class="input"
-
-           placeholder="National ID (16 digits)"
-
-           maxlength="16">
-
-    <!-- BUTTONS -->
-    <div style="
-      display:flex;
-      gap:10px;
-      margin-top:20px;
-    ">
-
-      <!-- SAVE -->
-      <button class="btn add-btn"
-              style="flex:1;"
-              onclick="saveMember()">
-
-        Save Member
-
-      </button>
-
-      <!-- CANCEL -->
-      <button class="btn danger"
-              style="flex:1;"
-              onclick="closeModal()">
-
-        Cancel
-
-      </button>
-
-    </div>
+    <button class="btn add-btn" onclick="saveMember()">Save</button>
+    <button class="btn danger" onclick="closeModal()">Cancel</button>
 
   </div>
-
 </div>
 
-<!-- =========================
-     IMAGE PREVIEW
-========================= -->
-<script>
-
-document
-  .getElementById("photo")
-
-  .addEventListener(
-    "change",
-
-    function (e) {
-
-      const file =
-        e.target.files[0];
-
-      if (!file) return;
-
-      const reader =
-        new FileReader();
-
-      reader.onload = function (event) {
-
-        document
-          .getElementById("previewImage")
-          .src = event.target.result;
-      };
-
-      reader.readAsDataURL(file);
-    }
-  );
-
-/* =========================
-   SIDEBAR TOGGLE
-========================= */
-
-function toggleSidebar() {
-
-  document
-    .getElementById("sidebar")
-    .classList
-    .toggle("collapsed");
-}
-
-</script>
-
-<!-- =========================
-     JS FILES
-========================= -->
-
-<!-- I18N -->
-<script src="js/i18n.js"></script>
-
-<!-- MEMBERS JS -->
-<script type="module"
-        src="js/members.js">
-
-</script>
+<script type="module" src="js/members.js"></script>
 
 </body>
 </html>
