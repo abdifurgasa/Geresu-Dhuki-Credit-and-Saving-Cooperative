@@ -45,7 +45,7 @@ let editId = null;
    OPEN MODAL
 ========================= */
 
-window.openModal = function () {
+function openModal() {
 
   modal.style.display = "flex";
 
@@ -55,20 +55,20 @@ window.openModal = function () {
   clearForm();
 
   editId = null;
-};
+}
 
 /* =========================
    CLOSE MODAL
 ========================= */
 
-window.closeModal = function () {
+function closeModal() {
 
   modal.style.display = "none";
 
   clearForm();
 
   editId = null;
-};
+}
 
 /* =========================
    CLEAR FORM
@@ -83,6 +83,10 @@ function clearForm() {
   document.getElementById("nid").value = "";
 
   document.getElementById("photo").value = "";
+
+  document.getElementById("previewImage")
+    .src =
+    "https://via.placeholder.com/100";
 }
 
 /* =========================
@@ -161,7 +165,7 @@ async function isDuplicate(
    SAVE MEMBER
 ========================= */
 
-window.saveMember = async function () {
+async function saveMember() {
 
   const name =
     document.getElementById("name")
@@ -309,7 +313,7 @@ window.saveMember = async function () {
       "Error saving member"
     );
   }
-};
+}
 
 /* =========================
    LOAD MEMBERS
@@ -338,9 +342,7 @@ async function loadMembers() {
 
     let remainingLoans = 0;
 
-    /* =========================
-       MEMBER SAVINGS
-    ========================= */
+    /* SAVINGS */
 
     savingsSnap.forEach(s => {
 
@@ -355,9 +357,7 @@ async function loadMembers() {
       }
     });
 
-    /* =========================
-       MEMBER LOANS
-    ========================= */
+    /* LOANS */
 
     loansSnap.forEach(l => {
 
@@ -496,7 +496,7 @@ async function loadMembers() {
 }
 
 /* =========================
-   LOAD DASHBOARD CARDS
+   LOAD CARDS
 ========================= */
 
 async function loadCards() {
@@ -568,7 +568,7 @@ async function loadCards() {
    EDIT MEMBER
 ========================= */
 
-window.editMember = function (
+function editMember(
   id,
   name,
   phone,
@@ -590,33 +590,32 @@ window.editMember = function (
 
   document.getElementById("nid")
     .value = nid;
-};
+}
 
 /* =========================
    DELETE MEMBER
 ========================= */
 
-window.deleteMember =
-  async function (id) {
+async function deleteMember(id) {
 
-    if (
-      !confirm(
-        "Delete this member?"
-      )
-    ) return;
+  if (
+    !confirm(
+      "Delete this member?"
+    )
+  ) return;
 
-    await deleteDoc(
-      doc(db, "members", id)
-    );
+  await deleteDoc(
+    doc(db, "members", id)
+  );
 
-    alert(
-      "Member deleted successfully"
-    );
+  alert(
+    "Member deleted successfully"
+  );
 
-    loadMembers();
+  loadMembers();
 
-    loadCards();
-  };
+  loadCards();
+}
 
 /* =========================
    SEARCH MEMBERS
@@ -650,6 +649,20 @@ searchBox.addEventListener(
     });
   }
 );
+
+/* =========================
+   GLOBAL FUNCTIONS
+========================= */
+
+window.openModal = openModal;
+
+window.closeModal = closeModal;
+
+window.saveMember = saveMember;
+
+window.editMember = editMember;
+
+window.deleteMember = deleteMember;
 
 /* =========================
    INIT
