@@ -4,9 +4,10 @@ import {
   collection,
   addDoc,
   getDocs,
-  deleteDoc,
   updateDoc,
-  doc
+  deleteDoc,
+  doc,
+  serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 import {
@@ -18,75 +19,37 @@ import {
 
 const storage = getStorage(app);
 
-/* =========================
-   ELEMENTS
-========================= */
-let table, searchBox, modal;
-
-/* =========================
-   STATE
-========================= */
 let editId = null;
 
-/* =========================
-   INIT SAFE LOAD
-========================= */
-window.addEventListener("DOMContentLoaded", () => {
+const table = document.getElementById("memberTable");
+const modal = document.getElementById("modal");
 
-  table = document.getElementById("memberTable");
-  searchBox = document.getElementById("searchBox");
-  modal = document.getElementById("modal");
+/* ================= MODAL ================= */
 
-  loadMembers();
-  loadCards();
-});
-
-/* =========================
-   OPEN MODAL
-========================= */
 window.openModal = function () {
-
-  if (!modal) return;
-
   modal.style.display = "flex";
-
   document.getElementById("formTitle").innerText = "Add Member";
-
   clearForm();
-
   editId = null;
 };
 
-/* =========================
-   CLOSE MODAL
-========================= */
 window.closeModal = function () {
-
   modal.style.display = "none";
-
   clearForm();
-
-  editId = null;
 };
 
-/* =========================
-   CLEAR FORM
-========================= */
 function clearForm() {
-
-  document.getElementById("name").value = "";
-  document.getElementById("phone").value = "";
-  document.getElementById("nid").value = "";
-  document.getElementById("photo").value = "";
+  name.value = "";
+  phone.value = "";
+  nid.value = "";
+  photo.value = "";
 }
 
-/* =========================
-   VALIDATION
-========================= */
-function validate(name, phone, nid) {
+/* ================= VALIDATION ================= */
 
+function validate(name, phone, nid) {
   if (!name || !phone || !nid) {
-    alert("All fields are required");
+    alert("All fields required");
     return false;
   }
 
@@ -96,24 +59,21 @@ function validate(name, phone, nid) {
   }
 
   if (!/^[0-9]{16}$/.test(nid)) {
-    alert("National ID must be 16 digits");
+    alert("NID must be 16 digits");
     return false;
   }
 
   return true;
 }
 
-/* =========================
-   DUPLICATE CHECK
-========================= */
-async function isDuplicate(phone, nid, ignoreId = null) {
+/* ================= DUPLICATE CHECK ================= */
 
+async function isDuplicate(phone, nid, ignoreId = null) {
   const snap = await getDocs(collection(db, "members"));
 
   let found = false;
 
   snap.forEach(d => {
-
     if (ignoreId && d.id === ignoreId) return;
 
     const m = d.data();
@@ -126,20 +86,19 @@ async function isDuplicate(phone, nid, ignoreId = null) {
   return found;
 }
 
-/* =========================
-   SAVE MEMBER
-========================= */
+/* ================= SAVE MEMBER ================= */
+
 window.saveMember = async function () {
 
-  const name = document.getElementById("name").value.trim();
-  const phone = document.getElementById("phone").value.trim();
-  const nid = document.getElementById("nid").value.trim();
-  const photoFile = document.getElementById("photo").files[0];
+  const nameVal = name.value.trim();
+  const phoneVal = phone.value.trim();
+  const nidVal = nid.value.trim();
+  const file = photo.files[0];
 
-  if (!validate(name, phone, nid)) return;
+  if (!validate(nameVal, phoneVal, nidVal)) return;
 
-  if (await isDuplicate(phone, nid, editId)) {
-    alert("Phone or National ID already exists");
+  if (await isDuplicate(phoneVal, nidVal, editId)) {
+    alert("Duplicate phone or NID");
     return;
   }
 
@@ -147,21 +106,18 @@ window.saveMember = async function () {
 
     let photoURL = "";
 
-    if (photoFile) {
-
-      const storageRef = ref(storage, `members/${Date.now()}_${photoFile.name}`);
-
-      await uploadBytes(storageRef, photoFile);
-
+    if (file) {
+      const storageRef = ref(storage, "members/" + Date.now() + file.name);
+      await uploadBytes(storageRef, file);
       photoURL = await getDownloadURL(storageRef);
     }
 
     if (editId) {
 
       await updateDoc(doc(db, "members", editId), {
-        name,
-        phone,
-        nid,
+        name: nameVal,
+        phone: phoneVal,
+        nid: nidVal,
         ...(photoURL && { photo: photoURL })
       });
 
@@ -170,20 +126,18 @@ window.saveMember = async function () {
     } else {
 
       await addDoc(collection(db, "members"), {
-        name,
-        phone,
-        nid,
+        name: nameVal,
+        phone: phoneVal,
+        nid: nidVal,
         photo: photoURL,
         status: "Active",
-        verified: true,
-        createdAt: Date.now()
+        createdAt: serverTimestamp()
       });
 
       alert("Member saved successfully");
     }
 
     closeModal();
-
     loadMembers();
     loadCards();
 
@@ -193,12 +147,9 @@ window.saveMember = async function () {
   }
 };
 
-/* =========================
-   LOAD MEMBERS (WITH FINANCE)
-========================= */
-async function loadMembers() {
+/* ================= LOAD MEMBERS ================= */
 
-  if (!table) return;
+async function loadMembers() {
 
   table.innerHTML = "";
 
@@ -206,69 +157,54 @@ async function loadMembers() {
   const savings = await getDocs(collection(db, "savings"));
   const loans = await getDocs(collection(db, "loans"));
 
-  members.forEach(mDoc => {
+  members.forEach(mdoc => {
 
-    const m = mDoc.data();
+    const m = mdoc.data();
 
-    let totalSavings = 0;
-    let totalLoans = 0;
-    let remainingLoans = 0;
+    let totalSaving = 0;
+    let totalLoan = 0;
+    let remaining = 0;
 
     savings.forEach(s => {
-      const data = s.data();
-      if (data.memberId === mDoc.id) {
-        totalSavings += Number(data.amount || 0);
+      if (s.data().memberId === mdoc.id) {
+        totalSaving += Number(s.data().amount || 0);
       }
     });
 
     loans.forEach(l => {
-      const data = l.data();
-      if (data.memberId === mDoc.id) {
-        totalLoans += Number(data.totalAmount || 0);
-        remainingLoans += Number(data.remaining || 0);
+      if (l.data().memberId === mdoc.id) {
+        totalLoan += Number(l.data().total || 0);
+        remaining += Number(l.data().remaining || 0);
       }
     });
 
     table.innerHTML += `
       <tr>
-
         <td>
-          <div style="display:flex;gap:10px;align-items:center;">
-            <img src="${m.photo || 'https://via.placeholder.com/50'}"
-              style="width:45px;height:45px;border-radius:50%;object-fit:cover;">
-            <b>${m.name}</b>
-          </div>
+          <img src="${m.photo || 'https://via.placeholder.com/40'}"
+          style="width:40px;height:40px;border-radius:50%"> ${m.name}
         </td>
 
         <td>${m.phone}</td>
         <td>${m.nid}</td>
 
-        <td>${totalSavings.toLocaleString()}</td>
-        <td>${totalLoans.toLocaleString()}</td>
-        <td>${remainingLoans.toLocaleString()}</td>
+        <td>${totalSaving}</td>
+        <td>${totalLoan}</td>
+        <td>${remaining}</td>
 
-        <td>${m.status || "Active"}</td>
+        <td>${m.status}</td>
 
         <td>
-          <button class="btn success"
-            onclick="editMember('${mDoc.id}','${m.name}','${m.phone}','${m.nid}')">
-            Edit
-          </button>
-
-          <button class="btn danger"
-            onclick="deleteMember('${mDoc.id}')">
-            Delete
-          </button>
+          <button class="btn success" onclick="editMember('${mdoc.id}','${m.name}','${m.phone}','${m.nid}')">Edit</button>
+          <button class="btn danger" onclick="deleteMember('${mdoc.id}')">Delete</button>
         </td>
-
       </tr>
     `;
   });
 }
 
-/* =========================
-   LOAD CARDS
-========================= */
+/* ================= CARDS ================= */
+
 async function loadCards() {
 
   const snap = await getDocs(collection(db, "members"));
@@ -278,59 +214,53 @@ async function loadCards() {
   let verified = 0;
   let newThisMonth = 0;
 
-  const now = new Date();
+  const month = new Date().getMonth();
 
   snap.forEach(d => {
-
     const m = d.data();
 
-    if ((m.status || "").toLowerCase() === "active") active++;
-
+    if (m.status === "Active") active++;
     if (m.verified) verified++;
 
     if (m.createdAt) {
-
-      const date = new Date(m.createdAt);
-
-      if (date.getMonth() === now.getMonth()) {
-        newThisMonth++;
-      }
+      const dte = m.createdAt.toDate?.() || new Date(m.createdAt);
+      if (dte.getMonth() === month) newThisMonth++;
     }
   });
 
-  document.getElementById("memberCount").innerText = total;
-  document.getElementById("activeCount").innerText = active;
-  document.getElementById("verifiedCount").innerText = verified;
-  document.getElementById("newCount").innerText = newThisMonth;
+  memberCount.innerText = total;
+  activeCount.innerText = active;
+  verifiedCount.innerText = verified;
+  newCount.innerText = newThisMonth;
 }
 
-/* =========================
-   EDIT
-========================= */
+/* ================= EDIT ================= */
+
 window.editMember = function (id, name, phone, nid) {
-
   editId = id;
-
   modal.style.display = "flex";
 
   document.getElementById("formTitle").innerText = "Edit Member";
 
-  document.getElementById("name").value = name;
-  document.getElementById("phone").value = phone;
-  document.getElementById("nid").value = nid;
+  name.value = name;
+  phone.value = phone;
+  nid.value = nid;
 };
 
-/* =========================
-   DELETE
-========================= */
-window.deleteMember = async function (id) {
+/* ================= DELETE ================= */
 
-  if (!confirm("Delete this member?")) return;
+window.deleteMember = async function (id) {
+  if (!confirm("Delete member?")) return;
 
   await deleteDoc(doc(db, "members", id));
 
-  alert("Member deleted");
+  alert("Deleted successfully");
 
   loadMembers();
   loadCards();
 };
+
+/* ================= INIT ================= */
+
+loadMembers();
+loadCards();
