@@ -15,14 +15,16 @@ import {
 ========================= */
 
 let selectedMember = null;
+let isProcessing = false;
 
 /* =========================
-   SEARCH MEMBERS
+   SEARCH MEMBER
 ========================= */
 
 window.searchMembers = async function () {
 
-  const keyword = document.getElementById("memberSearch").value.toLowerCase().trim();
+  const keyword = document.getElementById("memberSearch")
+    .value.toLowerCase().trim();
 
   const box = document.getElementById("searchResults");
 
@@ -35,7 +37,6 @@ window.searchMembers = async function () {
   snapshot.forEach(docSnap => {
 
     const m = docSnap.data();
-
     const text = `${m.name} ${m.phone} ${m.nid}`.toLowerCase();
 
     if (text.includes(keyword)) {
@@ -75,7 +76,7 @@ function selectMember(id, m) {
 }
 
 /* =========================
-   CHECK ACTIVE LOAN (STRICT RULE)
+   CHECK ACTIVE LOAN
 ========================= */
 
 async function hasActiveLoan(memberId) {
@@ -92,29 +93,96 @@ async function hasActiveLoan(memberId) {
 }
 
 /* =========================
-   COMPOUND INTEREST (CORRECT FORMULA)
+   LOAN ENGINE (CLEAN)
 ========================= */
 
-function compoundInterest(P, r, t) {
+function calculateLoan(principal, rate, years, type) {
 
-  // P = principal
-  // r = yearly interest rate (%)
-  // t = years
+  const r = rate / 100;
 
-  const rate = r / 100;
+  let totalInterest = 0;
+  let totalAmount = 0;
 
-  const A = P * Math.pow((1 + rate), t);
+  // SIMPLE
+  if (type === "simple") {
 
-  const interest = A - P;
+    totalInterest = principal * r * years;
+    totalAmount = principal + totalInterest;
+  }
 
-  return { total: A, interest };
+  // COMPOUND (monthly)
+  else if (type === "compound") {
+
+    const n = 12;
+
+    totalAmount =
+      principal * Math.pow((1 + r / n), (n * years));
+
+    totalInterest = totalAmount - principal;
+  }
+
+  // FLAT RATE
+  else if (type === "flat") {
+
+    totalInterest = principal * r * years;
+    totalAmount = principal + totalInterest;
+  }
+
+  return { totalAmount, totalInterest };
 }
 
 /* =========================
-   CREATE LOAN (SAFE VERSION)
+   CALCULATE BUTTON
+========================= */
+
+window.calculateLoan = function () {
+
+  const principal = Number(document.getElementById("loanAmount").value);
+  const rate = Number(document.getElementById("interestRate").value);
+  const duration = Number(document.getElementById("duration").value);
+
+  const durationType = document.getElementById("durationType").value;
+  const interestType = document.getElementById("interestType").value;
+
+  if (!principal || !rate || !duration) {
+    alert("Fill all fields");
+    return;
+  }
+
+  const years = durationType === "years"
+    ? duration
+    : duration / 12;
+
+  const result = calculateLoan(
+    principal,
+    rate,
+    years,
+    interestType
+  );
+
+  const months = durationType === "years"
+    ? duration * 12
+    : duration;
+
+  const monthly = result.totalAmount / months;
+
+  document.getElementById("monthlyPayment").innerText =
+    monthly.toFixed(2) + " ETB";
+
+  document.getElementById("totalRepayment").innerText =
+    result.totalAmount.toFixed(2) + " ETB";
+
+  document.getElementById("totalInterest").innerText =
+    result.totalInterest.toFixed(2) + " ETB";
+};
+
+/* =========================
+   CREATE LOAN (FIXED)
 ========================= */
 
 window.createLoan = async function () {
+
+  if (isProcessing) return;
 
   if (!selectedMember) {
     alert("Select member first");
@@ -124,76 +192,79 @@ window.createLoan = async function () {
   const principal = Number(document.getElementById("loanAmount").value);
   const rate = Number(document.getElementById("interestRate").value);
   const duration = Number(document.getElementById("duration").value);
-  const type = document.getElementById("durationType").value;
+
+  const durationType = document.getElementById("durationType").value;
+  const interestType = document.getElementById("interestType").value;
 
   if (!principal || !rate || !duration) {
     alert("Fill all fields");
     return;
   }
 
-  /* ❌ STRICT ONE LOAN RULE */
   if (await hasActiveLoan(selectedMember.id)) {
     alert("❌ Please finish your existing loan first");
     return;
   }
 
-  const years = type === "years" ? duration : duration / 12;
+  try {
 
-  /* =========================
-     COMPOUND CALCULATION
-  ========================= */
+    isProcessing = true;
 
-  const result = compoundInterest(principal, rate, years);
+    const years = durationType === "years"
+      ? duration
+      : duration / 12;
 
-  const total = result.total;
-  const interest = result.interest;
+    const result = calculateLoan(
+      principal,
+      rate,
+      years,
+      interestType
+    );
 
-  const months = type === "years" ? duration * 12 : duration;
+    const months = durationType === "years"
+      ? duration * 12
+      : duration;
 
-  const monthlyPayment = total / months;
+    const monthly = result.totalAmount / months;
 
-  /* =========================
-     PENALTY SYSTEM SETUP
-  ========================= */
+    await addDoc(collection(db, "loans"), {
 
-  const now = new Date();
+      memberId: selectedMember.id,
+      memberName: selectedMember.name,
+      phone: selectedMember.phone,
 
-  const nextDue = new Date();
-  nextDue.setMonth(nextDue.getMonth() + 1);
+      principal,
+      interestRate: rate,
+      interestType,
 
-  await addDoc(collection(db, "loans"), {
+      durationMonths: months,
 
-    memberId: selectedMember.id,
-    memberName: selectedMember.name,
-    phone: selectedMember.phone,
+      totalAmount: result.totalAmount,
+      totalInterest: result.totalInterest,
 
-    principal,
-    interestRate: rate,
+      monthlyPayment: monthly,
 
-    durationMonths: months,
+      paid: 0,
+      remaining: result.totalAmount,
 
-    totalAmount: total,
-    totalInterest: interest,
+      status: "active",
 
-    monthlyPayment,
+      createdAt: serverTimestamp()
+    });
 
-    paid: 0,
-    remaining: total,
+    alert("✅ Loan created successfully");
 
-    status: "active",
+    clearForm();
 
-    penalty: {
-      rate: 2, // 2% per month
-      lastChecked: now.toISOString(),
-      nextDueDate: nextDue.toISOString()
-    },
+  } catch (err) {
 
-    createdAt: serverTimestamp()
-  });
+    console.error(err);
+    alert("❌ Error creating loan");
 
-  alert("Loan created successfully (Compound + Penalty enabled)");
+  } finally {
 
-  clearForm();
+    isProcessing = false;
+  }
 };
 
 /* =========================
@@ -212,7 +283,7 @@ function clearForm() {
 }
 
 /* =========================
-   LOANS TABLE (REALTIME)
+   LOAD LOANS TABLE
 ========================= */
 
 function loadLoans() {
@@ -227,25 +298,17 @@ function loadLoans() {
 
       const l = docSnap.data();
 
-      const remaining = l.remaining || 0;
-
       table.innerHTML += `
         <tr>
           <td>${l.memberName}</td>
           <td>${l.principal}</td>
-          <td>${l.interestRate}%</td>
+          <td>${l.interestRate}% (${l.interestType})</td>
           <td>${l.durationMonths}</td>
-          <td>${(l.monthlyPayment || 0).toFixed(2)}</td>
-          <td>${(l.totalAmount || 0).toFixed(2)}</td>
-          <td>${l.paid || 0}</td>
-          <td>${remaining.toFixed(2)}</td>
-          <td>
-            <span class="status ${
-              l.status === "active" ? "pending" : "active"
-            }">
-              ${l.status}
-            </span>
-          </td>
+          <td>${l.monthlyPayment.toFixed(2)}</td>
+          <td>${l.totalAmount.toFixed(2)}</td>
+          <td>${l.paid}</td>
+          <td>${l.remaining.toFixed(2)}</td>
+          <td>${l.status}</td>
         </tr>
       `;
     });
