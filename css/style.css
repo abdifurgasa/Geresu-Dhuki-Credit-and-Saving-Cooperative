@@ -540,3 +540,44 @@ select:focus{
     font-size:24px;
   }
    }
+/* =========================
+   CHART GRID
+========================= */
+
+.chart-grid {
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(auto-fit, minmax(400px, 1fr));
+
+  gap: 20px;
+
+  align-items: stretch;
+}
+
+/* CHART CARD */
+
+.chart-grid .card {
+
+  min-height: 420px;
+}
+
+/* CANVAS */
+
+.chart-grid canvas {
+
+  width: 100% !important;
+
+  height: 320px !important;
+}
+
+/* MOBILE */
+
+@media(max-width:768px){
+
+  .chart-grid {
+
+    grid-template-columns: 1fr;
+  }
+}
