@@ -21,62 +21,33 @@ import {
 const storage = getStorage();
 
 /* =========================
-   STATE
+   ELEMENTS
 ========================= */
 const table = document.getElementById("memberTable");
 const searchBox = document.getElementById("searchBox");
 const modal = document.getElementById("modal");
 
+/* =========================
+   STATE
+========================= */
 let editId = null;
 let cache = [];
 
 /* =========================
-   MODAL
+   OPEN / CLOSE MODAL
 ========================= */
-window.openModal = () => {
-  modal.style.display = "flex";
-  editId = null;
-};
-
-window.closeModal = () => {
-  modal.style.display = "none";
-};
+window.openModal = () => modal.style.display = "flex";
+window.closeModal = () => modal.style.display = "none";
 
 /* =========================
-   PHOTO UPLOAD
+   UPLOAD PHOTO
 ========================= */
 async function uploadPhoto(file, id) {
+
   const storageRef = ref(storage, `members/${id}_${file.name}`);
   await uploadBytes(storageRef, file);
+
   return await getDownloadURL(storageRef);
-}
-
-/* =========================
-   CALCULATE FINANCE (REAL BANKING LOGIC)
-========================= */
-async function getFinance(memberId) {
-
-  let savings = 0;
-  let loans = 0;
-  let remaining = 0;
-
-  const sSnap = await getDocs(collection(db, "savings"));
-  sSnap.forEach(d => {
-    if (d.data().memberId === memberId) {
-      savings += Number(d.data().amount || 0);
-    }
-  });
-
-  const lSnap = await getDocs(collection(db, "loans"));
-  lSnap.forEach(d => {
-    const data = d.data();
-    if (data.memberId === memberId) {
-      loans += Number(data.totalAmount || 0);
-      remaining += Number(data.remaining || 0);
-    }
-  });
-
-  return { savings, loans, remaining };
 }
 
 /* =========================
@@ -84,9 +55,9 @@ async function getFinance(memberId) {
 ========================= */
 window.saveMember = async () => {
 
-  const name = nameInput();
-  const phone = phoneInput();
-  const nid = nidInput();
+  const name = document.getElementById("name").value.trim();
+  const phone = document.getElementById("phone").value.trim();
+  const nid = document.getElementById("nid").value.trim();
   const file = document.getElementById("photo").files[0];
 
   if (!name || !phone || !nid) {
@@ -109,40 +80,47 @@ window.saveMember = async () => {
       ...(photoURL && { photoURL })
     });
 
-    alert("Updated successfully");
+    alert("Member updated");
 
   } else {
 
     await addDoc(collection(db, "members"), {
+
       name,
       phone,
       nid,
       photoURL,
+
+      // ✅ IMPORTANT: finance fields stored here
+      savingsTotal: 0,
+      loansTotal: 0,
+      remainingLoan: 0,
+
       status: "Active",
       createdAt: serverTimestamp()
     });
 
-    alert("Saved successfully");
+    alert("Member saved");
   }
 
   closeModal();
 };
 
 /* =========================
-   LOAD MEMBERS (REALTIME)
+   LOAD MEMBERS (FAST + STABLE)
 ========================= */
 function loadMembers() {
 
-  onSnapshot(collection(db, "members"), async snap => {
+  onSnapshot(collection(db, "members"), snap => {
 
-    cache = [];
     table.innerHTML = "";
+    cache = [];
 
-    for (const d of snap.docs) {
+    document.getElementById("memberCount").innerText = snap.size;
+
+    snap.forEach(d => {
 
       const m = d.data();
-      const finance = await getFinance(d.id);
-
       cache.push({ id: d.id, ...m });
 
       table.innerHTML += `
@@ -150,7 +128,8 @@ function loadMembers() {
 
           <td>
             <img src="${m.photoURL || 'https://via.placeholder.com/40'}"
-                 width="40" height="40"
+                 width="40"
+                 height="40"
                  style="border-radius:50%">
           </td>
 
@@ -158,20 +137,23 @@ function loadMembers() {
           <td>${m.phone}</td>
           <td>${m.nid}</td>
 
-          <td>${finance.savings}</td>
-          <td>${finance.loans}</td>
-          <td>${finance.remaining}</td>
+          <!-- ✅ DIRECT FROM DATABASE -->
+          <td>${m.savingsTotal || 0} ETB</td>
+          <td>${m.loansTotal || 0} ETB</td>
+          <td>${m.remainingLoan || 0} ETB</td>
 
           <td>${m.status || "Active"}</td>
 
           <td>
+
             <button onclick="editMember('${d.id}')">Edit</button>
             <button onclick="deleteMember('${d.id}')">Delete</button>
+
           </td>
 
         </tr>
       `;
-    }
+    });
   });
 }
 
@@ -179,6 +161,7 @@ function loadMembers() {
    EDIT
 ========================= */
 window.editMember = (id) => {
+
   const m = cache.find(x => x.id === id);
   if (!m) return;
 
@@ -207,57 +190,43 @@ searchBox.addEventListener("input", () => {
 
   table.innerHTML = "";
 
-  cache.filter(m =>
-    m.name.toLowerCase().includes(val) ||
-    m.phone.includes(val) ||
-    m.nid.includes(val)
-  ).forEach(async m => {
+  cache
+    .filter(m =>
+      m.name.toLowerCase().includes(val) ||
+      m.phone.includes(val) ||
+      m.nid.includes(val)
+    )
+    .forEach(m => {
 
-    const finance = await getFinance(m.id);
+      table.innerHTML += `
+        <tr>
 
-    table.innerHTML += `
-      <tr>
+          <td>
+            <img src="${m.photoURL || 'https://via.placeholder.com/40'}"
+                 width="40"
+                 height="40"
+                 style="border-radius:50%">
+          </td>
 
-        <td>
-          <img src="${m.photoURL || 'https://via.placeholder.com/40'}"
-               width="40" height="40"
-               style="border-radius:50%">
-        </td>
+          <td>${m.name}</td>
+          <td>${m.phone}</td>
+          <td>${m.nid}</td>
 
-        <td>${m.name}</td>
-        <td>${m.phone}</td>
-        <td>${m.nid}</td>
+          <td>${m.savingsTotal || 0}</td>
+          <td>${m.loansTotal || 0}</td>
+          <td>${m.remainingLoan || 0}</td>
 
-        <td>${finance.savings}</td>
-        <td>${finance.loans}</td>
-        <td>${finance.remaining}</td>
+          <td>${m.status || "Active"}</td>
 
-        <td>${m.status || "Active"}</td>
+          <td>
+            <button onclick="editMember('${m.id}')">Edit</button>
+            <button onclick="deleteMember('${m.id}')">Delete</button>
+          </td>
 
-        <td>
-          <button onclick="editMember('${m.id}')">Edit</button>
-          <button onclick="deleteMember('${m.id}')">Delete</button>
-        </td>
-
-      </tr>
-    `;
-  });
+        </tr>
+      `;
+    });
 });
-
-/* =========================
-   HELPERS
-========================= */
-function nameInput() {
-  return document.getElementById("name").value.trim();
-}
-
-function phoneInput() {
-  return document.getElementById("phone").value.trim();
-}
-
-function nidInput() {
-  return document.getElementById("nid").value.trim();
-}
 
 /* =========================
    INIT
