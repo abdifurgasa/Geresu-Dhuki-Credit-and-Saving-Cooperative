@@ -11,9 +11,6 @@ import {
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-/* =========================
-   FIREBASE STORAGE
-========================= */
 import {
   getStorage,
   ref,
@@ -34,30 +31,22 @@ const modal = document.getElementById("modal");
    STATE
 ========================= */
 let editId = null;
-let membersCache = [];
+let cache = [];
 
 /* =========================
-   OPEN MODAL
+   MODAL
 ========================= */
-window.openModal = function () {
+window.openModal = () => {
   modal.style.display = "flex";
-  document.getElementById("formTitle").innerText = "Add Member";
-  clearForm();
   editId = null;
+  clearForm();
 };
 
-/* =========================
-   CLOSE MODAL
-========================= */
-window.closeModal = function () {
+window.closeModal = () => {
   modal.style.display = "none";
   clearForm();
-  editId = null;
 };
 
-/* =========================
-   CLEAR FORM
-========================= */
 function clearForm() {
   document.getElementById("name").value = "";
   document.getElementById("phone").value = "";
@@ -66,59 +55,35 @@ function clearForm() {
 }
 
 /* =========================
-   VALIDATION
+   PHOTO UPLOAD
 ========================= */
-function validate(name, phone, nid) {
-  if (!name || !phone || !nid) {
-    alert("All fields are required");
-    return false;
-  }
-
-  if (!/^[0-9]{9}$/.test(phone)) {
-    alert("Phone must be 9 digits");
-    return false;
-  }
-
-  if (!/^[0-9]{16}$/.test(nid)) {
-    alert("NID must be 16 digits");
-    return false;
-  }
-
-  return true;
-}
-
-/* =========================
-   UPLOAD PHOTO
-========================= */
-async function uploadPhoto(file, memberId) {
-  const storageRef = ref(storage, `members/${memberId}_${file.name}`);
-
+async function uploadPhoto(file, id) {
+  const storageRef = ref(storage, `members/${id}_${file.name}`);
   await uploadBytes(storageRef, file);
-
   return await getDownloadURL(storageRef);
 }
 
 /* =========================
-   SAVE MEMBER (ADD / EDIT)
+   SAVE MEMBER
 ========================= */
-window.saveMember = async function () {
+window.saveMember = async () => {
 
-  const name = document.getElementById("name").value.trim();
-  const phone = document.getElementById("phone").value.trim();
-  const nid = document.getElementById("nid").value.trim();
-  const photoFile = document.getElementById("photo").files[0];
+  const name = document.getElementById("name").value;
+  const phone = document.getElementById("phone").value;
+  const nid = document.getElementById("nid").value;
+  const file = document.getElementById("photo").files[0];
 
-  if (!validate(name, phone, nid)) return;
+  if (!name || !phone || !nid) {
+    alert("Fill all fields");
+    return;
+  }
+
+  let photoURL = "";
 
   try {
 
-    let photoURL = "";
-
-    /* =========================
-       UPLOAD PHOTO (IF NEW)
-    ========================= */
-    if (photoFile) {
-      photoURL = await uploadPhoto(photoFile, editId || Date.now());
+    if (file) {
+      photoURL = await uploadPhoto(file, editId || Date.now());
     }
 
     if (editId) {
@@ -130,7 +95,7 @@ window.saveMember = async function () {
         ...(photoURL && { photoURL })
       });
 
-      alert("Member updated successfully");
+      alert("Updated successfully");
 
     } else {
 
@@ -138,41 +103,38 @@ window.saveMember = async function () {
         name,
         phone,
         nid,
-        photoURL: photoURL || "",
-        status: "Active",
+        photoURL,
         savings: 0,
         loans: 0,
         remaining: 0,
+        status: "Active",
         createdAt: serverTimestamp()
       });
 
-      alert("Member added successfully");
+      alert("Saved successfully");
     }
 
     closeModal();
-    loadMembers();
 
-  } catch (err) {
-    console.error(err);
+  } catch (e) {
     alert("Error saving member");
   }
 };
 
 /* =========================
-   LOAD MEMBERS (REALTIME)
+   LOAD MEMBERS
 ========================= */
 function loadMembers() {
 
-  onSnapshot(collection(db, "members"), (snap) => {
+  onSnapshot(collection(db, "members"), snap => {
 
-    membersCache = [];
-
+    cache = [];
     table.innerHTML = "";
 
-    snap.forEach(docSnap => {
+    snap.forEach(d => {
 
-      const m = docSnap.data();
-      membersCache.push({ id: docSnap.id, ...m });
+      const m = d.data();
+      cache.push({ id: d.id, ...m });
 
       table.innerHTML += `
         <tr>
@@ -188,31 +150,16 @@ function loadMembers() {
           <td>${m.phone}</td>
           <td>${m.nid}</td>
 
-          <td>${m.savings || 0} ETB</td>
-          <td>${m.loans || 0} ETB</td>
-          <td>${m.remaining || 0} ETB</td>
+          <td>${m.savings || 0}</td>
+          <td>${m.loans || 0}</td>
+          <td>${m.remaining || 0}</td>
 
-          <td>
-            <span class="status active">
-              ${m.status || "Active"}
-            </span>
-          </td>
+          <td>${m.status || "Active"}</td>
 
           <td>
 
-            <button class="btn success"
-              onclick="editMember('${docSnap.id}')">
-
-              Edit
-
-            </button>
-
-            <button class="btn danger"
-              onclick="deleteMember('${docSnap.id}')">
-
-              Delete
-
-            </button>
+            <button onclick="editMember('${d.id}')">Edit</button>
+            <button onclick="deleteMember('${d.id}')">Delete</button>
 
           </td>
 
@@ -223,19 +170,15 @@ function loadMembers() {
 }
 
 /* =========================
-   EDIT MEMBER
+   EDIT
 ========================= */
-window.editMember = function (id) {
+window.editMember = (id) => {
 
-  const m = membersCache.find(x => x.id === id);
-
+  const m = cache.find(x => x.id === id);
   if (!m) return;
 
   editId = id;
-
   modal.style.display = "flex";
-
-  document.getElementById("formTitle").innerText = "Edit Member";
 
   document.getElementById("name").value = m.name;
   document.getElementById("phone").value = m.phone;
@@ -243,79 +186,58 @@ window.editMember = function (id) {
 };
 
 /* =========================
-   DELETE MEMBER
+   DELETE
 ========================= */
-window.deleteMember = async function (id) {
-
-  if (!confirm("Delete this member?")) return;
+window.deleteMember = async (id) => {
+  if (!confirm("Delete member?")) return;
 
   await deleteDoc(doc(db, "members", id));
-
-  alert("Member deleted successfully");
+  alert("Deleted");
 };
 
 /* =========================
    SEARCH
 ========================= */
-searchBox.addEventListener("input", function () {
+searchBox.addEventListener("input", () => {
 
-  const value = this.value.toLowerCase();
+  const val = searchBox.value.toLowerCase();
 
   table.innerHTML = "";
 
-  membersCache
-    .filter(m =>
-      m.name.toLowerCase().includes(value) ||
-      m.phone.includes(value) ||
-      m.nid.includes(value)
-    )
-    .forEach(m => {
+  cache.filter(m =>
+    m.name.toLowerCase().includes(val) ||
+    m.phone.includes(val) ||
+    m.nid.includes(val)
+  ).forEach(m => {
 
-      table.innerHTML += `
-        <tr>
+    table.innerHTML += `
+      <tr>
 
-          <td>
-            <img src="${m.photoURL || 'https://via.placeholder.com/40'}"
-                 width="40"
-                 height="40"
-                 style="border-radius:50%">
-          </td>
+        <td>
+          <img src="${m.photoURL || 'https://via.placeholder.com/40'}"
+               width="40"
+               height="40"
+               style="border-radius:50%">
+        </td>
 
-          <td>${m.name}</td>
-          <td>${m.phone}</td>
-          <td>${m.nid}</td>
+        <td>${m.name}</td>
+        <td>${m.phone}</td>
+        <td>${m.nid}</td>
 
-          <td>${m.savings || 0} ETB</td>
-          <td>${m.loans || 0} ETB</td>
-          <td>${m.remaining || 0} ETB</td>
+        <td>${m.savings || 0}</td>
+        <td>${m.loans || 0}</td>
+        <td>${m.remaining || 0}</td>
 
-          <td>
-            <span class="status active">
-              ${m.status || "Active"}
-            </span>
-          </td>
+        <td>${m.status || "Active"}</td>
 
-          <td>
+        <td>
+          <button onclick="editMember('${m.id}')">Edit</button>
+          <button onclick="deleteMember('${m.id}')">Delete</button>
+        </td>
 
-            <button class="btn success"
-              onclick="editMember('${m.id}')">
-
-              Edit
-
-            </button>
-
-            <button class="btn danger"
-              onclick="deleteMember('${m.id}')">
-
-              Delete
-
-            </button>
-
-          </td>
-
-        </tr>
-      `;
-    });
+      </tr>
+    `;
+  });
 });
 
 /* =========================
