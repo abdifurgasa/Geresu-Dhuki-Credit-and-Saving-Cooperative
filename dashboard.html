@@ -8,22 +8,16 @@
   <meta name="viewport"
         content="width=device-width, initial-scale=1.0">
 
-  <title>SACCO Dashboard</title>
+  <title>Dashboard</title>
 
-  <!-- CSS -->
   <link rel="stylesheet"
         href="css/style.css">
-
-  <!-- CHART JS -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 </head>
 
 <body>
 
-<!-- =========================
-     SIDEBAR
-========================= -->
+<!-- SIDEBAR -->
 <aside class="sidebar"
        id="sidebar">
 
@@ -51,7 +45,12 @@
 
       <span class="icon">📊</span>
 
-      <span class="text">Dashboard</span>
+      <span class="text"
+            data-i18n="dashboard">
+
+        Dashboard
+
+      </span>
 
     </a>
 
@@ -61,7 +60,12 @@
 
       <span class="icon">👥</span>
 
-      <span class="text">Members</span>
+      <span class="text"
+            data-i18n="members">
+
+        Members
+
+      </span>
 
     </a>
 
@@ -71,7 +75,12 @@
 
       <span class="icon">💰</span>
 
-      <span class="text">Savings</span>
+      <span class="text"
+            data-i18n="savings">
+
+        Savings
+
+      </span>
 
     </a>
 
@@ -81,7 +90,12 @@
 
       <span class="icon">🏦</span>
 
-      <span class="text">Loans</span>
+      <span class="text"
+            data-i18n="loans">
+
+        Loans
+
+      </span>
 
     </a>
 
@@ -91,7 +105,12 @@
 
       <span class="icon">💵</span>
 
-      <span class="text">Repayments</span>
+      <span class="text"
+            data-i18n="repayments">
+
+        Repayments
+
+      </span>
 
     </a>
 
@@ -101,7 +120,12 @@
 
       <span class="icon">💱</span>
 
-      <span class="text">Transactions</span>
+      <span class="text"
+            data-i18n="transactions">
+
+        Transactions
+
+      </span>
 
     </a>
 
@@ -111,7 +135,12 @@
 
       <span class="icon">📄</span>
 
-      <span class="text">Reports</span>
+      <span class="text"
+            data-i18n="reports">
+
+        Reports
+
+      </span>
 
     </a>
 
@@ -121,7 +150,12 @@
 
       <span class="icon">👤</span>
 
-      <span class="text">Users</span>
+      <span class="text"
+            data-i18n="users">
+
+        Users
+
+      </span>
 
     </a>
 
@@ -131,7 +165,12 @@
 
       <span class="icon">⚙️</span>
 
-      <span class="text">Settings</span>
+      <span class="text"
+            data-i18n="settings">
+
+        Settings
+
+      </span>
 
     </a>
 
@@ -139,21 +178,16 @@
 
 </aside>
 
-<!-- =========================
-     MAIN
-========================= -->
+<!-- MAIN -->
 <main class="main"
       id="main">
 
-  <!-- =========================
-       TOPBAR
-  ========================= -->
+  <!-- TOPBAR -->
   <div class="topbar">
 
-    <!-- TITLE -->
     <div>
 
-      <h2>
+      <h2 data-i18n="financialDashboard">
 
         Financial Dashboard
 
@@ -161,7 +195,6 @@
 
     </div>
 
-    <!-- RIGHT -->
     <div style="
       display:flex;
       align-items:center;
@@ -172,7 +205,7 @@
       <div class="selected-box"
            id="roleBox">
 
-        Loading...
+        👑 ADMIN
 
       </div>
 
@@ -181,15 +214,24 @@
               class="lang-select"
               onchange="changeLang(this.value)">
 
-        <option value="EN">EN</option>
-        <option value="AM">AM</option>
-        <option value="OR">OR</option>
+        <option value="EN">
+          English
+        </option>
+
+        <option value="AM">
+          አማርኛ
+        </option>
+
+        <option value="OR">
+          Afaan Oromoo
+        </option>
 
       </select>
 
       <!-- LOGOUT -->
       <button class="btn danger"
-              onclick="logoutUser()">
+              onclick="logoutUser()"
+              data-i18n="logout">
 
         Logout
 
@@ -199,18 +241,16 @@
 
   </div>
 
-  <!-- =========================
-       HEADER
-  ========================= -->
+  <!-- HEADER -->
   <div style="margin-top:25px;">
 
-    <h1>
+    <h1 data-i18n="overview">
 
       DASHBOARD OVERVIEW
 
     </h1>
 
-    <p>
+    <p data-i18n="welcome">
 
       Welcome to SACCO Banking System
 
@@ -218,15 +258,13 @@
 
   </div>
 
-  <!-- =========================
-       DASHBOARD CARDS
-  ========================= -->
+  <!-- CARDS -->
   <section class="cards">
 
     <!-- MEMBERS -->
     <div class="card blue">
 
-      <h3>
+      <h3 data-i18n="totalMembers">
 
         Total Members
 
@@ -243,7 +281,7 @@
     <!-- SAVINGS -->
     <div class="card green">
 
-      <h3>
+      <h3 data-i18n="totalSavings">
 
         Total Savings
 
@@ -260,7 +298,7 @@
     <!-- LOANS -->
     <div class="card orange">
 
-      <h3>
+      <h3 data-i18n="totalLoans">
 
         Total Loans
 
@@ -277,7 +315,7 @@
     <!-- PROFIT -->
     <div class="card purple">
 
-      <h3>
+      <h3 data-i18n="netProfit">
 
         Net Profit
 
@@ -293,35 +331,10 @@
 
   </section>
 
-  <!-- =========================
-       RISK ANALYSIS
-  ========================= -->
-  <section style="margin-top:30px;">
-
-    <div class="card red">
-
-      <h3>
-
-        Loan Risk Level
-
-      </h3>
-
-      <p id="riskLevel">
-
-        0%
-
-      </p>
-
-    </div>
-
-  </section>
-
-  <!-- =========================
-       QUICK ACTIONS
-  ========================= -->
+  <!-- QUICK ACTIONS -->
   <section style="margin-top:35px;">
 
-    <h2>
+    <h2 data-i18n="quickActions">
 
       Quick Actions
 
@@ -334,7 +347,7 @@
          class="card teal admin-only"
          style="text-decoration:none;">
 
-        <h3>
+        <h3 data-i18n="addMember">
 
           Add Member
 
@@ -349,7 +362,7 @@
          class="card green"
          style="text-decoration:none;">
 
-        <h3>
+        <h3 data-i18n="depositSavings">
 
           Deposit Savings
 
@@ -364,7 +377,7 @@
          class="card orange"
          style="text-decoration:none;">
 
-        <h3>
+        <h3 data-i18n="createLoan">
 
           Create Loan
 
@@ -374,12 +387,12 @@
 
       </a>
 
-      <!-- REPORTS -->
+      <!-- REPORT -->
       <a href="reports.html"
          class="card red admin-only"
          style="text-decoration:none;">
 
-        <h3>
+        <h3 data-i18n="reports">
 
           Reports
 
@@ -393,12 +406,10 @@
 
   </section>
 
-  <!-- =========================
-       FINANCIAL CHART
-  ========================= -->
+  <!-- ANALYTICS -->
   <section style="margin-top:40px;">
 
-    <h2>
+    <h2 data-i18n="financialAnalytics">
 
       Financial Analytics
 
@@ -412,12 +423,10 @@
 
   </section>
 
-  <!-- =========================
-       LOANS CHART
-  ========================= -->
+  <!-- REPAYMENT -->
   <section style="margin-top:40px;">
 
-    <h2>
+    <h2 data-i18n="loanVsRepayment">
 
       Loans vs Repayments
 
@@ -433,16 +442,14 @@
 
 </main>
 
-<!-- =========================
-     SCRIPT ORDER (IMPORTANT)
-========================= -->
+<!-- CHART -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <!-- LANGUAGE -->
 <script src="js/i18n.js"></script>
 
 <!-- AUTH -->
-<script type="module"
-        src="js/global-auth.js"></script>
+<script src="js/global-auth.js"></script>
 
 <!-- DASHBOARD -->
 <script type="module"
@@ -452,7 +459,7 @@
 <script type="module"
         src="js/session-timeout.js"></script>
 
-<!-- PENALTY ENGINE -->
+<!-- PENALTY -->
 <script type="module"
         src="js/penalty-engine.js"></script>
 
