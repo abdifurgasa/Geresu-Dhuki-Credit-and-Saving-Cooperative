@@ -11,7 +11,6 @@
 
 <body>
 
-<!-- SIDEBAR -->
 <aside class="sidebar" id="sidebar">
 
   <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
@@ -20,25 +19,21 @@
 
   <nav class="nav">
 
-    <a href="dashboard.html" class="nav-item">📊 Dashboard</a>
-    <a href="members.html" class="nav-item active">👥 Members</a>
-    <a href="savings.html" class="nav-item">💰 Savings</a>
-    <a href="loans.html" class="nav-item">🏦 Loans</a>
-    <a href="reports.html" class="nav-item">📄 Reports</a>
+    <a href="dashboard.html">📊 Dashboard</a>
+    <a href="members.html" class="active">👥 Members</a>
+    <a href="savings.html">💰 Savings</a>
+    <a href="loans.html">🏦 Loans</a>
 
   </nav>
 
 </aside>
 
-<!-- MAIN -->
 <main class="main">
 
   <div class="topbar">
     <h2>👥 Members Management</h2>
 
-    <button class="btn add-btn" onclick="openModal()">
-      + Add Member
-    </button>
+    <button class="btn add-btn" onclick="openModal()">+ Add Member</button>
   </div>
 
   <!-- CARDS -->
@@ -67,7 +62,7 @@
   </section>
 
   <!-- SEARCH -->
-  <div class="topbar" style="margin-top:20px;">
+  <div class="topbar">
     <input id="searchBox" class="input" placeholder="Search members...">
   </div>
 
@@ -104,21 +99,17 @@
     <input id="name" class="input" placeholder="Full Name">
     <input id="phone" class="input" placeholder="Phone">
     <input id="nid" class="input" placeholder="National ID">
-
     <input id="photo" type="file" class="input">
 
-    <div style="display:flex; gap:10px; margin-top:15px;">
-
+    <div style="display:flex; gap:10px;">
       <button class="btn add-btn" onclick="saveMember()">Save</button>
       <button class="btn danger" onclick="closeModal()">Cancel</button>
-
     </div>
 
   </div>
 
 </div>
 
-<!-- JS -->
 <script type="module" src="js/members.js"></script>
 
 </body>
