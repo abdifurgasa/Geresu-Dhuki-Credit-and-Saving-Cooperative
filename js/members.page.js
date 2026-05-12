@@ -1,201 +1,226 @@
-async function loadMembers() {
+import {
+  onSnapshot
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-  table.innerHTML = "";
+/* =========================
+   REALTIME MEMBERS SYSTEM
+========================= */
 
-  /* =========================
-     LOAD COLLECTIONS
-  ========================= */
+function loadMembersRealtime() {
 
-  const memberSnap =
-    await getDocs(collection(db, "members"));
+  onSnapshot(
+    collection(db, "members"),
 
-  const savingsSnap =
-    await getDocs(collection(db, "savings"));
+    async (memberSnap) => {
 
-  const loansSnap =
-    await getDocs(collection(db, "loans"));
+      table.innerHTML = "";
 
-  const repaymentsSnap =
-    await getDocs(collection(db, "repayments"));
+      /* =========================
+         LOAD OTHER COLLECTIONS
+      ========================= */
 
-  /* =========================
-     LOOP MEMBERS
-  ========================= */
+      const savingsSnap =
+        await getDocs(collection(db, "savings"));
 
-  memberSnap.forEach(memberDoc => {
+      const loansSnap =
+        await getDocs(collection(db, "loans"));
 
-    const m = memberDoc.data();
+      const repaymentsSnap =
+        await getDocs(collection(db, "repayments"));
 
-    let totalSavings = 0;
-    let totalLoans = 0;
-    let totalRepayments = 0;
-    let remaining = 0;
+      /* =========================
+         LOOP MEMBERS
+      ========================= */
 
-    /* =========================
-       CALCULATE SAVINGS
-    ========================= */
+      memberSnap.forEach(memberDoc => {
 
-    savingsSnap.forEach(s => {
+        const m = memberDoc.data();
 
-      const saving = s.data();
+        let totalSavings = 0;
+        let totalLoans = 0;
+        let totalRepayments = 0;
 
-      if (saving.memberId === memberDoc.id) {
+        /* =========================
+           SAVINGS
+        ========================= */
 
-        totalSavings += Number(
-          saving.amount || 0
-        );
-      }
-    });
+        savingsSnap.forEach(s => {
 
-    /* =========================
-       CALCULATE LOANS
-    ========================= */
+          const saving = s.data();
 
-    loansSnap.forEach(l => {
+          if (
+            saving.memberId === memberDoc.id
+          ) {
 
-      const loan = l.data();
+            totalSavings += Number(
+              saving.amount || 0
+            );
+          }
+        });
 
-      if (loan.memberId === memberDoc.id) {
+        /* =========================
+           LOANS
+        ========================= */
 
-        totalLoans += Number(
-          loan.totalAmount || loan.amount || 0
-        );
-      }
-    });
+        loansSnap.forEach(l => {
 
-    /* =========================
-       CALCULATE REPAYMENTS
-    ========================= */
+          const loan = l.data();
 
-    repaymentsSnap.forEach(r => {
+          if (
+            loan.memberId === memberDoc.id
+          ) {
 
-      const repayment = r.data();
+            totalLoans += Number(
+              loan.totalAmount ||
+              loan.amount ||
+              0
+            );
+          }
+        });
 
-      if (repayment.memberId === memberDoc.id) {
+        /* =========================
+           REPAYMENTS
+        ========================= */
 
-        totalRepayments += Number(
-          repayment.amount || 0
-        );
-      }
-    });
+        repaymentsSnap.forEach(r => {
 
-    /* =========================
-       REMAINING
-    ========================= */
+          const repayment = r.data();
 
-    remaining =
-      totalLoans - totalRepayments;
+          if (
+            repayment.memberId === memberDoc.id
+          ) {
 
-    /* =========================
-       CREATE ROW
-    ========================= */
+            totalRepayments += Number(
+              repayment.amount || 0
+            );
+          }
+        });
 
-    const row =
-      document.createElement("tr");
+        /* =========================
+           REMAINING
+        ========================= */
 
-    row.innerHTML = `
+        const remaining =
+          totalLoans - totalRepayments;
 
-      <td>
+        /* =========================
+           TABLE ROW
+        ========================= */
 
-        <div style="
-          display:flex;
-          align-items:center;
-          gap:10px;
-        ">
+        const row =
+          document.createElement("tr");
 
-          <img
-            src="${
-              m.photo ||
-              'https://via.placeholder.com/40'
-            }"
+        row.innerHTML = `
 
-            style="
-              width:40px;
-              height:40px;
-              border-radius:50%;
-              object-fit:cover;
-            "
-          >
+          <td>
 
-          <strong>
+            <div style="
+              display:flex;
+              align-items:center;
+              gap:10px;
+            ">
 
-            ${m.name}
+              <img
+                src="${
+                  m.photo ||
+                  'https://via.placeholder.com/40'
+                }"
 
-          </strong>
+                style="
+                  width:40px;
+                  height:40px;
+                  border-radius:50%;
+                  object-fit:cover;
+                "
+              >
 
-        </div>
+              <strong>
 
-      </td>
+                ${m.name}
 
-      <td>
+              </strong>
 
-        ${m.phone}
+            </div>
 
-      </td>
+          </td>
 
-      <td>
+          <td>
 
-        ${m.nid}
+            ${m.phone}
 
-      </td>
+          </td>
 
-      <td>
+          <td>
 
-        ${totalSavings.toLocaleString()} ETB
+            ${m.nid}
 
-      </td>
+          </td>
 
-      <td>
+          <td>
 
-        ${totalLoans.toLocaleString()} ETB
+            ${totalSavings.toLocaleString()} ETB
 
-      </td>
+          </td>
 
-      <td>
+          <td>
 
-        ${totalRepayments.toLocaleString()} ETB
+            ${totalLoans.toLocaleString()} ETB
 
-      </td>
+          </td>
 
-      <td>
+          <td>
 
-        ${remaining.toLocaleString()} ETB
+            ${totalRepayments.toLocaleString()} ETB
 
-      </td>
+          </td>
 
-      <td>
+          <td>
 
-        <span class="status active">
+            ${remaining.toLocaleString()} ETB
 
-          ${m.status || "Active"}
+          </td>
 
-        </span>
+          <td>
 
-      </td>
+            <span class="status active">
 
-      <td>
+              ${m.status || "Active"}
 
-        <button
-          class="btn success"
-          onclick="editMember('${memberDoc.id}')"
-        >
+            </span>
 
-          Edit
+          </td>
 
-        </button>
+          <td>
 
-        <button
-          class="btn danger"
-          data-id="${memberDoc.id}"
-        >
+            <button
+              class="btn success"
+              onclick="editMember('${memberDoc.id}')"
+            >
 
-          Delete
+              Edit
 
-        </button>
+            </button>
 
-      </td>
-    `;
+            <button
+              class="btn danger"
+              data-id="${memberDoc.id}"
+            >
 
-    table.appendChild(row);
-  });
+              Delete
+
+            </button>
+
+          </td>
+        `;
+
+        table.appendChild(row);
+      });
+
+      /* =========================
+         UPDATE CARDS
+      ========================= */
+
+      updateDashboardCards(memberSnap);
+    }
+  );
 }
