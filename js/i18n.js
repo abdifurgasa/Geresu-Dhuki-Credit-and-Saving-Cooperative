@@ -1,5 +1,5 @@
 /* =========================
-   LANGUAGE DATA
+   LANGUAGES
 ========================= */
 
 const translations = {
@@ -17,21 +17,18 @@ const translations = {
     settings: "Settings",
 
     overview: "DASHBOARD OVERVIEW",
-    welcome: "Welcome to SACCO Banking System",
+
+    welcome:
+      "Welcome to SACCO Banking System",
 
     totalMembers: "Total Members",
     totalSavings: "Total Savings",
     totalLoans: "Total Loans",
     netProfit: "Net Profit",
 
-    quickActions: "Quick Actions",
-
     addMember: "Add Member",
     depositSavings: "Deposit Savings",
     createLoan: "Create Loan",
-
-    financialAnalytics: "Financial Analytics",
-    loansVsRepayments: "Loans vs Repayments",
 
     logout: "Logout"
   },
@@ -48,22 +45,20 @@ const translations = {
     users: "ተጠቃሚዎች",
     settings: "ቅንብሮች",
 
-    overview: "የዳሽቦርድ አጠቃላይ እይታ",
-    welcome: "ወደ SACCO የባንክ ስርዓት እንኳን በደህና መጡ",
+    overview:
+      "የዳሽቦርድ አጠቃላይ እይታ",
+
+    welcome:
+      "ወደ SACCO ስርዓት እንኳን በደህና መጡ",
 
     totalMembers: "ጠቅላላ አባላት",
     totalSavings: "ጠቅላላ ቁጠባ",
     totalLoans: "ጠቅላላ ብድር",
     netProfit: "የተጣራ ትርፍ",
 
-    quickActions: "ፈጣን እርምጃዎች",
-
     addMember: "አባል ጨምር",
     depositSavings: "ቁጠባ አስገባ",
     createLoan: "ብድር ፍጠር",
-
-    financialAnalytics: "የፋይናንስ ትንታኔ",
-    loansVsRepayments: "ብድር እና ክፍያ",
 
     logout: "ውጣ"
   },
@@ -80,119 +75,97 @@ const translations = {
     users: "Fayyadamtoota",
     settings: "Qindaa'ina",
 
-    overview: "Haala Waliigalaa Daashboordii",
-    welcome: "Baga gara Sirna Baankii SACCO dhuftan",
+    overview:
+      "Haala Waliigalaa Daashboordii",
 
-    totalMembers: "Miseensota Waliigalaa",
-    totalSavings: "Qusannaa Waliigalaa",
-    totalLoans: "Liqii Waliigalaa",
-    netProfit: "Bu'aa Qulqulluu",
+    welcome:
+      "Baga gara SACCO dhuftan",
 
-    quickActions: "Gocha Ariifachiisaa",
+    totalMembers:
+      "Miseensota Waliigalaa",
 
-    addMember: "Miseensa Dabali",
-    depositSavings: "Qusannaa Galchi",
-    createLoan: "Liqii Uumi",
+    totalSavings:
+      "Qusannaa Waliigalaa",
 
-    financialAnalytics: "Xiinxala Faayinaansii",
-    loansVsRepayments: "Liqii fi Kaffaltii",
+    totalLoans:
+      "Liqii Waliigalaa",
+
+    netProfit:
+      "Bu'aa Qulqulluu",
+
+    addMember:
+      "Miseensa Dabali",
+
+    depositSavings:
+      "Qusannaa Galchi",
+
+    createLoan:
+      "Liqii Uumi",
 
     logout: "Ba'i"
   }
 };
 
 /* =========================
-   CHANGE LANGUAGE
+   APPLY LANGUAGE
 ========================= */
 
-window.changeLang = function(lang) {
+function applyLanguage(lang) {
+
+  const elements =
+    document.querySelectorAll("[data-i18n]");
+
+  elements.forEach(el => {
+
+    const key =
+      el.getAttribute("data-i18n");
+
+    if (
+      translations[lang]
+      &&
+      translations[lang][key]
+    ) {
+
+      el.textContent =
+        translations[lang][key];
+    }
+  });
 
   localStorage.setItem("lang", lang);
-
-  const t = translations[lang];
-
-  /* SIDEBAR */
-
-  const navTexts =
-    document.querySelectorAll(".nav .text");
-
-  if (navTexts.length >= 8) {
-
-    navTexts[0].innerText = t.dashboard;
-    navTexts[1].innerText = t.members;
-    navTexts[2].innerText = t.savings;
-    navTexts[3].innerText = t.loans;
-    navTexts[4].innerText = t.repayments;
-    navTexts[5].innerText = t.transactions;
-    navTexts[6].innerText = t.reports;
-    navTexts[7].innerText = t.users;
-
-    if (navTexts[8]) {
-      navTexts[8].innerText = t.settings;
-    }
-  }
-
-  /* HEADER */
-
-  const h1 =
-    document.querySelector("h1");
-
-  if (h1)
-    h1.innerText = t.overview;
-
-  /* WELCOME */
-
-  const welcome =
-    document.querySelector("p");
-
-  if (welcome)
-    welcome.innerText = t.welcome;
-
-  /* CARDS */
-
-  const h3 =
-    document.querySelectorAll(".card h3");
-
-  if (h3.length >= 7) {
-
-    h3[0].innerText = t.totalMembers;
-    h3[1].innerText = t.totalSavings;
-    h3[2].innerText = t.totalLoans;
-    h3[3].innerText = t.netProfit;
-
-    h3[4].innerText = t.addMember;
-    h3[5].innerText = t.depositSavings;
-    h3[6].innerText = t.createLoan;
-
-    if (h3[7]) {
-      h3[7].innerText = "Reports";
-    }
-  }
-
-  /* LOGOUT */
-
-  const logoutBtn =
-    document.querySelector(".btn.danger");
-
-  if (logoutBtn)
-    logoutBtn.innerText = t.logout;
-};
+}
 
 /* =========================
-   LOAD SAVED LANGUAGE
+   GLOBAL CHANGE FUNCTION
 ========================= */
 
-window.addEventListener(
+window.changeLang =
+  function(lang) {
+
+    applyLanguage(lang);
+  };
+
+/* =========================
+   INIT
+========================= */
+
+document.addEventListener(
   "DOMContentLoaded",
   () => {
 
-    const saved =
-      localStorage.getItem("lang") || "EN";
+    const savedLang =
+      localStorage.getItem("lang")
+      || "EN";
 
-    document.getElementById(
-      "langSelect"
-    ).value = saved;
+    const select =
+      document.getElementById(
+        "langSelect"
+      );
 
-    changeLang(saved);
+    if (select) {
+
+      select.value = savedLang;
+    }
+
+    applyLanguage(savedLang);
   }
 );
