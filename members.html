@@ -19,7 +19,6 @@
     .delete-btn{background:#c0392b;color:white;}
     .view-btn{background:#2980b9;color:white;}
 
-    /* Toast */
     .toast{
       position:fixed;
       bottom:20px;
@@ -93,8 +92,8 @@
     <input type="file" id="photo" class="input">
 
     <input id="name" class="input" placeholder="Full Name">
-    <input id="phone" class="input" placeholder="Phone">
-    <input id="nid" class="input" placeholder="NID">
+    <input id="phone" class="input" placeholder="Phone (9 digits)">
+    <input id="nid" class="input" placeholder="NID (16 digits)">
 
     <button class="btn add-btn" onclick="saveMember()">Save Member</button>
     <button class="btn danger" onclick="closeModal()">Close</button>
@@ -106,18 +105,16 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc, query, where } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
- FIREBASE CONFIG
-========================= */
 const firebaseConfig = {
-  apiKey: "AIzaSyCS-3e_WqGHNycDgvlXVkInaynTnvnplYE",
-  authDomain: "geresu-dhuki-sacco.firebaseapp.com",
-  projectId: "geresu-dhuki-sacco",
-  storageBucket: "geresu-dhuki-sacco.appspot.com",
-  messagingSenderId: "944934938425",
-  appId: "1:944934938425:web:caef23f2f3bb34c843eae8"
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_AUTH",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_BUCKET",
+  messagingSenderId: "YOUR_ID",
+  appId: "YOUR_APP_ID"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -132,6 +129,24 @@ function toast(msg){
   t.innerText = msg;
   t.classList.add("show");
   setTimeout(()=>t.classList.remove("show"),2000);
+}
+
+window.openModal = function(){
+  document.getElementById("modal").classList.add("show");
+};
+
+window.closeModal = function(){
+  document.getElementById("modal").classList.remove("show");
+  clearForm();
+};
+
+function clearForm(){
+  currentEditId = null;
+  uploadedImageURL = "";
+  document.getElementById("name").value="";
+  document.getElementById("phone").value="";
+  document.getElementById("nid").value="";
+  document.getElementById("preview").src="https://via.placeholder.com/100";
 }
 
 // IMAGE UPLOAD
@@ -156,22 +171,14 @@ window.onload = () => {
   });
 };
 
-window.openModal = function(){
-  document.getElementById("modal").classList.add("show");
-};
+// VALIDATION + DUPLICATE CHECK
+async function isDuplicate(phone, nid){
+  const q1 = query(collection(db,"members"), where("phone","==",phone));
+  const q2 = query(collection(db,"members"), where("nid","==",nid));
 
-window.closeModal = function(){
-  document.getElementById("modal").classList.remove("show");
-  clearForm();
-};
+  const [snap1, snap2] = await Promise.all([getDocs(q1), getDocs(q2)]);
 
-function clearForm(){
-  currentEditId = null;
-  uploadedImageURL = "";
-  document.getElementById("name").value="";
-  document.getElementById("phone").value="";
-  document.getElementById("nid").value="";
-  document.getElementById("preview").src="https://via.placeholder.com/100";
+  return (!snap1.empty || !snap2.empty);
 }
 
 window.saveMember = async function(){
@@ -179,7 +186,17 @@ window.saveMember = async function(){
   const phone = document.getElementById("phone").value;
   const nid = document.getElementById("nid").value;
 
-  if(!name || !phone || !nid){toast("Fill all fields");return;}
+  // LENGTH VALIDATION
+  if(phone.length !== 9){ toast("Phone must be 9 digits"); return; }
+  if(nid.length !== 16){ toast("NID must be 16 digits"); return; }
+
+  if(!name || !phone || !nid){ toast("Fill all fields"); return; }
+
+  // DUPLICATE CHECK (only for new member or changed data)
+  if(!currentEditId){
+    const dup = await isDuplicate(phone,nid);
+    if(dup){ toast("Phone or NID already exists"); return; }
+  }
 
   if(currentEditId){
     await updateDoc(doc(db,"members",currentEditId),{
@@ -210,7 +227,7 @@ window.openEdit = function(id,m){
 };
 
 window.deleteMember = async function(id){
-  if(!confirm("Delete this member?")) return;
+  if(!confirm("Are you sure?")) return;
   await deleteDoc(doc(db,"members",id));
   toast("Deleted");
   loadMembers();
@@ -240,23 +257,20 @@ async function loadMembers(){
         <td>
           <button class='btn view-btn' onclick='viewMember(${JSON.stringify(m)})'>View</button>
           <button class='btn edit-btn' onclick='openEdit("${d.id}",${JSON.stringify(m)})'>Edit</button>
-          <button class='btn delete-btn' onclick='deleteMember("${d.id}")'>Del</button>
+          <button class='btn delete-btn' onclick='deleteMember("${d.id}")'>Delete</button>
         </td>
       </tr>
     `;
   });
 }
 
-// DASHBOARD COUNTERS
 async function loadCounts(){
   const snap = await getDocs(collection(db,"members"));
   let total=0,active=0;
-
   snap.forEach(d=>{
     total++;
     if(d.data().status=="Active") active++;
   });
-
   document.getElementById("memberCount").innerText=total;
   document.getElementById("activeCount").innerText=active;
 }
