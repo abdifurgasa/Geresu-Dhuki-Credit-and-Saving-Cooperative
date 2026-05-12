@@ -6,7 +6,8 @@ import {
   getDocs,
   deleteDoc,
   updateDoc,
-  doc
+  doc,
+  serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 import {
@@ -16,144 +17,48 @@ import {
   getDownloadURL
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
-/* =========================
-   STORAGE
-========================= */
-
 const storage = getStorage(app);
 
-/* =========================
-   ELEMENTS
-========================= */
-
-const table =
-  document.getElementById("memberTable");
-
-const searchBox =
-  document.getElementById("searchBox");
-
-const modal =
-  document.getElementById("modal");
-
-/* =========================
-   STATE
-========================= */
+const table = document.getElementById("memberTable");
 
 let editId = null;
 
-/* =========================
-   OPEN MODAL
-========================= */
-
-function openModal() {
-
-  modal.style.display = "flex";
-
-  document.getElementById("formTitle")
-    .innerText = "Add Member";
-
-  clearForm();
-
-  editId = null;
-}
-
-/* =========================
-   CLOSE MODAL
-========================= */
-
-function closeModal() {
-
-  modal.style.display = "none";
-
-  clearForm();
-
-  editId = null;
-}
-
-/* =========================
-   CLEAR FORM
-========================= */
-
-function clearForm() {
-
-  document.getElementById("name").value = "";
-
-  document.getElementById("phone").value = "";
-
-  document.getElementById("nid").value = "";
-
-  document.getElementById("photo").value = "";
-
-  document.getElementById("previewImage")
-    .src =
-    "https://via.placeholder.com/100";
-}
-
-/* =========================
+/* =======================
    VALIDATION
-========================= */
-
+======================= */
 function validate(name, phone, nid) {
-
   if (!name || !phone || !nid) {
-
-    alert("All fields are required");
-
+    alert("All fields required");
     return false;
   }
 
-  /* PHONE = 9 DIGITS */
-
-  if (!/^[0-9]{9}$/.test(phone)) {
-
-    alert(
-      "Phone number must be exactly 9 digits"
-    );
-
+  if (!/^\d{9}$/.test(phone)) {
+    alert("Phone must be 9 digits");
     return false;
   }
 
-  /* NID = 16 DIGITS */
-
-  if (!/^[0-9]{16}$/.test(nid)) {
-
-    alert(
-      "National ID must be exactly 16 digits"
-    );
-
+  if (!/^\d{16}$/.test(nid)) {
+    alert("NID must be 16 digits");
     return false;
   }
 
   return true;
 }
 
-/* =========================
+/* =======================
    DUPLICATE CHECK
-========================= */
-
-async function isDuplicate(
-  phone,
-  nid,
-  ignoreId = null
-) {
-
-  const snap =
-    await getDocs(collection(db, "members"));
+======================= */
+async function isDuplicate(phone, nid, ignoreId = null) {
+  const snap = await getDocs(collection(db, "members"));
 
   let found = false;
 
   snap.forEach(d => {
+    if (ignoreId && d.id === ignoreId) return;
 
     const m = d.data();
 
-    if (ignoreId && d.id === ignoreId)
-      return;
-
-    if (
-      m.phone === phone ||
-      m.nid === nid
-    ) {
-
+    if (m.phone === phone || m.nid === nid) {
       found = true;
     }
   });
@@ -161,513 +66,154 @@ async function isDuplicate(
   return found;
 }
 
-/* =========================
+/* =======================
+   OPEN / CLOSE MODAL
+======================= */
+window.openModal = () => {
+  document.getElementById("modal").style.display = "flex";
+  editId = null;
+};
+
+window.closeModal = () => {
+  document.getElementById("modal").style.display = "none";
+};
+
+/* =======================
    SAVE MEMBER
-========================= */
+======================= */
+window.saveMember = async () => {
 
-async function saveMember() {
+  const name = document.getElementById("name").value.trim();
+  const phone = document.getElementById("phone").value.trim();
+  const nid = document.getElementById("nid").value.trim();
+  const file = document.getElementById("photo").files[0];
 
-  const name =
-    document.getElementById("name")
-    .value.trim();
+  if (!validate(name, phone, nid)) return;
 
-  const phone =
-    document.getElementById("phone")
-    .value.trim();
-
-  const nid =
-    document.getElementById("nid")
-    .value.trim();
-
-  const photoFile =
-    document.getElementById("photo")
-    .files[0];
-
-  /* VALIDATE */
-
-  if (!validate(name, phone, nid))
+  if (await isDuplicate(phone, nid, editId)) {
+    alert("Duplicate phone or NID");
     return;
+  }
 
-  /* DUPLICATE CHECK */
+  let photoURL = "";
 
-  const duplicate =
-    await isDuplicate(
+  if (file) {
+    const imgRef = ref(storage, "members/" + Date.now() + file.name);
+    await uploadBytes(imgRef, file);
+    photoURL = await getDownloadURL(imgRef);
+  }
+
+  if (editId) {
+    await updateDoc(doc(db, "members", editId), {
+      name, phone, nid,
+      ...(photoURL && { photo: photoURL })
+    });
+
+    alert("Member updated successfully");
+
+  } else {
+    await addDoc(collection(db, "members"), {
+      name,
       phone,
       nid,
-      editId
-    );
+      photo: photoURL,
+      status: "Active",
+      createdAt: serverTimestamp()
+    });
 
-  if (duplicate) {
-
-    alert(
-      "Duplicate Phone or National ID"
-    );
-
-    return;
+    alert("Member saved successfully");
   }
 
-  try {
+  closeModal();
+  loadMembers();
+  loadCards();
+};
 
-    let photoURL = "";
-
-    /* =========================
-       PHOTO UPLOAD
-    ========================= */
-
-    if (photoFile) {
-
-      const storageRef = ref(
-
-        storage,
-
-        "members/" +
-        Date.now() +
-        "_" +
-        photoFile.name
-      );
-
-      await uploadBytes(
-        storageRef,
-        photoFile
-      );
-
-      photoURL =
-        await getDownloadURL(storageRef);
-    }
-
-    /* =========================
-       UPDATE MEMBER
-    ========================= */
-
-    if (editId) {
-
-      const updateData = {
-
-        name,
-        phone,
-        nid
-      };
-
-      if (photoURL) {
-
-        updateData.photo =
-          photoURL;
-      }
-
-      await updateDoc(
-
-        doc(db, "members", editId),
-
-        updateData
-      );
-
-      alert(
-        "Member updated successfully"
-      );
-    }
-
-    /* =========================
-       ADD MEMBER
-    ========================= */
-
-    else {
-
-      await addDoc(
-
-        collection(db, "members"),
-
-        {
-
-          name,
-          phone,
-          nid,
-
-          photo: photoURL,
-
-          status: "Active",
-
-          verified: true,
-
-          createdAt: new Date()
-        }
-      );
-
-      alert(
-        "Member saved successfully"
-      );
-    }
-
-    closeModal();
-
-    loadMembers();
-
-    loadCards();
-
-  }
-
-  catch (error) {
-
-    console.error(error);
-
-    alert(
-      "Error saving member"
-    );
-  }
-}
-
-/* =========================
+/* =======================
    LOAD MEMBERS
-========================= */
-
+======================= */
 async function loadMembers() {
 
   table.innerHTML = "";
 
-  const memberSnap =
-    await getDocs(collection(db, "members"));
+  const members = await getDocs(collection(db, "members"));
+  const savings = await getDocs(collection(db, "savings"));
+  const loans = await getDocs(collection(db, "loans"));
 
-  const savingsSnap =
-    await getDocs(collection(db, "savings"));
+  members.forEach(mDoc => {
 
-  const loansSnap =
-    await getDocs(collection(db, "loans"));
+    const m = mDoc.data();
 
-  memberSnap.forEach(memberDoc => {
+    let savingTotal = 0;
+    let loanTotal = 0;
+    let remaining = 0;
 
-    const m = memberDoc.data();
-
-    let totalSavings = 0;
-
-    let totalLoans = 0;
-
-    let remainingLoans = 0;
-
-    /* SAVINGS */
-
-    savingsSnap.forEach(s => {
-
-      const saving = s.data();
-
-      if (
-        saving.memberId === memberDoc.id
-      ) {
-
-        totalSavings +=
-          Number(saving.amount || 0);
-      }
+    savings.forEach(s => {
+      if (s.data().memberId === mDoc.id)
+        savingTotal += Number(s.data().amount || 0);
     });
 
-    /* LOANS */
-
-    loansSnap.forEach(l => {
-
-      const loan = l.data();
-
-      if (
-        loan.memberId === memberDoc.id
-      ) {
-
-        totalLoans +=
-          Number(
-            loan.totalAmount || 0
-          );
-
-        remainingLoans +=
-          Number(
-            loan.remaining || 0
-          );
+    loans.forEach(l => {
+      if (l.data().memberId === mDoc.id) {
+        loanTotal += Number(l.data().amount || 0);
+        remaining += Number(l.data().remaining || 0);
       }
     });
 
     table.innerHTML += `
-
       <tr>
-
         <td>
-
-          <div style="
-            display:flex;
-            align-items:center;
-            gap:10px;
-          ">
-
-            <img
-              src="${
-                m.photo ||
-                'https://via.placeholder.com/50'
-              }"
-
-              style="
-                width:50px;
-                height:50px;
-                border-radius:50%;
-                object-fit:cover;
-              "
-            >
-
-            <div>
-
-              <strong>
-
-                ${m.name}
-
-              </strong>
-
-            </div>
-
-          </div>
-
+          <img src="${m.photo || 'https://via.placeholder.com/40'}"
+               style="width:40px;height:40px;border-radius:50%">
+          ${m.name}
         </td>
-
+        <td>${m.phone}</td>
+        <td>${m.nid}</td>
+        <td>${savingTotal}</td>
+        <td>${loanTotal}</td>
+        <td>${remaining}</td>
+        <td>${m.status}</td>
         <td>
-
-          ${m.phone}
-
+          <button onclick="editMember('${mDoc.id}')">Edit</button>
+          <button onclick="deleteMember('${mDoc.id}')">Delete</button>
         </td>
-
-        <td>
-
-          ${m.nid}
-
-        </td>
-
-        <td>
-
-          ${totalSavings.toLocaleString()} ETB
-
-        </td>
-
-        <td>
-
-          ${totalLoans.toLocaleString()} ETB
-
-        </td>
-
-        <td>
-
-          ${remainingLoans.toLocaleString()} ETB
-
-        </td>
-
-        <td>
-
-          <span class="status active">
-
-            ${m.status || "Active"}
-
-          </span>
-
-        </td>
-
-        <td>
-
-          <button
-            class="btn success"
-
-            onclick="editMember(
-              '${memberDoc.id}',
-              '${m.name}',
-              '${m.phone}',
-              '${m.nid}'
-            )"
-          >
-
-            Edit
-
-          </button>
-
-          <button
-            class="btn danger"
-
-            onclick="deleteMember(
-              '${memberDoc.id}'
-            )"
-          >
-
-            Delete
-
-          </button>
-
-        </td>
-
       </tr>
     `;
   });
 }
 
-/* =========================
-   LOAD CARDS
-========================= */
-
+/* =======================
+   CARDS
+======================= */
 async function loadCards() {
+  const snap = await getDocs(collection(db, "members"));
 
-  const snap =
-    await getDocs(collection(db, "members"));
-
-  let total = snap.size;
-
-  let active = 0;
-
-  let verified = 0;
-
-  let newMembers = 0;
-
-  const currentMonth =
-    new Date().getMonth();
-
-  snap.forEach(doc => {
-
-    const m = doc.data();
-
-    if (
-      (m.status || "")
-      .toLowerCase() === "active"
-    ) {
-
-      active++;
-    }
-
-    if (m.verified) {
-
-      verified++;
-    }
-
-    if (m.createdAt) {
-
-      const createdDate =
-        new Date(m.createdAt);
-
-      if (
-        createdDate.getMonth() ===
-        currentMonth
-      ) {
-
-        newMembers++;
-      }
-    }
-  });
-
-  document.getElementById(
-    "memberCount"
-  ).innerText = total;
-
-  document.getElementById(
-    "activeCount"
-  ).innerText = active;
-
-  document.getElementById(
-    "verifiedCount"
-  ).innerText = verified;
-
-  document.getElementById(
-    "newCount"
-  ).innerText = newMembers;
+  document.getElementById("memberCount").innerText = snap.size;
+  document.getElementById("activeCount").innerText = snap.size;
+  document.getElementById("verifiedCount").innerText = snap.size;
+  document.getElementById("newCount").innerText = snap.size;
 }
 
-/* =========================
-   EDIT MEMBER
-========================= */
-
-function editMember(
-  id,
-  name,
-  phone,
-  nid
-) {
-
+/* =======================
+   EDIT
+======================= */
+window.editMember = async (id) => {
   editId = id;
+  document.getElementById("modal").style.display = "flex";
+};
 
-  modal.style.display = "flex";
-
-  document.getElementById("formTitle")
-    .innerText = "Edit Member";
-
-  document.getElementById("name")
-    .value = name;
-
-  document.getElementById("phone")
-    .value = phone;
-
-  document.getElementById("nid")
-    .value = nid;
-}
-
-/* =========================
-   DELETE MEMBER
-========================= */
-
-async function deleteMember(id) {
-
-  if (
-    !confirm(
-      "Delete this member?"
-    )
-  ) return;
-
-  await deleteDoc(
-    doc(db, "members", id)
-  );
-
-  alert(
-    "Member deleted successfully"
-  );
-
+/* =======================
+   DELETE
+======================= */
+window.deleteMember = async (id) => {
+  await deleteDoc(doc(db, "members", id));
+  alert("Deleted successfully");
   loadMembers();
-
   loadCards();
-}
+};
 
-/* =========================
-   SEARCH MEMBERS
-========================= */
-
-searchBox.addEventListener(
-  "input",
-
-  async function () {
-
-    const value =
-      this.value.toLowerCase();
-
-    const rows =
-      table.querySelectorAll("tr");
-
-    rows.forEach(row => {
-
-      if (
-        row.innerText
-          .toLowerCase()
-          .includes(value)
-      ) {
-
-        row.style.display = "";
-
-      } else {
-
-        row.style.display = "none";
-      }
-    });
-  }
-);
-
-/* =========================
-   GLOBAL FUNCTIONS
-========================= */
-
-window.openModal = openModal;
-
-window.closeModal = closeModal;
-
-window.saveMember = saveMember;
-
-window.editMember = editMember;
-
-window.deleteMember = deleteMember;
-
-/* =========================
+/* =======================
    INIT
-========================= */
-
+======================= */
 loadMembers();
-
 loadCards();
