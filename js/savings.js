@@ -15,6 +15,7 @@ import { deposit } from "./wallet.js";
 ========================= */
 
 let selectedMember = null;
+let isProcessing = false; // 🔥 FIX: prevent double click
 
 /* =========================
    SEARCH MEMBERS
@@ -67,10 +68,7 @@ window.searchMembers = async function () {
 
 function selectMember(id, member) {
 
-  selectedMember = {
-    id,
-    ...member
-  };
+  selectedMember = { id, ...member };
 
   document.getElementById("selectedMember").innerHTML = `
     👤 ${member.name}<br>
@@ -82,10 +80,12 @@ function selectMember(id, member) {
 }
 
 /* =========================
-   DEPOSIT SAVINGS
+   DEPOSIT MONEY (FIXED)
 ========================= */
 
 window.depositMoney = async function () {
+
+  if (isProcessing) return; // 🔥 block spam clicks
 
   if (!selectedMember) {
     alert("Select member first");
@@ -99,40 +99,74 @@ window.depositMoney = async function () {
     return;
   }
 
-  /* =========================
-     SAVE SAVINGS RECORD
-  ========================= */
+  try {
+    isProcessing = true; // lock button
 
-  await addDoc(collection(db, "savings"), {
-    memberId: selectedMember.id,
-    memberName: selectedMember.name,
-    phone: selectedMember.phone,
-    amount,
-    type: "saving",
-    createdAt: serverTimestamp(),
-    date: new Date().toISOString()
-  });
+    /* =========================
+       SAVE SAVINGS
+    ========================= */
 
-  /* =========================
-     TRANSACTION LOG
-  ========================= */
+    await addDoc(collection(db, "savings"), {
+      memberId: selectedMember.id,
+      memberName: selectedMember.name,
+      phone: selectedMember.phone,
+      amount,
+      type: "saving",
+      createdAt: serverTimestamp(),
+      date: new Date().toISOString()
+    });
 
-  await addDoc(collection(db, "transactions"), {
-    memberId: selectedMember.id,
-    memberName: selectedMember.name,
-    type: "saving",
-    amount,
-    createdAt: serverTimestamp(),
-    date: new Date().toISOString()
-  });
+    /* =========================
+       WALLET UPDATE
+    ========================= */
 
-  /* =========================
-     WALLET UPDATE (IMPORTANT FIX)
-  ========================= */
+    await deposit(selectedMember.id, selectedMember.name, amount);
 
-  await deposit(selectedMember.id, selectedMember.name, amount);
+    /* =========================
+       SUCCESS MESSAGE
+    ========================= */
 
-  alert("Deposit successful");
+    alert("✅ Deposited Successfully");
 
-  document.getElementById("amount").value = "";
+    document.getElementById("amount").value = "";
+
+  } catch (error) {
+
+    console.error(error);
+    alert("❌ Deposit failed");
+
+  } finally {
+
+    isProcessing = false; // unlock button
+  }
 };
+
+/* =========================
+   REALTIME TABLE (FIXED UI SAFETY)
+========================= */
+
+function loadSavingsTable() {
+
+  const table = document.getElementById("savingsTable");
+
+  onSnapshot(collection(db, "savings"), (snapshot) => {
+
+    table.innerHTML = "";
+
+    snapshot.forEach(docSnap => {
+
+      const data = docSnap.data();
+
+      table.innerHTML += `
+        <tr>
+          <td>${data.memberName || ""}</td>
+          <td>${data.phone || ""}</td>
+          <td>${data.amount} ETB</td>
+          <td>${new Date(data.date).toLocaleString()}</td>
+        </tr>
+      `;
+    });
+  });
+}
+
+loadSavingsTable();
