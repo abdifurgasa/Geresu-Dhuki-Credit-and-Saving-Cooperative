@@ -1,93 +1,91 @@
-import { db } from "./firebase.js";
+import { db, storage, auth } from "./firebase.js";
 
 import {
   collection,
-  getDocs
+  addDoc,
+  getDocs,
+  serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-/* =========================
-   MEMBER LIST CONTAINER
-========================= */
-const container = document.getElementById("membersList");
+import {
+  ref,
+  uploadBytes,
+  getDownloadURL
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+
+const table = document.getElementById("membersTable");
 
 /* =========================
-   LOAD MEMBERS FUNCTION
+   LOAD MEMBERS TABLE
 ========================= */
 async function loadMembers() {
 
-  try {
+  const snapshot = await getDocs(collection(db, "members"));
 
-    console.log("Loading members...");
+  table.innerHTML = "";
 
-    const snapshot = await getDocs(collection(db, "members"));
+  snapshot.forEach((doc) => {
 
-    console.log("TOTAL MEMBERS:", snapshot.size);
+    const m = doc.data();
 
-    container.innerHTML = "";
-
-    // ❗ IF EMPTY DATABASE
-    if (snapshot.empty) {
-      container.innerHTML = `
-        <div style="padding:20px; color:red;">
-          <h3>No members found</h3>
-          <p>Check Firestore collection: <b>members</b></p>
-        </div>
-      `;
-      return;
-    }
-
-    // ✅ LOOP MEMBERS
-    snapshot.forEach((doc) => {
-
-      const m = doc.data();
-
-      console.log("Member:", doc.id, m);
-
-      container.innerHTML += `
-        <div class="member-card" style="
-          border:1px solid #ddd;
-          padding:10px;
-          margin:10px;
-          border-radius:8px;
-          display:flex;
-          gap:10px;
-          align-items:center;
-        ">
-
-          <img src="${m.photoUrl}" 
-               width="70" 
-               height="70"
-               style="border-radius:50%; object-fit:cover;">
-
-          <div>
-            <h3>${m.name}</h3>
-            <p>📞 ${m.phone}</p>
-            <p>🆔 ${m.nid}</p>
-            <p>💰 Savings: ${m.savings} ETB</p>
-
-            <a href="member-profile.html?id=${doc.id}">
-              View Profile
-            </a>
-          </div>
-
-        </div>
-      `;
-    });
-
-  } catch (error) {
-
-    console.error("ERROR loading members:", error);
-
-    container.innerHTML = `
-      <div style="color:red; padding:20px;">
-        <h3>Firebase Error</h3>
-        <p>${error.message}</p>
-      </div>
+    table.innerHTML += `
+      <tr>
+        <td><img src="${m.photoUrl}" width="50"></td>
+        <td>${m.name}</td>
+        <td>${m.phone}</td>
+        <td>${m.nid}</td>
+        <td>${m.savings}</td>
+        <td>${m.loanTotal}</td>
+        <td>${m.status}</td>
+      </tr>
     `;
-  }
+  });
+
 }
 
 /* =========================
-   INIT
+   ADD MEMBER
 ========================= */
+document.getElementById("memberForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const name = document.getElementById("name").value;
+  const phone = document.getElementById("phone").value;
+  const nid = document.getElementById("nid").value;
+  const photo = document.getElementById("photo").files[0];
+
+  const photoRef = ref(storage, "members/" + Date.now() + photo.name);
+  await uploadBytes(photoRef, photo);
+
+  const photoUrl = await getDownloadURL(photoRef);
+
+  const user = auth.currentUser;
+
+  await addDoc(collection(db, "members"), {
+    name,
+    phone,
+    nid,
+    photoUrl,
+
+    savings: 0,
+    loanTotal: 0,
+    loanRemaining: 0,
+
+    status: "active",
+    isDeleted: false,
+
+    createdAt: serverTimestamp(),
+    createdBy: user?.uid || "system",
+
+    lastUpdatedAt: serverTimestamp(),
+    lastUpdatedBy: user?.uid || "system"
+  });
+
+  alert("Member added!");
+
+  closeModal();
+  loadMembers();
+});
+
+/* INIT */
 loadMembers();
