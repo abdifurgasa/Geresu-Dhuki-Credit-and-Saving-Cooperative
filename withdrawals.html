@@ -4,336 +4,133 @@
 <head>
 
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1.0">
+  <title data-i18n="withdrawalsModule">Withdrawals Module</title>
 
-  <title>
-
-    Withdrawals Module
-
-  </title>
-
-  <!-- CSS -->
-  <link rel="stylesheet"
-        href="css/style.css">
+  <link rel="stylesheet" href="css/style.css">
 
 </head>
 
 <body>
 
-<!-- =========================
-     SIDEBAR
-========================= -->
-<aside class="sidebar"
-       id="sidebar">
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
 
-  <!-- TOGGLE -->
-  <button class="toggle-btn"
-          onclick="toggleSidebar()">
+  <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
 
-    ☰
+  <h2 class="logo">🏦 SACCO</h2>
 
-  </button>
-
-  <!-- LOGO -->
-  <h2 class="logo">
-
-    🏦 SACCO
-
-  </h2>
-
-  <!-- NAVIGATION -->
   <nav class="nav">
 
-    <!-- DASHBOARD -->
-    <a href="dashboard.html"
-       class="nav-item">
-
+    <a href="dashboard.html" class="nav-item">
       <span class="icon">📊</span>
-
-      <span class="text">
-
-        Dashboard
-
-      </span>
-
+      <span class="text" data-i18n="dashboard">Dashboard</span>
     </a>
 
-    <!-- MEMBERS -->
-    <a href="members.html"
-       class="nav-item">
-
+    <a href="members.html" class="nav-item">
       <span class="icon">👥</span>
-
-      <span class="text">
-
-        Members
-
-      </span>
-
+      <span class="text" data-i18n="members">Members</span>
     </a>
 
-    <!-- SAVINGS -->
-    <a href="savings.html"
-       class="nav-item">
-
+    <a href="savings.html" class="nav-item">
       <span class="icon">💰</span>
-
-      <span class="text">
-
-        Savings
-
-      </span>
-
+      <span class="text" data-i18n="savings">Savings</span>
     </a>
 
-    <!-- LOANS -->
-    <a href="loans.html"
-       class="nav-item">
-
+    <a href="loans.html" class="nav-item">
       <span class="icon">🏦</span>
-
-      <span class="text">
-
-        Loans
-
-      </span>
-
+      <span class="text" data-i18n="loans">Loans</span>
     </a>
 
-    <!-- REPAYMENTS -->
-    <a href="repayments.html"
-       class="nav-item">
-
+    <a href="repayments.html" class="nav-item">
       <span class="icon">💵</span>
-
-      <span class="text">
-
-        Repayments
-
-      </span>
-
+      <span class="text" data-i18n="repayments">Repayments</span>
     </a>
 
-    <!-- WITHDRAWALS -->
-    <a href="withdrawals.html"
-       class="nav-item active">
-
+    <a href="withdrawals.html" class="nav-item active">
       <span class="icon">💸</span>
-
-      <span class="text">
-
-        Withdrawals
-
-      </span>
-
-    </a>
-
-    <!-- TRANSACTIONS -->
-    <a href="transactions.html"
-       class="nav-item">
-
-      <span class="icon">💱</span>
-
-      <span class="text">
-
-        Transactions
-
-      </span>
-
-    </a>
-
-    <!-- REPORTS -->
-    <a href="reports.html"
-       class="nav-item">
-
-      <span class="icon">📄</span>
-
-      <span class="text">
-
-        Reports
-
-      </span>
-
-    </a>
-
-    <!-- USERS -->
-    <a href="users.html"
-       class="nav-item">
-
-      <span class="icon">👤</span>
-
-      <span class="text">
-
-        Users
-
-      </span>
-
-    </a>
-
-    <!-- SETTINGS -->
-    <a href="settings.html"
-       class="nav-item">
-
-      <span class="icon">⚙️</span>
-
-      <span class="text">
-
-        Settings
-
-      </span>
-
+      <span class="text" data-i18n="withdrawals">Withdrawals</span>
     </a>
 
   </nav>
 
 </aside>
 
-<!-- =========================
-     MAIN CONTENT
-========================= -->
-<main class="main"
-      id="main">
+<!-- MAIN -->
+<main class="main" id="main">
 
   <!-- TOPBAR -->
   <div class="topbar">
 
-    <div>
+    <h2 data-i18n="withdrawalsManagement">Withdrawals Management</h2>
 
-      <h2>
+    <div style="display:flex; gap:10px; align-items:center;">
 
-        💸 Withdrawals Management
+      <!-- LANGUAGE -->
+      <select id="langSelect" class="lang-select" onchange="changeLang(this.value)">
 
-      </h2>
+        <option value="EN">EN</option>
+        <option value="AM">AM</option>
+        <option value="OR">OR</option>
 
-    </div>
+      </select>
 
-    <div class="selected-box">
-
-      👑 ADMIN
+      <div class="selected-box">👑 ADMIN</div>
 
     </div>
 
   </div>
 
-  <!-- PAGE HEADER -->
+  <!-- HEADER -->
   <div style="margin-top:25px;">
-
-    <h1>
-
-      WITHDRAWAL MODULE
-
-    </h1>
-
-    <p>
-
-      Manage SACCO withdrawal expenses
-
-    </p>
-
+    <h1 data-i18n="withdrawalModule">WITHDRAWAL MODULE</h1>
+    <p data-i18n="manageWithdrawals">Manage SACCO withdrawal expenses</p>
   </div>
 
-  <!-- DASHBOARD CARDS -->
+  <!-- CARDS -->
   <section class="cards">
 
-    <!-- TOTAL WITHDRAWALS -->
     <div class="card red">
-
-      <h3>
-
-        Total Withdrawals
-
-      </h3>
-
-      <p id="totalWithdrawals">
-
-        0 ETB
-
-      </p>
-
+      <h3 data-i18n="totalWithdrawals">Total Withdrawals</h3>
+      <p id="totalWithdrawals">0 ETB</p>
     </div>
 
-    <!-- RECORDS -->
     <div class="card blue">
-
-      <h3>
-
-        Total Records
-
-      </h3>
-
-      <p id="withdrawCount">
-
-        0
-
-      </p>
-
+      <h3 data-i18n="totalRecords">Total Records</h3>
+      <p id="withdrawCount">0</p>
     </div>
 
   </section>
 
-  <!-- =========================
-       WITHDRAWAL FORM
-  ========================= -->
+  <!-- FORM -->
   <section style="margin-top:30px;">
 
     <div class="card">
 
-      <h2>
+      <h2 data-i18n="newWithdrawal">💸 New Withdrawal</h2>
 
-        💸 New Withdrawal
+      <input id="withdrawer" class="input" type="text" data-i18n-placeholder="withdrawerName">
 
-      </h2>
+      <input id="withdrawAmount" class="input" type="number" data-i18n-placeholder="withdrawAmount">
 
-      <!-- WITHDRAWER -->
-      <input
-        type="text"
-        id="withdrawer"
-        class="input"
-        placeholder="Withdrawer Name">
+      <textarea id="withdrawReason" class="input" data-i18n-placeholder="withdrawReason"
+        style="min-height:120px;"></textarea>
 
-      <!-- AMOUNT -->
-      <input
-        type="number"
-        id="withdrawAmount"
-        class="input"
-        placeholder="Withdrawal Amount">
-
-      <!-- REASON -->
-      <textarea
-        id="withdrawReason"
-        class="input"
-        placeholder="Reason of Withdrawal"
-        style="
-          min-height:120px;
-        "></textarea>
-
-      <!-- BUTTON -->
-      <button
-        class="btn danger"
-        onclick="makeWithdrawal()">
-
+      <button class="btn danger" onclick="makeWithdrawal()" data-i18n="withdrawNow">
         Withdraw Now
-
       </button>
 
     </div>
 
   </section>
 
-  <!-- =========================
-       WITHDRAWAL TABLE
-  ========================= -->
+  <!-- TABLE -->
   <section style="margin-top:30px;">
 
     <div class="card">
 
-      <h2>
-
-        Withdrawal History
-
-      </h2>
+      <h2 data-i18n="withdrawalHistory">Withdrawal History</h2>
 
       <div style="overflow-x:auto;">
 
@@ -342,38 +139,16 @@
           <thead>
 
             <tr>
-
-              <th>
-
-                Withdrawer
-
-              </th>
-
-              <th>
-
-                Amount
-
-              </th>
-
-              <th>
-
-                Reason
-
-              </th>
-
-              <th>
-
-                Date
-
-              </th>
-
+              <th data-i18n="withdrawer">Withdrawer</th>
+              <th data-i18n="amount">Amount</th>
+              <th data-i18n="reason">Reason</th>
+              <th data-i18n="actionBy">Action By</th>
+              <th data-i18n="date">Date</th>
             </tr>
 
           </thead>
 
-          <tbody id="withdrawTable">
-
-          </tbody>
+          <tbody id="withdrawTable"></tbody>
 
         </table>
 
@@ -385,24 +160,18 @@
 
 </main>
 
-<!-- =========================
-     SIDEBAR SCRIPT
-========================= -->
+<!-- SIDEBAR -->
 <script>
-
 function toggleSidebar() {
-
-  document
-    .getElementById("sidebar")
-    .classList
-    .toggle("collapsed");
+  document.getElementById("sidebar").classList.toggle("collapsed");
 }
-
 </script>
 
-<!-- WITHDRAWALS JS -->
-<script type="module"
-        src="js/withdrawals.js"></script>
+<!-- I18N SYSTEM -->
+<script src="js/i18n.js"></script>
+
+<!-- JS -->
+<script type="module" src="js/withdrawals.js"></script>
 
 </body>
 </html>
