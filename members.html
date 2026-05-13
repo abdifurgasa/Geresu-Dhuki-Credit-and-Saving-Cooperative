@@ -4,54 +4,79 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Members</title>
+  <title data-i18n="members">Members</title>
+
   <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
 
-<!-- SIDEBAR LOADS FROM layout.js -->
-<div class="overlay"></div>
+<!-- SIDEBAR (same system) -->
+<aside class="sidebar" id="sidebar">
 
+  <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+  <h2 class="logo">🏦 SACCO</h2>
+
+  <nav class="nav">
+
+    <a href="dashboard.html">📊 Dashboard</a>
+    <a href="members.html" class="active">👥 Members</a>
+    <a href="savings.html">💰 Savings</a>
+    <a href="loans.html">🏦 Loans</a>
+    <a href="repayments.html">💵 Repayments</a>
+    <a href="withdrawals.html">💸 Withdrawals</a>
+    <a href="reports.html">📄 Reports</a>
+    <a href="users.html">👤 Users</a>
+    <a href="settings.html">⚙️ Settings</a>
+
+  </nav>
+
+</aside>
+
+<!-- MAIN -->
 <main class="main">
 
   <div class="topbar">
-    <h2>👥 Members Management</h2>
+    <h2 data-i18n="members">Members Management</h2>
+    <div class="selected-box">👑 ADMIN</div>
   </div>
 
-  <!-- CARDS -->
-  <section class="cards">
+  <!-- ADD MEMBER FORM -->
+  <section class="card" style="margin-top:20px;">
 
-    <div class="card blue">
-      <h3>Total Members</h3>
-      <p id="memberCount">0</p>
-    </div>
+    <h2>➕ Add Member</h2>
 
-    <div class="card green">
-      <h3>Active Members</h3>
-      <p id="activeCount">0</p>
-    </div>
+    <input id="name" class="input" placeholder="Full Name">
+    <input id="phone" class="input" placeholder="Phone Number (9 digits)">
+    <input id="nid" class="input" placeholder="National ID (16 digits)">
+
+    <input type="file" id="photo" class="input">
+
+    <button class="btn success" onclick="addMember()">
+      Save Member
+    </button>
 
   </section>
 
-  <!-- ADD MEMBER BUTTON -->
-  <button class="btn success" onclick="openModal()">
-    + Add Member
-  </button>
+  <!-- SEARCH -->
+  <section style="margin-top:20px;">
+    <input id="search" class="input" placeholder="Search member..." oninput="filterMembers()">
+  </section>
 
   <!-- TABLE -->
-  <div style="overflow-x:auto; margin-top:20px;">
+  <section class="card">
+
     <table class="table">
 
       <thead>
         <tr>
+          <th>Photo</th>
           <th>Name</th>
           <th>Phone</th>
           <th>NID</th>
           <th>Savings</th>
           <th>Loans</th>
           <th>Status</th>
-          <th>Action By</th>
           <th>Actions</th>
         </tr>
       </thead>
@@ -59,35 +84,13 @@
       <tbody id="memberTable"></tbody>
 
     </table>
-  </div>
+
+  </section>
 
 </main>
 
-<!-- MODAL -->
-<div id="modal" class="modal">
-
-  <div class="modal-box">
-
-    <h2 id="formTitle">Add Member</h2>
-
-    <input id="name" class="input" placeholder="Full Name">
-    <input id="phone" class="input" placeholder="Phone (9 digits)">
-    <input id="nid" class="input" placeholder="NID (16 digits)">
-
-    <button class="btn success" onclick="saveMember()">
-      Save Member
-    </button>
-
-    <button class="btn danger" onclick="closeModal()">
-      Cancel
-    </button>
-
-  </div>
-
-</div>
-
-<!-- SCRIPTS -->
 <script src="js/layout.js"></script>
+<script src="js/i18n.js"></script>
 <script type="module" src="js/members.js"></script>
 
 </body>
