@@ -25,6 +25,7 @@ const translations = {
     totalMembers: "Total Members",
     totalSavings: "Total Savings",
     totalLoans: "Total Loans",
+    totalWithdrawals: "Total Withdrawals",
     netProfit: "Net Profit",
 
     addMember: "Add Member",
@@ -56,6 +57,7 @@ const translations = {
     totalMembers: "ጠቅላላ አባላት",
     totalSavings: "ጠቅላላ ቁጠባ",
     totalLoans: "ጠቅላላ ብድር",
+    totalWithdrawals: "ጠቅላላ ወጪ",
     netProfit: "የተጣራ ትርፍ",
 
     addMember: "አባል ጨምር",
@@ -92,6 +94,8 @@ const translations = {
 
     totalLoans:
       "Liqii Waliigalaa",
+     totalWithdrawals:
+      "Baasii Waliigalaa",
 
     netProfit:
       "Bu'aa Qulqulluu",
