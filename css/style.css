@@ -752,3 +752,36 @@ select:focus{
 .close-btn:hover {
   background: #dc2626;
 }
+/* =========================
+   CLEAN FINAL OVERRIDES (FIX ALL CONFLICTS)
+========================= */
+
+/* FORCE SINGLE BUTTON STYLE */
+.add-btn {
+  background: linear-gradient(135deg, #2563eb, #1e40af) !important;
+}
+
+/* REMOVE ANY OLD TABLE STYLE CONFLICT */
+.table {
+  display: none !important;
+}
+
+/* ENHANCED MODAL LAYER */
+.modal {
+  backdrop-filter: blur(8px);
+}
+
+/* BETTER PAGE ALIGNMENT */
+.main {
+  padding-bottom: 50px;
+}
+
+/* TABLE WRAPPER FIX */
+.table-card {
+  margin-top: 20px;
+}
+
+/* IMAGE FIX */
+.member-photo {
+  box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+}
