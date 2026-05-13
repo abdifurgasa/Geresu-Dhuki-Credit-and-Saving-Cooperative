@@ -4,103 +4,24 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Members</title>
+  <title>Members List</title>
 
   <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
 
-<!-- SIDEBAR -->
-<aside class="sidebar" id="sidebar">
+  <div class="container">
 
-  <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
-  <h2 class="logo">🏦 SACCO</h2>
+    <h2>👥 Members List</h2>
 
-  <nav class="nav">
+    <!-- MEMBERS CONTAINER -->
+    <div id="membersList"></div>
 
-    <a href="dashboard.html">📊 Dashboard</a>
-    <a href="members.html" class="active">👥 Members</a>
-    <a href="savings.html">💰 Savings</a>
-    <a href="loans.html">🏦 Loans</a>
-    <a href="repayments.html">💵 Repayments</a>
-    <a href="withdrawals.html">💸 Withdrawals</a>
-    <a href="reports.html">📄 Reports</a>
-    <a href="users.html">👤 Users</a>
-    <a href="settings.html">⚙️ Settings</a>
-
-  </nav>
-
-</aside>
-
-<!-- MAIN -->
-<main class="main">
-
-  <div class="topbar">
-    <h2>👥 Members Management</h2>
-    <div class="selected-box">👑 ADMIN</div>
   </div>
 
-  <!-- ADD MEMBER FORM -->
-  <section class="card" style="margin-top:20px;">
-
-    <h2>➕ Add Member</h2>
-
-    <input id="name" class="input" placeholder="Full Name">
-
-    <input id="phone" class="input" placeholder="Phone (9 digits)">
-
-    <input id="nid" class="input" placeholder="National ID (16 digits)">
-
-    <input id="photo" class="input" placeholder="Photo URL">
-
-    <button class="btn success" onclick="addMember()">
-      Save Member
-    </button>
-
-  </section>
-
-  <!-- TABLE -->
-  <section class="card" style="margin-top:20px;">
-
-    <h2>📋 Members List</h2>
-
-    <table class="table">
-
-      <thead>
-        <tr>
-          <th>Photo</th>
-          <th>Name</th>
-          <th>Phone</th>
-          <th>NID</th>
-          <th>Savings</th>
-          <th>Loans</th>
-          <th>Repayment</th>
-          <th>Remaining</th>
-          <th>Status</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-
-      <tbody id="memberTable"></tbody>
-
-    </table>
-
-  </section>
-
-  <!-- AUDIT LOG -->
-  <section class="card" style="margin-top:20px;">
-
-    <h2>🧾 Member Activity Log</h2>
-
-    <div id="memberLogs"></div>
-
-  </section>
-
-</main>
-
-<script src="js/layout.js"></script>
-<script type="module" src="js/members.js"></script>
+  <!-- JS -->
+  <script type="module" src="js/members.js"></script>
 
 </body>
 </html>
