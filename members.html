@@ -4,14 +4,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title data-i18n="members">Members</title>
+  <title>Members</title>
 
   <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
 
-<!-- SIDEBAR (same system) -->
+<!-- SIDEBAR -->
 <aside class="sidebar" id="sidebar">
 
   <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
@@ -37,7 +37,7 @@
 <main class="main">
 
   <div class="topbar">
-    <h2 data-i18n="members">Members Management</h2>
+    <h2>👥 Members Management</h2>
     <div class="selected-box">👑 ADMIN</div>
   </div>
 
@@ -47,10 +47,12 @@
     <h2>➕ Add Member</h2>
 
     <input id="name" class="input" placeholder="Full Name">
-    <input id="phone" class="input" placeholder="Phone Number (9 digits)">
+
+    <input id="phone" class="input" placeholder="Phone (9 digits)">
+
     <input id="nid" class="input" placeholder="National ID (16 digits)">
 
-    <input type="file" id="photo" class="input">
+    <input id="photo" class="input" placeholder="Photo URL">
 
     <button class="btn success" onclick="addMember()">
       Save Member
@@ -58,13 +60,10 @@
 
   </section>
 
-  <!-- SEARCH -->
-  <section style="margin-top:20px;">
-    <input id="search" class="input" placeholder="Search member..." oninput="filterMembers()">
-  </section>
-
   <!-- TABLE -->
-  <section class="card">
+  <section class="card" style="margin-top:20px;">
+
+    <h2>📋 Members List</h2>
 
     <table class="table">
 
@@ -76,6 +75,8 @@
           <th>NID</th>
           <th>Savings</th>
           <th>Loans</th>
+          <th>Repayment</th>
+          <th>Remaining</th>
           <th>Status</th>
           <th>Actions</th>
         </tr>
@@ -87,10 +88,18 @@
 
   </section>
 
+  <!-- AUDIT LOG -->
+  <section class="card" style="margin-top:20px;">
+
+    <h2>🧾 Member Activity Log</h2>
+
+    <div id="memberLogs"></div>
+
+  </section>
+
 </main>
 
 <script src="js/layout.js"></script>
-<script src="js/i18n.js"></script>
 <script type="module" src="js/members.js"></script>
 
 </body>
