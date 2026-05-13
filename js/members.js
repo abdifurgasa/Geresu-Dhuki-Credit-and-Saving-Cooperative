@@ -1,105 +1,52 @@
-import { db, auth } from "./firebase.js";
+import { db } from "./firebase.js";
 
 import {
   collection,
-  addDoc,
-  onSnapshot,
-  doc,
-  updateDoc,
-  increment
+  getDocs
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-/* =========================
-   LOAD MEMBERS
-========================= */
+const container = document.getElementById("membersList");
 
-onSnapshot(collection(db, "members"), snap => {
+async function loadMembers() {
 
-  const table = document.getElementById("memberTable");
-  table.innerHTML = "";
+  try {
 
-  snap.forEach(docSnap => {
+    const snapshot = await getDocs(collection(db, "members"));
 
-    const m = docSnap.data();
+    container.innerHTML = ""; // clear old data
 
-    table.innerHTML += `
-      <tr>
-        <td><img src="${m.photo}" width="40"/></td>
-        <td>${m.name}</td>
-        <td>${m.phone}</td>
-        <td>${m.nid}</td>
-        <td>${m.savings || 0}</td>
-        <td>${m.loans || 0}</td>
-        <td>${m.repayment || 0}</td>
-        <td>${m.remaining || 0}</td>
-        <td>${m.status || "active"}</td>
-        <td>
-          <button onclick="viewLogs('${docSnap.id}')">Logs</button>
-        </td>
-      </tr>
-    `;
-  });
+    snapshot.forEach((doc) => {
 
-});
+      const m = doc.data();
 
-/* =========================
-   ADD MEMBER (FIXED + VALIDATION)
-========================= */
+      container.innerHTML += `
+        <div class="member-card">
 
-window.addMember = async function () {
+          <img src="${m.photoUrl}" alt="photo" width="80" height="80">
 
-  const user = auth.currentUser;
+          <div>
+            <h3>${m.name}</h3>
+            <p>📞 ${m.phone}</p>
+            <p>🆔 ${m.nid}</p>
 
-  const name = document.getElementById("name").value;
-  const phone = document.getElementById("phone").value;
-  const nid = document.getElementById("nid").value;
-  const photo = document.getElementById("photo").value;
+            <p>💰 Savings: ${m.savings} ETB</p>
 
-  /* VALIDATION */
-  if (phone.length !== 9) {
-    return alert("Phone must be 9 digits");
+            <a href="member-profile.html?id=${doc.id}">
+              View Profile
+            </a>
+          </div>
+
+        </div>
+        <hr>
+      `;
+
+    });
+
+  } catch (error) {
+    console.error("Error loading members:", error);
+    container.innerHTML = "Failed to load members.";
   }
 
-  if (nid.length !== 16) {
-    return alert("NID must be 16 digits");
-  }
+}
 
-  await addDoc(collection(db, "members"), {
-
-    name,
-    phone,
-    nid,
-    photo,
-
-    savings: 0,
-    loans: 0,
-    repayment: 0,
-    remaining: 0,
-    status: "active",
-
-    /* ⭐ WHO CREATED MEMBER */
-    createdBy: user?.email || "unknown",
-    createdById: user?.uid || null,
-
-    createdAt: new Date().toISOString()
-
-  });
-
-  alert("Member added successfully");
-
-};
-
-/* =========================
-   VIEW MEMBER LOGS
-========================= */
-
-window.viewLogs = async function (memberId) {
-
-  const logsDiv = document.getElementById("memberLogs");
-
-  logsDiv.innerHTML = `
-    <h4>Logs for Member ID: ${memberId}</h4>
-    <p>✔ Created by admin<br>
-    ✔ Updated savings/loan history appears here (future upgrade)</p>
-  `;
-};
+loadMembers();
