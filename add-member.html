@@ -7,43 +7,42 @@
   <title>Add Member</title>
 
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/forms.css">
 </head>
 
 <body>
 
   <div class="container">
 
-    <h2> + Add New Member</h2>
+    <h2>➕ Add New Member</h2>
 
-    <!-- MEMBER FORM -->
     <form id="memberForm">
 
       <!-- NAME -->
       <label>Full Name</label>
-      <input type="text" id="name" placeholder="Enter full name" required>
+      <input type="text" id="name" required>
 
       <!-- PHONE -->
-      <label>Phone Number</label>
-      <input type="text" id="phone" placeholder="Enter phone number" required>
+      <label>Phone</label>
+      <input type="text" id="phone" required>
 
       <!-- NID -->
       <label>National ID</label>
-      <input type="text" id="nid" placeholder="Enter NID number" required>
+      <input type="text" id="nid" required>
 
       <!-- PHOTO -->
       <label>Profile Photo</label>
       <input type="file" id="photo" accept="image/*" required>
 
-      <!-- SUBMIT -->
-      <button type="submit" class="btn-primary">
-        Save Member
-      </button>
+      <!-- BUTTON -->
+      <button type="submit">Save Member</button>
 
     </form>
 
+    <p id="msg"></p>
+
   </div>
 
-  <!-- JS -->
   <script type="module" src="js/addMember.js"></script>
 
 </body>
