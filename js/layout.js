@@ -9,69 +9,69 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.body.insertAdjacentHTML("afterbegin", sidebarHTML);
 
   /* =========================
-     NOW ELEMENTS EXIST → SAFE TO USE
+     WAIT FOR DOM UPDATE
   ========================= */
+  setTimeout(() => {
 
-  const sidebar = document.querySelector("#sidebar");
+    // initialize sidebar toggle AFTER load
+    initSidebar();
+
+    // APPLY LANGUAGE AFTER sidebar exists
+    applyLanguage();
+
+  }, 50);
+
+});
+
+/* =========================
+   SIDEBAR TOGGLE
+========================= */
+function initSidebar() {
+
+  const sidebar = document.getElementById("sidebar");
   const toggleBtn = document.querySelector(".toggle-btn");
   const overlay = document.querySelector(".overlay");
 
-  /* =========================
-     RESTORE STATE
-  ========================= */
-  const saved = localStorage.getItem("sidebar");
+  if (!sidebar || !toggleBtn) return;
 
-  if (saved === "collapsed" && window.innerWidth > 768) {
-    sidebar.classList.add("collapsed");
-  }
-
-  /* =========================
-     TOGGLE SIDEBAR
-  ========================= */
-  toggleBtn?.addEventListener("click", () => {
+  toggleBtn.addEventListener("click", () => {
 
     if (window.innerWidth <= 768) {
-
       sidebar.classList.toggle("open");
       overlay?.classList.toggle("active");
-
     } else {
-
       sidebar.classList.toggle("collapsed");
-
-      localStorage.setItem(
-        "sidebar",
-        sidebar.classList.contains("collapsed")
-          ? "collapsed"
-          : "expanded"
-      );
     }
 
   });
 
-  /* =========================
-     OVERLAY CLOSE
-  ========================= */
   overlay?.addEventListener("click", () => {
-
     sidebar.classList.remove("open");
     overlay.classList.remove("active");
-
   });
 
-  /* =========================
-     ACTIVE MENU FIX
-  ========================= */
-  const current = window.location.pathname.split("/").pop();
+}
 
-  document.querySelectorAll(".nav a").forEach(link => {
+/* =========================
+   MULTI LANGUAGE FIX
+========================= */
+function applyLanguage() {
 
-    const href = link.getAttribute("href");
+  const lang = localStorage.getItem("lang") || "EN";
 
-    if (href === current) {
-      link.classList.add("active");
+  document.querySelectorAll("[data-i18n]").forEach(el => {
+
+    const key = el.getAttribute("data-i18n");
+
+    const text = translations?.[lang]?.[key];
+
+    if (text) {
+      el.innerText = text;
     }
 
   });
 
-});
+}
+
+/* expose globally */
+window.applyLanguage = applyLanguage;
