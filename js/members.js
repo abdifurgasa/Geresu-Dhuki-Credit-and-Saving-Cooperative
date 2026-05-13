@@ -5,48 +5,57 @@ import {
   getDocs
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-const container = document.getElementById("membersList");
+document.addEventListener("DOMContentLoaded", () => {
 
-async function loadMembers() {
+  const container = document.getElementById("membersList");
 
-  try {
+  async function loadMembers() {
 
-    const snapshot = await getDocs(collection(db, "members"));
+    try {
 
-    container.innerHTML = ""; // clear old data
+      const snapshot = await getDocs(collection(db, "members"));
 
-    snapshot.forEach((doc) => {
+      container.innerHTML = "";
 
-      const m = doc.data();
+      if (snapshot.empty) {
+        container.innerHTML = "<p>No members found</p>";
+        return;
+      }
 
-      container.innerHTML += `
-        <div class="member-card">
+      snapshot.forEach((doc) => {
 
-          <img src="${m.photoUrl}" alt="photo" width="80" height="80">
+        const m = doc.data();
 
-          <div>
-            <h3>${m.name}</h3>
-            <p>📞 ${m.phone}</p>
-            <p>🆔 ${m.nid}</p>
+        container.innerHTML += `
+          <div class="member-card">
 
-            <p>💰 Savings: ${m.savings} ETB</p>
+            <img src="${m.photoUrl}" alt="photo" width="80" height="80">
 
-            <a href="member-profile.html?id=${doc.id}">
-              View Profile
-            </a>
+            <div>
+              <h3>${m.name}</h3>
+              <p>📞 ${m.phone}</p>
+              <p>🆔 ${m.nid}</p>
+
+              <p>💰 Savings: ${m.savings} ETB</p>
+
+              <a href="member-profile.html?id=${doc.id}">
+                View Profile
+              </a>
+            </div>
+
           </div>
+          <hr>
+        `;
 
-        </div>
-        <hr>
-      `;
+      });
 
-    });
+    } catch (error) {
+      console.error("Error loading members:", error);
+      container.innerHTML = "Failed to load members.";
+    }
 
-  } catch (error) {
-    console.error("Error loading members:", error);
-    container.innerHTML = "Failed to load members.";
   }
 
-}
+  loadMembers();
 
-loadMembers();
+});
