@@ -4,75 +4,57 @@ import {
   collection,
   addDoc,
   getDocs,
-  deleteDoc,
-  doc,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-import {
-  getAuth
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 /* ================= FIREBASE ================= */
 const auth = getAuth();
-const withdrawalsRef = collection(db, "withdrawals");
+const ref = collection(db, "withdrawals");
 
 /* ================= TABLE ================= */
 const table = document.getElementById("withdrawTable");
 
-/* ================= SAVE WITHDRAWAL ================= */
-window.saveWithdrawal = async function () {
+/* ================= INIT ================= */
+window.addEventListener("load", loadWithdrawals);
 
-  const withdrawer =
-    document.getElementById("withdrawer").value.trim();
+/* ================= MAKE WITHDRAWAL ================= */
+window.makeWithdrawal = async function () {
 
-  const amount =
-    Number(document.getElementById("amount").value);
-
-  const reason =
-    document.getElementById("reason").value.trim();
+  const withdrawer = document.getElementById("withdrawer").value.trim();
+  const amount = Number(document.getElementById("withdrawAmount").value);
+  const reason = document.getElementById("withdrawReason").value.trim();
 
   if (!withdrawer || !amount || !reason) {
-    alert("Fill all fields");
+    alert("Please fill all fields");
     return;
   }
 
-  if (amount <= 0) {
-    alert("Invalid amount");
-    return;
-  }
-
-  /* 👇 WHO DID ACTION (REAL AUTH USER) */
   const user = auth.currentUser;
-
-  const actionBy = user
-    ? user.email
-    : "Unknown User";
+  const actionBy = user ? user.email : "Unknown";
 
   try {
 
-    await addDoc(withdrawalsRef, {
-
+    await addDoc(ref, {
       withdrawer,
       amount,
       reason,
-
-      actionBy,   // ✅ WHO DID IT
-
+      actionBy,
       createdAt: serverTimestamp()
-
     });
 
-    alert("Withdrawal saved");
+    alert("Withdrawal saved successfully");
 
-    closeModal();
+    document.getElementById("withdrawer").value = "";
+    document.getElementById("withdrawAmount").value = "";
+    document.getElementById("withdrawReason").value = "";
 
     loadWithdrawals();
 
-  } catch (e) {
+  } catch (err) {
 
-    console.error(e);
-
+    console.error(err);
     alert("Error saving withdrawal");
   }
 };
@@ -82,57 +64,35 @@ async function loadWithdrawals() {
 
   table.innerHTML = "";
 
-  const snap = await getDocs(withdrawalsRef);
+  const snap = await getDocs(ref);
 
   let total = 0;
 
   snap.forEach(d => {
 
     const w = d.data();
-
     total += Number(w.amount || 0);
 
-    table.innerHTML += `
+    const date = w.createdAt
+      ? new Date(w.createdAt.toDate()).toLocaleString()
+      : "-";
 
+    table.innerHTML += `
       <tr>
 
         <td>${w.withdrawer}</td>
-
         <td>${Number(w.amount).toLocaleString()} ETB</td>
-
         <td>${w.reason}</td>
-
         <td>${w.actionBy || "-"}</td>
-
-        <td>${w.createdAt ? "Saved" : ""}</td>
-
-        <td>
-          <button class="btn danger"
-            onclick="deleteWithdrawal('${d.id}')">
-            Delete
-          </button>
-        </td>
+        <td>${date}</td>
 
       </tr>
     `;
   });
 
-  /* optional dashboard sync */
-  const el = document.getElementById("totalWithdrawals");
-  if (el) el.innerText = total.toLocaleString() + " ETB";
+  document.getElementById("totalWithdrawals").innerText =
+    total.toLocaleString() + " ETB";
+
+  document.getElementById("withdrawCount").innerText =
+    snap.size;
 }
-
-/* ================= DELETE ================= */
-window.deleteWithdrawal = async function (id) {
-
-  if (!confirm("Delete this withdrawal?")) return;
-
-  await deleteDoc(doc(db, "withdrawals", id));
-
-  alert("Deleted");
-
-  loadWithdrawals();
-};
-
-/* ================= INIT ================= */
-window.addEventListener("load", loadWithdrawals);
