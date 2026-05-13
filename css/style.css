@@ -264,7 +264,19 @@ h2{
   left:-50%;
   transform:rotate(20deg);
 }
+.logout {
+  background: linear-gradient(135deg, #ff4d4d, #c0392b);
+  color: white !important;
+  border-radius: 10px;
+  margin-top: 12px;
+  font-weight: bold;
+  transition: 0.3s;
+}
 
+.logout:hover {
+  transform: scale(1.05);
+  background: linear-gradient(135deg, #ff1a1a, #a93226);
+}
 /* DIFFERENT COLORS */
 .card.blue{
   background:linear-gradient(135deg,#0ea5e9,#2563eb);
