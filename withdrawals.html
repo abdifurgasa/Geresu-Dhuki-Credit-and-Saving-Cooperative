@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+  <title>
+
+    Withdrawals Module
+
+  </title>
+
+  <!-- CSS -->
+  <link rel="stylesheet"
+        href="css/style.css">
+
+</head>
+
+<body>
+
+<!-- =========================
+     SIDEBAR
+========================= -->
+<aside class="sidebar"
+       id="sidebar">
+
+  <!-- TOGGLE -->
+  <button class="toggle-btn"
+          onclick="toggleSidebar()">
+
+    ☰
+
+  </button>
+
+  <!-- LOGO -->
+  <h2 class="logo">
+
+    🏦 SACCO
+
+  </h2>
+
+  <!-- NAVIGATION -->
+  <nav class="nav">
+
+    <!-- DASHBOARD -->
+    <a href="dashboard.html"
+       class="nav-item">
+
+      <span class="icon">📊</span>
+
+      <span class="text">
+
+        Dashboard
+
+      </span>
+
+    </a>
+
+    <!-- MEMBERS -->
+    <a href="members.html"
+       class="nav-item">
+
+      <span class="icon">👥</span>
+
+      <span class="text">
+
+        Members
+
+      </span>
+
+    </a>
+
+    <!-- SAVINGS -->
+    <a href="savings.html"
+       class="nav-item">
+
+      <span class="icon">💰</span>
+
+      <span class="text">
+
+        Savings
+
+      </span>
+
+    </a>
+
+    <!-- LOANS -->
+    <a href="loans.html"
+       class="nav-item">
+
+      <span class="icon">🏦</span>
+
+      <span class="text">
+
+        Loans
+
+      </span>
+
+    </a>
+
+    <!-- REPAYMENTS -->
+    <a href="repayments.html"
+       class="nav-item">
+
+      <span class="icon">💵</span>
+
+      <span class="text">
+
+        Repayments
+
+      </span>
+
+    </a>
+
+    <!-- WITHDRAWALS -->
+    <a href="withdrawals.html"
+       class="nav-item active">
+
+      <span class="icon">💸</span>
+
+      <span class="text">
+
+        Withdrawals
+
+      </span>
+
+    </a>
+
+    <!-- TRANSACTIONS -->
+    <a href="transactions.html"
+       class="nav-item">
+
+      <span class="icon">💱</span>
+
+      <span class="text">
+
+        Transactions
+
+      </span>
+
+    </a>
+
+    <!-- REPORTS -->
+    <a href="reports.html"
+       class="nav-item">
+
+      <span class="icon">📄</span>
+
+      <span class="text">
+
+        Reports
+
+      </span>
+
+    </a>
+
+    <!-- USERS -->
+    <a href="users.html"
+       class="nav-item">
+
+      <span class="icon">👤</span>
+
+      <span class="text">
+
+        Users
+
+      </span>
+
+    </a>
+
+    <!-- SETTINGS -->
+    <a href="settings.html"
+       class="nav-item">
+
+      <span class="icon">⚙️</span>
+
+      <span class="text">
+
+        Settings
+
+      </span>
+
+    </a>
+
+  </nav>
+
+</aside>
+
+<!-- =========================
+     MAIN CONTENT
+========================= -->
+<main class="main"
+      id="main">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+
+    <div>
+
+      <h2>
+
+        💸 Withdrawals Management
+
+      </h2>
+
+    </div>
+
+    <div class="selected-box">
+
+      👑 ADMIN
+
+    </div>
+
+  </div>
+
+  <!-- PAGE HEADER -->
+  <div style="margin-top:25px;">
+
+    <h1>
+
+      WITHDRAWAL MODULE
+
+    </h1>
+
+    <p>
+
+      Manage SACCO withdrawal expenses
+
+    </p>
+
+  </div>
+
+  <!-- DASHBOARD CARDS -->
+  <section class="cards">
+
+    <!-- TOTAL WITHDRAWALS -->
+    <div class="card red">
+
+      <h3>
+
+        Total Withdrawals
+
+      </h3>
+
+      <p id="totalWithdrawals">
+
+        0 ETB
+
+      </p>
+
+    </div>
+
+    <!-- RECORDS -->
+    <div class="card blue">
+
+      <h3>
+
+        Total Records
+
+      </h3>
+
+      <p id="withdrawCount">
+
+        0
+
+      </p>
+
+    </div>
+
+  </section>
+
+  <!-- =========================
+       WITHDRAWAL FORM
+  ========================= -->
+  <section style="margin-top:30px;">
+
+    <div class="card">
+
+      <h2>
+
+        💸 New Withdrawal
+
+      </h2>
+
+      <!-- WITHDRAWER -->
+      <input
+        type="text"
+        id="withdrawer"
+        class="input"
+        placeholder="Withdrawer Name">
+
+      <!-- AMOUNT -->
+      <input
+        type="number"
+        id="withdrawAmount"
+        class="input"
+        placeholder="Withdrawal Amount">
+
+      <!-- REASON -->
+      <textarea
+        id="withdrawReason"
+        class="input"
+        placeholder="Reason of Withdrawal"
+        style="
+          min-height:120px;
+        "></textarea>
+
+      <!-- BUTTON -->
+      <button
+        class="btn danger"
+        onclick="makeWithdrawal()">
+
+        Withdraw Now
+
+      </button>
+
+    </div>
+
+  </section>
+
+  <!-- =========================
+       WITHDRAWAL TABLE
+  ========================= -->
+  <section style="margin-top:30px;">
+
+    <div class="card">
+
+      <h2>
+
+        Withdrawal History
+
+      </h2>
+
+      <div style="overflow-x:auto;">
+
+        <table class="table">
+
+          <thead>
+
+            <tr>
+
+              <th>
+
+                Withdrawer
+
+              </th>
+
+              <th>
+
+                Amount
+
+              </th>
+
+              <th>
+
+                Reason
+
+              </th>
+
+              <th>
+
+                Date
+
+              </th>
+
+            </tr>
+
+          </thead>
+
+          <tbody id="withdrawTable">
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  </section>
+
+</main>
+
+<!-- =========================
+     SIDEBAR SCRIPT
+========================= -->
+<script>
+
+function toggleSidebar() {
+
+  document
+    .getElementById("sidebar")
+    .classList
+    .toggle("collapsed");
+}
+
+</script>
+
+<!-- WITHDRAWALS JS -->
+<script type="module"
+        src="js/withdrawals.js"></script>
+
+</body>
+</html>
