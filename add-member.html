@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add Member</title>
+
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+  <div class="container">
+
+    <h2> + Add New Member</h2>
+
+    <!-- MEMBER FORM -->
+    <form id="memberForm">
+
+      <!-- NAME -->
+      <label>Full Name</label>
+      <input type="text" id="name" placeholder="Enter full name" required>
+
+      <!-- PHONE -->
+      <label>Phone Number</label>
+      <input type="text" id="phone" placeholder="Enter phone number" required>
+
+      <!-- NID -->
+      <label>National ID</label>
+      <input type="text" id="nid" placeholder="Enter NID number" required>
+
+      <!-- PHOTO -->
+      <label>Profile Photo</label>
+      <input type="file" id="photo" accept="image/*" required>
+
+      <!-- SUBMIT -->
+      <button type="submit" class="btn-primary">
+        Save Member
+      </button>
+
+    </form>
+
+  </div>
+
+  <!-- JS -->
+  <script type="module" src="js/addMember.js"></script>
+
+</body>
+</html>
