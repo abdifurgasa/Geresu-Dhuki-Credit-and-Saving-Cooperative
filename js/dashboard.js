@@ -22,7 +22,20 @@ let role = null;
 let chartsInitialized = false;
 
 /* =========================
-   AUTH + ROLE LOCK (FIXED)
+   GLOBAL STATS
+========================= */
+
+let stats = {
+  members: 0,
+  savings: 0,
+  loans: 0,
+  repayments: 0,
+  withdrawals: 0,
+  outstanding: 0
+};
+
+/* =========================
+   AUTH
 ========================= */
 
 onAuthStateChanged(auth, async (user) => {
@@ -35,14 +48,7 @@ onAuthStateChanged(auth, async (user) => {
   const userRef = doc(db, "users", user.uid);
   const snap = await getDoc(userRef);
 
-  if (!snap.exists()) {
-    alert("User not found");
-    return;
-  }
-
   role = snap.data().role;
-
-  localStorage.setItem("role", role);
 
   document.getElementById("roleBox").innerText =
     role === "admin" ? "👑 Admin" : "👤 Member";
@@ -63,14 +69,6 @@ onAuthStateChanged(auth, async (user) => {
 
 function loadAdminDashboard() {
 
-  let stats = {
-    members: 0,
-    savings: 0,
-    loans: 0,
-    repayments: 0,
-    outstanding: 0
-  };
-
   /* MEMBERS */
   onSnapshot(collection(db, "members"), snap => {
     stats.members = snap.size;
@@ -89,7 +87,7 @@ function loadAdminDashboard() {
     document.getElementById("savings").innerText =
       stats.savings.toLocaleString() + " ETB";
 
-    updateCharts(stats);
+    updateDashboard();
   });
 
   /* LOANS */
@@ -107,7 +105,7 @@ function loadAdminDashboard() {
     document.getElementById("loans").innerText =
       stats.loans.toLocaleString() + " ETB";
 
-    updateCharts(stats);
+    updateDashboard();
   });
 
   /* REPAYMENTS */
@@ -119,10 +117,22 @@ function loadAdminDashboard() {
       stats.repayments += Number(d.data().amount || 0);
     });
 
-    document.getElementById("profit").innerText =
-      stats.repayments.toLocaleString() + " ETB";
+    updateDashboard();
+  });
 
-    updateCharts(stats);
+  /* 💸 WITHDRAWALS (NEW FIX) */
+  onSnapshot(collection(db, "withdrawals"), snap => {
+
+    stats.withdrawals = 0;
+
+    snap.forEach(d => {
+      stats.withdrawals += Number(d.data().amount || 0);
+    });
+
+    document.getElementById("withdrawals").innerText =
+      stats.withdrawals.toLocaleString() + " ETB";
+
+    updateDashboard();
   });
 }
 
@@ -142,62 +152,47 @@ function loadMemberDashboard(uid) {
         total.toLocaleString() + " ETB";
     }
   );
-
-  onSnapshot(
-    query(collection(db, "loans"), where("memberId", "==", uid)),
-    snap => {
-      let total = 0;
-      snap.forEach(d => total += Number(d.data().totalAmount || 0));
-
-      document.getElementById("loans").innerText =
-        total.toLocaleString() + " ETB";
-    }
-  );
-
-  onSnapshot(
-    query(collection(db, "repayments"), where("memberId", "==", uid)),
-    snap => {
-      let total = 0;
-      snap.forEach(d => total += Number(d.data().amount || 0));
-
-      document.getElementById("profit").innerText =
-        total.toLocaleString() + " ETB";
-    }
-  );
 }
 
 /* =========================
-   FINANCE RISK ENGINE
+   PROFIT CALCULATION (FIXED)
 ========================= */
 
-function calculateRisk(loans, outstanding) {
+function calculateProfit() {
 
-  if (loans === 0) return 0;
-
-  return (outstanding / loans) * 100;
+  return stats.savings
+    - stats.loans
+    - stats.withdrawals;
 }
 
 /* =========================
-   CHART SYSTEM (ADVANCED)
+   UPDATE DASHBOARD
+========================= */
+
+function updateDashboard() {
+
+  const profit = calculateProfit();
+
+  document.getElementById("profit").innerText =
+    profit.toLocaleString() + " ETB";
+
+  updateCharts();
+}
+
+/* =========================
+   CHARTS
 ========================= */
 
 let financeChart;
 let repaymentChart;
 
-/* =========================
-   UPDATE CHARTS
-========================= */
-
-function updateCharts(stats) {
+function updateCharts() {
 
   if (!chartsInitialized) {
     initCharts();
     chartsInitialized = true;
   }
 
-  const risk = calculateRisk(stats.loans, stats.outstanding);
-
-  /* UPDATE MAIN CHART */
   financeChart.data.datasets[0].data = [
     stats.savings,
     stats.loans,
@@ -206,7 +201,6 @@ function updateCharts(stats) {
 
   financeChart.update();
 
-  /* UPDATE REPAYMENT CHART */
   repaymentChart.data.datasets[0].data = [
     stats.loans,
     stats.repayments,
@@ -214,10 +208,6 @@ function updateCharts(stats) {
   ];
 
   repaymentChart.update();
-
-  /* OPTIONAL RISK DISPLAY */
-  const riskBox = document.getElementById("riskLevel");
-  if (riskBox) riskBox.innerText = risk.toFixed(2) + "%";
 }
 
 /* =========================
@@ -226,35 +216,27 @@ function updateCharts(stats) {
 
 function initCharts() {
 
-  const ctx1 = document.getElementById("dashboardChart");
-  const ctx2 = document.getElementById("repaymentChart");
-
-  financeChart = new Chart(ctx1, {
-
-    type: "bar",
-
-    data: {
-      labels: ["Savings", "Loans", "Repayments"],
-
-      datasets: [{
-        label: "ETB Overview",
-        data: [0, 0, 0]
-      }]
+  financeChart = new Chart(
+    document.getElementById("dashboardChart"),
+    {
+      type: "bar",
+      data: {
+        labels: ["Savings", "Loans", "Repayments"],
+        datasets: [{ data: [0, 0, 0] }]
+      }
     }
-  });
+  );
 
-  repaymentChart = new Chart(ctx2, {
-
-    type: "doughnut",
-
-    data: {
-      labels: ["Loans", "Repayments", "Outstanding"],
-
-      datasets: [{
-        data: [0, 0, 0]
-      }]
+  repaymentChart = new Chart(
+    document.getElementById("repaymentChart"),
+    {
+      type: "doughnut",
+      data: {
+        labels: ["Loans", "Repayments", "Outstanding"],
+        datasets: [{ data: [0, 0, 0] }]
+      }
     }
-  });
+  );
 }
 
 /* =========================
@@ -262,7 +244,6 @@ function initCharts() {
 ========================= */
 
 window.logoutUser = async function () {
-
   await signOut(auth);
   localStorage.clear();
   window.location.href = "index.html";
