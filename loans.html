@@ -2,363 +2,99 @@
 <html lang="en">
 
 <head>
-
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <title>Loan System</title>
+  <title data-i18n="loans">Loans</title>
 
   <link rel="stylesheet" href="css/style.css">
-
 </head>
 
 <body>
-<!-- =========================
-     SIDEBAR
-========================= -->
-<aside class="sidebar"
-       id="sidebar">
 
-   <!-- TOGGLE -->
-  <button class="toggle-btn"
-          onclick="toggleSidebar()">
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
 
-    ☰
+  <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+  <h2 class="logo">🏦 SACCO</h2>
 
-  </button>
-
-  <!-- LOGO -->
-  <h2 class="logo">
-
-    🏦 SACCO
-
-  </h2>
-
-  <!-- NAVIGATION -->
   <nav class="nav">
 
-    <!-- DASHBOARD -->
-    <a href="dashboard.html"
-       class="nav-item active">
-
-      <span class="icon">📊</span>
-
-      <span class="text"
-            data-i18n="dashboard">
-
-        Dashboard
-
-      </span>
-
-    </a>
-
-    <!-- MEMBERS -->
-    <a href="members.html"
-       class="nav-item admin-only">
-
-      <span class="icon">👥</span>
-
-      <span class="text"
-            data-i18n="members">
-
-        Members
-
-      </span>
-
-    </a>
-
-    <!-- SAVINGS -->
-    <a href="savings.html"
-       class="nav-item">
-
-      <span class="icon">💰</span>
-
-      <span class="text"
-            data-i18n="savings">
-
-        Savings
-
-      </span>
-
-    </a>
-
-    <!-- LOANS -->
-    <a href="loans.html"
-       class="nav-item">
-
-      <span class="icon">🏦</span>
-
-      <span class="text"
-            data-i18n="loans">
-
-        Loans
-
-      </span>
-
-    </a>
-
-    <!-- REPAYMENTS -->
-    <a href="repayments.html"
-       class="nav-item">
-
-      <span class="icon">💵</span>
-
-      <span class="text"
-            data-i18n="repayments">
-
-        Repayments
-
-      </span>
-
-    </a>
-
-    <!-- TRANSACTIONS -->
-    <a href="transactions.html"
-       class="nav-item admin-only">
-
-      <span class="icon">💱</span>
-
-      <span class="text"
-            data-i18n="transactions">
-
-        Transactions
-
-      </span>
-
-    </a>
-    
-<!-- WITHDRAWALS -->
-    <a href="withdrawals.html"
-       class="nav-item admin-only">
-
-      <span class="icon">💵</span>
-
-      <span class="text"
-            data-i18n="withdrawals">
-
-        Withdrawals
-
-      </span>
-
-    </a>
-    <!-- REPORTS -->
-    <a href="reports.html"
-       class="nav-item admin-only">
-
-      <span class="icon">📄</span>
-
-      <span class="text"
-            data-i18n="reports">
-
-        Reports
-
-      </span>
-
-    </a>
-
-    <!-- USERS -->
-    <a href="users.html"
-       class="nav-item admin-only">
-
-      <span class="icon">👤</span>
-
-      <span class="text"
-            data-i18n="users">
-
-        Users
-
-      </span>
-
-    </a>
-
-    <!-- SETTINGS -->
-    <a href="settings.html"
-       class="nav-item">
-
-      <span class="icon">⚙️</span>
-
-      <span class="text"
-            data-i18n="settings">
-
-        Settings
-
-      </span>
-
-    </a>
+    <a href="dashboard.html">📊 Dashboard</a>
+    <a href="members.html">👥 Members</a>
+    <a href="savings.html">💰 Savings</a>
+    <a href="loans.html" class="active">🏦 Loans</a>
+    <a href="repayments.html">💵 Repayments</a>
+    <a href="withdrawals.html">💸 Withdrawals</a>
+    <a href="reports.html">📄 Reports</a>
+    <a href="users.html">👤 Users</a>
+    <a href="settings.html">⚙️ Settings</a>
 
   </nav>
 
 </aside>
-  
-<div class="container">
 
-  <!-- =========================
-       TITLE
-  ========================= -->
-  <h1>🏦 LOAN MANAGEMENT SYSTEM</h1>
+<!-- MAIN -->
+<main class="main">
 
-  <!-- =========================
-       SEARCH MEMBER
-  ========================= -->
-  <div class="search-container">
+  <div class="topbar">
+    <h2>🏦 Loan Management</h2>
+    <div class="selected-box">👑 ADMIN</div>
+  </div>
 
-    <input id="memberSearch"
-           class="input"
-           placeholder="Search member (Name / Phone / NID)">
+  <!-- SEARCH MEMBER -->
+  <section class="card" style="margin-top:20px;">
 
-    <button class="btn primary"
-            onclick="searchMembers()">
+    <h2>🔍 Select Member</h2>
 
-      Search
+    <input id="memberId" class="input" placeholder="Member ID">
 
+  </section>
+
+  <!-- LOAN FORM -->
+  <section class="card" style="margin-top:20px;">
+
+    <h2>➕ Create Loan</h2>
+
+    <input id="amount" type="number" class="input" placeholder="Loan Amount">
+
+    <input id="interest" type="number" class="input" placeholder="Interest %">
+
+    <input id="duration" type="number" class="input" placeholder="Duration (months)">
+
+    <button class="btn success" onclick="createLoan()">
+      Create Loan
     </button>
 
-  </div>
+  </section>
 
-  <!-- SEARCH RESULTS -->
-  <div id="searchResults"
-       class="search-results"></div>
+  <!-- TABLE -->
+  <section class="card" style="margin-top:20px;">
 
-  <!-- SELECTED MEMBER -->
-  <div id="selectedMember"
-       class="selected-box">
+    <h2>📜 Loan Records</h2>
 
-    No member selected
+    <table class="table">
 
-  </div>
+      <thead>
+        <tr>
+          <th>Member</th>
+          <th>Principal</th>
+          <th>Interest</th>
+          <th>Total</th>
+          <th>Paid</th>
+          <th>Remaining</th>
+          <th>Status</th>
+        </tr>
+      </thead>
 
-  <!-- =========================
-       LOAN FORM
-  ========================= -->
-  <div class="loan-form">
+      <tbody id="loanTable"></tbody>
 
-    <!-- LOAN AMOUNT -->
-    <input id="loanAmount"
-           class="input"
-           type="number"
-           placeholder="Loan Amount">
+    </table>
 
-    <!-- INTEREST RATE -->
-    <input id="interestRate"
-           class="input"
-           type="number"
-           placeholder="Interest Rate %">
+  </section>
 
-    <!-- 🔥 INTEREST TYPE (IMPORTANT FIX) -->
-    <select id="interestType"
-            class="input">
+</main>
 
-      <option value="simple">
-        Simple Interest
-      </option>
-
-      <option value="compound">
-        Compound Interest
-      </option>
-
-      <option value="flat">
-        Flat Rate Interest
-      </option>
-
-    </select>
-
-    <!-- DURATION -->
-    <input id="duration"
-           class="input"
-           type="number"
-           placeholder="Loan Duration">
-
-    <!-- DURATION TYPE -->
-    <select id="durationType"
-            class="input">
-
-      <option value="months">
-        Months
-      </option>
-
-      <option value="years">
-        Years
-      </option>
-
-    </select>
-
-    <!-- CALCULATE BUTTON -->
-    <button class="btn blue-btn"
-            onclick="calculateLoan()">
-
-      Calculate Loan
-
-    </button>
-
-  </div>
-
-  <!-- =========================
-       LOAN SUMMARY
-  ========================= -->
-  <div class="selected-box">
-
-    <p>
-      Monthly Payment:
-      <strong id="monthlyPayment">0 ETB</strong>
-    </p>
-
-    <p>
-      Total Repayment:
-      <strong id="totalRepayment">0 ETB</strong>
-    </p>
-
-    <p>
-      Total Interest:
-      <strong id="totalInterest">0 ETB</strong>
-    </p>
-
-  </div>
-
-  <!-- =========================
-       CREATE LOAN BUTTON
-  ========================= -->
-  <button class="btn success"
-          onclick="createLoan()">
-
-    Create Loan
-
-  </button>
-
-  <!-- =========================
-       LOAN TABLE
-  ========================= -->
-  <table class="table">
-
-    <thead>
-
-      <tr>
-
-        <th>Member</th>
-        <th>Principal</th>
-        <th>Interest</th>
-        <th>Type</th>
-        <th>Duration</th>
-        <th>Monthly</th>
-        <th>Total</th>
-        <th>Paid</th>
-        <th>Remaining</th>
-        <th>Status</th>
-
-      </tr>
-
-    </thead>
-
-    <tbody id="loanTable">
-
-    </tbody>
-
-  </table>
-
-</div>
-
-<!-- =========================
-     SCRIPT
-========================= -->
+<script src="js/layout.js"></script>
 <script type="module" src="js/loans.js"></script>
 
 </body>
