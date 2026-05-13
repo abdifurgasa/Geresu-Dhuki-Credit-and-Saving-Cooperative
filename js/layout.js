@@ -88,3 +88,15 @@ document.querySelectorAll(".has-submenu > a").forEach(menu => {
   });
 
 });
+document.addEventListener("DOMContentLoaded", async () => {
+
+  const response = await fetch("sidebar.html");
+  const sidebarHTML = await response.text();
+
+  document.body.insertAdjacentHTML("afterbegin", sidebarHTML);
+
+});
+
+window.toggleSidebar = function () {
+  document.getElementById("sidebar").classList.toggle("collapsed");
+};
