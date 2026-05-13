@@ -1,178 +1,152 @@
-/* =========================
-   LANGUAGES
-========================= */
-
 const translations = {
 
-  EN: {
+/* =========================
+   ENGLISH
+========================= */
+EN: {
 
-    dashboard: "Dashboard",
-    members: "Members",
-    savings: "Savings",
-    loans: "Loans",
-    repayments: "Repayments",
-    transactions: "Transactions",
-    withdrawals: "Withdrawals",
-    reports: "Reports",
-    users: "Users",
-    settings: "Settings",
+  dashboard: "Dashboard",
+  members: "Members",
+  savings: "Savings",
+  loans: "Loans",
+  repayments: "Repayments",
+  withdrawals: "Withdrawals",
+  transactions: "Transactions",
+  reports: "Reports",
+  users: "Users",
+  settings: "Settings",
 
-    overview: "DASHBOARD OVERVIEW",
+  financialDashboard: "Financial Dashboard",
+  overview: "Overview",
+  welcome: "Welcome to SACCO Banking System",
 
-    welcome:
-      "Welcome to SACCO Banking System",
+  totalMembers: "Total Members",
+  totalSavings: "Total Savings",
+  totalLoans: "Total Loans",
+  netProfit: "Net Profit",
 
-    totalMembers: "Total Members",
-    totalSavings: "Total Savings",
-    totalLoans: "Total Loans",
-    totalWithdrawals: "Total Withdrawals",
-    netProfit: "Net Profit",
+  quickActions: "Quick Actions",
+  addMember: "Add Member",
+  depositSavings: "Deposit Savings",
+  createLoan: "Create Loan",
 
-    addMember: "Add Member",
-    depositSavings: "Deposit Savings",
-    createLoan: "Create Loan",
+  financialAnalytics: "Financial Analytics",
+  loanVsRepayment: "Loans vs Repayments",
 
-    logout: "Logout"
-  },
+  logout: "Logout"
 
-  AM: {
+},
 
-    dashboard: "ዳሽቦርድ",
-    members: "አባላት",
-    savings: "ቁጠባ",
-    loans: "ብድር",
-    repayments: "ክፍያ",
-    transactions: "ግብይቶች",
-    withdrawals: "ወጪ",
-    reports: "ሪፖርቶች",
-    users: "ተጠቃሚዎች",
-    settings: "ቅንብሮች",
+/* =========================
+   AMHARIC
+========================= */
+AM: {
 
-    overview:
-      "የዳሽቦርድ አጠቃላይ እይታ",
+  dashboard: "ዳሽቦርድ",
+  members: "አባላት",
+  savings: "ቁጠባ",
+  loans: "ብድር",
+  repayments: "መመለሻ",
+  withdrawals: "መውጫ",
+  transactions: "ግብይቶች",
+  reports: "ሪፖርቶች",
+  users: "ተጠቃሚዎች",
+  settings: "ቅንብሮች",
 
-    welcome:
-      "ወደ SACCO ስርዓት እንኳን በደህና መጡ",
+  financialDashboard: "የፋይናንስ ዳሽቦርድ",
+  overview: "አጠቃላይ እይታ",
+  welcome: "ወደ SACCO ስርዓት እንኳን ደህና መጡ",
 
-    totalMembers: "ጠቅላላ አባላት",
-    totalSavings: "ጠቅላላ ቁጠባ",
-    totalLoans: "ጠቅላላ ብድር",
-    totalWithdrawals: "ጠቅላላ ወጪ",
-    netProfit: "የተጣራ ትርፍ",
+  totalMembers: "ጠቅላላ አባላት",
+  totalSavings: "ጠቅላላ ቁጠባ",
+  totalLoans: "ጠቅላላ ብድር",
+  netProfit: "ንጥረ ትርፍ",
 
-    addMember: "አባል ጨምር",
-    depositSavings: "ቁጠባ አስገባ",
-    createLoan: "ብድር ፍጠር",
+  quickActions: "ፈጣን ተግባራት",
+  addMember: "አባል አክል",
+  depositSavings: "ቁጠባ አስገባ",
+  createLoan: "ብድር ፍጠር",
 
-    logout: "ውጣ"
-  },
+  financialAnalytics: "የፋይናንስ ትንተና",
+  loanVsRepayment: "ብድር እና መመለሻ",
 
-  OR: {
+  logout: "ውጣ"
 
-    dashboard: "Daashboordii",
-    members: "Miseensota",
-    savings: "Qusannaa",
-    loans: "Liqii",
-    repayments: "Kaffaltii",
-    transactions: "Daddabarsa",
-    withdrawals: "Baasii",
-    reports: "Ripoortii",
-    users: "Fayyadamtoota",
-    settings: "Qindaa'ina",
+},
 
-    overview:
-      "Haala Waliigalaa Daashboordii",
+/* =========================
+   OROMO
+========================= */
+OR: {
 
-    welcome:
-      "Baga gara SACCO dhuftan",
+  dashboard: "Daashboordii",
+  members: "Miseensota",
+  savings: "Qusannoo",
+  loans: "Liizii",
+  repayments: "Deebii",
+  withdrawals: "Baafata",
+  transactions: "Daldala",
+  reports: "Gabaasa",
+  users: "Fayyadamtoota",
+  settings: "Sirna",
 
-    totalMembers:
-      "Miseensota Waliigalaa",
+  financialDashboard: "Daashboordii Faayinaansii",
+  overview: "Ilaalcha Waliigalaa",
+  welcome: "Baga nagaan gara SACCO dhuftan",
 
-    totalSavings:
-      "Qusannaa Waliigalaa",
+  totalMembers: "Waliigala Miseensota",
+  totalSavings: "Waliigala Qusannoo",
+  totalLoans: "Waliigala Liizii",
+  netProfit: "Bu’aa Netii",
 
-    totalLoans:
-      "Liqii Waliigalaa",
-     totalWithdrawals:
-      "Baasii Waliigalaa",
+  quickActions: "Gochoota Saffisaa",
+  addMember: "Miseensa Dabaluu",
+  depositSavings: "Qusannoo Galchuu",
+  createLoan: "Liizii Uumuu",
 
-    netProfit:
-      "Bu'aa Qulqulluu",
+  financialAnalytics: "Xiinxala Faayinaansii",
+  loanVsRepayment: "Liizii vs Deebii",
 
-    addMember:
-      "Miseensa Dabali",
+  logout: "Ba’i"
 
-    depositSavings:
-      "Qusannaa Galchi",
+}
 
-    createLoan:
-      "Liqii Uumi",
-
-    logout: "Ba'i"
-  }
 };
 
 /* =========================
    APPLY LANGUAGE
 ========================= */
+function applyLanguage() {
 
-function applyLanguage(lang) {
+  const lang = localStorage.getItem("lang") || "EN";
 
-  const elements =
-    document.querySelectorAll("[data-i18n]");
+  document.querySelectorAll("[data-i18n]").forEach(el => {
 
-  elements.forEach(el => {
+    const key = el.getAttribute("data-i18n");
 
-    const key =
-      el.getAttribute("data-i18n");
+    const value = translations?.[lang]?.[key];
 
-    if (
-      translations[lang]
-      &&
-      translations[lang][key]
-    ) {
-
-      el.textContent =
-        translations[lang][key];
+    if (value) {
+      el.innerText = value;
     }
+
   });
 
-  localStorage.setItem("lang", lang);
 }
 
 /* =========================
-   GLOBAL CHANGE FUNCTION
+   CHANGE LANGUAGE
 ========================= */
+window.changeLang = function (lang) {
 
-window.changeLang =
-  function(lang) {
+  localStorage.setItem("lang", lang);
+  applyLanguage();
 
-    applyLanguage(lang);
-  };
+};
 
 /* =========================
-   INIT
+   INIT ON LOAD
 ========================= */
-
-document.addEventListener(
-  "DOMContentLoaded",
-  () => {
-
-    const savedLang =
-      localStorage.getItem("lang")
-      || "EN";
-
-    const select =
-      document.getElementById(
-        "langSelect"
-      );
-
-    if (select) {
-
-      select.value = savedLang;
-    }
-
-    applyLanguage(savedLang);
-  }
-);
+document.addEventListener("DOMContentLoaded", () => {
+  applyLanguage();
+});
