@@ -2,190 +2,67 @@
 <html lang="en">
 
 <head>
-
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title data-i18n="dashboard">Dashboard</title>
 
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1.0">
-
-  <title>Dashboard</title>
-
-  <link rel="stylesheet"
-        href="css/style.css">
-
+  <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
 
 <!-- SIDEBAR -->
-<aside class="sidebar"
-       id="sidebar">
+<aside class="sidebar" id="sidebar">
 
-  <!-- TOGGLE -->
-  <button class="toggle-btn"
-          onclick="toggleSidebar()">
+  <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
 
-    ☰
+  <h2 class="logo">🏦 SACCO</h2>
 
-  </button>
-
-  <!-- LOGO -->
-  <h2 class="logo">
-
-    🏦 SACCO
-
-  </h2>
-
-  <!-- NAVIGATION -->
   <nav class="nav">
 
-    <!-- DASHBOARD -->
-    <a href="dashboard.html"
-       class="nav-item active">
-
+    <a href="dashboard.html" class="nav-item active">
       <span class="icon">📊</span>
-
-      <span class="text"
-            data-i18n="dashboard">
-
-        Dashboard
-
-      </span>
-
+      <span class="text" data-i18n="dashboard">Dashboard</span>
     </a>
 
-    <!-- MEMBERS -->
-    <a href="members.html"
-       class="nav-item admin-only">
-
+    <a href="members.html" class="nav-item admin-only">
       <span class="icon">👥</span>
-
-      <span class="text"
-            data-i18n="members">
-
-        Members
-
-      </span>
-
+      <span class="text" data-i18n="members">Members</span>
     </a>
 
-    <!-- SAVINGS -->
-    <a href="savings.html"
-       class="nav-item">
-
+    <a href="savings.html" class="nav-item">
       <span class="icon">💰</span>
-
-      <span class="text"
-            data-i18n="savings">
-
-        Savings
-
-      </span>
-
+      <span class="text" data-i18n="savings">Savings</span>
     </a>
 
-    <!-- LOANS -->
-    <a href="loans.html"
-       class="nav-item">
-
+    <a href="loans.html" class="nav-item">
       <span class="icon">🏦</span>
-
-      <span class="text"
-            data-i18n="loans">
-
-        Loans
-
-      </span>
-
+      <span class="text" data-i18n="loans">Loans</span>
     </a>
 
-    <!-- REPAYMENTS -->
-    <a href="repayments.html"
-       class="nav-item">
-
+    <a href="repayments.html" class="nav-item">
       <span class="icon">💵</span>
-
-      <span class="text"
-            data-i18n="repayments">
-
-        Repayments
-
-      </span>
-
+      <span class="text" data-i18n="repayments">Repayments</span>
     </a>
 
-    <!-- TRANSACTIONS -->
-    <a href="transactions.html"
-       class="nav-item admin-only">
-
-      <span class="icon">💱</span>
-
-      <span class="text"
-            data-i18n="transactions">
-
-        Transactions
-
-      </span>
-
+    <a href="withdrawals.html" class="nav-item admin-only">
+      <span class="icon">💸</span>
+      <span class="text" data-i18n="withdrawals">Withdrawals</span>
     </a>
-    
-<!-- WITHDRAWALS -->
-    <a href="withdrawals.html"
-       class="nav-item admin-only">
 
-      <span class="icon">💵</span>
-
-      <span class="text"
-            data-i18n="withdrawals">
-
-        Withdrawals
-
-      </span>
-
-    </a>
-    <!-- REPORTS -->
-    <a href="reports.html"
-       class="nav-item admin-only">
-
+    <a href="reports.html" class="nav-item admin-only">
       <span class="icon">📄</span>
-
-      <span class="text"
-            data-i18n="reports">
-
-        Reports
-
-      </span>
-
+      <span class="text" data-i18n="reports">Reports</span>
     </a>
 
-    <!-- USERS -->
-    <a href="users.html"
-       class="nav-item admin-only">
-
+    <a href="users.html" class="nav-item admin-only">
       <span class="icon">👤</span>
-
-      <span class="text"
-            data-i18n="users">
-
-        Users
-
-      </span>
-
+      <span class="text" data-i18n="users">Users</span>
     </a>
 
-    <!-- SETTINGS -->
-    <a href="settings.html"
-       class="nav-item">
-
+    <a href="settings.html" class="nav-item">
       <span class="icon">⚙️</span>
-
-      <span class="text"
-            data-i18n="settings">
-
-        Settings
-
-      </span>
-
+      <span class="text" data-i18n="settings">Settings</span>
     </a>
 
   </nav>
@@ -193,170 +70,48 @@
 </aside>
 
 <!-- MAIN -->
-<main class="main"
-      id="main">
+<main class="main" id="main">
 
-  <!-- TOPBAR -->
   <div class="topbar">
 
-    <div>
+    <h2 data-i18n="financialDashboard">Financial Dashboard</h2>
 
-      <h2 data-i18n="financialDashboard">
-
-        Financial Dashboard
-
-      </h2>
-
-    </div>
-
-    <div style="
-      display:flex;
-      align-items:center;
-      gap:10px;
-    ">
-
-      <!-- ROLE -->
-      <div class="selected-box"
-           id="roleBox">
-
-        👑 ADMIN
-
-      </div>
-
-      <!-- LANGUAGE -->
-      <select id="langSelect"
-              class="lang-select"
-              onchange="changeLang(this.value)">
-
-        <option value="EN">
-          English
-        </option>
-
-        <option value="AM">
-          አማርኛ
-        </option>
-
-        <option value="OR">
-          Afaan Oromoo
-        </option>
-
-      </select>
-
-      <!-- LOGOUT -->
-      <button class="btn danger"
-              onclick="logoutUser()"
-              data-i18n="logout">
-
-        Logout
-
-      </button>
-
-    </div>
+    <div class="selected-box">👑 ADMIN</div>
 
   </div>
 
-  <!-- HEADER -->
   <div style="margin-top:25px;">
-
-    <h1 data-i18n="overview">
-
-      DASHBOARD OVERVIEW
-
-    </h1>
-
-    <p data-i18n="welcome">
-
-      Welcome to SACCO Banking System
-
-    </p>
-
+    <h1 data-i18n="overview">DASHBOARD OVERVIEW</h1>
+    <p data-i18n="welcome">Welcome to SACCO Banking System</p>
   </div>
 
   <!-- CARDS -->
   <section class="cards">
 
-    <!-- MEMBERS -->
     <div class="card blue">
-
-      <h3 data-i18n="totalMembers">
-
-        Total Members
-
-      </h3>
-
-      <p id="members">
-
-        0
-
-      </p>
-
+      <h3 data-i18n="totalMembers">Total Members</h3>
+      <p id="members">0</p>
     </div>
 
-    <!-- SAVINGS -->
     <div class="card green">
-
-      <h3 data-i18n="totalSavings">
-
-        Total Savings
-
-      </h3>
-
-      <p id="savings">
-
-        0 ETB
-
-      </p>
-
+      <h3 data-i18n="totalSavings">Total Savings</h3>
+      <p id="savings">0 ETB</p>
     </div>
 
-    <!-- LOANS -->
     <div class="card orange">
-
-      <h3 data-i18n="totalLoans">
-
-        Total Loans
-
-      </h3>
-
-      <p id="loans">
-
-        0 ETB
-
-      </p>
-
+      <h3 data-i18n="totalLoans">Total Loans</h3>
+      <p id="loans">0 ETB</p>
     </div>
-    
-   <!-- WITHDRAWALS -->
+
+    <!-- ✅ FIXED WITHDRAWALS -->
     <div class="card red">
-
-      <h3 data-i18n="totalwithdrawals">
-
-        Total Withdrawals
-
-      </h3>
-
-      <p id="loans">
-
-        0 ETB
-
-      </p>
-
+      <h3 data-i18n="withdrawals">Total Withdrawals</h3>
+      <p id="withdrawals">0 ETB</p>
     </div>
-    <!-- PROFIT -->
+
     <div class="card purple">
-
-      <h3 data-i18n="netProfit">
-
-        Net Profit
-
-      </h3>
-
-      <p id="profit">
-
-        0 ETB
-
-      </p>
-
+      <h3 data-i18n="netProfit">Net Profit</h3>
+      <p id="profit">0 ETB</p>
     </div>
 
   </section>
@@ -364,135 +119,40 @@
   <!-- QUICK ACTIONS -->
   <section style="margin-top:35px;">
 
-    <h2 data-i18n="quickActions">
-
-      Quick Actions
-
-    </h2>
+    <h2 data-i18n="quickActions">Quick Actions</h2>
 
     <div class="cards">
 
-      <!-- ADD MEMBER -->
-      <a href="members.html"
-         class="card teal admin-only"
-         style="text-decoration:none;">
-
-        <h3 data-i18n="addMember">
-
-          Add Member
-
-        </h3>
-
-        <p>👥</p>
-
+      <a href="members.html" class="card teal admin-only">
+        <h3 data-i18n="addMember">Add Member</h3>
+        👥
       </a>
 
-      <!-- SAVINGS -->
-      <a href="savings.html"
-         class="card green"
-         style="text-decoration:none;">
-
-        <h3 data-i18n="depositSavings">
-
-          Deposit Savings
-
-        </h3>
-
-        <p>💰</p>
-
+      <a href="savings.html" class="card green">
+        <h3 data-i18n="depositSavings">Savings</h3>
+        💰
       </a>
 
-      <!-- LOAN -->
-      <a href="loans.html"
-         class="card orange"
-         style="text-decoration:none;">
-
-        <h3 data-i18n="createLoan">
-
-          Create Loan
-
-        </h3>
-
-        <p>🏦</p>
-
+      <a href="loans.html" class="card orange">
+        <h3 data-i18n="createLoan">Loans</h3>
+        🏦
       </a>
 
-      <!-- REPORT -->
-      <a href="reports.html"
-         class="card red admin-only"
-         style="text-decoration:none;">
-
-        <h3 data-i18n="reports">
-
-          Reports
-
-        </h3>
-
-        <p>📄</p>
-
+      <a href="withdrawals.html" class="card red admin-only">
+        <h3 data-i18n="withdrawals">Withdrawals</h3>
+        💸
       </a>
 
     </div>
 
   </section>
 
-  <!-- =========================
-     CHART SECTION
-========================= -->
-<section style="margin-top:40px;">
+</main>
 
-  <div class="chart-grid">
-
-    <!-- FINANCIAL ANALYTICS -->
-    <div class="card">
-
-      <h2 data-i18n="financialAnalytics">
-
-        Financial Analytics
-
-      </h2>
-
-      <canvas id="dashboardChart"></canvas>
-
-    </div>
-
-    <!-- LOANS VS REPAYMENTS -->
-    <div class="card">
-
-      <h2 data-i18n="loanVsRepayment">
-
-        Loans vs Repayments
-
-      </h2>
-
-      <canvas id="repaymentChart"></canvas>
-
-    </div>
-
-  </div>
-
-</section>
-
-<!-- CHART -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<!-- LANGUAGE -->
+<!-- SCRIPTS -->
+<script src="js/layout.js"></script>
 <script src="js/i18n.js"></script>
-
-<!-- AUTH -->
-<script src="js/global-auth.js"></script>
-
-<!-- DASHBOARD -->
-<script type="module"
-        src="js/dashboard.js"></script>
-
-<!-- SESSION -->
-<script type="module"
-        src="js/session-timeout.js"></script>
-
-<!-- PENALTY -->
-<script type="module"
-        src="js/penalty-engine.js"></script>
+<script type="module" src="js/dashboard.js"></script>
 
 </body>
 </html>
