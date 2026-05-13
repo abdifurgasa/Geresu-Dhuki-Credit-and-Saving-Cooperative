@@ -19,17 +19,14 @@ window.toggleSidebar = function () {
 ========================= */
 onAuthStateChanged(auth, (user) => {
 
-  // If user not logged in
   if (!user) {
-
     window.location.href = "/index.html";
-
   }
 
 });
 
 /* =========================
-   LOGOUT BUTTON
+   PAGE LOADED
 ========================= */
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -41,77 +38,65 @@ document.addEventListener("DOMContentLoaded", () => {
 
       e.preventDefault();
 
-      const confirmLogout = confirm(
-        "Are you sure you want to logout?"
-      );
+      try {
 
-      if (!confirmLogout) return;
+        await signOut(auth);
 
-      await logout();
+        localStorage.clear();
+        sessionStorage.clear();
+
+        window.location.href = "/index.html";
+
+      } catch (error) {
+
+        console.error("Logout failed:", error);
+        alert("Logout failed");
+
+      }
 
     });
 
   }
 
-  // Start session timeout
   startSessionTimeout();
 
 });
 
 /* =========================
-   LOGOUT FUNCTION
-========================= */
-async function logout() {
-
-  try {
-
-    // Firebase logout
-    await signOut(auth);
-
-    // Clear storage
-    localStorage.clear();
-    sessionStorage.clear();
-
-    // Redirect to login/index page
-    window.location.href = "/index.html";
-
-  } catch (error) {
-
-    console.error("Logout Error:", error);
-
-  }
-
-}
-
-/* =========================
    SESSION TIMEOUT
 ========================= */
 
-// 5 minutes
 const SESSION_LIMIT = 5 * 60 * 1000;
 
 let timeout;
 
-/* =========================
-   RESET TIMER
-========================= */
 function resetTimer() {
 
   clearTimeout(timeout);
 
   timeout = setTimeout(async () => {
 
-    alert("Session expired. Please login again.");
+    alert("Session expired");
 
-    await logout();
+    try {
+
+      await signOut(auth);
+
+      localStorage.clear();
+      sessionStorage.clear();
+
+      window.location.href = "/index.html";
+
+    } catch (error) {
+
+      console.error(error);
+
+    }
 
   }, SESSION_LIMIT);
 
 }
 
-/* =========================
-   START SESSION TIMEOUT
-========================= */
 function startSessionTimeout() {
 
   [
