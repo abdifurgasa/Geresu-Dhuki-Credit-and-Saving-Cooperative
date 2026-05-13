@@ -15,7 +15,6 @@ import {
 document.getElementById("memberForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  // FORM DATA
   const name = document.getElementById("name").value;
   const phone = document.getElementById("phone").value;
   const nid = document.getElementById("nid").value;
@@ -23,18 +22,26 @@ document.getElementById("memberForm").addEventListener("submit", async (e) => {
 
   try {
 
-    // 🔥 1. UPLOAD PHOTO TO FIREBASE STORAGE
-    const photoRef = ref(storage, "members/" + Date.now() + "_" + photo.name);
+    // 🚨 VALIDATION (IMPORTANT)
+    if (!photo) {
+      alert("Please select a photo");
+      return;
+    }
+
+    // 🔥 UPLOAD IMAGE
+    const photoRef = ref(
+      storage,
+      "members/" + Date.now() + "_" + photo.name
+    );
 
     await uploadBytes(photoRef, photo);
 
     const photoUrl = await getDownloadURL(photoRef);
 
-    // 👮 CURRENT USER (WHO CREATED MEMBER)
+    // 👮 SAFE USER CHECK
     const user = auth.currentUser;
 
-    // ☁️ 2. SAVE MEMBER TO FIRESTORE
-    await addDoc(collection(db, "members"), {
+    const memberData = {
 
       name,
       phone,
@@ -49,21 +56,24 @@ document.getElementById("memberForm").addEventListener("submit", async (e) => {
       isDeleted: false,
 
       createdAt: serverTimestamp(),
-      createdBy: user ? user.uid : null,
+      createdBy: user ? user.uid : "system",
 
       lastUpdatedAt: serverTimestamp(),
-      lastUpdatedBy: user ? user.uid : null
+      lastUpdatedBy: user ? user.uid : "system"
+    };
 
-    });
+    // ☁️ SAVE TO FIRESTORE
+    await addDoc(collection(db, "members"), memberData);
 
-    // ✅ SUCCESS
+    console.log("MEMBER SAVED:", memberData);
+
     alert("Member added successfully!");
 
     document.getElementById("memberForm").reset();
 
   } catch (error) {
-    console.error("Error adding member:", error);
-    alert("Failed to add member!");
+    console.error("ERROR ADDING MEMBER:", error);
+    alert(error.message);
   }
 
 });
