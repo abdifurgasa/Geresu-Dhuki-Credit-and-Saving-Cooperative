@@ -1,35 +1,131 @@
 import { auth } from "./firebase.js";
-import { signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+import {
+  signOut,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 /* =========================
    SIDEBAR TOGGLE
 ========================= */
-function toggleSidebar() {
-  document.getElementById("sidebar").classList.toggle("collapsed");
+window.toggleSidebar = function () {
+  document
+    .getElementById("sidebar")
+    .classList.toggle("collapsed");
+};
+
+/* =========================
+   AUTH CHECK
+========================= */
+onAuthStateChanged(auth, (user) => {
+
+  // If user not logged in
+  if (!user) {
+
+    window.location.href = "/index.html";
+
+  }
+
+});
+
+/* =========================
+   LOGOUT BUTTON
+========================= */
+document.addEventListener("DOMContentLoaded", () => {
+
+  const logoutBtn = document.getElementById("logoutBtn");
+
+  if (logoutBtn) {
+
+    logoutBtn.addEventListener("click", async (e) => {
+
+      e.preventDefault();
+
+      const confirmLogout = confirm(
+        "Are you sure you want to logout?"
+      );
+
+      if (!confirmLogout) return;
+
+      await logout();
+
+    });
+
+  }
+
+  // Start session timeout
+  startSessionTimeout();
+
+});
+
+/* =========================
+   LOGOUT FUNCTION
+========================= */
+async function logout() {
+
+  try {
+
+    // Firebase logout
+    await signOut(auth);
+
+    // Clear storage
+    localStorage.clear();
+    sessionStorage.clear();
+
+    // Redirect to login/index page
+    window.location.href = "/index.html";
+
+  } catch (error) {
+
+    console.error("Logout Error:", error);
+
+  }
+
 }
 
 /* =========================
-   LOGOUT (ONLY ONE SYSTEM)
+   SESSION TIMEOUT
 ========================= */
-document.addEventListener("DOMContentLoaded", () => {
-  const btn = document.getElementById("logoutBtn");
 
-  if (btn) {
-    btn.addEventListener("click", async (e) => {
-      e.preventDefault();
+// 5 minutes
+const SESSION_LIMIT = 5 * 60 * 1000;
 
-      try {
-        await signOut(auth);
+let timeout;
 
-        // clear all local data
-        localStorage.clear();
+/* =========================
+   RESET TIMER
+========================= */
+function resetTimer() {
 
-        // redirect to index page
-        window.location.href = "/index.html";
+  clearTimeout(timeout);
 
-      } catch (error) {
-        console.error("Logout failed:", error);
-      }
-    });
-  }
-});
+  timeout = setTimeout(async () => {
+
+    alert("Session expired. Please login again.");
+
+    await logout();
+
+  }, SESSION_LIMIT);
+
+}
+
+/* =========================
+   START SESSION TIMEOUT
+========================= */
+function startSessionTimeout() {
+
+  [
+    "click",
+    "mousemove",
+    "keypress",
+    "scroll",
+    "touchstart"
+  ].forEach(event => {
+
+    document.addEventListener(event, resetTimer);
+
+  });
+
+  resetTimer();
+
+}
