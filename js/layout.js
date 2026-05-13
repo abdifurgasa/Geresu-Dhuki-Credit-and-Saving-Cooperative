@@ -1,56 +1,46 @@
 import { auth } from "./firebase.js";
-
-import {
-  signOut,
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 /* =========================
    SIDEBAR TOGGLE
 ========================= */
 window.toggleSidebar = function () {
-  document
-    .getElementById("sidebar")
-    .classList.toggle("collapsed");
+  document.getElementById("sidebar").classList.toggle("collapsed");
 };
 
 /* =========================
-   AUTH CHECK
-========================= */
-onAuthStateChanged(auth, (user) => {
-
-  if (!user) {
-    window.location.href = "/index.html";
-  }
-
-});
-
-/* =========================
-   PAGE LOADED
+   LOGOUT WITH CONFIRMATION
 ========================= */
 document.addEventListener("DOMContentLoaded", () => {
 
-  const logoutBtn = document.getElementById("logoutBtn");
+  const btn = document.getElementById("logoutBtn");
 
-  if (logoutBtn) {
+  if (btn) {
 
-    logoutBtn.addEventListener("click", async (e) => {
+    btn.addEventListener("click", async (e) => {
 
       e.preventDefault();
 
+      // confirmation popup
+      const confirmLogout = confirm("Are you sure you want to logout?");
+
+      if (!confirmLogout) return;
+
       try {
 
+        // Firebase logout
         await signOut(auth);
 
+        // clear local data
         localStorage.clear();
-        sessionStorage.clear();
 
+        // redirect to index page
         window.location.href = "/index.html";
 
       } catch (error) {
 
         console.error("Logout failed:", error);
-        alert("Logout failed");
+        alert("Logout failed!");
 
       }
 
@@ -58,59 +48,4 @@ document.addEventListener("DOMContentLoaded", () => {
 
   }
 
-  startSessionTimeout();
-
 });
-
-/* =========================
-   SESSION TIMEOUT
-========================= */
-
-const SESSION_LIMIT = 5 * 60 * 1000;
-
-let timeout;
-
-function resetTimer() {
-
-  clearTimeout(timeout);
-
-  timeout = setTimeout(async () => {
-
-    alert("Session expired");
-
-    try {
-
-      await signOut(auth);
-
-      localStorage.clear();
-      sessionStorage.clear();
-
-      window.location.href = "/index.html";
-
-    } catch (error) {
-
-      console.error(error);
-
-    }
-
-  }, SESSION_LIMIT);
-
-}
-
-function startSessionTimeout() {
-
-  [
-    "click",
-    "mousemove",
-    "keypress",
-    "scroll",
-    "touchstart"
-  ].forEach(event => {
-
-    document.addEventListener(event, resetTimer);
-
-  });
-
-  resetTimer();
-
-}
