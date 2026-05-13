@@ -3,170 +3,72 @@ import { db } from "./firebase.js";
 import {
   collection,
   addDoc,
-  getDocs,
   onSnapshot,
-  serverTimestamp
+  doc,
+  getDoc,
+  updateDoc,
+  increment
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-import { deposit } from "./wallet.js";
-
 /* =========================
-   GLOBAL STATE
+   LOAD SAVINGS HISTORY
 ========================= */
 
-let selectedMember = null;
-let isProcessing = false; // 🔥 FIX: prevent double click
-
-/* =========================
-   SEARCH MEMBERS
-========================= */
-
-window.searchMembers = async function () {
-
-  const keyword = document.getElementById("memberSearch")
-    .value.toLowerCase().trim();
-
-  const box = document.getElementById("searchResults");
-
-  box.innerHTML = "";
-
-  if (!keyword) {
-    alert("Enter search keyword");
-    return;
-  }
-
-  const snapshot = await getDocs(collection(db, "members"));
-
-  snapshot.forEach(docSnap => {
-
-    const member = docSnap.data();
-
-    const text = `${member.name} ${member.phone} ${member.nid}`.toLowerCase();
-
-    if (text.includes(keyword)) {
-
-      const div = document.createElement("div");
-
-      div.className = "result-item";
-
-      div.innerHTML = `
-        👤 ${member.name}<br>
-        📱 ${member.phone}<br>
-        🆔 ${member.nid}
-      `;
-
-      div.onclick = () => selectMember(docSnap.id, member);
-
-      box.appendChild(div);
-    }
-  });
-};
-
-/* =========================
-   SELECT MEMBER
-========================= */
-
-function selectMember(id, member) {
-
-  selectedMember = { id, ...member };
-
-  document.getElementById("selectedMember").innerHTML = `
-    👤 ${member.name}<br>
-    📱 ${member.phone}<br>
-    🆔 ${member.nid}
-  `;
-
-  document.getElementById("searchResults").innerHTML = "";
-}
-
-/* =========================
-   DEPOSIT MONEY (FIXED)
-========================= */
-
-window.depositMoney = async function () {
-
-  if (isProcessing) return; // 🔥 block spam clicks
-
-  if (!selectedMember) {
-    alert("Select member first");
-    return;
-  }
-
-  const amount = Number(document.getElementById("amount").value);
-
-  if (!amount || amount <= 0) {
-    alert("Invalid amount");
-    return;
-  }
-
-  try {
-    isProcessing = true; // lock button
-
-    /* =========================
-       SAVE SAVINGS
-    ========================= */
-
-    await addDoc(collection(db, "savings"), {
-      memberId: selectedMember.id,
-      memberName: selectedMember.name,
-      phone: selectedMember.phone,
-      amount,
-      type: "saving",
-      createdAt: serverTimestamp(),
-      date: new Date().toISOString()
-    });
-
-    /* =========================
-       WALLET UPDATE
-    ========================= */
-
-    await deposit(selectedMember.id, selectedMember.name, amount);
-
-    /* =========================
-       SUCCESS MESSAGE
-    ========================= */
-
-    alert("✅ Deposited Successfully");
-
-    document.getElementById("amount").value = "";
-
-  } catch (error) {
-
-    console.error(error);
-    alert("❌ Deposit failed");
-
-  } finally {
-
-    isProcessing = false; // unlock button
-  }
-};
-
-/* =========================
-   REALTIME TABLE (FIXED UI SAFETY)
-========================= */
-
-function loadSavingsTable() {
+onSnapshot(collection(db, "savings"), snap => {
 
   const table = document.getElementById("savingsTable");
+  table.innerHTML = "";
 
-  onSnapshot(collection(db, "savings"), (snapshot) => {
+  snap.forEach(docSnap => {
 
-    table.innerHTML = "";
+    const s = docSnap.data();
 
-    snapshot.forEach(docSnap => {
-
-      const data = docSnap.data();
-
-      table.innerHTML += `
-        <tr>
-          <td>${data.memberName || ""}</td>
-          <td>${data.phone || ""}</td>
-          <td>${data.amount} ETB</td>
-          <td>${new Date(data.date).toLocaleString()}</td>
-        </tr>
-      `;
-    });
+    table.innerHTML += `
+      <tr>
+        <td>${s.memberId}</td>
+        <td>${s.amount} ETB</td>
+        <td>${s.date}</td>
+      </tr>
+    `;
   });
-}
 
-loadSavingsTable();
+});
+
+/* =========================
+   ADD SAVINGS (MAIN LOGIC)
+========================= */
+
+window.addSavings = async function () {
+
+  const memberId = document.getElementById("memberId").value;
+  const amount = Number(document.getElementById("amount").value);
+
+  if (!memberId || amount <= 0) {
+    alert("Invalid input");
+    return;
+  }
+
+  /* SAVE TRANSACTION */
+  await addDoc(collection(db, "savings"), {
+    memberId,
+    amount,
+    date: new Date().toISOString()
+  });
+
+  /* UPDATE MEMBER BALANCE */
+  const memberRef = doc(db, "members", memberId);
+  const memberSnap = await getDoc(memberRef);
+
+  if (memberSnap.exists()) {
+
+    await updateDoc(memberRef, {
+      savings: increment(amount)
+    });
+
+  }
+
+  alert("Savings added successfully");
+
+  document.getElementById("memberId").value = "";
+  document.getElementById("amount").value = "";
+};
