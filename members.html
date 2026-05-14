@@ -10,7 +10,7 @@
     content="width=device-width, initial-scale=1.0"
   >
 
-  <title>Members Management</title>
+  <title>Members</title>
 
   <link rel="stylesheet" href="css/style.css">
 
@@ -24,9 +24,9 @@
 
 <body>
 
-<!-- =========================================================
+<!-- =========================
      SIDEBAR
-========================================================= -->
+========================= -->
 <aside class="sidebar" id="sidebar">
 
   <button
@@ -40,135 +40,76 @@
 
   <nav class="nav">
 
-    <!-- DASHBOARD -->
     <a href="dashboard.html" class="nav-item">
       <span class="icon">📊</span>
       <span class="text">Dashboard</span>
     </a>
 
-    <!-- MEMBERS -->
     <a href="members.html" class="nav-item active">
       <span class="icon">👥</span>
       <span class="text">Members</span>
     </a>
 
-    <!-- SAVINGS -->
     <a href="savings.html" class="nav-item">
       <span class="icon">💰</span>
       <span class="text">Savings</span>
     </a>
 
-    <!-- LOANS -->
     <a href="loans.html" class="nav-item">
       <span class="icon">🏦</span>
       <span class="text">Loans</span>
     </a>
 
-    <!-- REPAYMENTS -->
     <a href="repayments.html" class="nav-item">
       <span class="icon">💳</span>
       <span class="text">Repayments</span>
     </a>
 
-    <!-- WITHDRAWALS -->
     <a href="withdrawals.html" class="nav-item">
-      <span class="icon">💸</span>
+      <span class="icon">📤</span>
       <span class="text">Withdrawals</span>
     </a>
 
-    <!-- USERS -->
     <a href="users.html" class="nav-item">
       <span class="icon">👨‍💼</span>
       <span class="text">Users</span>
     </a>
 
-    <!-- SETTINGS -->
     <a href="settings.html" class="nav-item">
       <span class="icon">⚙️</span>
       <span class="text">Settings</span>
+    </a>
+
+    <a
+      href="#"
+      class="nav-item logout"
+      id="logoutBtn"
+    >
+      <span class="icon">🚪</span>
+      <span class="text">Logout</span>
     </a>
 
   </nav>
 
 </aside>
 
-<!-- =========================================================
-     MAIN CONTENT
-========================================================= -->
+<!-- =========================
+     MAIN
+========================= -->
 <main class="main">
 
   <!-- TOPBAR -->
   <div class="topbar">
 
-    <h2>
-      👥 Members Management
-    </h2>
+    <h2>👥 Members Management</h2>
 
-    <div
-      style="
-        display:flex;
-        gap:12px;
-        align-items:center;
-      "
+    <button
+      class="add-btn"
+      onclick="openModal()"
     >
-
-      <!-- LANGUAGE -->
-      <select class="lang-select">
-
-        <option>English</option>
-
-        <option>Afaan Oromo</option>
-
-        <option>Amharic</option>
-
-      </select>
-
-      <!-- ADD MEMBER -->
-      <button
-        class="add-btn"
-        onclick="openModal()"
-      >
-
-        <i class="fa fa-plus"></i>
-
-        Add Member
-
-      </button>
-
-      <!-- LOGOUT -->
-      <a
-        href="#"
-        class="add-btn"
-        id="logoutBtn"
-        style="
-          background:
-          linear-gradient(
-            135deg,
-            #ef4444,
-            #b91c1c
-          );
-          text-decoration:none;
-        "
-      >
-
-        <i class="fa fa-right-from-bracket"></i>
-
-        Logout
-
-      </a>
-
-    </div>
-
-  </div>
-
-  <!-- =========================================================
-       MEMBER SEARCH
-  ========================================================= -->
-  <div class="members-header">
-
-    <h2>
-      👥 Member Directory
-    </h2>
+      <i class="fa fa-plus"></i>
+      Add Member
+    </button>
 
   </div>
 
@@ -182,7 +123,6 @@
       placeholder="Search by name, phone or NID..."
     >
 
-    <!-- DROPDOWN -->
     <div
       id="searchResults"
       class="search-dropdown"
@@ -195,14 +135,10 @@
     id="selectedMember"
     class="selected-box"
   >
-
-    👤 Select member from search
-
+    👤 Select a member
   </div>
 
-  <!-- =========================================================
-       MEMBERS TABLE
-  ========================================================= -->
+  <!-- TABLE -->
   <div class="table-card">
 
     <table class="table-modern">
@@ -212,32 +148,21 @@
         <tr>
 
           <th>Photo</th>
-
           <th>Name</th>
-
           <th>Phone</th>
-
           <th>NID</th>
-
           <th>Savings</th>
-
           <th>Loan Total</th>
-
           <th>Remaining Loan</th>
-
           <th>Status</th>
-
           <th>Created Date</th>
-
           <th>Created By</th>
 
         </tr>
 
       </thead>
 
-      <tbody id="membersTable">
-
-      </tbody>
+      <tbody id="membersTable"></tbody>
 
     </table>
 
@@ -245,16 +170,17 @@
 
 </main>
 
-<!-- =========================================================
-     ADD MEMBER MODAL
-========================================================= -->
-<div class="modal" id="memberModal">
+<!-- =========================
+     MODAL
+========================= -->
+<div
+  class="modal"
+  id="memberModal"
+>
 
   <div class="modal-box">
 
-    <h3>
-      Add New Member
-    </h3>
+    <h3>Add New Member</h3>
 
     <form id="memberForm">
 
@@ -272,14 +198,11 @@
         id="phone"
         placeholder="9 Digit Phone"
         maxlength="9"
-        pattern="[0-9]{9}"
-
+        required
         oninput="
           this.value =
           this.value.replace(/[^0-9]/g,'')
         "
-
-        required
       >
 
       <!-- NID -->
@@ -288,14 +211,11 @@
         id="nid"
         placeholder="16 Digit National ID"
         maxlength="16"
-        pattern="[0-9]{16}"
-
+        required
         oninput="
           this.value =
           this.value.replace(/[^0-9]/g,'')
         "
-
-        required
       >
 
       <!-- PHOTO -->
@@ -306,14 +226,23 @@
         required
       >
 
+      <!-- PHOTO PREVIEW -->
+      <div class="photo-preview-box">
+
+        <img
+          id="photoPreview"
+          class="photo-preview"
+          src="https://via.placeholder.com/120x120?text=Photo"
+        >
+
+      </div>
+
       <!-- SAVE -->
       <button
         type="submit"
         class="save-btn"
       >
-
         Save Member
-
       </button>
 
       <!-- CANCEL -->
@@ -322,9 +251,7 @@
         class="close-btn"
         onclick="closeModal()"
       >
-
         Cancel
-
       </button>
 
     </form>
@@ -333,22 +260,16 @@
 
 </div>
 
-<!-- =========================================================
+<!-- =========================
      SCRIPTS
-========================================================= -->
+========================= -->
 
 <script src="js/layout.js"></script>
 
-<script
-  type="module"
-  src="js/members.js"
-></script>
+<script type="module" src="js/members.js"></script>
 
 <script>
 
-/* =========================================================
-   OPEN MODAL
-========================================================= */
 function openModal(){
 
   document
@@ -356,28 +277,11 @@ function openModal(){
     .style.display = "flex";
 }
 
-/* =========================================================
-   CLOSE MODAL
-========================================================= */
 function closeModal(){
 
   document
     .getElementById("memberModal")
     .style.display = "none";
-}
-
-/* =========================================================
-   CLOSE WHEN CLICK OUTSIDE
-========================================================= */
-window.onclick = function(e){
-
-  const modal =
-    document.getElementById("memberModal");
-
-  if(e.target === modal){
-
-    closeModal();
-  }
 }
 
 </script>
