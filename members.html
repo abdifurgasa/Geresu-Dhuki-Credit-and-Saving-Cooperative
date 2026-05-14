@@ -2,59 +2,107 @@
 <html lang="en">
 
 <head>
+
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
 
   <title>Members</title>
 
   <link rel="stylesheet" href="css/style.css">
 
   <!-- FONT AWESOME -->
-  <link rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+  >
+
 </head>
 
 <body>
 
-<!-- SIDEBAR -->
+<!-- =========================
+     SIDEBAR
+========================= -->
 <aside class="sidebar" id="sidebar">
 
-  <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+  <button
+    class="toggle-btn"
+    onclick="toggleSidebar()"
+  >
+    ☰
+  </button>
 
   <h2 class="logo">🏦 SACCO</h2>
 
   <nav class="nav">
 
     <a href="dashboard.html" class="nav-item">
+
       <span class="icon">📊</span>
-      <span class="text">Dashboard</span>
+
+      <span class="text">
+        Dashboard
+      </span>
+
     </a>
 
-    <a href="members.html" class="nav-item active">
+    <a
+      href="members.html"
+      class="nav-item active"
+    >
+
       <span class="icon">👥</span>
-      <span class="text">Members</span>
+
+      <span class="text">
+        Members
+      </span>
+
     </a>
 
-    <a href="#" class="nav-item logout" id="logoutBtn">
+    <!-- LOGOUT -->
+    <a
+      href="#"
+      class="nav-item logout"
+      id="logoutBtn"
+    >
+
       <span class="icon">🚪</span>
-      <span class="text">Logout</span>
+
+      <span class="text">
+        Logout
+      </span>
+
     </a>
 
   </nav>
 
 </aside>
 
-<!-- MAIN -->
+<!-- =========================
+     MAIN
+========================= -->
 <main class="main">
 
   <!-- TOPBAR -->
   <div class="topbar">
 
-    <h2>👥 Members Management</h2>
+    <h2>
+      👥 Members Management
+    </h2>
 
-    <button class="add-btn" onclick="openModal()">
+    <button
+      class="add-btn"
+      onclick="openModal()"
+    >
+
       <i class="fa fa-plus"></i>
+
       Add Member
+
     </button>
 
   </div>
@@ -65,43 +113,50 @@
     <input
       type="text"
       id="searchInput"
+      class="input"
       placeholder="Search member..."
     >
 
   </div>
 
-  <!-- TABLE -->
+  <!-- =========================
+       TABLE
+  ========================= -->
   <div class="table-card">
 
     <table class="table-modern">
 
       <thead>
-  <tr>
 
-    <th>Photo</th>
+        <tr>
 
-    <th>Name</th>
+          <th>Photo</th>
 
-    <th>Phone</th>
+          <th>Name</th>
 
-    <th>NID</th>
+          <th>Phone</th>
 
-    <th>Savings</th>
+          <th>NID</th>
 
-    <th>Loan Total</th>
+          <th>Savings</th>
 
-    <th>Remaining Loan</th>
+          <th>Loan Total</th>
 
-    <th>Status</th>
+          <th>Remaining Loan</th>
 
-    <th>Created Date</th>
+          <th>Status</th>
 
-    <th>Created By</th>
+          <th>Created Date</th>
 
-  </tr>
-</thead>
+          <th>Created By</th>
 
-      <tbody id="membersTable"></tbody>
+        </tr>
+
+      </thead>
+
+      <tbody id="membersTable">
+
+      </tbody>
 
     </table>
 
@@ -116,47 +171,87 @@
 
   <div class="modal-box">
 
-    <h3>Add New Member</h3>
+    <h3>
+      Add New Member
+    </h3>
 
     <form id="memberForm">
 
+      <!-- FULL NAME -->
       <input
         type="text"
         id="name"
+        class="input"
         placeholder="Full Name"
         required
       >
 
+      <!-- PHONE -->
       <input
         type="text"
         id="phone"
-        placeholder="Phone"
+        class="input"
+        placeholder="9 Digit Phone"
+
+        maxlength="9"
+
+        pattern="[0-9]{9}"
+
+        oninput="
+          this.value =
+          this.value.replace(/[^0-9]/g,'')
+        "
+
         required
       >
 
+      <!-- NID -->
       <input
         type="text"
         id="nid"
-        placeholder="National ID"
+        class="input"
+        placeholder="16 Digit National ID"
+
+        maxlength="16"
+
+        pattern="[0-9]{16}"
+
+        oninput="
+          this.value =
+          this.value.replace(/[^0-9]/g,'')
+        "
+
         required
       >
 
+      <!-- PHOTO -->
       <input
         type="file"
         id="photo"
+        class="input"
+        accept="image/*"
         required
       >
 
-      <button type="submit" class="save-btn">
+      <!-- SAVE -->
+      <button
+        type="submit"
+        class="save-btn"
+      >
+
         Save Member
+
       </button>
 
+      <!-- CANCEL -->
       <button
         type="button"
         class="close-btn"
         onclick="closeModal()"
       >
+
         Cancel
+
       </button>
 
     </form>
@@ -165,19 +260,37 @@
 
 </div>
 
-<!-- SCRIPTS -->
+<!-- =========================
+     SCRIPTS
+========================= -->
+
 <script src="js/layout.js"></script>
 
-<script type="module" src="js/members.js"></script>
+<script
+  type="module"
+  src="js/members.js"
+></script>
 
 <script>
 
+/* =========================
+   OPEN MODAL
+========================= */
 function openModal() {
-  document.getElementById("memberModal").style.display = "flex";
+
+  document
+    .getElementById("memberModal")
+    .style.display = "flex";
 }
 
+/* =========================
+   CLOSE MODAL
+========================= */
 function closeModal() {
-  document.getElementById("memberModal").style.display = "none";
+
+  document
+    .getElementById("memberModal")
+    .style.display = "none";
 }
 
 </script>
