@@ -1,4 +1,8 @@
-import { db, storage, auth } from "./firebase.js";
+import {
+  db,
+  storage,
+  auth
+} from "./firebase.js";
 
 import {
   collection,
@@ -13,79 +17,282 @@ import {
   getDownloadURL
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
+/* =========================
+   TABLE BODY
+========================= */
 const table = document.getElementById("membersTable");
 
 /* =========================
-   LOAD MEMBERS TABLE
+   LOAD MEMBERS
 ========================= */
 async function loadMembers() {
 
-  const snapshot = await getDocs(collection(db, "members"));
-
   table.innerHTML = "";
 
-  snapshot.forEach((doc) => {
+  try {
 
-    const m = doc.data();
+    const snapshot = await getDocs(
+      collection(db, "members")
+    );
 
-    table.innerHTML += `
+    console.log("TOTAL MEMBERS:", snapshot.size);
+
+    /* NO MEMBERS */
+    if (snapshot.empty) {
+
+      table.innerHTML = `
+        <tr>
+          <td colspan="10" style="text-align:center;padding:20px;">
+            No members found
+          </td>
+        </tr>
+      `;
+
+      return;
+    }
+
+    /* LOOP MEMBERS */
+    snapshot.forEach((doc) => {
+
+      const m = doc.data();
+
+      console.log(doc.id, m);
+
+      table.innerHTML += `
+
+        <tr>
+
+          <!-- PHOTO -->
+          <td>
+            <img
+              src="${m.photoUrl || 'https://via.placeholder.com/50'}"
+              class="member-photo"
+            >
+          </td>
+
+          <!-- NAME -->
+          <td>
+            ${m.name || "-"}
+          </td>
+
+          <!-- PHONE -->
+          <td>
+            ${m.phone || "-"}
+          </td>
+
+          <!-- NID -->
+          <td>
+            ${m.nid || "-"}
+          </td>
+
+          <!-- SAVINGS -->
+          <td>
+            ${m.savings || 0} ETB
+          </td>
+
+          <!-- LOAN TOTAL -->
+          <td>
+            ${m.loanTotal || 0} ETB
+          </td>
+
+          <!-- REMAINING -->
+          <td>
+            ${m.loanRemaining || 0} ETB
+          </td>
+
+          <!-- STATUS -->
+          <td>
+
+            <span class="badge active">
+              ${m.status || "active"}
+            </span>
+
+          </td>
+
+          <!-- CREATED DATE -->
+          <td>
+
+            ${
+              m.createdAt
+              ? new Date(
+                  m.createdAt.seconds * 1000
+                ).toLocaleDateString()
+              : "-"
+            }
+
+          </td>
+
+          <!-- CREATED BY -->
+          <td>
+
+            ${m.createdBy || "-"}
+
+          </td>
+
+        </tr>
+
+      `;
+    });
+
+  } catch (error) {
+
+    console.error("ERROR LOADING MEMBERS:", error);
+
+    table.innerHTML = `
       <tr>
-        <td><img src="${m.photoUrl}" width="50"></td>
-        <td>${m.name}</td>
-        <td>${m.phone}</td>
-        <td>${m.nid}</td>
-        <td>${m.savings}</td>
-        <td>${m.loanTotal}</td>
-        <td>${m.status}</td>
+        <td colspan="10" style="text-align:center;color:red;padding:20px;">
+          Failed to load members
+        </td>
       </tr>
     `;
-  });
-
+  }
 }
+
+/* =========================
+   INITIAL LOAD
+========================= */
+loadMembers();
 
 /* =========================
    ADD MEMBER
 ========================= */
-document.getElementById("memberForm").addEventListener("submit", async (e) => {
+document
+.getElementById("memberForm")
+.addEventListener("submit", async (e) => {
+
   e.preventDefault();
 
-  const name = document.getElementById("name").value;
-  const phone = document.getElementById("phone").value;
-  const nid = document.getElementById("nid").value;
-  const photo = document.getElementById("photo").files[0];
+  /* FORM VALUES */
+  const name =
+    document.getElementById("name").value;
 
-  const photoRef = ref(storage, "members/" + Date.now() + photo.name);
-  await uploadBytes(photoRef, photo);
+  const phone =
+    document.getElementById("phone").value;
 
-  const photoUrl = await getDownloadURL(photoRef);
+  const nid =
+    document.getElementById("nid").value;
 
-  const user = auth.currentUser;
+  const photo =
+    document.getElementById("photo").files[0];
 
-  await addDoc(collection(db, "members"), {
-    name,
-    phone,
-    nid,
-    photoUrl,
+  try {
 
-    savings: 0,
-    loanTotal: 0,
-    loanRemaining: 0,
+    /* =========================
+       UPLOAD PHOTO
+    ========================= */
+    let photoUrl = "";
 
-    status: "active",
-    isDeleted: false,
+    if (photo) {
 
-    createdAt: serverTimestamp(),
-    createdBy: user?.uid || "system",
+      const photoRef = ref(
+        storage,
+        "members/" +
+        Date.now() +
+        "_" +
+        photo.name
+      );
 
-    lastUpdatedAt: serverTimestamp(),
-    lastUpdatedBy: user?.uid || "system"
-  });
+      await uploadBytes(photoRef, photo);
 
-  alert("Member added!");
+      photoUrl =
+        await getDownloadURL(photoRef);
+    }
 
-  closeModal();
-  loadMembers();
+    /* CURRENT USER */
+    const user = auth.currentUser;
+
+    /* =========================
+       SAVE TO FIRESTORE
+    ========================= */
+    await addDoc(
+      collection(db, "members"),
+      {
+
+        name,
+        phone,
+        nid,
+        photoUrl,
+
+        /* FINANCIAL */
+        savings: 0,
+
+        loanTotal: 0,
+
+        loanRemaining: 0,
+
+        /* STATUS */
+        status: "active",
+
+        isDeleted: false,
+
+        /* TRACKING */
+        createdAt: serverTimestamp(),
+
+        createdBy:
+          user ? user.uid : "unknown",
+
+        lastUpdatedAt: serverTimestamp(),
+
+        lastUpdatedBy:
+          user ? user.uid : "unknown"
+
+      }
+    );
+
+    /* SUCCESS */
+    alert("Member added successfully!");
+
+    /* RESET FORM */
+    document
+      .getElementById("memberForm")
+      .reset();
+
+    /* CLOSE MODAL */
+    document
+      .getElementById("memberModal")
+      .style.display = "none";
+
+    /* RELOAD MEMBERS */
+    loadMembers();
+
+  } catch (error) {
+
+    console.error(
+      "ERROR ADDING MEMBER:",
+      error
+    );
+
+    alert("Failed to add member");
+  }
+
 });
 
-/* INIT */
-loadMembers();
+/* =========================
+   SEARCH MEMBER
+========================= */
+document
+.getElementById("searchInput")
+.addEventListener("keyup", function () {
+
+  const value =
+    this.value.toLowerCase();
+
+  const rows =
+    document.querySelectorAll(
+      "#membersTable tr"
+    );
+
+  rows.forEach((row) => {
+
+    row.style.display =
+      row.innerText
+        .toLowerCase()
+        .includes(value)
+
+      ? ""
+
+      : "none";
+
+  });
+
+});
