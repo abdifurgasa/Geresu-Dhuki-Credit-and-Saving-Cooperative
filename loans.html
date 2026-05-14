@@ -4,110 +4,94 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <title>Loans</title>
+  <title>Loans Module</title>
 
   <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
 
-<!-- SIDEBAR -->
-<aside class="sidebar" id="sidebar">
-
-  <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
-
-  <h2 class="logo">🏦 SACCO</h2>
-
-  <nav class="nav">
-
-    <a href="dashboard.html" class="nav-item">Dashboard</a>
-    <a href="members.html" class="nav-item">Members</a>
-    <a href="loans.html" class="nav-item active">Loans</a>
-
-  </nav>
-
-</aside>
-
-<!-- MAIN -->
 <main class="main">
 
-  <div class="topbar">
-    <h2>🏦 Loan Management</h2>
-    <button class="add-btn" onclick="openModal()">➕ Create Loan</button>
+  <h2>🏦 Loans Management</h2>
+
+  <!-- =========================
+       SEARCH MEMBER
+  ========================= -->
+  <div class="search-container">
+
+    <input
+      type="text"
+      id="searchMember"
+      class="input"
+      placeholder="Search member..."
+    >
+
+    <div id="searchResults" class="search-results"></div>
+
   </div>
 
-  <input type="text" id="searchInput" class="input" placeholder="Search loans...">
+  <!-- SELECTED MEMBER -->
+  <div id="selectedMember" class="selected-box">
+    👤 Select member first
+  </div>
 
-  <table class="table-modern">
+  <!-- =========================
+       LOAN FORM
+  ========================= -->
+  <form id="loanForm" class="modal-box">
 
-    <thead>
-      <tr>
-        <th>Member</th>
-        <th>Amount</th>
-        <th>Interest Type</th>
-        <th>Rate %</th>
-        <th>Duration</th>
-        <th>Total</th>
-        <th>Remaining</th>
-        <th>Status</th>
-      </tr>
-    </thead>
+    <input type="number" id="principal" class="input" placeholder="Loan Amount" required>
 
-    <tbody id="loanTable"></tbody>
+    <input type="number" id="rate" class="input" placeholder="Interest Rate %" required>
 
-  </table>
+    <input type="number" id="time" class="input" placeholder="Duration" required>
+
+    <select id="timeType" class="input">
+      <option value="months">Months</option>
+      <option value="years">Years</option>
+    </select>
+
+    <select id="interestType" class="input">
+      <option value="simple">Simple</option>
+      <option value="compound">Compound</option>
+      <option value="flat">Flat</option>
+    </select>
+
+    <button type="submit" class="save-btn">
+      Create Loan
+    </button>
+
+  </form>
+
+  <!-- =========================
+       LOANS TABLE
+  ========================= -->
+  <div class="table-card">
+
+    <table class="table-modern">
+
+      <thead>
+        <tr>
+          <th>Member</th>
+          <th>Principal</th>
+          <th>Interest</th>
+          <th>Total</th>
+          <th>Remaining</th>
+          <th>Type</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+
+      <tbody id="loansTable"></tbody>
+
+    </table>
+
+  </div>
 
 </main>
 
-<!-- MODAL -->
-<div class="modal" id="loanModal">
-
-  <div class="modal-box">
-
-    <h3>Create Loan</h3>
-
-    <form id="loanForm">
-
-      <select id="member" class="input" required></select>
-
-      <input type="number" id="amount" class="input" placeholder="Loan Amount" required>
-
-      <input type="number" id="interest" class="input" placeholder="Interest %" required>
-
-      <!-- INTEREST TYPE -->
-      <select id="interestType" class="input" required>
-        <option value="">Interest Type</option>
-        <option value="simple">Simple</option>
-        <option value="flat">Flat</option>
-        <option value="compound">Compound</option>
-      </select>
-
-      <!-- DURATION -->
-      <input type="number" id="durationValue" class="input" placeholder="Duration (e.g 12)" required>
-
-      <select id="durationType" class="input" required>
-        <option value="">Month / Year</option>
-        <option value="months">Months</option>
-        <option value="years">Years</option>
-      </select>
-
-      <button type="submit" class="save-btn">Save Loan</button>
-      <button type="button" class="close-btn" onclick="closeModal()">Cancel</button>
-
-    </form>
-
-  </div>
-
-</div>
-
-<script src="js/layout.js"></script>
 <script type="module" src="js/loans.js"></script>
-
-<script>
-function openModal(){ document.getElementById("loanModal").style.display="flex"; }
-function closeModal(){ document.getElementById("loanModal").style.display="none"; }
-</script>
 
 </body>
 </html>
