@@ -2,177 +2,189 @@ import { db, auth } from "./firebase.js";
 
 import {
   collection,
-  getDocs,
   addDoc,
-  doc,
-  getDoc,
-  updateDoc,
+  getDocs,
+  onSnapshot,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-const loanTable = document.getElementById("loanTable");
-const memberSelect = document.getElementById("member");
-
 /* =========================
-   INTEREST ENGINE
+   LOAN ENGINE
 ========================= */
-function calculateLoan(amount, rate, type, durationValue, durationType) {
+function calculateLoan(p, r, t, typeTime, type) {
 
-  let months = durationType === "years"
-    ? durationValue * 12
-    : durationValue;
+  p = Number(p);
+  r = Number(r);
+  t = Number(t);
 
+  if (typeTime === "months") t = t / 12;
+
+  let interest = 0;
   let total = 0;
 
   if (type === "simple") {
-    const interest = (amount * rate * months) / 12 / 100;
-    total = amount + interest;
+    interest = (p * r * t) / 100;
+    total = p + interest;
   }
 
-  else if (type === "flat") {
-    const interest = (amount * rate) / 100;
-    total = amount + interest;
+  if (type === "compound") {
+    total = p * Math.pow((1 + r / 100), t);
+    interest = total - p;
   }
 
-  else if (type === "compound") {
-    total = amount * Math.pow((1 + rate / 100 / 12), months);
+  if (type === "flat") {
+    interest = (p * r * t) / 100;
+    total = p + interest;
   }
 
   return {
-    totalPayable: Number(total.toFixed(2)),
-    months
+    principal: p,
+    interest,
+    total,
+    remaining: total
   };
 }
 
 /* =========================
-   LOAD MEMBERS
+   MEMBER SEARCH
 ========================= */
+const searchInput = document.getElementById("searchMember");
+const resultsBox = document.getElementById("searchResults");
+const selectedBox = document.getElementById("selectedMember");
+
+let members = [];
+let selectedMemberId = null;
+
+/* LOAD MEMBERS */
 async function loadMembers() {
 
   const snap = await getDocs(collection(db, "members"));
 
-  memberSelect.innerHTML = `<option value="">Select Member</option>`;
+  members = [];
 
-  snap.forEach(d => {
-    const m = d.data();
-    memberSelect.innerHTML += `
-      <option value="${d.id}">${m.name}</option>
-    `;
+  snap.forEach(doc => {
+    members.push({ id: doc.id, ...doc.data() });
   });
 }
 
-/* =========================
-   LOAD LOANS
-========================= */
-async function loadLoans() {
+loadMembers();
 
-  loanTable.innerHTML = "";
+/* SEARCH */
+searchInput.addEventListener("input", (e) => {
 
-  const snap = await getDocs(collection(db, "loans"));
+  const value = e.target.value.toLowerCase();
 
-  snap.forEach(d => {
+  resultsBox.innerHTML = "";
 
-    const l = d.data();
+  const filtered = members.filter(m =>
+    m.name?.toLowerCase().includes(value) ||
+    m.phone?.includes(value) ||
+    m.nid?.includes(value)
+  );
 
-    loanTable.innerHTML += `
-      <tr>
-        <td>${l.memberName}</td>
-        <td>${l.loanAmount}</td>
-        <td>${l.interestType}</td>
-        <td>${l.interestRate}%</td>
-        <td>${l.durationValue} ${l.durationType}</td>
-        <td>${l.totalPayable}</td>
-        <td>${l.remainingLoan}</td>
-        <td>${l.status}</td>
-      </tr>
+  filtered.forEach(m => {
+
+    const div = document.createElement("div");
+
+    div.className = "result-item";
+
+    div.innerHTML = `
+      👤 ${m.name}<br>
+      📱 ${m.phone}<br>
+      🆔 ${m.nid}
     `;
+
+    div.onclick = () => {
+
+      selectedMemberId = m.id;
+
+      selectedBox.innerHTML = `
+        👤 ${m.name}<br>
+        📱 ${m.phone}<br>
+        🆔 ${m.nid}<br>
+        💰 Savings: ${m.savings || 0}
+      `;
+
+      searchInput.value = m.name;
+      resultsBox.innerHTML = "";
+    };
+
+    resultsBox.appendChild(div);
   });
-}
+
+});
 
 /* =========================
    CREATE LOAN
 ========================= */
-document.getElementById("loanForm")
-.addEventListener("submit", async (e) => {
+document.getElementById("loanForm").addEventListener("submit", async (e) => {
 
   e.preventDefault();
 
-  const memberId = document.getElementById("member").value;
-  const amount = Number(document.getElementById("amount").value);
-  const interest = Number(document.getElementById("interest").value);
-  const interestType = document.getElementById("interestType").value;
-
-  const durationValue = Number(document.getElementById("durationValue").value);
-  const durationType = document.getElementById("durationType").value;
-
-  const memberRef = doc(db, "members", memberId);
-  const memberSnap = await getDoc(memberRef);
-
-  if (!memberSnap.exists()) {
-    alert("Member not found");
+  if (!selectedMemberId) {
+    alert("Select member first!");
     return;
   }
 
-  const member = memberSnap.data();
+  const p = document.getElementById("principal").value;
+  const r = document.getElementById("rate").value;
+  const t = document.getElementById("time").value;
+  const tt = document.getElementById("timeType").value;
+  const type = document.getElementById("interestType").value;
 
-  const result = calculateLoan(
-    amount,
-    interest,
-    interestType,
-    durationValue,
-    durationType
-  );
-
-  const user = auth.currentUser;
+  const loan = calculateLoan(p, r, t, tt, type);
 
   await addDoc(collection(db, "loans"), {
 
-    memberId,
-    memberName: member.name,
+    memberId: selectedMemberId,
 
-    loanAmount: amount,
-    interestRate: interest,
-    interestType,
+    principal: loan.principal,
+    interest: loan.interest,
+    total: loan.total,
+    remaining: loan.remaining,
 
-    durationValue,
-    durationType,
-    durationMonths: result.months,
+    interestType: type,
+    timeType: tt,
 
-    totalPayable: result.totalPayable,
-    remainingLoan: result.totalPayable,
-
+    paid: 0,
     status: "active",
 
     createdAt: serverTimestamp(),
-    createdBy: user ? user.uid : null
+    createdBy: auth.currentUser?.uid || null
   });
 
-  await updateDoc(memberRef, {
-    loanTotal: result.totalPayable,
-    loanRemaining: result.totalPayable
-  });
+  alert("Loan created!");
 
-  alert("Loan created successfully!");
+  e.target.reset();
 
-  document.getElementById("loanForm").reset();
-  closeModal();
-  loadLoans();
+  selectedMemberId = null;
+  selectedBox.innerHTML = "👤 Select member first";
 });
 
 /* =========================
-   SEARCH
+   LOAD LOANS TABLE
 ========================= */
-document.getElementById("searchInput")
-.addEventListener("input", function () {
+const table = document.getElementById("loansTable");
 
-  const val = this.value.toLowerCase();
+onSnapshot(collection(db, "loans"), (snap) => {
 
-  document.querySelectorAll("#loanTable tr").forEach(row => {
-    row.style.display =
-      row.innerText.toLowerCase().includes(val) ? "" : "none";
+  table.innerHTML = "";
+
+  snap.forEach(doc => {
+
+    const d = doc.data();
+
+    table.innerHTML += `
+      <tr>
+        <td>${d.memberId}</td>
+        <td>${d.principal}</td>
+        <td>${d.interest.toFixed(2)}</td>
+        <td>${d.total.toFixed(2)}</td>
+        <td>${d.remaining.toFixed(2)}</td>
+        <td>${d.interestType}</td>
+        <td>${d.status}</td>
+      </tr>
+    `;
   });
-});
 
-/* INIT */
-loadMembers();
-loadLoans();
+});
