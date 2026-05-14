@@ -2,161 +2,64 @@
 <html lang="en">
 
 <head>
-
   <meta charset="UTF-8">
-
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
-
   <title>Members</title>
-
   <link rel="stylesheet" href="css/style.css">
-
-  <!-- FONT AWESOME -->
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
-  >
-
 </head>
 
 <body>
 
-<!-- =========================
-     SIDEBAR
-========================= -->
-<aside class="sidebar" id="sidebar">
-
-  <button
-    class="toggle-btn"
-    onclick="toggleSidebar()"
-  >
-    ☰
-  </button>
-
-  <h2 class="logo">🏦 SACCO</h2>
-
-  <nav class="nav">
-
-    <a href="dashboard.html" class="nav-item">
-
-      <span class="icon">📊</span>
-
-      <span class="text">
-        Dashboard
-      </span>
-
-    </a>
-
-    <a
-      href="members.html"
-      class="nav-item active"
-    >
-
-      <span class="icon">👥</span>
-
-      <span class="text">
-        Members
-      </span>
-
-    </a>
-
-    <!-- LOGOUT -->
-    <a
-      href="#"
-      class="nav-item logout"
-      id="logoutBtn"
-    >
-
-      <span class="icon">🚪</span>
-
-      <span class="text">
-        Logout
-      </span>
-
-    </a>
-
-  </nav>
-
-</aside>
-
-<!-- =========================
-     MAIN
-========================= -->
 <main class="main">
 
-  <!-- TOPBAR -->
+  <!-- TOP -->
   <div class="topbar">
+    <h2>👥 Members Management</h2>
 
-    <h2>
-      👥 Members Management
-    </h2>
-
-    <button
-      class="add-btn"
-      onclick="openModal()"
-    >
-
-      <i class="fa fa-plus"></i>
-
-      Add Member
-
+    <button class="add-btn" onclick="openModal()">
+      + Add Member
     </button>
-
   </div>
 
   <!-- SEARCH -->
-  <div class="search-box">
+  <div class="search-container">
 
     <input
       type="text"
-      id="searchInput"
+      id="searchMember"
       class="input"
-      placeholder="Search member..."
+      placeholder="Search by name, phone, NID..."
     >
+
+    <div id="searchResults" class="search-results"></div>
 
   </div>
 
-  <!-- =========================
-       TABLE
-  ========================= -->
+  <!-- SELECTED MEMBER -->
+  <div id="selectedMember" class="selected-box">
+    👤 Select a member
+  </div>
+
+  <!-- TABLE -->
   <div class="table-card">
 
     <table class="table-modern">
 
       <thead>
-
         <tr>
-
           <th>Photo</th>
-
           <th>Name</th>
-
           <th>Phone</th>
-
           <th>NID</th>
-
           <th>Savings</th>
-
-          <th>Loan Total</th>
-
-          <th>Remaining Loan</th>
-
+          <th>Loan</th>
+          <th>Remaining</th>
           <th>Status</th>
-
-          <th>Created Date</th>
-
-          <th>Created By</th>
-
+          <th>Created</th>
+          <th>By</th>
         </tr>
-
       </thead>
 
-      <tbody id="membersTable">
-
-      </tbody>
+      <tbody id="membersTable"></tbody>
 
     </table>
 
@@ -164,95 +67,39 @@
 
 </main>
 
-<!-- =========================
-     MODAL
-========================= -->
+<!-- MODAL -->
 <div class="modal" id="memberModal">
 
   <div class="modal-box">
 
-    <h3>
-      Add New Member
-    </h3>
+    <h3>Add Member</h3>
 
     <form id="memberForm">
 
-      <!-- FULL NAME -->
-      <input
-        type="text"
-        id="name"
-        class="input"
-        placeholder="Full Name"
-        required
-      >
+      <input type="text" id="name" placeholder="Full Name" required>
 
-      <!-- PHONE -->
       <input
         type="text"
         id="phone"
-        class="input"
-        placeholder="9 Digit Phone"
-
+        placeholder="Phone (9 digits)"
         maxlength="9"
-
-        pattern="[0-9]{9}"
-
-        oninput="
-          this.value =
-          this.value.replace(/[^0-9]/g,'')
-        "
-
+        oninput="this.value=this.value.replace(/[^0-9]/g,'')"
         required
       >
 
-      <!-- NID -->
       <input
         type="text"
         id="nid"
-        class="input"
-        placeholder="16 Digit National ID"
-
+        placeholder="NID (16 digits)"
         maxlength="16"
-
-        pattern="[0-9]{16}"
-
-        oninput="
-          this.value =
-          this.value.replace(/[^0-9]/g,'')
-        "
-
+        oninput="this.value=this.value.replace(/[^0-9]/g,'')"
         required
       >
 
-      <!-- PHOTO -->
-      <input
-        type="file"
-        id="photo"
-        class="input"
-        accept="image/*"
-        required
-      >
+      <input type="file" id="photo" required>
 
-      <!-- SAVE -->
-      <button
-        type="submit"
-        class="save-btn"
-      >
-
-        Save Member
-
-      </button>
-
-      <!-- CANCEL -->
-      <button
-        type="button"
-        class="close-btn"
-        onclick="closeModal()"
-      >
-
-        Cancel
-
-      </button>
+      <button type="submit" class="save-btn">Save</button>
+      <button type="button" class="close-btn" onclick="closeModal()">Cancel</button>
 
     </form>
 
@@ -260,39 +107,15 @@
 
 </div>
 
-<!-- =========================
-     SCRIPTS
-========================= -->
-
-<script src="js/layout.js"></script>
-
-<script
-  type="module"
-  src="js/members.js"
-></script>
+<script type="module" src="js/members.js"></script>
 
 <script>
-
-/* =========================
-   OPEN MODAL
-========================= */
-function openModal() {
-
-  document
-    .getElementById("memberModal")
-    .style.display = "flex";
+function openModal(){
+  document.getElementById("memberModal").style.display="flex";
 }
-
-/* =========================
-   CLOSE MODAL
-========================= */
-function closeModal() {
-
-  document
-    .getElementById("memberModal")
-    .style.display = "none";
+function closeModal(){
+  document.getElementById("memberModal").style.display="none";
 }
-
 </script>
 
 </body>
