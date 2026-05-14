@@ -28,21 +28,38 @@ const photoPreview = document.getElementById("photoPreview");
 const modal = document.getElementById("memberModal");
 
 /* =========================
-   PHOTO PREVIEW FIX
+   MODAL FIX (IMPORTANT)
 ========================= */
-photoInput.addEventListener("change", (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
+function openModal() {
+  modal.style.display = "flex";
+}
 
-  const reader = new FileReader();
-  reader.onload = (event) => {
-    photoPreview.src = event.target.result;
-  };
-  reader.readAsDataURL(file);
-});
+function closeModal() {
+  modal.style.display = "none";
+}
+
+/* 👇 MAKE FUNCTIONS GLOBAL (THIS FIXES YOUR BUTTON) */
+window.openModal = openModal;
+window.closeModal = closeModal;
 
 /* =========================
-   SAVE MEMBER (FIXED)
+   PHOTO PREVIEW FIX
+========================= */
+if (photoInput) {
+  photoInput.addEventListener("change", (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      photoPreview.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+/* =========================
+   SAVE MEMBER
 ========================= */
 memberForm.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -54,7 +71,6 @@ memberForm.addEventListener("submit", async (e) => {
     const photo = photoInput.files[0];
 
     if (!photo) return alert("Select photo");
-
     if (phone.length !== 9) return alert("Phone must be 9 digits");
     if (nid.length !== 16) return alert("NID must be 16 digits");
 
