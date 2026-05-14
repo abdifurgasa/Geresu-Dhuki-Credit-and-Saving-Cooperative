@@ -592,3 +592,22 @@ body{
 .search-item small{
   color: #64748b;
 }
+/* =========================
+   PHOTO PREVIEW
+========================= */
+
+.photo-preview-box{
+  margin-top:12px;
+  display:flex;
+  justify-content:center;
+}
+
+.photo-preview{
+  width:120px;
+  height:120px;
+  border-radius:16px;
+  object-fit:cover;
+  border:3px solid #e2e8f0;
+  box-shadow:0 10px 25px rgba(0,0,0,0.08);
+  background:#f8fafc;
+}
