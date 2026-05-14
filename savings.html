@@ -1,86 +1,269 @@
+<!-- savings.html -->
+
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title data-i18n="savings">Savings</title>
 
-  <link rel="stylesheet" href="css/style.css">
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Savings</title>
+
+  <link
+    rel="stylesheet"
+    href="css/style.css"
+  >
+
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+  >
+
 </head>
 
 <body>
 
-<!-- SIDEBAR -->
+<!-- =========================
+     SIDEBAR
+========================= -->
 <aside class="sidebar" id="sidebar">
 
-  <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
-  <h2 class="logo">🏦 SACCO</h2>
+  <button
+    class="toggle-btn"
+    onclick="toggleSidebar()"
+  >
+    ☰
+  </button>
+
+  <h2 class="logo">
+    🏦 SACCO
+  </h2>
 
   <nav class="nav">
 
-    <a href="dashboard.html">📊 Dashboard</a>
-    <a href="members.html">👥 Members</a>
-    <a href="savings.html" class="active">💰 Savings</a>
-    <a href="loans.html">🏦 Loans</a>
-    <a href="repayments.html">💵 Repayments</a>
-    <a href="withdrawals.html">💸 Withdrawals</a>
-    <a href="reports.html">📄 Reports</a>
-    <a href="users.html">👤 Users</a>
-    <a href="settings.html">⚙️ Settings</a>
+    <a href="dashboard.html" class="nav-item">
+      <span class="icon">📊</span>
+      <span class="text">Dashboard</span>
+    </a>
+
+    <a href="members.html" class="nav-item">
+      <span class="icon">👥</span>
+      <span class="text">Members</span>
+    </a>
+
+    <a
+      href="savings.html"
+      class="nav-item active"
+    >
+      <span class="icon">💰</span>
+      <span class="text">Savings</span>
+    </a>
 
   </nav>
 
 </aside>
 
-<!-- MAIN -->
+<!-- =========================
+     MAIN
+========================= -->
 <main class="main">
 
+  <!-- TOPBAR -->
   <div class="topbar">
-    <h2>💰 Savings Module</h2>
-    <div class="selected-box">👑 ADMIN</div>
-  </div>
 
-  <!-- DEPOSIT FORM -->
-  <section class="card" style="margin-top:20px;">
+    <h2>
+      💰 Savings Management
+    </h2>
 
-    <h2>➕ Deposit Savings</h2>
+    <button
+      class="add-btn"
+      onclick="openModal()"
+    >
 
-    <input id="memberId" class="input" placeholder="Member ID">
+      <i class="fa fa-plus"></i>
 
-    <input id="amount" type="number" class="input" placeholder="Amount">
+      Add Savings
 
-    <button class="btn success" onclick="addSavings()">
-      Save Deposit
     </button>
 
-  </section>
+  </div>
+
+  <!-- SEARCH -->
+  <div class="search-box">
+
+    <input
+      type="text"
+      id="searchInput"
+      class="input"
+      placeholder="Search member..."
+    >
+
+  </div>
 
   <!-- TABLE -->
-  <section class="card" style="margin-top:20px;">
+  <div class="table-card">
 
-    <h2>📜 Savings History</h2>
-
-    <table class="table">
+    <table class="table-modern">
 
       <thead>
+
         <tr>
-          <th>Member ID</th>
+
+          <th>Member</th>
+
           <th>Amount</th>
+
+          <th>Previous Balance</th>
+
+          <th>New Balance</th>
+
+          <th>Payment Method</th>
+
+          <th>Note</th>
+
           <th>Date</th>
+
+          <th>Created By</th>
+
+          <th>Status</th>
+
         </tr>
+
       </thead>
 
-      <tbody id="savingsTable"></tbody>
+      <tbody id="savingsTable">
+
+      </tbody>
 
     </table>
 
-  </section>
+  </div>
 
 </main>
 
+<!-- =========================
+     MODAL
+========================= -->
+<div class="modal" id="savingModal">
+
+  <div class="modal-box">
+
+    <h3>
+      Add Savings
+    </h3>
+
+    <form id="savingForm">
+
+      <!-- MEMBER -->
+      <select
+        id="member"
+        class="input"
+        required
+      >
+        <option value="">
+          Select Member
+        </option>
+      </select>
+
+      <!-- AMOUNT -->
+      <input
+        type="number"
+        id="amount"
+        class="input"
+        placeholder="Amount"
+        required
+      >
+
+      <!-- PAYMENT -->
+      <select
+        id="paymentMethod"
+        class="input"
+        required
+      >
+
+        <option value="">
+          Payment Method
+        </option>
+
+        <option value="cash">
+          Cash
+        </option>
+
+        <option value="bank">
+          Bank
+        </option>
+
+        <option value="telebirr">
+          Telebirr
+        </option>
+
+        <option value="cbe-birr">
+          CBE Birr
+        </option>
+
+      </select>
+
+      <!-- NOTE -->
+      <input
+        type="text"
+        id="note"
+        class="input"
+        placeholder="Note"
+      >
+
+      <!-- SAVE -->
+      <button
+        type="submit"
+        class="save-btn"
+      >
+        Save Savings
+      </button>
+
+      <!-- CANCEL -->
+      <button
+        type="button"
+        class="close-btn"
+        onclick="closeModal()"
+      >
+        Cancel
+      </button>
+
+    </form>
+
+  </div>
+
+</div>
+
+<!-- SCRIPTS -->
 <script src="js/layout.js"></script>
-<script type="module" src="js/savings.js"></script>
+
+<script
+  type="module"
+  src="js/savings.js"
+></script>
+
+<script>
+
+function openModal() {
+
+  document
+    .getElementById("savingModal")
+    .style.display = "flex";
+}
+
+function closeModal() {
+
+  document
+    .getElementById("savingModal")
+    .style.display = "none";
+}
+
+</script>
 
 </body>
 </html>
