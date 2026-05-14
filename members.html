@@ -2,22 +2,174 @@
 <html lang="en">
 
 <head>
+
   <meta charset="UTF-8">
-  <title>Members</title>
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Members Management</title>
+
   <link rel="stylesheet" href="css/style.css">
+
+  <!-- FONT AWESOME -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+  >
+
 </head>
 
 <body>
 
+<!-- =========================================================
+     SIDEBAR
+========================================================= -->
+<aside class="sidebar" id="sidebar">
+
+  <button
+    class="toggle-btn"
+    onclick="toggleSidebar()"
+  >
+    ☰
+  </button>
+
+  <h2 class="logo">🏦 SACCO</h2>
+
+  <nav class="nav">
+
+    <!-- DASHBOARD -->
+    <a href="dashboard.html" class="nav-item">
+      <span class="icon">📊</span>
+      <span class="text">Dashboard</span>
+    </a>
+
+    <!-- MEMBERS -->
+    <a href="members.html" class="nav-item active">
+      <span class="icon">👥</span>
+      <span class="text">Members</span>
+    </a>
+
+    <!-- SAVINGS -->
+    <a href="savings.html" class="nav-item">
+      <span class="icon">💰</span>
+      <span class="text">Savings</span>
+    </a>
+
+    <!-- LOANS -->
+    <a href="loans.html" class="nav-item">
+      <span class="icon">🏦</span>
+      <span class="text">Loans</span>
+    </a>
+
+    <!-- REPAYMENTS -->
+    <a href="repayments.html" class="nav-item">
+      <span class="icon">💳</span>
+      <span class="text">Repayments</span>
+    </a>
+
+    <!-- WITHDRAWALS -->
+    <a href="withdrawals.html" class="nav-item">
+      <span class="icon">💸</span>
+      <span class="text">Withdrawals</span>
+    </a>
+
+    <!-- USERS -->
+    <a href="users.html" class="nav-item">
+      <span class="icon">👨‍💼</span>
+      <span class="text">Users</span>
+    </a>
+
+    <!-- SETTINGS -->
+    <a href="settings.html" class="nav-item">
+      <span class="icon">⚙️</span>
+      <span class="text">Settings</span>
+    </a>
+
+  </nav>
+
+</aside>
+
+<!-- =========================================================
+     MAIN CONTENT
+========================================================= -->
 <main class="main">
 
-  <!-- TOP -->
+  <!-- TOPBAR -->
   <div class="topbar">
-    <h2>👥 Members Management</h2>
 
-    <button class="add-btn" onclick="openModal()">
-      + Add Member
-    </button>
+    <h2>
+      👥 Members Management
+    </h2>
+
+    <div
+      style="
+        display:flex;
+        gap:12px;
+        align-items:center;
+      "
+    >
+
+      <!-- LANGUAGE -->
+      <select class="lang-select">
+
+        <option>English</option>
+
+        <option>Afaan Oromo</option>
+
+        <option>Amharic</option>
+
+      </select>
+
+      <!-- ADD MEMBER -->
+      <button
+        class="add-btn"
+        onclick="openModal()"
+      >
+
+        <i class="fa fa-plus"></i>
+
+        Add Member
+
+      </button>
+
+      <!-- LOGOUT -->
+      <a
+        href="#"
+        class="add-btn"
+        id="logoutBtn"
+        style="
+          background:
+          linear-gradient(
+            135deg,
+            #ef4444,
+            #b91c1c
+          );
+          text-decoration:none;
+        "
+      >
+
+        <i class="fa fa-right-from-bracket"></i>
+
+        Logout
+
+      </a>
+
+    </div>
+
+  </div>
+
+  <!-- =========================================================
+       MEMBER SEARCH
+  ========================================================= -->
+  <div class="members-header">
+
+    <h2>
+      👥 Member Directory
+    </h2>
+
   </div>
 
   <!-- SEARCH -->
@@ -26,40 +178,66 @@
     <input
       type="text"
       id="searchMember"
-      class="input"
-      placeholder="Search by name, phone, NID..."
+      class="search-input"
+      placeholder="Search by name, phone or NID..."
     >
 
-    <div id="searchResults" class="search-results"></div>
+    <!-- DROPDOWN -->
+    <div
+      id="searchResults"
+      class="search-dropdown"
+    ></div>
 
   </div>
 
   <!-- SELECTED MEMBER -->
-  <div id="selectedMember" class="selected-box">
-    👤 Select a member
+  <div
+    id="selectedMember"
+    class="selected-box"
+  >
+
+    👤 Select member from search
+
   </div>
 
-  <!-- TABLE -->
+  <!-- =========================================================
+       MEMBERS TABLE
+  ========================================================= -->
   <div class="table-card">
 
     <table class="table-modern">
 
       <thead>
+
         <tr>
+
           <th>Photo</th>
+
           <th>Name</th>
+
           <th>Phone</th>
+
           <th>NID</th>
+
           <th>Savings</th>
-          <th>Loan</th>
-          <th>Remaining</th>
+
+          <th>Loan Total</th>
+
+          <th>Remaining Loan</th>
+
           <th>Status</th>
-          <th>Created</th>
-          <th>By</th>
+
+          <th>Created Date</th>
+
+          <th>Created By</th>
+
         </tr>
+
       </thead>
 
-      <tbody id="membersTable"></tbody>
+      <tbody id="membersTable">
+
+      </tbody>
 
     </table>
 
@@ -67,39 +245,87 @@
 
 </main>
 
-<!-- MODAL -->
+<!-- =========================================================
+     ADD MEMBER MODAL
+========================================================= -->
 <div class="modal" id="memberModal">
 
   <div class="modal-box">
 
-    <h3>Add Member</h3>
+    <h3>
+      Add New Member
+    </h3>
 
     <form id="memberForm">
 
-      <input type="text" id="name" placeholder="Full Name" required>
+      <!-- NAME -->
+      <input
+        type="text"
+        id="name"
+        placeholder="Full Name"
+        required
+      >
 
+      <!-- PHONE -->
       <input
         type="text"
         id="phone"
-        placeholder="Phone (9 digits)"
+        placeholder="9 Digit Phone"
         maxlength="9"
-        oninput="this.value=this.value.replace(/[^0-9]/g,'')"
+        pattern="[0-9]{9}"
+
+        oninput="
+          this.value =
+          this.value.replace(/[^0-9]/g,'')
+        "
+
         required
       >
 
+      <!-- NID -->
       <input
         type="text"
         id="nid"
-        placeholder="NID (16 digits)"
+        placeholder="16 Digit National ID"
         maxlength="16"
-        oninput="this.value=this.value.replace(/[^0-9]/g,'')"
+        pattern="[0-9]{16}"
+
+        oninput="
+          this.value =
+          this.value.replace(/[^0-9]/g,'')
+        "
+
         required
       >
 
-      <input type="file" id="photo" required>
+      <!-- PHOTO -->
+      <input
+        type="file"
+        id="photo"
+        accept="image/*"
+        required
+      >
 
-      <button type="submit" class="save-btn">Save</button>
-      <button type="button" class="close-btn" onclick="closeModal()">Cancel</button>
+      <!-- SAVE -->
+      <button
+        type="submit"
+        class="save-btn"
+      >
+
+        Save Member
+
+      </button>
+
+      <!-- CANCEL -->
+      <button
+        type="button"
+        class="close-btn"
+        onclick="closeModal()"
+      >
+
+        Cancel
+
+      </button>
 
     </form>
 
@@ -107,15 +333,53 @@
 
 </div>
 
-<script type="module" src="js/members.js"></script>
+<!-- =========================================================
+     SCRIPTS
+========================================================= -->
+
+<script src="js/layout.js"></script>
+
+<script
+  type="module"
+  src="js/members.js"
+></script>
 
 <script>
+
+/* =========================================================
+   OPEN MODAL
+========================================================= */
 function openModal(){
-  document.getElementById("memberModal").style.display="flex";
+
+  document
+    .getElementById("memberModal")
+    .style.display = "flex";
 }
+
+/* =========================================================
+   CLOSE MODAL
+========================================================= */
 function closeModal(){
-  document.getElementById("memberModal").style.display="none";
+
+  document
+    .getElementById("memberModal")
+    .style.display = "none";
 }
+
+/* =========================================================
+   CLOSE WHEN CLICK OUTSIDE
+========================================================= */
+window.onclick = function(e){
+
+  const modal =
+    document.getElementById("memberModal");
+
+  if(e.target === modal){
+
+    closeModal();
+  }
+}
+
 </script>
 
 </body>
