@@ -1,8 +1,4 @@
-import {
-  db,
-  storage,
-  auth
-} from "./firebase.js";
+import { db, storage, auth } from "./firebase.js";
 
 import {
   collection,
@@ -19,322 +15,164 @@ import {
   getDownloadURL
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
-/* =========================
-   TABLE BODY
-========================= */
 const table = document.getElementById("membersTable");
+const searchInput = document.getElementById("searchMember");
+const resultsBox = document.getElementById("searchResults");
+const selectedBox = document.getElementById("selectedMember");
+
+let members = [];
 
 /* =========================
-   LOAD MEMBERS
+   LOAD MEMBERS TABLE
 ========================= */
 async function loadMembers() {
 
+  const snap = await getDocs(collection(db, "members"));
+
+  members = [];
+
   table.innerHTML = "";
 
-  try {
+  snap.forEach(doc => {
 
-    const snapshot = await getDocs(
-      collection(db, "members")
-    );
+    const m = doc.data();
+    members.push({ id: doc.id, ...m });
 
-    console.log("TOTAL MEMBERS:", snapshot.size);
-
-    /* NO MEMBERS */
-    if (snapshot.empty) {
-
-      table.innerHTML = `
-        <tr>
-          <td colspan="10" style="text-align:center;padding:20px;">
-            No members found
-          </td>
-        </tr>
-      `;
-
-      return;
-    }
-
-    /* LOOP MEMBERS */
-    snapshot.forEach((doc) => {
-
-      const m = doc.data();
-
-      table.innerHTML += `
-
-        <tr>
-
-          <!-- PHOTO -->
-          <td>
-            <img
-              src="${m.photoUrl || 'https://via.placeholder.com/50'}"
-              class="member-photo"
-            >
-          </td>
-
-          <!-- NAME -->
-          <td>${m.name || "-"}</td>
-
-          <!-- PHONE -->
-          <td>${m.phone || "-"}</td>
-
-          <!-- NID -->
-          <td>${m.nid || "-"}</td>
-
-          <!-- SAVINGS -->
-          <td>${m.savings || 0} ETB</td>
-
-          <!-- LOAN TOTAL -->
-          <td>${m.loanTotal || 0} ETB</td>
-
-          <!-- REMAINING -->
-          <td>${m.loanRemaining || 0} ETB</td>
-
-          <!-- STATUS -->
-          <td>
-            <span class="badge active">
-              ${m.status || "active"}
-            </span>
-          </td>
-
-          <!-- CREATED DATE -->
-          <td>
-            ${
-              m.createdAt
-              ? new Date(
-                  m.createdAt.seconds * 1000
-                ).toLocaleDateString()
-              : "-"
-            }
-          </td>
-
-          <!-- CREATED BY -->
-          <td>${m.createdBy || "-"}</td>
-
-        </tr>
-
-      `;
-    });
-
-  } catch (error) {
-
-    console.error("ERROR LOADING MEMBERS:", error);
-
-    table.innerHTML = `
+    table.innerHTML += `
       <tr>
-        <td colspan="10" style="text-align:center;color:red;padding:20px;">
-          Failed to load members
-        </td>
+        <td><img src="${m.photoUrl}" width="40" height="40" style="border-radius:50%"></td>
+        <td>${m.name}</td>
+        <td>${m.phone}</td>
+        <td>${m.nid}</td>
+        <td>${m.savings}</td>
+        <td>${m.loanTotal}</td>
+        <td>${m.loanRemaining}</td>
+        <td>${m.status}</td>
+        <td>${m.createdAt?.toDate().toLocaleDateString()}</td>
+        <td>${m.createdBy}</td>
       </tr>
     `;
-  }
+  });
 }
 
-/* =========================
-   INITIAL LOAD
-========================= */
 loadMembers();
 
 /* =========================
-   ADD MEMBER
+   SEARCH
 ========================= */
-document
-.getElementById("memberForm")
-.addEventListener("submit", async (e) => {
+searchInput.addEventListener("input", (e) => {
 
-  e.preventDefault();
+  const val = e.target.value.toLowerCase();
 
-  /* =========================
-     FORM VALUES
-  ========================= */
-  const name =
-    document.getElementById("name").value.trim();
+  resultsBox.innerHTML = "";
 
-  const phone =
-    document.getElementById("phone").value.trim();
+  if (!val) return;
 
-  const nid =
-    document.getElementById("nid").value.trim();
+  const filtered = members.filter(m =>
+    m.name.toLowerCase().includes(val) ||
+    m.phone.includes(val) ||
+    m.nid.includes(val)
+  );
 
-  const photo =
-    document.getElementById("photo").files[0];
+  filtered.forEach(m => {
 
-  /* =========================
-     VALIDATION
-  ========================= */
+    const div = document.createElement("div");
 
-  /* PHONE MUST BE 9 DIGITS */
-  const phoneRegex = /^[0-9]{9}$/;
+    div.className = "result-item";
 
-  if (!phoneRegex.test(phone)) {
+    div.innerHTML = `
+      👤 ${m.name}<br>
+      📱 ${m.phone}
+    `;
 
-    alert("Phone number must be exactly 9 digits");
+    div.onclick = () => {
 
-    return;
-  }
+      selectedBox.innerHTML = `
+        👤 ${m.name}<br>
+        📱 ${m.phone}<br>
+        🆔 ${m.nid}<br>
+        💰 Savings: ${m.savings}
+      `;
 
-  /* NID MUST BE 16 DIGITS */
-  const nidRegex = /^[0-9]{16}$/;
+      resultsBox.innerHTML = "";
+      searchInput.value = "";
+    };
 
-  if (!nidRegex.test(nid)) {
-
-    alert("NID must be exactly 16 digits");
-
-    return;
-  }
-
-  try {
-
-    /* =========================
-       CHECK DUPLICATE PHONE
-    ========================= */
-    const phoneQuery = query(
-      collection(db, "members"),
-      where("phone", "==", phone)
-    );
-
-    const phoneSnapshot =
-      await getDocs(phoneQuery);
-
-    if (!phoneSnapshot.empty) {
-
-      alert("Phone number already exists");
-
-      return;
-    }
-
-    /* =========================
-       CHECK DUPLICATE NID
-    ========================= */
-    const nidQuery = query(
-      collection(db, "members"),
-      where("nid", "==", nid)
-    );
-
-    const nidSnapshot =
-      await getDocs(nidQuery);
-
-    if (!nidSnapshot.empty) {
-
-      alert("NID already exists");
-
-      return;
-    }
-
-    /* =========================
-       UPLOAD PHOTO
-    ========================= */
-    let photoUrl = "";
-
-    if (photo) {
-
-      const photoRef = ref(
-        storage,
-        "members/" +
-        Date.now() +
-        "_" +
-        photo.name
-      );
-
-      await uploadBytes(photoRef, photo);
-
-      photoUrl =
-        await getDownloadURL(photoRef);
-    }
-
-    /* CURRENT USER */
-    const user = auth.currentUser;
-
-    /* =========================
-       SAVE MEMBER
-    ========================= */
-    await addDoc(
-      collection(db, "members"),
-      {
-
-        name,
-        phone,
-        nid,
-        photoUrl,
-
-        /* FINANCIAL */
-        savings: 0,
-
-        loanTotal: 0,
-
-        loanRemaining: 0,
-
-        /* STATUS */
-        status: "active",
-
-        isDeleted: false,
-
-        /* TRACKING */
-        createdAt: serverTimestamp(),
-
-        createdBy:
-          user ? user.uid : "unknown",
-
-        lastUpdatedAt: serverTimestamp(),
-
-        lastUpdatedBy:
-          user ? user.uid : "unknown"
-
-      }
-    );
-
-    /* SUCCESS */
-    alert("Member added successfully!");
-
-    /* RESET FORM */
-    document
-      .getElementById("memberForm")
-      .reset();
-
-    /* CLOSE MODAL */
-    document
-      .getElementById("memberModal")
-      .style.display = "none";
-
-    /* RELOAD MEMBERS */
-    loadMembers();
-
-  } catch (error) {
-
-    console.error(
-      "ERROR ADDING MEMBER:",
-      error
-    );
-
-    alert("Failed to add member");
-  }
-
+    resultsBox.appendChild(div);
+  });
 });
 
 /* =========================
-   SEARCH MEMBER
+   DUPLICATE CHECK
 ========================= */
-document
-.getElementById("searchInput")
-.addEventListener("keyup", function () {
+async function checkDuplicate(phone, nid) {
 
-  const value =
-    this.value.toLowerCase();
+  const snap = await getDocs(collection(db, "members"));
 
-  const rows =
-    document.querySelectorAll(
-      "#membersTable tr"
-    );
+  let exists = false;
 
-  rows.forEach((row) => {
+  snap.forEach(doc => {
+    const d = doc.data();
 
-    row.style.display =
-      row.innerText
-        .toLowerCase()
-        .includes(value)
+    if (d.phone === phone || d.nid === nid) {
+      exists = true;
+    }
+  });
 
-      ? ""
+  return exists;
+}
 
-      : "none";
+/* =========================
+   SAVE MEMBER
+========================= */
+document.getElementById("memberForm").addEventListener("submit", async (e) => {
+
+  e.preventDefault();
+
+  const name = document.getElementById("name").value;
+  const phone = document.getElementById("phone").value;
+  const nid = document.getElementById("nid").value;
+  const photo = document.getElementById("photo").files[0];
+
+  if (phone.length !== 9) return alert("Phone must be 9 digits");
+  if (nid.length !== 16) return alert("NID must be 16 digits");
+
+  if (await checkDuplicate(phone, nid)) {
+    return alert("Phone or NID already exists!");
+  }
+
+  const photoRef = ref(storage, "members/" + Date.now() + photo.name);
+  await uploadBytes(photoRef, photo);
+  const photoUrl = await getDownloadURL(photoRef);
+
+  const user = auth.currentUser;
+
+  await addDoc(collection(db, "members"), {
+
+    name,
+    phone,
+    nid,
+    photoUrl,
+
+    savings: 0,
+    loanTotal: 0,
+    loanRemaining: 0,
+
+    status: "active",
+    isDeleted: false,
+
+    createdAt: serverTimestamp(),
+    createdBy: user?.uid || "system",
+
+    lastUpdatedAt: serverTimestamp(),
+    lastUpdatedBy: user?.uid || "system"
 
   });
 
+  alert("Member added successfully!");
+
+  document.getElementById("memberForm").reset();
+
+  closeModal();
+  loadMembers();
 });
