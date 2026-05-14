@@ -538,3 +538,57 @@ body{
 .result-item:hover {
   background: #e0f2fe;
 }
+/* =========================
+   SEARCH CONTAINER FIX
+========================= */
+.search-container{
+  position: relative;
+  max-width: 500px;
+  margin-bottom: 15px;
+}
+
+/* INPUT */
+.search-input{
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  outline: none;
+  font-size: 15px;
+  background: white;
+}
+
+/* SEARCH DROPDOWN */
+.search-dropdown{
+  position: absolute;
+  top: 110%;
+  left: 0;
+  right: 0;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.12);
+  max-height: 250px;
+  overflow-y: auto;
+  z-index: 1000;
+}
+
+/* ITEM */
+.search-item{
+  padding: 12px;
+  cursor: pointer;
+  border-bottom: 1px solid #f1f5f9;
+  transition: 0.2s;
+}
+
+.search-item:hover{
+  background: #f1f5f9;
+}
+
+.search-item strong{
+  display: block;
+  color: #0f172a;
+}
+
+.search-item small{
+  color: #64748b;
+}
