@@ -1,8 +1,3 @@
-// ======================================================
-// GERESU DHUKI SACCO — MEMBERS MODULE
-// FILE: js/members.js
-// ======================================================
-
 import { db, storage, auth } from "./firebase.js";
 
 import {
@@ -11,7 +6,8 @@ import {
   getDocs,
   query,
   where,
-  serverTimestamp
+  serverTimestamp,
+  orderBy
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 import {
@@ -20,37 +16,50 @@ import {
   getDownloadURL
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
-// ======================================================
-// ELEMENTS
-// ======================================================
+/* =====================================================
+   ELEMENTS
+===================================================== */
 
 const memberForm = document.getElementById("memberForm");
 
 const membersTable = document.getElementById("membersTable");
 
-const searchInput = document.getElementById("searchMember");
+const searchInput = document.getElementById("searchInput");
+
+const searchMember = document.getElementById("searchMember");
 
 const searchResults = document.getElementById("searchResults");
 
-const selectedBox = document.getElementById("selectedMember");
+const selectedMember = document.getElementById("selectedMember");
 
-// ======================================================
-// LOAD MEMBERS
-// ======================================================
+/* =====================================================
+   LOAD MEMBERS
+===================================================== */
 
 async function loadMembers() {
 
   try {
 
-    const snapshot = await getDocs(collection(db, "members"));
+    membersTable.innerHTML = `
+      <tr>
+        <td colspan="10">
+          Loading members...
+        </td>
+      </tr>
+    `;
 
-    membersTable.innerHTML = "";
+    const snapshot = await getDocs(
+      query(
+        collection(db, "members"),
+        orderBy("createdAt", "desc")
+      )
+    );
 
     if (snapshot.empty) {
 
       membersTable.innerHTML = `
         <tr>
-          <td colspan="10" style="text-align:center;padding:30px;color:red;">
+          <td colspan="10">
             No members found
           </td>
         </tr>
@@ -59,15 +68,15 @@ async function loadMembers() {
       return;
     }
 
+    membersTable.innerHTML = "";
+
     snapshot.forEach((doc) => {
 
       const m = doc.data();
 
-      const createdDate = m.createdAt
-        ? new Date(
-            m.createdAt.seconds * 1000
-          ).toLocaleDateString()
-        : "-";
+      const createdDate =
+        m.createdAt?.toDate?.().toLocaleDateString()
+        || "-";
 
       membersTable.innerHTML += `
 
@@ -80,23 +89,17 @@ async function loadMembers() {
             >
           </td>
 
-          <td>${m.name}</td>
+          <td>${m.name || "-"}</td>
 
-          <td>${m.phone}</td>
+          <td>${m.phone || "-"}</td>
 
-          <td>${m.nid}</td>
+          <td>${m.nid || "-"}</td>
 
-          <td>
-            ${Number(m.savings || 0).toLocaleString()}
-          </td>
+          <td>${m.savings || 0}</td>
 
-          <td>
-            ${Number(m.loanTotal || 0).toLocaleString()}
-          </td>
+          <td>${m.loanTotal || 0}</td>
 
-          <td>
-            ${Number(m.loanRemaining || 0).toLocaleString()}
-          </td>
+          <td>${m.loanRemaining || 0}</td>
 
           <td>
             <span class="badge active">
@@ -106,12 +109,9 @@ async function loadMembers() {
 
           <td>${createdDate}</td>
 
-          <td>
-            ${m.createdBy || "-"}
-          </td>
+          <td>${m.createdBy || "-"}</td>
 
         </tr>
-
       `;
     });
 
@@ -121,61 +121,91 @@ async function loadMembers() {
 
     membersTable.innerHTML = `
       <tr>
-        <td colspan="10" style="text-align:center;color:red;padding:30px;">
-          Failed to load members
+        <td colspan="10">
+          Error loading members
         </td>
       </tr>
     `;
   }
 }
 
-// ======================================================
-// ADD MEMBER
-// ======================================================
+/* =====================================================
+   ADD MEMBER
+===================================================== */
 
 memberForm.addEventListener("submit", async (e) => {
 
   e.preventDefault();
 
-  const name = document
-    .getElementById("name")
-    .value.trim();
-
-  const phone = document
-    .getElementById("phone")
-    .value.trim();
-
-  const nid = document
-    .getElementById("nid")
-    .value.trim();
-
-  const photo = document
-    .getElementById("photo")
-    .files[0];
-
-  // ======================================================
-  // VALIDATIONS
-  // ======================================================
-
-  if (phone.length !== 9) {
-
-    alert("Phone must be 9 digits");
-
-    return;
-  }
-
-  if (nid.length !== 16) {
-
-    alert("NID must be 16 digits");
-
-    return;
-  }
-
   try {
 
-    // ======================================================
-    // CHECK DUPLICATE PHONE
-    // ======================================================
+    const saveBtn =
+      memberForm.querySelector(".save-btn");
+
+    saveBtn.disabled = true;
+
+    saveBtn.innerHTML = "Saving...";
+
+    /* =====================
+       FORM VALUES
+    ===================== */
+
+    const name =
+      document.getElementById("name")
+      .value
+      .trim();
+
+    const phone =
+      document.getElementById("phone")
+      .value
+      .trim();
+
+    const nid =
+      document.getElementById("nid")
+      .value
+      .trim();
+
+    const photo =
+      document.getElementById("photo")
+      .files[0];
+
+    /* =====================
+       VALIDATION
+    ===================== */
+
+    if (phone.length !== 9) {
+
+      alert("Phone must be 9 digits");
+
+      saveBtn.disabled = false;
+      saveBtn.innerHTML = "Save Member";
+
+      return;
+    }
+
+    if (nid.length !== 16) {
+
+      alert("NID must be 16 digits");
+
+      saveBtn.disabled = false;
+      saveBtn.innerHTML = "Save Member";
+
+      return;
+    }
+
+    if (!photo) {
+
+      alert("Please select photo");
+
+      saveBtn.disabled = false;
+      saveBtn.innerHTML = "Save Member";
+
+      return;
+    }
+
+    /* =====================
+       CHECK PHONE DUPLICATE
+    ===================== */
 
     const phoneQuery = query(
       collection(db, "members"),
@@ -188,12 +218,15 @@ memberForm.addEventListener("submit", async (e) => {
 
       alert("Phone already exists");
 
+      saveBtn.disabled = false;
+      saveBtn.innerHTML = "Save Member";
+
       return;
     }
 
-    // ======================================================
-    // CHECK DUPLICATE NID
-    // ======================================================
+    /* =====================
+       CHECK NID DUPLICATE
+    ===================== */
 
     const nidQuery = query(
       collection(db, "members"),
@@ -206,31 +239,38 @@ memberForm.addEventListener("submit", async (e) => {
 
       alert("NID already exists");
 
+      saveBtn.disabled = false;
+      saveBtn.innerHTML = "Save Member";
+
       return;
     }
 
-    // ======================================================
-    // UPLOAD PHOTO
-    // ======================================================
+    /* =====================
+       UPLOAD PHOTO
+    ===================== */
 
-    const photoRef = ref(
+    const fileName =
+      Date.now() + "_" + photo.name;
+
+    const storageRef = ref(
       storage,
-      "members/" + Date.now() + "_" + photo.name
+      "members/" + fileName
     );
 
-    await uploadBytes(photoRef, photo);
+    await uploadBytes(storageRef, photo);
 
-    const photoUrl = await getDownloadURL(photoRef);
+    const photoUrl =
+      await getDownloadURL(storageRef);
 
-    // ======================================================
-    // CURRENT USER
-    // ======================================================
+    /* =====================
+       USER
+    ===================== */
 
     const user = auth.currentUser;
 
-    // ======================================================
-    // SAVE TO FIRESTORE
-    // ======================================================
+    /* =====================
+       SAVE TO FIRESTORE
+    ===================== */
 
     await addDoc(collection(db, "members"), {
 
@@ -252,177 +292,157 @@ memberForm.addEventListener("submit", async (e) => {
       createdAt: serverTimestamp(),
 
       createdBy: user
-        ? user.email
-        : "Admin",
+        ? user.email || user.uid
+        : "admin",
 
       lastUpdatedAt: serverTimestamp(),
 
       lastUpdatedBy: user
-        ? user.email
-        : "Admin"
+        ? user.email || user.uid
+        : "admin"
     });
 
-    // ======================================================
-    // SUCCESS
-    // ======================================================
+    /* =====================
+       SUCCESS
+    ===================== */
 
     alert("Member added successfully");
 
     memberForm.reset();
 
-    document.getElementById(
-      "memberModal"
-    ).style.display = "none";
+    closeModal();
 
     loadMembers();
 
+    saveBtn.disabled = false;
+
+    saveBtn.innerHTML = "Save Member";
+
   } catch (error) {
 
     console.error(error);
 
-    alert("Failed to add member");
+    alert(error.message);
+
+    const saveBtn =
+      memberForm.querySelector(".save-btn");
+
+    saveBtn.disabled = false;
+
+    saveBtn.innerHTML = "Save Member";
   }
 });
 
-// ======================================================
-// SEARCH MEMBERS
-// ======================================================
+/* =====================================================
+   SEARCH MEMBER
+===================================================== */
 
-async function searchMembers(keyword) {
+let membersCache = [];
+
+async function loadSearchMembers() {
+
+  const snapshot = await getDocs(
+    collection(db, "members")
+  );
+
+  membersCache = [];
+
+  snapshot.forEach((doc) => {
+
+    membersCache.push({
+      id: doc.id,
+      ...doc.data()
+    });
+  });
+}
+
+searchMember?.addEventListener("input", () => {
+
+  const value =
+    searchMember.value.toLowerCase();
 
   searchResults.innerHTML = "";
 
-  if (!keyword) {
+  if (!value) return;
 
-    searchResults.innerHTML = "";
+  const filtered = membersCache.filter((m) => {
 
-    return;
-  }
-
-  try {
-
-    const snapshot = await getDocs(
-      collection(db, "members")
+    return (
+      m.name?.toLowerCase().includes(value)
+      ||
+      m.phone?.includes(value)
+      ||
+      m.nid?.includes(value)
     );
+  });
 
-    const members = [];
+  filtered.forEach((m) => {
 
-    snapshot.forEach((doc) => {
+    const div = document.createElement("div");
 
-      members.push({
-        id: doc.id,
-        ...doc.data()
-      });
-    });
+    div.className = "search-item";
 
-    const filtered = members.filter((m) => {
+    div.innerHTML = `
 
-      return (
-        m.name
-          ?.toLowerCase()
-          .includes(keyword.toLowerCase())
+      <strong>${m.name}</strong>
 
-        ||
+      <small>
+        ${m.phone}
+      </small>
 
-        m.phone
-          ?.includes(keyword)
+    `;
 
-        ||
+    div.onclick = () => {
 
-        m.nid
-          ?.includes(keyword)
-      );
-    });
+      selectedMember.innerHTML = `
 
-    if (filtered.length === 0) {
+        👤 ${m.name}<br>
 
-      searchResults.innerHTML = `
-        <div class="search-item">
-          No member found
-        </div>
-      `;
+        📱 ${m.phone}<br>
 
-      return;
-    }
+        🆔 ${m.nid}<br>
 
-    filtered.forEach((m) => {
-
-      const div = document.createElement("div");
-
-      div.className = "search-item";
-
-      div.innerHTML = `
-
-        <strong>
-          👤 ${m.name}
-        </strong>
-
-        <small>
-          📱 ${m.phone}
-        </small>
-
-        <small>
-          🆔 ${m.nid}
-        </small>
+        💰 Savings: ${m.savings || 0}
 
       `;
 
-      // ======================================================
-      // SELECT MEMBER
-      // ======================================================
+      searchResults.innerHTML = "";
 
-      div.onclick = () => {
+      searchMember.value = m.name;
+    };
 
-        selectedBox.innerHTML = `
-
-          👤 ${m.name}<br>
-
-          📱 ${m.phone}<br>
-
-          🆔 ${m.nid}<br>
-
-          💰 Savings:
-          ${Number(
-            m.savings || 0
-          ).toLocaleString()}<br>
-
-          💵 Loan:
-          ${Number(
-            m.loanTotal || 0
-          ).toLocaleString()}<br>
-
-          🏦 Remaining:
-          ${Number(
-            m.loanRemaining || 0
-          ).toLocaleString()}
-
-        `;
-
-        searchResults.innerHTML = "";
-
-        searchInput.value = m.name;
-      };
-
-      searchResults.appendChild(div);
-    });
-
-  } catch (error) {
-
-    console.error(error);
-  }
-}
-
-// ======================================================
-// SEARCH EVENT
-// ======================================================
-
-searchInput.addEventListener("input", (e) => {
-
-  searchMembers(e.target.value);
+    searchResults.appendChild(div);
+  });
 });
 
-// ======================================================
-// INITIAL LOAD
-// ======================================================
+/* =====================================================
+   FILTER TABLE
+===================================================== */
+
+searchInput?.addEventListener("input", () => {
+
+  const value =
+    searchInput.value.toLowerCase();
+
+  const rows =
+    membersTable.querySelectorAll("tr");
+
+  rows.forEach((row) => {
+
+    const text =
+      row.innerText.toLowerCase();
+
+    row.style.display =
+      text.includes(value)
+      ? ""
+      : "none";
+  });
+});
+
+/* =====================================================
+   START
+===================================================== */
 
 loadMembers();
+
+loadSearchMembers();
