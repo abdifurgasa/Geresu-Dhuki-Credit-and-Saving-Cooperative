@@ -15,26 +15,28 @@
 
   <h2>🏦 Loans Management</h2>
 
-  <!-- =========================
-       SEARCH MEMBER
-  ========================= -->
-  <div class="search-container">
+ <!-- =========================
+     MEMBER SEARCH (CLEAN UI)
+========================= -->
+<div class="search-container">
 
-    <input
-      type="text"
-      id="searchMember"
-      class="input"
-      placeholder="Search member..."
-    >
+  <input
+    type="text"
+    id="searchMember"
+    class="input search-input"
+    placeholder="🔍 Search member by name, phone or NID..."
+    autocomplete="off"
+  >
 
-    <div id="searchResults" class="search-results"></div>
+  <!-- DROPDOWN RESULTS -->
+  <div id="searchResults" class="search-dropdown"></div>
 
-  </div>
+</div>
 
-  <!-- SELECTED MEMBER -->
-  <div id="selectedMember" class="selected-box">
-    👤 Select member first
-  </div>
+<!-- SELECTED MEMBER -->
+<div id="selectedMember" class="selected-box">
+  👤 Select a member
+</div>
 
   <!-- =========================
        LOAN FORM
