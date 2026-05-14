@@ -42,11 +42,25 @@ const photoInput =
 const photoPreview =
   document.getElementById("photoPreview");
 
+const modal =
+  document.getElementById("memberModal");
+
+/* =====================================================
+   CLOSE MODAL
+===================================================== */
+
+function closeModal(){
+
+  modal.style.display = "none";
+}
+
 /* =====================================================
    PHOTO PREVIEW
 ===================================================== */
 
-photoInput?.addEventListener("change", (e)=>{
+photoInput.addEventListener(
+  "change",
+  (e)=>{
 
   const file = e.target.files[0];
 
@@ -61,7 +75,6 @@ photoInput?.addEventListener("change", (e)=>{
   };
 
   reader.readAsDataURL(file);
-
 });
 
 /* =====================================================
@@ -70,56 +83,85 @@ photoInput?.addEventListener("change", (e)=>{
 
 async function loadMembers(){
 
-  membersTable.innerHTML = "";
+  try{
 
-  const snapshot =
-    await getDocs(collection(db,"members"));
+    membersTable.innerHTML = "";
 
-  snapshot.forEach((doc)=>{
+    const snapshot =
+      await getDocs(
+        collection(db,"members")
+      );
 
-    const m = doc.data();
+    if(snapshot.empty){
 
-    const createdDate =
-      m.createdAt?.toDate
-      ? m.createdAt.toDate().toLocaleDateString()
-      : "-";
+      membersTable.innerHTML = `
+        <tr>
+          <td colspan="10">
+            No members found
+          </td>
+        </tr>
+      `;
 
-    membersTable.innerHTML += `
+      return;
+    }
 
-      <tr>
+    snapshot.forEach((doc)=>{
 
-        <td>
-          <img
-            src="${m.photoUrl}"
-            class="member-photo"
-          >
-        </td>
+      const m = doc.data();
 
-        <td>${m.name}</td>
+      const createdDate =
+        m.createdAt?.toDate
+        ? m.createdAt
+            .toDate()
+            .toLocaleDateString()
+        : "-";
 
-        <td>${m.phone}</td>
+      membersTable.innerHTML += `
 
-        <td>${m.nid}</td>
+        <tr>
 
-        <td>${m.savings || 0}</td>
+          <td>
+            <img
+              src="${m.photoUrl}"
+              class="member-photo"
+            >
+          </td>
 
-        <td>${m.loanTotal || 0}</td>
+          <td>${m.name}</td>
 
-        <td>${m.loanRemaining || 0}</td>
+          <td>${m.phone}</td>
 
-        <td>
-          <span class="badge active">
-            ${m.status}
-          </span>
-        </td>
+          <td>${m.nid}</td>
 
-        <td>${createdDate}</td>
+          <td>${m.savings || 0}</td>
 
-        <td>${m.createdBy || "-"}</td>
+          <td>${m.loanTotal || 0}</td>
 
-      </tr>
-    `;
-  });
+          <td>${m.loanRemaining || 0}</td>
+
+          <td>
+            <span class="badge active">
+              ${m.status}
+            </span>
+          </td>
+
+          <td>${createdDate}</td>
+
+          <td>${m.createdBy || "-"}</td>
+
+        </tr>
+      `;
+    });
+
+  }
+
+  catch(error){
+
+    console.error(
+      "Load members error:",
+      error
+    );
+  }
 }
 
 loadMembers();
@@ -136,38 +178,64 @@ memberForm.addEventListener(
 
   try{
 
+    /* =========================
+       GET VALUES
+    ========================= */
+
     const name =
-      document.getElementById("name")
-      .value.trim();
+      document
+      .getElementById("name")
+      .value
+      .trim();
 
     const phone =
-      document.getElementById("phone")
-      .value.trim();
+      document
+      .getElementById("phone")
+      .value
+      .trim();
 
     const nid =
-      document.getElementById("nid")
-      .value.trim();
+      document
+      .getElementById("nid")
+      .value
+      .trim();
 
     const photo =
       photoInput.files[0];
 
-    /* PHONE VALIDATION */
+    /* =========================
+       VALIDATION
+    ========================= */
+
+    if(!photo){
+
+      alert("Select photo");
+
+      return;
+    }
+
     if(phone.length !== 9){
 
-      alert("Phone must be 9 digits");
+      alert(
+        "Phone must be 9 digits"
+      );
 
       return;
     }
 
-    /* NID VALIDATION */
     if(nid.length !== 16){
 
-      alert("NID must be 16 digits");
+      alert(
+        "NID must be 16 digits"
+      );
 
       return;
     }
 
-    /* CHECK DUPLICATE PHONE */
+    /* =========================
+       DUPLICATE PHONE
+    ========================= */
+
     const phoneQuery = query(
       collection(db,"members"),
       where("phone","==",phone)
@@ -178,12 +246,17 @@ memberForm.addEventListener(
 
     if(!phoneSnap.empty){
 
-      alert("Phone already exists");
+      alert(
+        "Phone already exists"
+      );
 
       return;
     }
 
-    /* CHECK DUPLICATE NID */
+    /* =========================
+       DUPLICATE NID
+    ========================= */
+
     const nidQuery = query(
       collection(db,"members"),
       where("nid","==",nid)
@@ -194,30 +267,46 @@ memberForm.addEventListener(
 
     if(!nidSnap.empty){
 
-      alert("NID already exists");
+      alert(
+        "NID already exists"
+      );
 
       return;
     }
 
-    /* PHOTO UPLOAD */
-    const photoRef = ref(
+    /* =========================
+       UPLOAD PHOTO
+    ========================= */
+
+    const fileName =
+      Date.now() + "_" + photo.name;
+
+    const storageRef = ref(
       storage,
-      "members/" +
-      Date.now() +
-      "_" +
-      photo.name
+      "members/" + fileName
     );
 
-    await uploadBytes(photoRef,photo);
+    await uploadBytes(
+      storageRef,
+      photo
+    );
 
     const photoUrl =
-      await getDownloadURL(photoRef);
+      await getDownloadURL(
+        storageRef
+      );
 
-    /* CURRENT USER */
+    /* =========================
+       CURRENT USER
+    ========================= */
+
     const user =
       auth.currentUser;
 
-    /* SAVE FIRESTORE */
+    /* =========================
+       SAVE TO FIRESTORE
+    ========================= */
+
     await addDoc(
       collection(db,"members"),
       {
@@ -243,7 +332,7 @@ memberForm.addEventListener(
         createdBy:
           user
           ? user.uid
-          : null,
+          : "admin",
 
         lastUpdatedAt:
           serverTimestamp(),
@@ -251,9 +340,13 @@ memberForm.addEventListener(
         lastUpdatedBy:
           user
           ? user.uid
-          : null
+          : "admin"
       }
     );
+
+    /* =========================
+       SUCCESS
+    ========================= */
 
     alert(
       "✅ Member saved successfully"
@@ -264,24 +357,27 @@ memberForm.addEventListener(
     photoPreview.src =
       "https://via.placeholder.com/120x120?text=Photo";
 
-    loadMembers();
-
     closeModal();
+
+    loadMembers();
 
   }
 
   catch(error){
 
-    console.error(error);
+    console.error(
+      "Save member error:",
+      error
+    );
 
     alert(
-      "Failed to save member"
+      "❌ Failed to save member"
     );
   }
 });
 
 /* =====================================================
-   SEARCH
+   SEARCH MEMBER
 ===================================================== */
 
 searchInput.addEventListener(
@@ -300,7 +396,9 @@ searchInput.addEventListener(
   }
 
   const snapshot =
-    await getDocs(collection(db,"members"));
+    await getDocs(
+      collection(db,"members")
+    );
 
   snapshot.forEach((doc)=>{
 
@@ -308,16 +406,19 @@ searchInput.addEventListener(
 
     const found =
 
-      m.name.toLowerCase()
+      m.name
+      .toLowerCase()
       .includes(value)
 
       ||
 
-      m.phone.includes(value)
+      m.phone
+      .includes(value)
 
       ||
 
-      m.nid.includes(value);
+      m.nid
+      .includes(value);
 
     if(found){
 
@@ -332,7 +433,7 @@ searchInput.addEventListener(
         <strong>${m.name}</strong>
 
         <small>
-          ${m.phone}
+          📱 ${m.phone}
         </small>
 
       `;
@@ -352,13 +453,13 @@ searchInput.addEventListener(
 
         `;
 
-        searchResults.innerHTML = "";
-
         searchInput.value =
           m.name;
+
+        searchResults.innerHTML = "";
       };
 
       searchResults.appendChild(div);
     }
   });
-}); 
+});
