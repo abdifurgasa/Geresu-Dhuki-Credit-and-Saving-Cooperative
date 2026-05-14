@@ -4,22 +4,77 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Members Management</title>
+
+  <title>Members</title>
 
   <link rel="stylesheet" href="css/style.css">
+
+  <!-- FONT AWESOME -->
+  <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 
 <body>
 
-  <div class="container">
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+
+  <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+
+  <h2 class="logo">🏦 SACCO</h2>
+
+  <nav class="nav">
+
+    <a href="dashboard.html" class="nav-item">
+      <span class="icon">📊</span>
+      <span class="text">Dashboard</span>
+    </a>
+
+    <a href="members.html" class="nav-item active">
+      <span class="icon">👥</span>
+      <span class="text">Members</span>
+    </a>
+
+    <a href="#" class="nav-item logout" id="logoutBtn">
+      <span class="icon">🚪</span>
+      <span class="text">Logout</span>
+    </a>
+
+  </nav>
+
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
 
     <h2>👥 Members Management</h2>
 
-    <!-- BUTTON -->
-    <button onclick="openModal()">+ Add Member</button>
+    <button class="add-btn" onclick="openModal()">
+      <i class="fa fa-plus"></i>
+      Add Member
+    </button>
 
-    <!-- TABLE -->
-    <table border="1" width="100%" style="margin-top:20px;">
+  </div>
+
+  <!-- SEARCH -->
+  <div class="search-box">
+
+    <input
+      type="text"
+      id="searchInput"
+      placeholder="Search member..."
+    >
+
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-card">
+
+    <table class="table-modern">
+
       <thead>
         <tr>
           <th>Photo</th>
@@ -33,44 +88,85 @@
       </thead>
 
       <tbody id="membersTable"></tbody>
+
     </table>
 
   </div>
 
-  <!-- ================= MODAL ================= -->
-  <div id="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:#000000aa;">
+</main>
 
-    <div style="background:white; width:400px; margin:10% auto; padding:20px;">
+<!-- =========================
+     MODAL
+========================= -->
+<div class="modal" id="memberModal">
 
-      <h3>Add Member</h3>
+  <div class="modal-box">
 
-      <form id="memberForm">
+    <h3>Add New Member</h3>
 
-        <input type="text" id="name" placeholder="Name" required><br><br>
-        <input type="text" id="phone" placeholder="Phone" required><br><br>
-        <input type="text" id="nid" placeholder="NID" required><br><br>
-        <input type="file" id="photo" required><br><br>
+    <form id="memberForm">
 
-        <button type="submit">Save</button>
-        <button type="button" onclick="closeModal()">Close</button>
+      <input
+        type="text"
+        id="name"
+        placeholder="Full Name"
+        required
+      >
 
-      </form>
+      <input
+        type="text"
+        id="phone"
+        placeholder="Phone"
+        required
+      >
 
-    </div>
+      <input
+        type="text"
+        id="nid"
+        placeholder="National ID"
+        required
+      >
+
+      <input
+        type="file"
+        id="photo"
+        required
+      >
+
+      <button type="submit" class="save-btn">
+        Save Member
+      </button>
+
+      <button
+        type="button"
+        class="close-btn"
+        onclick="closeModal()"
+      >
+        Cancel
+      </button>
+
+    </form>
 
   </div>
 
-  <script type="module" src="js/members.js"></script>
+</div>
 
-  <script>
-    function openModal() {
-      document.getElementById("modal").style.display = "block";
-    }
+<!-- SCRIPTS -->
+<script src="js/layout.js"></script>
 
-    function closeModal() {
-      document.getElementById("modal").style.display = "none";
-    }
-  </script>
+<script type="module" src="js/members.js"></script>
+
+<script>
+
+function openModal() {
+  document.getElementById("memberModal").style.display = "flex";
+}
+
+function closeModal() {
+  document.getElementById("memberModal").style.display = "none";
+}
+
+</script>
 
 </body>
 </html>
