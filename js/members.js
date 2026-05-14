@@ -28,7 +28,7 @@ const photoPreview = document.getElementById("photoPreview");
 const modal = document.getElementById("memberModal");
 
 /* =========================
-   PHOTO PREVIEW
+   PHOTO PREVIEW FIX
 ========================= */
 photoInput.addEventListener("change", (e) => {
   const file = e.target.files[0];
@@ -42,38 +42,7 @@ photoInput.addEventListener("change", (e) => {
 });
 
 /* =========================
-   IMAGE COMPRESS (IMPORTANT FIX)
-========================= */
-function compressImage(file, maxWidth = 800) {
-  return new Promise((resolve) => {
-    const reader = new FileReader();
-
-    reader.onload = (e) => {
-      const img = new Image();
-      img.src = e.target.result;
-
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
-        const scale = maxWidth / img.width;
-
-        canvas.width = maxWidth;
-        canvas.height = img.height * scale;
-
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-        canvas.toBlob((blob) => {
-          resolve(blob);
-        }, "image/jpeg", 0.7); // 🔥 compress 70%
-      };
-    };
-
-    reader.readAsDataURL(file);
-  });
-}
-
-/* =========================
-   SAVE MEMBER
+   SAVE MEMBER (FIXED)
 ========================= */
 memberForm.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -86,30 +55,26 @@ memberForm.addEventListener("submit", async (e) => {
 
     if (!photo) return alert("Select photo");
 
-    if (phone.length !== 9)
-      return alert("Phone must be 9 digits");
+    if (phone.length !== 9) return alert("Phone must be 9 digits");
+    if (nid.length !== 16) return alert("NID must be 16 digits");
 
-    if (nid.length !== 16)
-      return alert("NID must be 16 digits");
-
-    /* DUPLICATE CHECK */
+    // duplicate phone
     const phoneSnap = await getDocs(
       query(collection(db, "members"), where("phone", "==", phone))
     );
     if (!phoneSnap.empty) return alert("Phone already exists");
 
+    // duplicate nid
     const nidSnap = await getDocs(
       query(collection(db, "members"), where("nid", "==", nid))
     );
     if (!nidSnap.empty) return alert("NID already exists");
 
-    /* 🔥 COMPRESS IMAGE (IMPORTANT FIX) */
-    const compressedFile = await compressImage(photo);
-
-    const fileName = Date.now() + ".jpg";
+    // upload photo
+    const fileName = Date.now() + "_" + photo.name;
     const storageRef = ref(storage, "members/" + fileName);
 
-    await uploadBytes(storageRef, compressedFile);
+    await uploadBytes(storageRef, photo);
     const photoUrl = await getDownloadURL(storageRef);
 
     const user = auth.currentUser;
@@ -119,13 +84,10 @@ memberForm.addEventListener("submit", async (e) => {
       phone,
       nid,
       photoUrl,
-
       savings: 0,
       loanTotal: 0,
       loanRemaining: 0,
-
       status: "active",
-
       createdAt: serverTimestamp(),
       createdBy: user ? user.uid : "admin"
     });
@@ -134,15 +96,15 @@ memberForm.addEventListener("submit", async (e) => {
 
     memberForm.reset();
     photoPreview.src =
-      "https://via.placeholder.com/120x120?text=Photo";
+      "https://dummyimage.com/120x120/cccccc/000000&text=Photo";
 
     modal.style.display = "none";
 
     loadMembers();
 
-  } catch (error) {
-    console.error(error);
-    alert("❌ Save failed: " + error.message);
+  } catch (err) {
+    console.error(err);
+    alert("❌ Failed: " + err.message);
   }
 });
 
@@ -175,46 +137,3 @@ async function loadMembers() {
 }
 
 loadMembers();
-
-/* =========================
-   SEARCH (CLEAN UI)
-========================= */
-searchInput.addEventListener("input", async () => {
-  const val = searchInput.value.toLowerCase();
-  searchResults.innerHTML = "";
-
-  if (!val) return;
-
-  const snapshot = await getDocs(collection(db, "members"));
-
-  snapshot.forEach((doc) => {
-    const m = doc.data();
-
-    if (
-      m.name.toLowerCase().includes(val) ||
-      m.phone.includes(val) ||
-      m.nid.includes(val)
-    ) {
-      const div = document.createElement("div");
-      div.className = "search-item";
-
-      div.innerHTML = `
-        <strong>${m.name}</strong>
-        <small>${m.phone}</small>
-      `;
-
-      div.onclick = () => {
-        selectedMember.innerHTML = `
-          👤 ${m.name}<br>
-          📱 ${m.phone}<br>
-          🆔 ${m.nid}<br>
-          💰 Savings: ${m.savings}
-        `;
-
-        searchResults.innerHTML = "";
-      };
-
-      searchResults.appendChild(div);
-    }
-  });
-});
