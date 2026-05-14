@@ -2,11 +2,14 @@
 <html lang="en">
 
 <head>
+
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title data-i18n="loans">Loans</title>
+
+  <title>Loans</title>
 
   <link rel="stylesheet" href="css/style.css">
+
 </head>
 
 <body>
@@ -15,19 +18,15 @@
 <aside class="sidebar" id="sidebar">
 
   <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+
   <h2 class="logo">🏦 SACCO</h2>
 
   <nav class="nav">
 
-    <a href="dashboard.html">📊 Dashboard</a>
-    <a href="members.html">👥 Members</a>
-    <a href="savings.html">💰 Savings</a>
-    <a href="loans.html" class="active">🏦 Loans</a>
-    <a href="repayments.html">💵 Repayments</a>
-    <a href="withdrawals.html">💸 Withdrawals</a>
-    <a href="reports.html">📄 Reports</a>
-    <a href="users.html">👤 Users</a>
-    <a href="settings.html">⚙️ Settings</a>
+    <a href="dashboard.html" class="nav-item">📊 Dashboard</a>
+    <a href="members.html" class="nav-item">👥 Members</a>
+    <a href="savings.html" class="nav-item">💰 Savings</a>
+    <a href="loans.html" class="nav-item active">🏦 Loans</a>
 
   </nav>
 
@@ -37,65 +36,94 @@
 <main class="main">
 
   <div class="topbar">
+
     <h2>🏦 Loan Management</h2>
-    <div class="selected-box">👑 ADMIN</div>
-  </div>
 
-  <!-- SEARCH MEMBER -->
-  <section class="card" style="margin-top:20px;">
-
-    <h2>🔍 Select Member</h2>
-
-    <input id="memberId" class="input" placeholder="Member ID">
-
-  </section>
-
-  <!-- LOAN FORM -->
-  <section class="card" style="margin-top:20px;">
-
-    <h2>➕ Create Loan</h2>
-
-    <input id="amount" type="number" class="input" placeholder="Loan Amount">
-
-    <input id="interest" type="number" class="input" placeholder="Interest %">
-
-    <input id="duration" type="number" class="input" placeholder="Duration (months)">
-
-    <button class="btn success" onclick="createLoan()">
-      Create Loan
+    <button class="add-btn" onclick="openModal()">
+      ➕ Create Loan
     </button>
 
-  </section>
+  </div>
+
+  <!-- SEARCH -->
+  <input type="text" id="searchInput" class="input" placeholder="Search loan...">
 
   <!-- TABLE -->
-  <section class="card" style="margin-top:20px;">
+  <table class="table-modern">
 
-    <h2>📜 Loan Records</h2>
+    <thead>
+      <tr>
+        <th>Member</th>
+        <th>Amount</th>
+        <th>Interest Type</th>
+        <th>Interest %</th>
+        <th>Total</th>
+        <th>Remaining</th>
+        <th>Duration</th>
+        <th>Status</th>
+        <th>Date</th>
+      </tr>
+    </thead>
 
-    <table class="table">
+    <tbody id="loanTable"></tbody>
 
-      <thead>
-        <tr>
-          <th>Member</th>
-          <th>Principal</th>
-          <th>Interest</th>
-          <th>Total</th>
-          <th>Paid</th>
-          <th>Remaining</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-
-      <tbody id="loanTable"></tbody>
-
-    </table>
-
-  </section>
+  </table>
 
 </main>
 
+<!-- MODAL -->
+<div class="modal" id="loanModal">
+
+  <div class="modal-box">
+
+    <h3>Create Loan</h3>
+
+    <form id="loanForm">
+
+      <select id="member" class="input" required>
+        <option value="">Select Member</option>
+      </select>
+
+      <input type="number" id="amount" class="input" placeholder="Loan Amount" required>
+
+      <input type="number" id="interest" class="input" placeholder="Interest %" required>
+
+      <!-- ✅ NEW -->
+      <select id="interestType" class="input" required>
+
+        <option value="">Interest Type</option>
+        <option value="flat">Flat</option>
+        <option value="reducing">Reducing</option>
+        <option value="compound">Compound</option>
+
+      </select>
+
+      <input type="text" id="duration" class="input" placeholder="Duration" required>
+
+      <input type="text" id="note" class="input" placeholder="Note">
+
+      <button type="submit" class="save-btn">Save Loan</button>
+
+      <button type="button" class="close-btn" onclick="closeModal()">Cancel</button>
+
+    </form>
+
+  </div>
+
+</div>
+
 <script src="js/layout.js"></script>
 <script type="module" src="js/loans.js"></script>
+
+<script>
+function openModal() {
+  document.getElementById("loanModal").style.display = "flex";
+}
+
+function closeModal() {
+  document.getElementById("loanModal").style.display = "none";
+}
+</script>
 
 </body>
 </html>
