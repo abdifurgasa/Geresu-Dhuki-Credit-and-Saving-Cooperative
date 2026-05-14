@@ -2,14 +2,12 @@
 <html lang="en">
 
 <head>
-
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>Loans</title>
 
   <link rel="stylesheet" href="css/style.css">
-
 </head>
 
 <body>
@@ -23,10 +21,9 @@
 
   <nav class="nav">
 
-    <a href="dashboard.html" class="nav-item">📊 Dashboard</a>
-    <a href="members.html" class="nav-item">👥 Members</a>
-    <a href="savings.html" class="nav-item">💰 Savings</a>
-    <a href="loans.html" class="nav-item active">🏦 Loans</a>
+    <a href="dashboard.html" class="nav-item">Dashboard</a>
+    <a href="members.html" class="nav-item">Members</a>
+    <a href="loans.html" class="nav-item active">Loans</a>
 
   </nav>
 
@@ -36,19 +33,12 @@
 <main class="main">
 
   <div class="topbar">
-
     <h2>🏦 Loan Management</h2>
-
-    <button class="add-btn" onclick="openModal()">
-      ➕ Create Loan
-    </button>
-
+    <button class="add-btn" onclick="openModal()">➕ Create Loan</button>
   </div>
 
-  <!-- SEARCH -->
-  <input type="text" id="searchInput" class="input" placeholder="Search loan...">
+  <input type="text" id="searchInput" class="input" placeholder="Search loans...">
 
-  <!-- TABLE -->
   <table class="table-modern">
 
     <thead>
@@ -56,12 +46,11 @@
         <th>Member</th>
         <th>Amount</th>
         <th>Interest Type</th>
-        <th>Interest %</th>
+        <th>Rate %</th>
+        <th>Duration</th>
         <th>Total</th>
         <th>Remaining</th>
-        <th>Duration</th>
         <th>Status</th>
-        <th>Date</th>
       </tr>
     </thead>
 
@@ -80,30 +69,30 @@
 
     <form id="loanForm">
 
-      <select id="member" class="input" required>
-        <option value="">Select Member</option>
-      </select>
+      <select id="member" class="input" required></select>
 
       <input type="number" id="amount" class="input" placeholder="Loan Amount" required>
 
       <input type="number" id="interest" class="input" placeholder="Interest %" required>
 
-      <!-- ✅ NEW -->
+      <!-- INTEREST TYPE -->
       <select id="interestType" class="input" required>
-
         <option value="">Interest Type</option>
+        <option value="simple">Simple</option>
         <option value="flat">Flat</option>
-        <option value="reducing">Reducing</option>
         <option value="compound">Compound</option>
-
       </select>
 
-      <input type="text" id="duration" class="input" placeholder="Duration" required>
+      <!-- DURATION -->
+      <input type="number" id="durationValue" class="input" placeholder="Duration (e.g 12)" required>
 
-      <input type="text" id="note" class="input" placeholder="Note">
+      <select id="durationType" class="input" required>
+        <option value="">Month / Year</option>
+        <option value="months">Months</option>
+        <option value="years">Years</option>
+      </select>
 
       <button type="submit" class="save-btn">Save Loan</button>
-
       <button type="button" class="close-btn" onclick="closeModal()">Cancel</button>
 
     </form>
@@ -116,13 +105,8 @@
 <script type="module" src="js/loans.js"></script>
 
 <script>
-function openModal() {
-  document.getElementById("loanModal").style.display = "flex";
-}
-
-function closeModal() {
-  document.getElementById("loanModal").style.display = "none";
-}
+function openModal(){ document.getElementById("loanModal").style.display="flex"; }
+function closeModal(){ document.getElementById("loanModal").style.display="none"; }
 </script>
 
 </body>
