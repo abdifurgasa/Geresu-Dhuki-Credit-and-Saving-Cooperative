@@ -8,6 +8,8 @@ import {
   collection,
   addDoc,
   getDocs,
+  query,
+  where,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -56,8 +58,6 @@ async function loadMembers() {
 
       const m = doc.data();
 
-      console.log(doc.id, m);
-
       table.innerHTML += `
 
         <tr>
@@ -71,47 +71,32 @@ async function loadMembers() {
           </td>
 
           <!-- NAME -->
-          <td>
-            ${m.name || "-"}
-          </td>
+          <td>${m.name || "-"}</td>
 
           <!-- PHONE -->
-          <td>
-            ${m.phone || "-"}
-          </td>
+          <td>${m.phone || "-"}</td>
 
           <!-- NID -->
-          <td>
-            ${m.nid || "-"}
-          </td>
+          <td>${m.nid || "-"}</td>
 
           <!-- SAVINGS -->
-          <td>
-            ${m.savings || 0} ETB
-          </td>
+          <td>${m.savings || 0} ETB</td>
 
           <!-- LOAN TOTAL -->
-          <td>
-            ${m.loanTotal || 0} ETB
-          </td>
+          <td>${m.loanTotal || 0} ETB</td>
 
           <!-- REMAINING -->
-          <td>
-            ${m.loanRemaining || 0} ETB
-          </td>
+          <td>${m.loanRemaining || 0} ETB</td>
 
           <!-- STATUS -->
           <td>
-
             <span class="badge active">
               ${m.status || "active"}
             </span>
-
           </td>
 
           <!-- CREATED DATE -->
           <td>
-
             ${
               m.createdAt
               ? new Date(
@@ -119,15 +104,10 @@ async function loadMembers() {
                 ).toLocaleDateString()
               : "-"
             }
-
           </td>
 
           <!-- CREATED BY -->
-          <td>
-
-            ${m.createdBy || "-"}
-
-          </td>
+          <td>${m.createdBy || "-"}</td>
 
         </tr>
 
@@ -162,20 +142,82 @@ document
 
   e.preventDefault();
 
-  /* FORM VALUES */
+  /* =========================
+     FORM VALUES
+  ========================= */
   const name =
-    document.getElementById("name").value;
+    document.getElementById("name").value.trim();
 
   const phone =
-    document.getElementById("phone").value;
+    document.getElementById("phone").value.trim();
 
   const nid =
-    document.getElementById("nid").value;
+    document.getElementById("nid").value.trim();
 
   const photo =
     document.getElementById("photo").files[0];
 
+  /* =========================
+     VALIDATION
+  ========================= */
+
+  /* PHONE MUST BE 9 DIGITS */
+  const phoneRegex = /^[0-9]{9}$/;
+
+  if (!phoneRegex.test(phone)) {
+
+    alert("Phone number must be exactly 9 digits");
+
+    return;
+  }
+
+  /* NID MUST BE 16 DIGITS */
+  const nidRegex = /^[0-9]{16}$/;
+
+  if (!nidRegex.test(nid)) {
+
+    alert("NID must be exactly 16 digits");
+
+    return;
+  }
+
   try {
+
+    /* =========================
+       CHECK DUPLICATE PHONE
+    ========================= */
+    const phoneQuery = query(
+      collection(db, "members"),
+      where("phone", "==", phone)
+    );
+
+    const phoneSnapshot =
+      await getDocs(phoneQuery);
+
+    if (!phoneSnapshot.empty) {
+
+      alert("Phone number already exists");
+
+      return;
+    }
+
+    /* =========================
+       CHECK DUPLICATE NID
+    ========================= */
+    const nidQuery = query(
+      collection(db, "members"),
+      where("nid", "==", nid)
+    );
+
+    const nidSnapshot =
+      await getDocs(nidQuery);
+
+    if (!nidSnapshot.empty) {
+
+      alert("NID already exists");
+
+      return;
+    }
 
     /* =========================
        UPLOAD PHOTO
@@ -202,7 +244,7 @@ document
     const user = auth.currentUser;
 
     /* =========================
-       SAVE TO FIRESTORE
+       SAVE MEMBER
     ========================= */
     await addDoc(
       collection(db, "members"),
