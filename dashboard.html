@@ -68,7 +68,8 @@
       <span class="text" data-i18n="settings">Settings</span>
     </a>
 
-    <a href="#" class="nav-item logout" id="logoutBtn">
+    <!-- LOGOUT -->
+    <a href="#" class="nav-item logout" onclick="logout()">
       <span class="icon">🚪</span>
       <span class="text" data-i18n="logout">Logout</span>
     </a>
@@ -93,10 +94,7 @@
         <option value="om">Afaan Oromoo</option>
       </select>
 
-      <!-- ✅ FIXED: ROLE BOX ADDED HERE -->
-      <div class="selected-box" id="roleBox">
-        👤 Loading...
-      </div>
+      <div class="selected-box">👑 ADMIN</div>
 
     </div>
 
@@ -177,7 +175,7 @@
 </main>
 
 <!-- SCRIPTS -->
-<script type="module" src="js/layout.js"></script>
+<script src="js/layout.js"></script>
 <script src="js/i18n.js"></script>
 <script type="module" src="js/dashboard.js"></script>
 
