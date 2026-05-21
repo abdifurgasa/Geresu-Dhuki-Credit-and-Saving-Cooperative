@@ -1,306 +1,209 @@
-// js/savings.js
+// js/savings.js (UPGRADED REAL-TIME VERSION)
+
+import { db, auth } from "./firebase.js";
 
 import {
-  db,
-  auth
-} from "./firebase.js";
-
-import {
-
   collection,
   getDocs,
   addDoc,
   doc,
   getDoc,
   updateDoc,
-  serverTimestamp
-
+  serverTimestamp,
+  onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 /* =========================
-   TABLE
+   ELEMENTS
 ========================= */
-const table =
-  document.getElementById("savingsTable");
+
+const table = document.getElementById("savingsTable");
+const memberSelect = document.getElementById("member");
 
 /* =========================
-   MEMBER SELECT
+   CURRENT USER INFO
+   (YOU SHOULD REPLACE WITH ROLES SYSTEM LATER)
 ========================= */
-const memberSelect =
-  document.getElementById("member");
+
+function getUserName() {
+  const user = auth.currentUser;
+  return user ? user.email || user.uid : "unknown";
+}
 
 /* =========================
-   LOAD MEMBERS
+   LOAD MEMBERS (ONE TIME)
 ========================= */
+
 async function loadMembers() {
+  const snapshot = await getDocs(collection(db, "members"));
 
-  const snapshot =
-    await getDocs(
-      collection(db, "members")
-    );
+  memberSelect.innerHTML = `<option value="">Select member</option>`;
 
   snapshot.forEach((docSnap) => {
-
-    const member = docSnap.data();
+    const m = docSnap.data();
 
     memberSelect.innerHTML += `
-
       <option value="${docSnap.id}">
-
-        ${member.name}
-
+        ${m.name}
       </option>
-
     `;
   });
 }
 
 /* =========================
-   LOAD SAVINGS
+   REAL-TIME SAVINGS LIST
 ========================= */
-async function loadSavings() {
 
-  table.innerHTML = "";
+function loadSavings() {
 
-  const snapshot =
-    await getDocs(
-      collection(db, "savings")
-    );
+  onSnapshot(collection(db, "savings"), (snapshot) => {
 
-  if (snapshot.empty) {
+    table.innerHTML = "";
 
-    table.innerHTML = `
-      <tr>
-        <td colspan="9">
-          No savings found
-        </td>
-      </tr>
-    `;
+    if (snapshot.empty) {
+      table.innerHTML = `
+        <tr>
+          <td colspan="9">No savings found</td>
+        </tr>
+      `;
+      return;
+    }
 
-    return;
-  }
+    snapshot.forEach((docSnap) => {
 
-  snapshot.forEach((docSnap) => {
+      const s = docSnap.data();
 
-    const s = docSnap.data();
+      table.innerHTML += `
+        <tr>
 
-    table.innerHTML += `
+          <td>${s.memberName}</td>
 
-      <tr>
+          <td>${s.amount} ETB</td>
 
-        <td>
-          ${s.memberName}
-        </td>
+          <td>${s.previousBalance ?? 0} ETB</td>
 
-        <td>
-          ${s.amount} ETB
-        </td>
+          <td>${s.newBalance ?? 0} ETB</td>
 
-        <td>
-          ${s.previousBalance} ETB
-        </td>
+          <td>${s.paymentMethod || "-"}</td>
 
-        <td>
-          ${s.newBalance} ETB
-        </td>
+          <td>${s.note || "-"}</td>
 
-        <td>
-          ${s.paymentMethod}
-        </td>
+          <td>
+            ${s.createdAt
+              ? new Date(s.createdAt.seconds * 1000).toLocaleString()
+              : "-"}
+          </td>
 
-        <td>
-          ${s.note || "-"}
-        </td>
+          <td><b>${s.createdByName || "unknown"}</b></td>
 
-        <td>
+          <td>
+            <span class="badge active">
+              ${s.status || "completed"}
+            </span>
+          </td>
 
-          ${
-            s.createdAt
-            ? new Date(
-                s.createdAt.seconds * 1000
-              ).toLocaleDateString()
-            : "-"
-          }
+        </tr>
+      `;
+    });
 
-        </td>
-
-        <td>
-          ${s.createdBy || "-"}
-        </td>
-
-        <td>
-
-          <span class="badge active">
-            ${s.status}
-          </span>
-
-        </td>
-
-      </tr>
-
-    `;
   });
 }
 
 /* =========================
    ADD SAVINGS
 ========================= */
-document
-.getElementById("savingForm")
+
+document.getElementById("savingForm")
 .addEventListener("submit", async (e) => {
 
   e.preventDefault();
 
   try {
 
-    /* FORM VALUES */
-    const memberId =
-      document.getElementById("member").value;
+    const memberId = document.getElementById("member").value;
+    const amount = Number(document.getElementById("amount").value);
+    const paymentMethod = document.getElementById("paymentMethod").value;
+    const note = document.getElementById("note").value;
 
-    const amount =
-      Number(
-        document.getElementById("amount").value
-      );
-
-    const paymentMethod =
-      document.getElementById("paymentMethod").value;
-
-    const note =
-      document.getElementById("note").value;
-
-    /* GET MEMBER */
-    const memberRef =
-      doc(db, "members", memberId);
-
-    const memberSnap =
-      await getDoc(memberRef);
-
-    if (!memberSnap.exists()) {
-
-      alert("Member not found");
-
+    if (!memberId || !amount) {
+      alert("Fill all required fields");
       return;
     }
 
-    const member =
-      memberSnap.data();
+    /* GET MEMBER */
+    const memberRef = doc(db, "members", memberId);
+    const memberSnap = await getDoc(memberRef);
 
-    /* BALANCE */
-    const previousBalance =
-      member.savings || 0;
+    if (!memberSnap.exists()) {
+      alert("Member not found");
+      return;
+    }
 
-    const newBalance =
-      previousBalance + amount;
+    const member = memberSnap.data();
 
-    /* CURRENT USER */
-    const user =
-      auth.currentUser;
+    const previousBalance = member.savings || 0;
+    const newBalance = previousBalance + amount;
 
-    /* SAVE TRANSACTION */
-    await addDoc(
-      collection(db, "savings"),
-      {
+    const userName = getUserName();
 
-        memberId,
+    /* SAVE SAVINGS */
+    await addDoc(collection(db, "savings"), {
+      memberId,
+      memberName: member.name,
+      amount,
+      previousBalance,
+      newBalance,
+      paymentMethod,
+      note,
 
-        memberName:
-          member.name,
+      status: "completed",
 
-        amount,
+      createdAt: serverTimestamp(),
 
-        previousBalance,
+      createdByName: userName
+    });
 
-        newBalance,
-
-        paymentMethod,
-
-        note,
-
-        status: "completed",
-
-        createdAt:
-          serverTimestamp(),
-
-        createdBy:
-          user
-          ? user.uid
-          : "unknown"
-
-      }
-    );
-
-    /* UPDATE MEMBER */
-    await updateDoc(
-      memberRef,
-      {
-
-        savings:
-          newBalance,
-
-        lastUpdatedAt:
-          serverTimestamp(),
-
-        lastUpdatedBy:
-          user
-          ? user.uid
-          : "unknown"
-
-      }
-    );
+    /* UPDATE MEMBER BALANCE */
+    await updateDoc(memberRef, {
+      savings: newBalance,
+      lastUpdatedAt: serverTimestamp(),
+      lastUpdatedBy: userName
+    });
 
     alert("Savings added successfully");
 
-    /* RESET */
-    document
-      .getElementById("savingForm")
-      .reset();
-
-    closeModal();
-
-    loadSavings();
+    document.getElementById("savingForm").reset();
 
   } catch (error) {
-
     console.error(error);
-
-    alert("Failed to save");
+    alert("Failed to save savings");
   }
 
 });
 
 /* =========================
-   SEARCH
+   SEARCH FILTER
 ========================= */
-document
-.getElementById("searchInput")
+
+document.getElementById("searchInput")
 .addEventListener("keyup", function () {
 
-  const value =
-    this.value.toLowerCase();
+  const value = this.value.toLowerCase();
 
-  const rows =
-    document.querySelectorAll(
-      "#savingsTable tr"
-    );
-
-  rows.forEach((row) => {
+  document.querySelectorAll("#savingsTable tr").forEach(row => {
 
     row.style.display =
-      row.innerText
-        .toLowerCase()
-        .includes(value)
-
-      ? ""
-
-      : "none";
+      row.innerText.toLowerCase().includes(value)
+        ? ""
+        : "none";
 
   });
 
 });
 
 /* =========================
-   INITIAL LOAD
+   INIT
 ========================= */
-loadMembers();
 
+loadMembers();
 loadSavings();
