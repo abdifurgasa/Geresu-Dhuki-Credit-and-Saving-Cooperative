@@ -2,100 +2,187 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <title>Savings</title>
+  <title data-i18n="savings">Savings</title>
 
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/style.css" />
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
 
-<!-- =========================
-     MAIN
-========================= -->
+<!-- =========================================================
+     SIDEBAR
+========================================================= -->
+
+<aside class="sidebar" id="sidebar">
+
+  <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+
+  <h2 class="logo">🏦 SACCO</h2>
+
+  <nav class="nav">
+
+    <a href="dashboard.html" class="nav-item">
+      <span class="icon">📊</span>
+      <span class="text" data-i18n="dashboard">Dashboard</span>
+    </a>
+
+    <a href="members.html" class="nav-item">
+      <span class="icon">👥</span>
+      <span class="text" data-i18n="members">Members</span>
+    </a>
+
+    <a href="savings.html" class="nav-item active">
+      <span class="icon">💰</span>
+      <span class="text" data-i18n="savings">Savings</span>
+    </a>
+
+    <a href="loans.html" class="nav-item">
+      <span class="icon">🏦</span>
+      <span class="text" data-i18n="loans">Loans</span>
+    </a>
+
+    <a href="withdrawals.html" class="nav-item">
+      <span class="icon">📤</span>
+      <span class="text" data-i18n="withdrawals">Withdrawals</span>
+    </a>
+
+    <a href="users.html" class="nav-item">
+      <span class="icon">👨‍💼</span>
+      <span class="text" data-i18n="users">Users</span>
+    </a>
+
+    <a href="settings.html" class="nav-item">
+      <span class="icon">⚙️</span>
+      <span class="text" data-i18n="settings">Settings</span>
+    </a>
+
+    <a href="#" class="nav-item logout">
+      <span class="icon">🚪</span>
+      <span class="text" data-i18n="logout">Logout</span>
+    </a>
+
+  </nav>
+
+</aside>
+
+<!-- =========================================================
+     MAIN CONTENT
+========================================================= -->
+
 <main class="main">
 
   <!-- TOPBAR -->
   <div class="topbar">
 
-    <h2>💰 Savings Management</h2>
+    <h2 data-i18n="savings">💰 Savings Management</h2>
+
+    <div style="display:flex; gap:15px; align-items:center;">
+
+      <select id="languageSelect" onchange="changeLanguage(this.value)">
+        <option value="en">English</option>
+        <option value="am">አማርኛ</option>
+        <option value="om">Afaan Oromoo</option>
+      </select>
+
+      <div id="roleBox">👑 ADMIN</div>
+
+    </div>
 
   </div>
 
-  <!-- =========================
+  <!-- =========================================================
        MEMBER SELECT
-  ========================= -->
-  <div class="search-container">
+  ========================================================= -->
 
-    <input
-      type="text"
-      id="searchMember"
-      class="input"
-      placeholder="Search member (name, phone, NID)..."
-      autocomplete="off"
-    >
+  <section style="margin-top:25px;">
 
-    <div id="searchResults"></div>
+    <h2>Select Member</h2>
 
-  </div>
+    <select id="member" class="input" style="width:100%; padding:12px;">
+      <option value="">-- Select Member --</option>
+    </select>
 
-  <!-- SELECTED MEMBER -->
+  </section>
+
+  <!-- =========================================================
+       DEPOSIT FORM
+  ========================================================= -->
+
+  <section style="margin-top:20px;">
+
+    <h2>Deposit Savings</h2>
+
+    <div class="cards" style="grid-template-columns:1fr;">
+
+      <input
+        type="number"
+        id="amount"
+        placeholder="Enter amount"
+        class="input"
+        style="padding:12px; border-radius:10px;"
+      />
+
+      <button id="saveBtn" class="add-btn">
+        💰 Deposit
+      </button>
+
+    </div>
+
+  </section>
+
+  <!-- =========================================================
+       SELECTED MEMBER INFO
+  ========================================================= -->
+
   <div id="selectedBox" class="selected-box">
-    👤 Select a member
+    👤 Select a member to see details
   </div>
 
-  <!-- =========================
-       SAVINGS INPUT
-  ========================= -->
-  <div style="margin-top:20px;">
+  <!-- =========================================================
+       SAVINGS HISTORY
+  ========================================================= -->
 
-    <input
-      type="number"
-      id="amount"
-      class="input"
-      placeholder="Enter savings amount"
-    >
+  <section style="margin-top:30px;">
 
-    <button id="saveBtn" class="add-btn">
-      💰 Deposit
-    </button>
+    <h2>📜 Savings History</h2>
 
-  </div>
+    <div class="table-card">
 
-  <hr style="margin:25px 0;">
+      <table class="table-modern">
 
-  <!-- =========================
-       HISTORY TABLE
-  ========================= -->
-  <h3>📜 Savings History</h3>
+        <thead>
+          <tr>
+            <th>Member</th>
+            <th>Amount</th>
+            <th>Previous</th>
+            <th>New Balance</th>
+            <th>By</th>
+            <th>Date</th>
+          </tr>
+        </thead>
 
-  <div class="table-card">
+        <tbody id="savingTable"></tbody>
 
-    <table class="table-modern">
+      </table>
 
-      <thead>
-        <tr>
-          <th>Member</th>
-          <th>Amount</th>
-          <th>Date</th>
-          <th>Created By</th>
-        </tr>
-      </thead>
+    </div>
 
-      <tbody id="savingTable"></tbody>
-
-    </table>
-
-  </div>
+  </section>
 
 </main>
 
-<!-- =========================
-     SCRIPT
-========================= -->
+<!-- =========================================================
+     SCRIPTS
+========================================================= -->
+
 <script type="module" src="js/savings.js"></script>
+<script type="module" src="js/layout.js"></script>
+<script src="js/i18n.js"></script>
 
 </body>
 </html>
