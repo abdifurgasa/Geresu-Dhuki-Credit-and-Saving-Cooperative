@@ -1,4 +1,4 @@
-import { db, storage, auth } from "./firebase.js";
+import { db, auth } from "./firebase.js";
 
 import {
   collection,
@@ -8,12 +8,6 @@ import {
   where,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-import {
-  ref,
-  uploadBytes,
-  getDownloadURL
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
 import {
   onAuthStateChanged
@@ -40,9 +34,6 @@ const searchInput = document.getElementById("searchMember");
 const searchResults = document.getElementById("searchResults");
 const selectedMember = document.getElementById("selectedMember");
 
-const photoInput = document.getElementById("photo");
-const photoPreview = document.getElementById("photoPreview");
-
 const modal = document.getElementById("memberModal");
 
 /* =========================================================
@@ -57,51 +48,39 @@ function closeModal() {
   modal.style.display = "none";
 }
 
-/* =========================================================
-   PHOTO PREVIEW
-========================================================= */
-
-if (photoInput) {
-  photoInput.addEventListener("change", (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      photoPreview.src = event.target.result;
-    };
-    reader.readAsDataURL(file);
-  });
-}
+/* expose for HTML buttons */
+window.openModal = openModal;
+window.closeModal = closeModal;
 
 /* =========================================================
-   SAVE MEMBER (FIXED + SAFE)
+   SAVE MEMBER (NO PHOTO VERSION - STABLE)
 ========================================================= */
 
 if (memberForm) {
+
   memberForm.addEventListener("submit", async (e) => {
     e.preventDefault();
 
     try {
+
       const name = document.getElementById("name").value.trim();
       const phone = document.getElementById("phone").value.trim();
       const nid = document.getElementById("nid").value.trim();
 
-      const photo = photoInput.files[0];
+      /* ================= VALIDATION ================= */
 
-      /* VALIDATION */
       if (!name || !phone || !nid) {
         alert("Please fill all fields");
         return;
       }
 
-      if (!photo) {
-        alert("Please select photo");
-        return;
-      }
+      /* ================= DUPLICATE CHECK PHONE ================= */
 
-      /* DUPLICATE CHECK (PHONE) */
-      const phoneQ = query(collection(db, "members"), where("phone", "==", phone));
+      const phoneQ = query(
+        collection(db, "members"),
+        where("phone", "==", phone)
+      );
+
       const phoneSnap = await getDocs(phoneQ);
 
       if (!phoneSnap.empty) {
@@ -109,8 +88,13 @@ if (memberForm) {
         return;
       }
 
-      /* DUPLICATE CHECK (NID) */
-      const nidQ = query(collection(db, "members"), where("nid", "==", nid));
+      /* ================= DUPLICATE CHECK NID ================= */
+
+      const nidQ = query(
+        collection(db, "members"),
+        where("nid", "==", nid)
+      );
+
       const nidSnap = await getDocs(nidQ);
 
       if (!nidSnap.empty) {
@@ -118,28 +102,16 @@ if (memberForm) {
         return;
       }
 
-      /* UPLOAD PHOTO (SAFE) */
-      let photoUrl = "";
+      /* ================= SAVE MEMBER ================= */
 
-      try {
-        const fileName = Date.now() + "_" + photo.name;
-        const storageRef = ref(storage, "members/" + fileName);
-
-        await uploadBytes(storageRef, photo);
-        photoUrl = await getDownloadURL(storageRef);
-
-      } catch (err) {
-        console.error("Upload error:", err);
-        alert("Photo upload failed");
-        return;
-      }
-
-      /* SAVE MEMBER */
       await addDoc(collection(db, "members"), {
+
         name,
         phone,
         nid,
-        photoUrl,
+
+        /* SAFE DEFAULT IMAGE (NO STORAGE) */
+        photoUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}`,
 
         savings: 0,
         loanTotal: 0,
@@ -149,12 +121,12 @@ if (memberForm) {
 
         createdAt: serverTimestamp(),
         createdBy: currentUser?.email || "admin"
+
       });
 
       alert("✅ Member saved successfully");
 
       memberForm.reset();
-      photoPreview.src = "https://dummyimage.com/120x120/cccccc/000000&text=Photo";
 
       closeModal();
 
@@ -162,7 +134,7 @@ if (memberForm) {
 
     } catch (error) {
       console.error("SAVE ERROR:", error);
-      alert("❌ Failed to save member: " + error.message);
+      alert("❌ Failed: " + error.message);
     }
   });
 }
@@ -172,6 +144,7 @@ if (memberForm) {
 ========================================================= */
 
 async function loadMembers() {
+
   if (!membersTable) return;
 
   membersTable.innerHTML = "";
@@ -179,6 +152,7 @@ async function loadMembers() {
   const snapshot = await getDocs(collection(db, "members"));
 
   snapshot.forEach((doc) => {
+
     const m = doc.data();
 
     const date = m.createdAt
@@ -187,16 +161,20 @@ async function loadMembers() {
 
     membersTable.innerHTML += `
       <tr>
-        <td><img src="${m.photoUrl}" class="member-photo"/></td>
+
+        <td>
+          <img src="${m.photoUrl}" class="member-photo"/>
+        </td>
+
         <td>${m.name}</td>
         <td>${m.phone}</td>
         <td>${m.nid}</td>
         <td>${m.savings} ETB</td>
         <td>${m.loanTotal} ETB</td>
-        <td>${m.loanRemaining} ETB</td>
-        <td><span class="badge active">${m.status}</span></td>
+        <td>${m.status}</td>
         <td>${date}</td>
         <td>${m.createdBy}</td>
+
       </tr>
     `;
   });
@@ -209,15 +187,19 @@ loadMembers();
 ========================================================= */
 
 if (searchInput) {
+
   searchInput.addEventListener("input", async () => {
+
     const value = searchInput.value.toLowerCase();
 
     searchResults.innerHTML = "";
+
     if (!value) return;
 
     const snapshot = await getDocs(collection(db, "members"));
 
     snapshot.forEach((doc) => {
+
       const m = doc.data();
 
       if (
@@ -225,6 +207,7 @@ if (searchInput) {
         m.phone.includes(value) ||
         m.nid.includes(value)
       ) {
+
         const div = document.createElement("div");
         div.className = "search-item";
 
@@ -234,6 +217,7 @@ if (searchInput) {
         `;
 
         div.onclick = () => {
+
           selectedMember.innerHTML = `
             👤 ${m.name}<br>
             📱 ${m.phone}<br>
@@ -243,6 +227,7 @@ if (searchInput) {
 
           searchResults.innerHTML = "";
           searchInput.value = m.name;
+
         };
 
         searchResults.appendChild(div);
