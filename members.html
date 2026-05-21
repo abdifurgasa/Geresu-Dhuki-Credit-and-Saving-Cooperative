@@ -2,27 +2,15 @@
 <html lang="en">
 
 <head>
-
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  />
+  <title data-i18n="members">Members</title>
 
-  <title data-i18n="members">
-    Members
-  </title>
-
-  <!-- STYLE -->
   <link rel="stylesheet" href="css/style.css" />
 
-  <!-- ICONS -->
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
-  />
-
+  <!-- ICONS (optional) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
@@ -30,394 +18,147 @@
 <!-- =========================================================
      SIDEBAR
 ========================================================= -->
-
 <aside class="sidebar" id="sidebar">
 
-  <button
-    class="toggle-btn"
-    onclick="toggleSidebar()"
-  >
-    ☰
-  </button>
+  <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
 
   <h2 class="logo">🏦 SACCO</h2>
 
   <nav class="nav">
 
-    <!-- DASHBOARD -->
-    <a
-      href="dashboard.html"
-      class="nav-item"
-    >
+    <a href="dashboard.html" class="nav-item">
       <span class="icon">📊</span>
-
-      <span
-        class="text"
-        data-i18n="dashboard"
-      >
-        Dashboard
-      </span>
+      <span class="text" data-i18n="dashboard">Dashboard</span>
     </a>
 
-    <!-- MEMBERS -->
-    <a
-      href="members.html"
-      class="nav-item active"
-    >
+    <a href="members.html" class="nav-item active">
       <span class="icon">👥</span>
-
-      <span
-        class="text"
-        data-i18n="members"
-      >
-        Members
-      </span>
+      <span class="text" data-i18n="members">Members</span>
     </a>
 
-    <!-- SAVINGS -->
-    <a
-      href="savings.html"
-      class="nav-item"
-    >
+    <a href="savings.html" class="nav-item">
       <span class="icon">💰</span>
-
-      <span
-        class="text"
-        data-i18n="savings"
-      >
-        Savings
-      </span>
+      <span class="text" data-i18n="savings">Savings</span>
     </a>
 
-    <!-- LOANS -->
-    <a
-      href="loans.html"
-      class="nav-item"
-    >
+    <a href="loans.html" class="nav-item">
       <span class="icon">🏦</span>
-
-      <span
-        class="text"
-        data-i18n="loans"
-      >
-        Loans
-      </span>
+      <span class="text" data-i18n="loans">Loans</span>
     </a>
 
-    <!-- REPAYMENTS -->
-    <a
-      href="repayments.html"
-      class="nav-item"
-    >
-      <span class="icon">💳</span>
-
-      <span
-        class="text"
-        data-i18n="repayments"
-      >
-        Repayments
-      </span>
-    </a>
-
-    <!-- WITHDRAWALS -->
-    <a
-      href="withdrawals.html"
-      class="nav-item"
-    >
+    <a href="withdrawals.html" class="nav-item">
       <span class="icon">📤</span>
-
-      <span
-        class="text"
-        data-i18n="withdrawals"
-      >
-        Withdrawals
-      </span>
+      <span class="text" data-i18n="withdrawals">Withdrawals</span>
     </a>
 
-    <!-- USERS -->
-    <a
-      href="users.html"
-      class="nav-item admin-only"
-    >
-      <span class="icon">👨‍💼</span>
-
-      <span
-        class="text"
-        data-i18n="users"
-      >
-        Users
-      </span>
-    </a>
-
-    <!-- SETTINGS -->
-    <a
-      href="settings.html"
-      class="nav-item"
-    >
+    <a href="settings.html" class="nav-item">
       <span class="icon">⚙️</span>
-
-      <span
-        class="text"
-        data-i18n="settings"
-      >
-        Settings
-      </span>
-    </a>
-
-    <!-- LOGOUT -->
-    <a
-      href="#"
-      class="nav-item logout"
-      id="logoutBtn"
-    >
-      <span class="icon">🚪</span>
-
-      <span
-        class="text"
-        data-i18n="logout"
-      >
-        Logout
-      </span>
+      <span class="text" data-i18n="settings">Settings</span>
     </a>
 
   </nav>
-
 </aside>
 
 <!-- =========================================================
-     MAIN CONTENT
+     MAIN
 ========================================================= -->
-
 <main class="main">
 
   <!-- TOPBAR -->
   <div class="topbar">
+    <h2 data-i18n="members">Members Management</h2>
 
-    <h2 data-i18n="membersManagement">
-      👥 Members Management
-    </h2>
-
-    <div
-      style="
-        display:flex;
-        gap:15px;
-        align-items:center;
-      "
-    >
-
-      <!-- LANGUAGE -->
-      <select
-        id="languageSelect"
-        class="lang-select"
-        onchange="changeLanguage(this.value)"
-      >
-        <option value="en">English</option>
-        <option value="am">አማርኛ</option>
-        <option value="om">Afaan Oromoo</option>
-      </select>
-
-      <!-- ADD MEMBER -->
-      <button
-        class="add-btn"
-        id="openModalBtn"
-      >
-        <i class="fa fa-plus"></i>
-
-        <span data-i18n="addMember">
-          Add Member
-        </span>
-      </button>
-
-    </div>
-
+    <button class="add-btn" onclick="openModal()">+ Add Member</button>
   </div>
 
-  <!-- =========================================================
-       SEARCH
-  ========================================================= -->
-
+  <!-- SEARCH -->
   <div class="search-container">
-
     <input
       type="text"
       id="searchMember"
       class="search-input"
-      data-i18n-placeholder="searchMember"
-      placeholder="Search by name, phone or NID..."
+      placeholder="Search member (name, phone, NID)"
     />
 
-    <div
-      id="searchResults"
-      class="search-dropdown"
-    ></div>
-
+    <div id="searchResults"></div>
   </div>
 
-  <!-- =========================================================
-       SELECTED MEMBER
-  ========================================================= -->
-
-  <div
-    id="selectedMember"
-    class="selected-box"
-  >
-    👤 Select a member
+  <!-- SELECTED MEMBER -->
+  <div id="selectedMember" class="card card-soft-blue">
+    👤 Select a member to view details
   </div>
 
-  <!-- =========================================================
-       TABLE
-  ========================================================= -->
-
-  <div class="table-card">
-
+  <!-- TABLE -->
+  <div class="table-card" style="margin-top:20px;">
     <table class="table-modern">
 
       <thead>
-
         <tr>
-
-          <th data-i18n="photo">
-            Photo
-          </th>
-
-          <th data-i18n="name">
-            Name
-          </th>
-
-          <th data-i18n="phone">
-            Phone
-          </th>
-
-          <th data-i18n="nid">
-            NID
-          </th>
-
-          <th data-i18n="totalSavings">
-            Savings
-          </th>
-
-          <th data-i18n="totalLoans">
-            Loan Total
-          </th>
-
-          <th data-i18n="remainingLoan">
-            Remaining Loan
-          </th>
-
-          <th data-i18n="status">
-            Status
-          </th>
-
-          <th data-i18n="createdDate">
-            Created Date
-          </th>
-
-          <th data-i18n="createdBy">
-            Created By
-          </th>
-
+          <th>Name</th>
+          <th>Phone</th>
+          <th>NID</th>
+          <th>Savings</th>
+          <th>Loans</th>
+          <th>Status</th>
+          <th>Created By</th>
+          <th>Date</th>
         </tr>
-
       </thead>
 
       <tbody id="membersTable"></tbody>
 
     </table>
-
   </div>
 
 </main>
 
 <!-- =========================================================
-     MEMBER MODAL
+     MEMBER MODAL (NO PHOTO)
 ========================================================= -->
-
-<div
-  class="modal"
-  id="memberModal"
->
+<div class="modal" id="memberModal">
 
   <div class="modal-box">
 
-    <h3 data-i18n="addMember">
-      Add New Member
-    </h3>
+    <h2>Add Member</h2>
 
-    <!-- FORM -->
     <form id="memberForm">
 
-      <!-- NAME -->
       <input
         type="text"
         id="name"
-        data-i18n-placeholder="fullName"
+        class="search-input"
         placeholder="Full Name"
         required
       />
 
-      <!-- PHONE -->
+      <br><br>
+
       <input
         type="text"
         id="phone"
-        maxlength="9"
-        data-i18n-placeholder="phone"
-        placeholder="9 Digit Phone"
+        class="search-input"
+        placeholder="Phone"
         required
       />
 
-      <!-- NID -->
+      <br><br>
+
       <input
         type="text"
         id="nid"
-        maxlength="16"
-        data-i18n-placeholder="nid"
-        placeholder="16 Digit National ID"
+        class="search-input"
+        placeholder="National ID"
         required
       />
 
-      <!-- PHOTO -->
-      <input
-        type="file"
-        id="photo"
-        accept="image/*"
-        required
-      />
+      <br><br>
 
-      <!-- PREVIEW -->
-      <div
-        style="
-          display:flex;
-          justify-content:center;
-          margin-top:15px;
-        "
-      >
-
-        <img
-          id="photoPreview"
-          src="https://dummyimage.com/120x120/cccccc/000000&text=Photo"
-        />
-
-      </div>
-
-      <!-- SAVE -->
-      <button
-        type="submit"
-        class="save-btn"
-      >
-        <span data-i18n="save">
-          Save Member
-        </span>
+      <button type="submit" class="save-btn">
+        Save Member
       </button>
 
-      <!-- CANCEL -->
-      <button
-        type="button"
-        class="close-btn"
-        id="closeModalBtn"
-      >
-        <span data-i18n="cancel">
-          Cancel
-        </span>
+      <button type="button" class="close-btn" onclick="closeModal()">
+        Close
       </button>
 
     </form>
@@ -429,18 +170,18 @@
 <!-- =========================================================
      SCRIPTS
 ========================================================= -->
-
-<script
-  type="module"
-  src="js/layout.js"
-></script>
-
+<script type="module" src="js/members.js"></script>
 <script src="js/i18n.js"></script>
 
-<script
-  type="module"
-  src="js/members.js"
-></script>
+<script>
+function openModal(){
+  document.getElementById("memberModal").style.display="flex";
+}
+
+function closeModal(){
+  document.getElementById("memberModal").style.display="none";
+}
+</script>
 
 </body>
 </html>
