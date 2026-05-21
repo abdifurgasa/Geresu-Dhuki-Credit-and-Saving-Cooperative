@@ -2,269 +2,178 @@ import { db, auth } from "./firebase.js";
 
 import {
   collection,
-  getDocs
+  onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-import {
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 /* =========================================================
    ELEMENTS
 ========================================================= */
 
-const membersEl =
-  document.getElementById("members");
+const membersEl = document.getElementById("members");
+const savingsEl = document.getElementById("savings");
+const loansEl = document.getElementById("loans");
+const withdrawalsEl = document.getElementById("withdrawals");
+const profitEl = document.getElementById("profit");
+const roleBox = document.getElementById("roleBox");
 
-const savingsEl =
-  document.getElementById("savings");
-
-const loansEl =
-  document.getElementById("loans");
-
-const withdrawalsEl =
-  document.getElementById("withdrawals");
-
-const profitEl =
-  document.getElementById("profit");
-
-const roleBox =
-  document.getElementById("roleBox");
+let financeChart = null;
 
 /* =========================================================
-   AUTH ROLE SYSTEM
+   AUTH + ROLE
 ========================================================= */
 
 onAuthStateChanged(auth, (user) => {
-
   if (!user) {
-
-    window.location.href =
-      "index.html";
-
+    window.location.href = "index.html";
     return;
-
   }
 
-  /* ADMIN / MEMBER ROLE */
-  const role =
-    localStorage.getItem("role") || "member";
+  const role = localStorage.getItem("role") || "member";
 
   if (roleBox) {
-
     roleBox.innerText =
-      role === "admin"
-        ? "👑 ADMIN"
-        : "👤 MEMBER";
-
+      role === "admin" ? "👑 ADMIN" : "👤 MEMBER";
   }
-
-  /* ADMIN ONLY */
-  const adminOnly =
-    document.querySelectorAll(".admin-only");
-
-  adminOnly.forEach((item) => {
-
-    item.style.display =
-      role === "admin"
-        ? "flex"
-        : "none";
-
-  });
-
 });
 
 /* =========================================================
-   LOAD DASHBOARD DATA
+   REAL-TIME DASHBOARD ENGINE
 ========================================================= */
 
-async function loadDashboard() {
+function startLiveDashboard() {
 
-  try {
+  const membersRef = collection(db, "members");
+  const savingsRef = collection(db, "savings");
+  const loansRef = collection(db, "loans");
+  const withdrawalsRef = collection(db, "withdrawals");
 
-    /* MEMBERS */
-    const membersSnap =
-      await getDocs(
-        collection(db, "members")
-      );
+  let membersCount = 0;
+  let savingsTotal = 0;
+  let loansTotal = 0;
+  let withdrawalsTotal = 0;
 
-    let totalMembers =
-      membersSnap.size;
+  /* =========================
+     MEMBERS LIVE
+  ========================= */
+  onSnapshot(membersRef, (snap) => {
 
-    let totalSavings = 0;
+    membersCount = snap.size;
 
-    let totalLoans = 0;
+    savingsTotal = 0;
+    loansTotal = 0;
 
-    /* LOOP MEMBERS */
-    membersSnap.forEach((doc) => {
-
-      const data = doc.data();
-
-      totalSavings +=
-        Number(data.savings || 0);
-
-      totalLoans +=
-        Number(data.loanTotal || 0);
-
+    snap.forEach(doc => {
+      const d = doc.data();
+      savingsTotal += Number(d.savings || 0);
+      loansTotal += Number(d.loanTotal || 0);
     });
 
-    /* WITHDRAWALS */
-    const withdrawSnap =
-      await getDocs(
-        collection(db, "withdrawals")
-      );
+    updateUI();
+  });
 
-    let totalWithdrawals = 0;
+  /* =========================
+     SAVINGS LIVE
+  ========================= */
+  onSnapshot(savingsRef, (snap) => {
+    let total = 0;
 
-    withdrawSnap.forEach((doc) => {
-
-      const data = doc.data();
-
-      totalWithdrawals +=
-        Number(data.amount || 0);
-
+    snap.forEach(doc => {
+      total += Number(doc.data().amount || 0);
     });
 
-    /* PROFIT */
-    const profit =
-      totalSavings - totalLoans;
+    savingsTotal = total;
 
-    /* UPDATE UI */
-    if (membersEl) {
+    updateUI();
+  });
 
-      membersEl.innerText =
-        totalMembers;
+  /* =========================
+     LOANS LIVE
+  ========================= */
+  onSnapshot(loansRef, (snap) => {
+    let total = 0;
 
-    }
+    snap.forEach(doc => {
+      total += Number(doc.data().amount || 0);
+    });
 
-    if (savingsEl) {
+    loansTotal = total;
 
-      savingsEl.innerText =
-        totalSavings.toLocaleString()
-        + " ETB";
+    updateUI();
+  });
 
-    }
+  /* =========================
+     WITHDRAWALS LIVE
+  ========================= */
+  onSnapshot(withdrawalsRef, (snap) => {
+    let total = 0;
 
-    if (loansEl) {
+    snap.forEach(doc => {
+      total += Number(doc.data().amount || 0);
+    });
 
-      loansEl.innerText =
-        totalLoans.toLocaleString()
-        + " ETB";
+    withdrawalsTotal = total;
 
-    }
+    updateUI();
+  });
 
-    if (withdrawalsEl) {
+  /* =========================
+     UI UPDATE FUNCTION
+  ========================= */
+  function updateUI() {
 
-      withdrawalsEl.innerText =
-        totalWithdrawals.toLocaleString()
-        + " ETB";
+    const profit = savingsTotal - loansTotal;
 
-    }
+    if (membersEl) membersEl.innerText = membersCount;
+    if (savingsEl) savingsEl.innerText = savingsTotal.toLocaleString() + " ETB";
+    if (loansEl) loansEl.innerText = loansTotal.toLocaleString() + " ETB";
+    if (withdrawalsEl) withdrawalsEl.innerText = withdrawalsTotal.toLocaleString() + " ETB";
+    if (profitEl) profitEl.innerText = profit.toLocaleString() + " ETB";
 
-    if (profitEl) {
-
-      profitEl.innerText =
-        profit.toLocaleString()
-        + " ETB";
-
-    }
-
-    /* CHART */
-    loadChart(
-      totalSavings,
-      totalLoans,
-      totalWithdrawals,
-      profit
-    );
-
-  } catch (error) {
-
-    console.error(error);
-
+    updateChart(savingsTotal, loansTotal, withdrawalsTotal, profit);
   }
-
 }
 
 /* =========================================================
-   CHART
+   LIVE CHART (NO DUPLICATES)
 ========================================================= */
 
-function loadChart(
+function updateChart(savings, loans, withdrawals, profit) {
 
-  savings,
-  loans,
-  withdrawals,
-  profit
-
-) {
-
-  const ctx =
-    document.getElementById("financeChart");
+  const ctx = document.getElementById("financeChart");
 
   if (!ctx) return;
 
-  new Chart(ctx, {
+  if (financeChart) {
+    financeChart.destroy();
+  }
 
+  financeChart = new Chart(ctx, {
     type: "bar",
-
     data: {
-
-      labels: [
-        "Savings",
-        "Loans",
-        "Withdrawals",
-        "Profit"
-      ],
-
+      labels: ["Savings", "Loans", "Withdrawals", "Profit"],
       datasets: [{
-
-        label:
-          "Financial Report",
-
-        data: [
-          savings,
-          loans,
-          withdrawals,
-          profit
-        ],
-
-        backgroundColor: [
-
-          "#17a8d3",
-          "#f59e0b",
-          "#ef4444",
-          "#22c55e"
-
-        ],
-
+        label: "Live Financial Dashboard",
+        data: [savings, loans, withdrawals, profit],
+        backgroundColor: ["#17a8d3", "#f59e0b", "#ef4444", "#22c55e"],
         borderRadius: 10
-
       }]
-
     },
-
     options: {
-
       responsive: true,
-
+      animation: {
+        duration: 800
+      },
       plugins: {
-
-        legend: {
-
-          display: false
-
-        }
-
+        legend: { display: false }
       }
-
     }
-
   });
-
 }
 
 /* =========================================================
-   START
+   START SYSTEM
 ========================================================= */
 
-loadDashboard();
+startLiveDashboard();
