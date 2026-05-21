@@ -34,53 +34,51 @@ const searchInput = document.getElementById("searchMember");
 const searchResults = document.getElementById("searchResults");
 const selectedMember = document.getElementById("selectedMember");
 
-const modal = document.getElementById("memberModal");
-
 /* =========================================================
-   MODAL
+   MODAL FUNCTIONS
 ========================================================= */
 
-function openModal() {
-  modal.style.display = "flex";
-}
+window.openModal = function () {
+  const modal = document.getElementById("memberModal");
+  if (modal) modal.style.display = "flex";
+};
 
-function closeModal() {
-  modal.style.display = "none";
-}
-
-/* expose for HTML buttons */
-window.openModal = openModal;
-window.closeModal = closeModal;
+window.closeModal = function () {
+  const modal = document.getElementById("memberModal");
+  if (modal) modal.style.display = "none";
+};
 
 /* =========================================================
-   SAVE MEMBER (NO PHOTO VERSION - STABLE)
+   SAVE MEMBER (NO PHOTO - FIXED)
 ========================================================= */
 
 if (memberForm) {
-
   memberForm.addEventListener("submit", async (e) => {
     e.preventDefault();
 
     try {
-
       const name = document.getElementById("name").value.trim();
       const phone = document.getElementById("phone").value.trim();
       const nid = document.getElementById("nid").value.trim();
 
-      /* ================= VALIDATION ================= */
-
+      /* VALIDATION */
       if (!name || !phone || !nid) {
         alert("Please fill all fields");
         return;
       }
 
-      /* ================= DUPLICATE CHECK PHONE ================= */
+      if (phone.length < 9) {
+        alert("Invalid phone number");
+        return;
+      }
 
-      const phoneQ = query(
-        collection(db, "members"),
-        where("phone", "==", phone)
-      );
+      if (nid.length < 10) {
+        alert("Invalid NID");
+        return;
+      }
 
+      /* DUPLICATE PHONE CHECK */
+      const phoneQ = query(collection(db, "members"), where("phone", "==", phone));
       const phoneSnap = await getDocs(phoneQ);
 
       if (!phoneSnap.empty) {
@@ -88,13 +86,8 @@ if (memberForm) {
         return;
       }
 
-      /* ================= DUPLICATE CHECK NID ================= */
-
-      const nidQ = query(
-        collection(db, "members"),
-        where("nid", "==", nid)
-      );
-
+      /* DUPLICATE NID CHECK */
+      const nidQ = query(collection(db, "members"), where("nid", "==", nid));
       const nidSnap = await getDocs(nidQ);
 
       if (!nidSnap.empty) {
@@ -102,16 +95,11 @@ if (memberForm) {
         return;
       }
 
-      /* ================= SAVE MEMBER ================= */
-
+      /* SAVE MEMBER */
       await addDoc(collection(db, "members"), {
-
         name,
         phone,
         nid,
-
-        /* SAFE DEFAULT IMAGE (NO STORAGE) */
-        photoUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}`,
 
         savings: 0,
         loanTotal: 0,
@@ -121,19 +109,16 @@ if (memberForm) {
 
         createdAt: serverTimestamp(),
         createdBy: currentUser?.email || "admin"
-
       });
 
       alert("✅ Member saved successfully");
 
       memberForm.reset();
-
       closeModal();
-
       loadMembers();
 
     } catch (error) {
-      console.error("SAVE ERROR:", error);
+      console.error(error);
       alert("❌ Failed: " + error.message);
     }
   });
@@ -144,62 +129,55 @@ if (memberForm) {
 ========================================================= */
 
 async function loadMembers() {
-
   if (!membersTable) return;
 
   membersTable.innerHTML = "";
 
-  const snapshot = await getDocs(collection(db, "members"));
+  try {
+    const snapshot = await getDocs(collection(db, "members"));
 
-  snapshot.forEach((doc) => {
+    snapshot.forEach((doc) => {
+      const m = doc.data();
 
-    const m = doc.data();
+      const date = m.createdAt
+        ? new Date(m.createdAt.seconds * 1000).toLocaleDateString()
+        : "-";
 
-    const date = m.createdAt
-      ? new Date(m.createdAt.seconds * 1000).toLocaleDateString()
-      : "-";
+      membersTable.innerHTML += `
+        <tr>
+          <td>${m.name}</td>
+          <td>${m.phone}</td>
+          <td>${m.nid}</td>
+          <td>${m.savings} ETB</td>
+          <td>${m.loanTotal} ETB</td>
+          <td><span class="badge active">${m.status}</span></td>
+          <td>${m.createdBy}</td>
+          <td>${date}</td>
+        </tr>
+      `;
+    });
 
-    membersTable.innerHTML += `
-      <tr>
-
-        <td>
-          <img src="${m.photoUrl}" class="member-photo"/>
-        </td>
-
-        <td>${m.name}</td>
-        <td>${m.phone}</td>
-        <td>${m.nid}</td>
-        <td>${m.savings} ETB</td>
-        <td>${m.loanTotal} ETB</td>
-        <td>${m.status}</td>
-        <td>${date}</td>
-        <td>${m.createdBy}</td>
-
-      </tr>
-    `;
-  });
+  } catch (error) {
+    console.error(error);
+  }
 }
 
 loadMembers();
 
 /* =========================================================
-   SEARCH
+   SEARCH MEMBER (LIVE FILTER)
 ========================================================= */
 
 if (searchInput) {
-
   searchInput.addEventListener("input", async () => {
-
     const value = searchInput.value.toLowerCase();
 
     searchResults.innerHTML = "";
-
     if (!value) return;
 
     const snapshot = await getDocs(collection(db, "members"));
 
     snapshot.forEach((doc) => {
-
       const m = doc.data();
 
       if (
@@ -207,7 +185,6 @@ if (searchInput) {
         m.phone.includes(value) ||
         m.nid.includes(value)
       ) {
-
         const div = document.createElement("div");
         div.className = "search-item";
 
@@ -217,7 +194,6 @@ if (searchInput) {
         `;
 
         div.onclick = () => {
-
           selectedMember.innerHTML = `
             👤 ${m.name}<br>
             📱 ${m.phone}<br>
@@ -227,7 +203,6 @@ if (searchInput) {
 
           searchResults.innerHTML = "";
           searchInput.value = m.name;
-
         };
 
         searchResults.appendChild(div);
