@@ -2,6 +2,7 @@ const translations = {
   en: {
     dashboard: "Dashboard",
     members: "Members",
+    member: "Member",
     savings: "Savings",
     loans: "Loans",
     repayments: "Repayments",
@@ -26,6 +27,7 @@ const translations = {
   am: {
     dashboard: "ዳሽቦርድ",
     members: "አባላት",
+    member: "አባል",
     savings: "ቁጠባ",
     loans: "ብድር",
     repayments: "ክፍያ",
@@ -36,7 +38,7 @@ const translations = {
     logout: "ውጣ",
     financialDashboard: "የፋይናንስ ዳሽቦርድ",
     overview: "አጠቃላይ እይታ",
-    welcome: "እንኳን ወደ SACCO በደህና መጡ",
+    welcome: "እንኳን ወደ Geresu Dhuki SACCO በደህና መጡ",
     quickActions: "ፈጣን እርምጃዎች",
     addMember: "አባል አክል",
     depositSavings: "ቁጠባ",
@@ -50,25 +52,26 @@ const translations = {
   om: {
     dashboard: "Daashboordii",
     members: "Miseensota",
-    savings: "Quusaa",
-    loans: "Liizii",
+    member: "Miseensa",
+    savings: "Qusannaa",
+    loans: "Liqii",
     repayments: "Deebii",
-    withdrawals: "Ba’iinsa",
+    withdrawals: "Baasii",
     reports: "Gabaasa",
     users: "Fayyadamtoota",
-    settings: "Sajoo",
+    settings: "Sirreessituu",
     logout: "Ba’i",
     financialDashboard: "Daashboordii Faayinaansii",
     overview: "Ilaalcha Waliigalaa",
-    welcome: "Baga Gara SACCO dhuftan",
+    welcome: "Baga Gara Geresu Dhuki SACCO dhuftan",
     quickActions: "Gocha Saffisaa",
     addMember: "Miseensa Dabali",
-    depositSavings: "Quusaa",
-    createLoan: "Liizii Uumi",
-    netProfit: "Faayidaa Netoo",
-    totalMembers: "Waliigala Miseensota",
-    totalSavings: "Waliigala Quusaa",
-    totalLoans: "Waliigala Liizii"
+    depositSavings: "Qusannaa",
+    createLoan: "Liqii Uumi",
+    netProfit: "Bu'aa Qulqulluu",
+    totalMembers: "Miseensota Waliigalaa",
+    totalSavings: "Qusannaa Waliigalaa",
+    totalLoans: "Liqii Waliigalaa"
   }
 };
 
