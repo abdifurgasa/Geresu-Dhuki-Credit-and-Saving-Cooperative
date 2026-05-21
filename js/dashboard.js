@@ -1,250 +1,270 @@
 import { db, auth } from "./firebase.js";
 
 import {
-  doc,
-  getDoc,
   collection,
-  onSnapshot,
-  query,
-  where
+  getDocs
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 import {
-  onAuthStateChanged,
-  signOut
+  onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-/* =========================
-   STATE
-========================= */
+/* =========================================================
+   ELEMENTS
+========================================================= */
 
-let role = null;
-let chartsInitialized = false;
+const membersEl =
+  document.getElementById("members");
 
-/* =========================
-   GLOBAL STATS
-========================= */
+const savingsEl =
+  document.getElementById("savings");
 
-let stats = {
-  members: 0,
-  savings: 0,
-  loans: 0,
-  repayments: 0,
-  withdrawals: 0,
-  outstanding: 0
-};
+const loansEl =
+  document.getElementById("loans");
 
-/* =========================
-   AUTH
-========================= */
+const withdrawalsEl =
+  document.getElementById("withdrawals");
 
-onAuthStateChanged(auth, async (user) => {
+const profitEl =
+  document.getElementById("profit");
+
+const roleBox =
+  document.getElementById("roleBox");
+
+/* =========================================================
+   AUTH ROLE SYSTEM
+========================================================= */
+
+onAuthStateChanged(auth, (user) => {
 
   if (!user) {
-    window.location.href = "index.html";
+
+    window.location.href =
+      "index.html";
+
     return;
+
   }
 
-  const userRef = doc(db, "users", user.uid);
-  const snap = await getDoc(userRef);
+  /* ADMIN / MEMBER ROLE */
+  const role =
+    localStorage.getItem("role") || "member";
 
-  role = snap.data().role;
+  if (roleBox) {
 
-  document.getElementById("roleBox").innerText =
-    role === "admin" ? "👑 Admin" : "👤 Member";
+    roleBox.innerText =
+      role === "admin"
+        ? "👑 ADMIN"
+        : "👤 MEMBER";
 
-  if (role === "admin") {
-    loadAdminDashboard();
-  } else {
-    loadMemberDashboard(user.uid);
-
-    document.querySelectorAll(".admin-only")
-      .forEach(el => el.style.display = "none");
   }
+
+  /* ADMIN ONLY */
+  const adminOnly =
+    document.querySelectorAll(".admin-only");
+
+  adminOnly.forEach((item) => {
+
+    item.style.display =
+      role === "admin"
+        ? "flex"
+        : "none";
+
+  });
+
 });
 
-/* =========================
-   ADMIN DASHBOARD
-========================= */
+/* =========================================================
+   LOAD DASHBOARD DATA
+========================================================= */
 
-function loadAdminDashboard() {
+async function loadDashboard() {
 
-  /* MEMBERS */
-  onSnapshot(collection(db, "members"), snap => {
-    stats.members = snap.size;
-    document.getElementById("members").innerText = stats.members;
-  });
+  try {
 
-  /* SAVINGS */
-  onSnapshot(collection(db, "savings"), snap => {
+    /* MEMBERS */
+    const membersSnap =
+      await getDocs(
+        collection(db, "members")
+      );
 
-    stats.savings = 0;
+    let totalMembers =
+      membersSnap.size;
 
-    snap.forEach(d => {
-      stats.savings += Number(d.data().amount || 0);
+    let totalSavings = 0;
+
+    let totalLoans = 0;
+
+    /* LOOP MEMBERS */
+    membersSnap.forEach((doc) => {
+
+      const data = doc.data();
+
+      totalSavings +=
+        Number(data.savings || 0);
+
+      totalLoans +=
+        Number(data.loanTotal || 0);
+
     });
 
-    document.getElementById("savings").innerText =
-      stats.savings.toLocaleString() + " ETB";
+    /* WITHDRAWALS */
+    const withdrawSnap =
+      await getDocs(
+        collection(db, "withdrawals")
+      );
 
-    updateDashboard();
-  });
+    let totalWithdrawals = 0;
 
-  /* LOANS */
-  onSnapshot(collection(db, "loans"), snap => {
+    withdrawSnap.forEach((doc) => {
 
-    stats.loans = 0;
-    stats.outstanding = 0;
+      const data = doc.data();
 
-    snap.forEach(d => {
-      const l = d.data();
-      stats.loans += Number(l.totalAmount || 0);
-      stats.outstanding += Number(l.remaining || 0);
+      totalWithdrawals +=
+        Number(data.amount || 0);
+
     });
 
-    document.getElementById("loans").innerText =
-      stats.loans.toLocaleString() + " ETB";
+    /* PROFIT */
+    const profit =
+      totalSavings - totalLoans;
 
-    updateDashboard();
-  });
+    /* UPDATE UI */
+    if (membersEl) {
 
-  /* REPAYMENTS */
-  onSnapshot(collection(db, "repayments"), snap => {
+      membersEl.innerText =
+        totalMembers;
 
-    stats.repayments = 0;
-
-    snap.forEach(d => {
-      stats.repayments += Number(d.data().amount || 0);
-    });
-
-    updateDashboard();
-  });
-
-  /* 💸 WITHDRAWALS (NEW FIX) */
-  onSnapshot(collection(db, "withdrawals"), snap => {
-
-    stats.withdrawals = 0;
-
-    snap.forEach(d => {
-      stats.withdrawals += Number(d.data().amount || 0);
-    });
-
-    document.getElementById("withdrawals").innerText =
-      stats.withdrawals.toLocaleString() + " ETB";
-
-    updateDashboard();
-  });
-}
-
-/* =========================
-   MEMBER DASHBOARD
-========================= */
-
-function loadMemberDashboard(uid) {
-
-  onSnapshot(
-    query(collection(db, "savings"), where("memberId", "==", uid)),
-    snap => {
-      let total = 0;
-      snap.forEach(d => total += Number(d.data().amount || 0));
-
-      document.getElementById("savings").innerText =
-        total.toLocaleString() + " ETB";
     }
-  );
-}
 
-/* =========================
-   PROFIT CALCULATION (FIXED)
-========================= */
+    if (savingsEl) {
 
-function calculateProfit() {
+      savingsEl.innerText =
+        totalSavings.toLocaleString()
+        + " ETB";
 
-  return stats.savings
-    - stats.loans
-    - stats.withdrawals;
-}
+    }
 
-/* =========================
-   UPDATE DASHBOARD
-========================= */
+    if (loansEl) {
 
-function updateDashboard() {
+      loansEl.innerText =
+        totalLoans.toLocaleString()
+        + " ETB";
 
-  const profit = calculateProfit();
+    }
 
-  document.getElementById("profit").innerText =
-    profit.toLocaleString() + " ETB";
+    if (withdrawalsEl) {
 
-  updateCharts();
-}
+      withdrawalsEl.innerText =
+        totalWithdrawals.toLocaleString()
+        + " ETB";
 
-/* =========================
-   CHARTS
-========================= */
+    }
 
-let financeChart;
-let repaymentChart;
+    if (profitEl) {
 
-function updateCharts() {
+      profitEl.innerText =
+        profit.toLocaleString()
+        + " ETB";
 
-  if (!chartsInitialized) {
-    initCharts();
-    chartsInitialized = true;
+    }
+
+    /* CHART */
+    loadChart(
+      totalSavings,
+      totalLoans,
+      totalWithdrawals,
+      profit
+    );
+
+  } catch (error) {
+
+    console.error(error);
+
   }
 
-  financeChart.data.datasets[0].data = [
-    stats.savings,
-    stats.loans,
-    stats.repayments
-  ];
-
-  financeChart.update();
-
-  repaymentChart.data.datasets[0].data = [
-    stats.loans,
-    stats.repayments,
-    stats.outstanding
-  ];
-
-  repaymentChart.update();
 }
 
-/* =========================
-   INIT CHARTS
-========================= */
+/* =========================================================
+   CHART
+========================================================= */
 
-function initCharts() {
+function loadChart(
 
-  financeChart = new Chart(
-    document.getElementById("dashboardChart"),
-    {
-      type: "bar",
-      data: {
-        labels: ["Savings", "Loans", "Repayments"],
-        datasets: [{ data: [0, 0, 0] }]
+  savings,
+  loans,
+  withdrawals,
+  profit
+
+) {
+
+  const ctx =
+    document.getElementById("financeChart");
+
+  if (!ctx) return;
+
+  new Chart(ctx, {
+
+    type: "bar",
+
+    data: {
+
+      labels: [
+        "Savings",
+        "Loans",
+        "Withdrawals",
+        "Profit"
+      ],
+
+      datasets: [{
+
+        label:
+          "Financial Report",
+
+        data: [
+          savings,
+          loans,
+          withdrawals,
+          profit
+        ],
+
+        backgroundColor: [
+
+          "#17a8d3",
+          "#f59e0b",
+          "#ef4444",
+          "#22c55e"
+
+        ],
+
+        borderRadius: 10
+
+      }]
+
+    },
+
+    options: {
+
+      responsive: true,
+
+      plugins: {
+
+        legend: {
+
+          display: false
+
+        }
+
       }
-    }
-  );
 
-  repaymentChart = new Chart(
-    document.getElementById("repaymentChart"),
-    {
-      type: "doughnut",
-      data: {
-        labels: ["Loans", "Repayments", "Outstanding"],
-        datasets: [{ data: [0, 0, 0] }]
-      }
     }
-  );
+
+  });
+
 }
 
-/* =========================
-   LOGOUT
-========================= */
+/* =========================================================
+   START
+========================================================= */
 
-window.logoutUser = async function () {
-  await signOut(auth);
-  localStorage.clear();
-  window.location.href = "index.html";
-};
+loadDashboard();
