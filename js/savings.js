@@ -3,72 +3,113 @@ import { db, auth } from "./firebase.js";
 import {
   collection,
   addDoc,
+  getDocs,
   doc,
   getDoc,
   updateDoc,
-  getDocs,
-  query,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-
-/* =========================================================
-   AUTH SAFE USER
-========================================================= */
-
-let currentUser = null;
-
-onAuthStateChanged(auth, (user) => {
-  currentUser = user;
-});
 
 /* =========================================================
    ELEMENTS
 ========================================================= */
 
-const memberSelect = document.getElementById("member");
-const amountInput = document.getElementById("amount");
+const searchInput = document.getElementById("searchMember");
+const searchResults = document.getElementById("searchResults");
+const selectedBox = document.getElementById("selectedMember");
+
+const amountEl = document.getElementById("amount");
+const noteEl = document.getElementById("note");
+const methodEl = document.getElementById("paymentMethod");
+
+const saveBtn = document.getElementById("saveBtn");
 const table = document.getElementById("savingTable");
-const selectedBox = document.getElementById("selectedBox");
 
 /* =========================================================
-   LOAD MEMBERS
+   SELECTED MEMBER STORAGE
 ========================================================= */
 
-async function loadMembers() {
-  const snap = await getDocs(collection(db, "members"));
+let selectedMemberId = null;
+let selectedMemberData = null;
 
-  memberSelect.innerHTML = "";
+/* =========================================================
+   LOAD MEMBERS FOR SEARCH
+========================================================= */
 
-  snap.forEach((docSnap) => {
+async function loadMembers(queryText) {
+  searchResults.innerHTML = "";
+
+  const snapshot = await getDocs(collection(db, "members"));
+
+  snapshot.forEach((docSnap) => {
     const m = docSnap.data();
 
-    memberSelect.innerHTML += `
-      <option value="${docSnap.id}">
-        ${m.name}
-      </option>
+    const match =
+      m.name?.toLowerCase().includes(queryText) ||
+      m.phone?.includes(queryText) ||
+      m.nid?.includes(queryText);
+
+    if (!queryText || !match) return;
+
+    const div = document.createElement("div");
+    div.className = "search-item";
+
+    div.innerHTML = `
+      <strong>${m.name}</strong><br>
+      <small>${m.phone}</small>
     `;
+
+    div.onclick = () => {
+      selectedMemberId = docSnap.id;
+      selectedMemberData = m;
+
+      selectedBox.innerHTML = `
+        👤 ${m.name}<br>
+        📱 ${m.phone}<br>
+        🆔 ${m.nid}<br>
+        💰 Savings: ${m.savings || 0} ETB
+      `;
+
+      searchResults.innerHTML = "";
+      searchInput.value = m.name;
+    };
+
+    searchResults.appendChild(div);
   });
 }
 
-loadMembers();
-
 /* =========================================================
-   SAVE SAVINGS (MAIN LOGIC)
+   SEARCH EVENT
 ========================================================= */
 
-document.getElementById("saveBtn").addEventListener("click", async () => {
-  try {
-    const memberId = memberSelect.value;
-    const amount = Number(amountInput.value);
+searchInput.addEventListener("input", (e) => {
+  const value = e.target.value.toLowerCase().trim();
+  loadMembers(value);
+});
 
-    if (!memberId || amount <= 0) {
-      alert("Enter valid data");
+/* =========================================================
+   SAVE SAVINGS (DEPOSIT)
+========================================================= */
+
+saveBtn.addEventListener("click", async () => {
+  try {
+    if (!selectedMemberId) {
+      alert("Please select a member");
       return;
     }
 
-    const memberRef = doc(db, "members", memberId);
+    const amount = Number(amountEl.value);
+
+    if (!amount || amount <= 0) {
+      alert("Enter valid amount");
+      return;
+    }
+
+    const note = noteEl.value;
+    const method = methodEl.value;
+
+    /* GET MEMBER REFRESH DATA */
+    const memberRef = doc(db, "members", selectedMemberId);
     const memberSnap = await getDoc(memberRef);
 
     if (!memberSnap.exists()) {
@@ -78,35 +119,49 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
 
     const member = memberSnap.data();
 
-    const previousBalance = member.savingsBalance || 0;
+    const previousBalance = member.savings || 0;
     const newBalance = previousBalance + amount;
 
-    // 1. UPDATE MEMBER BALANCE
-    await updateDoc(memberRef, {
-      savingsBalance: newBalance
-    });
+    const user = auth.currentUser;
 
-    // 2. SAVE TRANSACTION (LEDGER)
+    /* SAVE TRANSACTION */
     await addDoc(collection(db, "savings"), {
-      memberId,
+      memberId: selectedMemberId,
       memberName: member.name,
+
       amount,
       previousBalance,
       newBalance,
-      type: "deposit",
+
+      paymentMethod: method,
+      note: note || "",
+
       createdAt: serverTimestamp(),
-      createdBy: currentUser?.email || "system"
+
+      createdBy: user ? user.email : "unknown"
     });
 
-    alert("✅ Savings added successfully");
+    /* UPDATE MEMBER BALANCE */
+    await updateDoc(memberRef, {
+      savings: newBalance,
+      lastUpdatedAt: serverTimestamp(),
+      lastUpdatedBy: user ? user.email : "unknown"
+    });
 
-    amountInput.value = "";
+    alert("Savings added successfully");
 
-    loadSavings();
+    /* RESET UI */
+    amountEl.value = "";
+    noteEl.value = "";
+    selectedBox.innerHTML = "👤 Select a member";
+    selectedMemberId = null;
+    selectedMemberData = null;
 
-  } catch (err) {
-    console.error(err);
-    alert("❌ Error saving deposit");
+    loadSavingsHistory();
+
+  } catch (error) {
+    console.error(error);
+    alert("Error: " + error.message);
   }
 });
 
@@ -114,29 +169,43 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
    LOAD SAVINGS HISTORY
 ========================================================= */
 
-async function loadSavings() {
-  const snap = await getDocs(collection(db, "savings"));
-
+async function loadSavingsHistory() {
   table.innerHTML = "";
 
-  snap.forEach((docSnap) => {
+  const snapshot = await getDocs(collection(db, "savings"));
+
+  if (snapshot.empty) {
+    table.innerHTML = `
+      <tr>
+        <td colspan="7">No savings found</td>
+      </tr>
+    `;
+    return;
+  }
+
+  snapshot.forEach((docSnap) => {
     const s = docSnap.data();
+
+    const date = s.createdAt
+      ? new Date(s.createdAt.seconds * 1000).toLocaleString()
+      : "-";
 
     table.innerHTML += `
       <tr>
         <td>${s.memberName}</td>
-        <td>${s.amount}</td>
-        <td>${s.previousBalance}</td>
-        <td>${s.newBalance}</td>
+        <td>${s.amount} ETB</td>
+        <td>${s.previousBalance} ETB</td>
+        <td>${s.newBalance} ETB</td>
+        <td>${s.paymentMethod}</td>
         <td>${s.createdBy}</td>
-        <td>${
-          s.createdAt
-            ? new Date(s.createdAt.seconds * 1000).toLocaleDateString()
-            : "-"
-        }</td>
+        <td>${date}</td>
       </tr>
     `;
   });
 }
 
-loadSavings();
+/* =========================================================
+   INITIAL LOAD
+========================================================= */
+
+loadSavingsHistory();
