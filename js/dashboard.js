@@ -5,7 +5,9 @@ import {
   onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 /* =========================================================
    ELEMENTS
@@ -16,15 +18,15 @@ const savingsEl = document.getElementById("savings");
 const loansEl = document.getElementById("loans");
 const withdrawalsEl = document.getElementById("withdrawals");
 const profitEl = document.getElementById("profit");
+
 const roleBox = document.getElementById("roleBox");
 
-let financeChart = null;
-
 /* =========================================================
-   AUTH + ROLE
+   AUTH + ROLE SYSTEM
 ========================================================= */
 
 onAuthStateChanged(auth, (user) => {
+
   if (!user) {
     window.location.href = "index.html";
     return;
@@ -34,146 +36,185 @@ onAuthStateChanged(auth, (user) => {
 
   if (roleBox) {
     roleBox.innerText =
-      role === "admin" ? "👑 ADMIN" : "👤 MEMBER";
+      role === "admin"
+        ? "👑 ADMIN"
+        : role === "cashier"
+          ? "💼 CASHIER"
+          : "👤 MEMBER";
   }
+
+  /* ADMIN ONLY ELEMENTS */
+  document.querySelectorAll(".admin-only").forEach(el => {
+    el.style.display = role === "admin" ? "flex" : "none";
+  });
+
 });
 
 /* =========================================================
-   REAL-TIME DASHBOARD ENGINE
+   ANIMATED COUNTER
 ========================================================= */
 
-function startLiveDashboard() {
+function animateValue(el, start, end, duration = 800) {
 
-  const membersRef = collection(db, "members");
-  const savingsRef = collection(db, "savings");
-  const loansRef = collection(db, "loans");
-  const withdrawalsRef = collection(db, "withdrawals");
+  if (!el) return;
 
-  let membersCount = 0;
-  let savingsTotal = 0;
-  let loansTotal = 0;
-  let withdrawalsTotal = 0;
+  let startTimestamp = null;
 
-  /* =========================
-     MEMBERS LIVE
-  ========================= */
-  onSnapshot(membersRef, (snap) => {
+  const step = (timestamp) => {
 
-    membersCount = snap.size;
+    if (!startTimestamp) startTimestamp = timestamp;
 
-    savingsTotal = 0;
-    loansTotal = 0;
+    const progress = Math.min((timestamp - startTimestamp) / duration, 1);
 
-    snap.forEach(doc => {
-      const d = doc.data();
-      savingsTotal += Number(d.savings || 0);
-      loansTotal += Number(d.loanTotal || 0);
-    });
+    const value = Math.floor(progress * (end - start) + start);
 
-    updateUI();
-  });
+    el.innerText = value.toLocaleString();
 
-  /* =========================
-     SAVINGS LIVE
-  ========================= */
-  onSnapshot(savingsRef, (snap) => {
-    let total = 0;
+    if (progress < 1) {
+      window.requestAnimationFrame(step);
+    }
 
-    snap.forEach(doc => {
-      total += Number(doc.data().amount || 0);
-    });
+  };
 
-    savingsTotal = total;
-
-    updateUI();
-  });
-
-  /* =========================
-     LOANS LIVE
-  ========================= */
-  onSnapshot(loansRef, (snap) => {
-    let total = 0;
-
-    snap.forEach(doc => {
-      total += Number(doc.data().amount || 0);
-    });
-
-    loansTotal = total;
-
-    updateUI();
-  });
-
-  /* =========================
-     WITHDRAWALS LIVE
-  ========================= */
-  onSnapshot(withdrawalsRef, (snap) => {
-    let total = 0;
-
-    snap.forEach(doc => {
-      total += Number(doc.data().amount || 0);
-    });
-
-    withdrawalsTotal = total;
-
-    updateUI();
-  });
-
-  /* =========================
-     UI UPDATE FUNCTION
-  ========================= */
-  function updateUI() {
-
-    const profit = savingsTotal - loansTotal;
-
-    if (membersEl) membersEl.innerText = membersCount;
-    if (savingsEl) savingsEl.innerText = savingsTotal.toLocaleString() + " ETB";
-    if (loansEl) loansEl.innerText = loansTotal.toLocaleString() + " ETB";
-    if (withdrawalsEl) withdrawalsEl.innerText = withdrawalsTotal.toLocaleString() + " ETB";
-    if (profitEl) profitEl.innerText = profit.toLocaleString() + " ETB";
-
-    updateChart(savingsTotal, loansTotal, withdrawalsTotal, profit);
-  }
+  window.requestAnimationFrame(step);
 }
 
 /* =========================================================
-   LIVE CHART (NO DUPLICATES)
+   REAL-TIME DASHBOARD
 ========================================================= */
 
-function updateChart(savings, loans, withdrawals, profit) {
+function loadRealtimeDashboard() {
+
+  /* MEMBERS */
+  onSnapshot(collection(db, "members"), (snapshot) => {
+
+    let totalMembers = snapshot.size;
+    let totalSavings = 0;
+    let totalLoans = 0;
+
+    snapshot.forEach(doc => {
+      const d = doc.data();
+      totalSavings += Number(d.savings || 0);
+      totalLoans += Number(d.loanTotal || 0);
+    });
+
+    animateValue(membersEl, 0, totalMembers);
+
+    animateValue(
+      savingsEl,
+      0,
+      totalSavings
+    );
+    savingsEl.innerText = totalSavings.toLocaleString() + " ETB";
+
+    animateValue(loansEl, 0, totalLoans);
+    loansEl.innerText = totalLoans.toLocaleString() + " ETB";
+
+    updateChart();
+
+  });
+
+  /* WITHDRAWALS */
+  onSnapshot(collection(db, "withdrawals"), (snapshot) => {
+
+    let totalWithdrawals = 0;
+
+    snapshot.forEach(doc => {
+      totalWithdrawals += Number(doc.data().amount || 0);
+    });
+
+    animateValue(withdrawalsEl, 0, totalWithdrawals);
+    withdrawalsEl.innerText = totalWithdrawals.toLocaleString() + " ETB";
+
+    updateChart();
+
+  });
+
+}
+
+/* =========================================================
+   PROFIT CALCULATION
+========================================================= */
+
+let lastSavings = 0;
+let lastLoans = 0;
+let lastWithdrawals = 0;
+
+/* =========================================================
+   CHART
+========================================================= */
+
+let chart;
+
+function initChart() {
 
   const ctx = document.getElementById("financeChart");
 
   if (!ctx) return;
 
-  if (financeChart) {
-    financeChart.destroy();
-  }
-
-  financeChart = new Chart(ctx, {
+  chart = new Chart(ctx, {
     type: "bar",
     data: {
       labels: ["Savings", "Loans", "Withdrawals", "Profit"],
       datasets: [{
-        label: "Live Financial Dashboard",
-        data: [savings, loans, withdrawals, profit],
-        backgroundColor: ["#17a8d3", "#f59e0b", "#ef4444", "#22c55e"],
+        label: "SACCO Overview",
+        data: [0, 0, 0, 0],
+        backgroundColor: [
+          "#17a8d3",
+          "#f59e0b",
+          "#ef4444",
+          "#22c55e"
+        ],
         borderRadius: 10
       }]
     },
     options: {
       responsive: true,
-      animation: {
-        duration: 800
-      },
       plugins: {
         legend: { display: false }
       }
     }
   });
+
+}
+
+/* =========================================================
+   UPDATE CHART (LIVE SYNC)
+========================================================= */
+
+function updateChart() {
+
+  if (!chart) return;
+
+  const savings =
+    parseFloat(savingsEl.innerText.replace(/[^0-9]/g, "")) || 0;
+
+  const loans =
+    parseFloat(loansEl.innerText.replace(/[^0-9]/g, "")) || 0;
+
+  const withdrawals =
+    parseFloat(withdrawalsEl.innerText.replace(/[^0-9]/g, "")) || 0;
+
+  const profit =
+    savings - loans - withdrawals;
+
+  animateValue(profitEl, 0, profit);
+  profitEl.innerText = profit.toLocaleString() + " ETB";
+
+  chart.data.datasets[0].data = [
+    savings,
+    loans,
+    withdrawals,
+    profit
+  ];
+
+  chart.update();
+
 }
 
 /* =========================================================
    START SYSTEM
 ========================================================= */
 
-startLiveDashboard();
+initChart();
+loadRealtimeDashboard();
