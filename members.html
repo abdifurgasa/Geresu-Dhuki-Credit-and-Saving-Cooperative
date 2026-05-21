@@ -5,74 +5,85 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <title data-i18n="members">Members</title>
+  <title>Members Management</title>
 
   <link rel="stylesheet" href="css/style.css" />
-
-  <!-- ICONS (optional) -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
 
 <!-- =========================================================
-     SIDEBAR
+     SIDEBAR (FULL MENU)
 ========================================================= -->
-<aside class="sidebar" id="sidebar">
-
-  <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+<aside class="sidebar">
 
   <h2 class="logo">🏦 SACCO</h2>
 
   <nav class="nav">
 
     <a href="dashboard.html" class="nav-item">
-      <span class="icon">📊</span>
-      <span class="text" data-i18n="dashboard">Dashboard</span>
+      📊 <span class="text">Dashboard</span>
     </a>
 
     <a href="members.html" class="nav-item active">
-      <span class="icon">👥</span>
-      <span class="text" data-i18n="members">Members</span>
+      👥 <span class="text">Members</span>
     </a>
 
     <a href="savings.html" class="nav-item">
-      <span class="icon">💰</span>
-      <span class="text" data-i18n="savings">Savings</span>
+      💰 <span class="text">Savings</span>
     </a>
 
     <a href="loans.html" class="nav-item">
-      <span class="icon">🏦</span>
-      <span class="text" data-i18n="loans">Loans</span>
+      🏦 <span class="text">Loans</span>
+    </a>
+
+    <a href="repayments.html" class="nav-item">
+      💳 <span class="text">Repayments</span>
     </a>
 
     <a href="withdrawals.html" class="nav-item">
-      <span class="icon">📤</span>
-      <span class="text" data-i18n="withdrawals">Withdrawals</span>
+      📤 <span class="text">Withdrawals</span>
+    </a>
+
+    <a href="reports.html" class="nav-item">
+      📈 <span class="text">Reports</span>
+    </a>
+
+    <a href="users.html" class="nav-item">
+      👨‍💼 <span class="text">Users</span>
     </a>
 
     <a href="settings.html" class="nav-item">
-      <span class="icon">⚙️</span>
-      <span class="text" data-i18n="settings">Settings</span>
+      ⚙️ <span class="text">Settings</span>
+    </a>
+
+    <a href="#" class="nav-item logout">
+      🚪 <span class="text">Logout</span>
     </a>
 
   </nav>
+
 </aside>
 
 <!-- =========================================================
-     MAIN
+     MAIN CONTENT
 ========================================================= -->
 <main class="main">
 
   <!-- TOPBAR -->
   <div class="topbar">
-    <h2 data-i18n="members">Members Management</h2>
 
-    <button class="add-btn" onclick="openModal()">+ Add Member</button>
+    <h2>👥 Members Management</h2>
+
+    <button class="add-btn" onclick="openModal()">
+      + Add Member
+    </button>
+
   </div>
 
   <!-- SEARCH -->
   <div class="search-container">
+
     <input
       type="text"
       id="searchMember"
@@ -81,6 +92,7 @@
     />
 
     <div id="searchResults"></div>
+
   </div>
 
   <!-- SELECTED MEMBER -->
@@ -90,6 +102,7 @@
 
   <!-- TABLE -->
   <div class="table-card" style="margin-top:20px;">
+
     <table class="table-modern">
 
       <thead>
@@ -108,12 +121,13 @@
       <tbody id="membersTable"></tbody>
 
     </table>
+
   </div>
 
 </main>
 
 <!-- =========================================================
-     MEMBER MODAL (NO PHOTO)
+     ADD MEMBER MODAL (NO PHOTO)
 ========================================================= -->
 <div class="modal" id="memberModal">
 
@@ -168,18 +182,17 @@
 </div>
 
 <!-- =========================================================
-     SCRIPTS
+     SCRIPT
 ========================================================= -->
 <script type="module" src="js/members.js"></script>
-<script src="js/i18n.js"></script>
 
 <script>
-function openModal(){
-  document.getElementById("memberModal").style.display="flex";
+function openModal() {
+  document.getElementById("memberModal").style.display = "flex";
 }
 
-function closeModal(){
-  document.getElementById("memberModal").style.display="none";
+function closeModal() {
+  document.getElementById("memberModal").style.display = "none";
 }
 </script>
 
