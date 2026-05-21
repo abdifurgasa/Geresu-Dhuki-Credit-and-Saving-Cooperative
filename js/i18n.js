@@ -13,7 +13,7 @@ const translations = {
     logout: "Logout",
     financialDashboard: "Financial Dashboard",
     overview: "Dashboard Overview",
-    welcome: "Welcome to SACCO Banking System",
+    welcome: "Welcome to Geresu Dhuki SACCO Banking System",
     quickActions: "Quick Actions",
     addMember: "Add Member",
     depositSavings: "Savings",
