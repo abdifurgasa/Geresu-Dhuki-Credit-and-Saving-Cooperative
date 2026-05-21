@@ -1,212 +1,197 @@
 import { db, auth } from "./firebase.js";
-
 import {
   collection,
   addDoc,
-  getDocs,
-  query,
-  where,
-  serverTimestamp
+  updateDoc,
+  deleteDoc,
+  doc,
+  serverTimestamp,
+  onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-import {
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+let membersCache = [];
+let currentPage = 1;
+const perPage = 5;
 
-/* =========================================================
-   AUTH SAFE STATE
-========================================================= */
+/* =========================
+   MODAL
+========================= */
 
-let currentUser = null;
+window.openModal = () => {
+  document.getElementById("memberModal").style.display = "flex";
+};
 
-onAuthStateChanged(auth, (user) => {
-  currentUser = user || null;
+window.closeModal = () => {
+  document.getElementById("memberModal").style.display = "none";
+};
+
+/* =========================
+   SAVE MEMBER
+========================= */
+
+document.getElementById("memberForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const name = document.getElementById("name").value;
+  const phone = document.getElementById("phone").value;
+  const nid = document.getElementById("nid").value;
+
+  await addDoc(collection(db, "members"), {
+    name,
+    phone,
+    nid,
+    savings: 0,
+    loanTotal: 0,
+    status: "active",
+    createdAt: serverTimestamp(),
+    createdBy: auth.currentUser?.email || "admin"
+  });
+
+  closeModal();
 });
 
-/* =========================================================
-   ELEMENTS
-========================================================= */
+/* =========================
+   REAL TIME LOAD
+========================= */
 
-const memberForm = document.getElementById("memberForm");
-const membersTable = document.getElementById("membersTable");
+onSnapshot(collection(db, "members"), (snapshot) => {
 
-const searchInput = document.getElementById("searchMember");
-const searchResults = document.getElementById("searchResults");
-const selectedMember = document.getElementById("selectedMember");
+  membersCache = [];
 
-/* =========================================================
-   MODAL FUNCTIONS
-========================================================= */
+  snapshot.forEach((docSnap) => {
+    membersCache.push({ id: docSnap.id, ...docSnap.data() });
+  });
 
-window.openModal = function () {
-  const modal = document.getElementById("memberModal");
-  if (modal) modal.style.display = "flex";
-};
+  renderTable();
+});
 
-window.closeModal = function () {
-  const modal = document.getElementById("memberModal");
-  if (modal) modal.style.display = "none";
-};
+/* =========================
+   TABLE RENDER
+========================= */
 
-/* =========================================================
-   SAVE MEMBER (NO PHOTO - FIXED)
-========================================================= */
+function renderTable() {
 
-if (memberForm) {
-  memberForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
+  const table = document.getElementById("membersTable");
+  table.innerHTML = "";
 
-    try {
-      const name = document.getElementById("name").value.trim();
-      const phone = document.getElementById("phone").value.trim();
-      const nid = document.getElementById("nid").value.trim();
+  const start = (currentPage - 1) * perPage;
+  const end = start + perPage;
 
-      /* VALIDATION */
-      if (!name || !phone || !nid) {
-        alert("Please fill all fields");
-        return;
-      }
+  const pageItems = membersCache.slice(start, end);
 
-      if (phone.length < 9) {
-        alert("Invalid phone number");
-        return;
-      }
+  pageItems.forEach(m => {
 
-      if (nid.length < 10) {
-        alert("Invalid NID");
-        return;
-      }
+    const row = document.createElement("tr");
 
-      /* DUPLICATE PHONE CHECK */
-      const phoneQ = query(collection(db, "members"), where("phone", "==", phone));
-      const phoneSnap = await getDocs(phoneQ);
+    row.innerHTML = `
+      <td>${m.name}</td>
+      <td>${m.phone}</td>
+      <td>${m.nid}</td>
+      <td>${m.savings} ETB</td>
+      <td>${m.loanTotal} ETB</td>
 
-      if (!phoneSnap.empty) {
-        alert("Phone already exists");
-        return;
-      }
+      <td>
+        <span class="badge ${m.status}">
+          ${m.status}
+        </span>
+      </td>
 
-      /* DUPLICATE NID CHECK */
-      const nidQ = query(collection(db, "members"), where("nid", "==", nid));
-      const nidSnap = await getDocs(nidQ);
+      <td>${m.createdBy}</td>
 
-      if (!nidSnap.empty) {
-        alert("NID already exists");
-        return;
-      }
+      <td>
+        <button onclick="editMember('${m.id}')">✏</button>
+        <button onclick="deleteMember('${m.id}')">🗑</button>
+      </td>
+    `;
 
-      /* SAVE MEMBER */
-      await addDoc(collection(db, "members"), {
-        name,
-        phone,
-        nid,
+    /* CLICK ROW → PROFILE */
+    row.onclick = () => {
+      alert(`
+Member Profile:
+Name: ${m.name}
+Phone: ${m.phone}
+NID: ${m.nid}
+Savings: ${m.savings}
+Loans: ${m.loanTotal}
+`);
+    };
 
-        savings: 0,
-        loanTotal: 0,
-        loanRemaining: 0,
-
-        status: "active",
-
-        createdAt: serverTimestamp(),
-        createdBy: currentUser?.email || "admin"
-      });
-
-      alert("✅ Member saved successfully");
-
-      memberForm.reset();
-      closeModal();
-      loadMembers();
-
-    } catch (error) {
-      console.error(error);
-      alert("❌ Failed: " + error.message);
-    }
+    table.appendChild(row);
   });
 }
 
-/* =========================================================
-   LOAD MEMBERS
-========================================================= */
+/* =========================
+   DELETE
+========================= */
 
-async function loadMembers() {
-  if (!membersTable) return;
+window.deleteMember = async (id) => {
+  await deleteDoc(doc(db, "members", id));
+};
 
-  membersTable.innerHTML = "";
+/* =========================
+   EDIT (INLINE SIMPLE)
+========================= */
 
-  try {
-    const snapshot = await getDocs(collection(db, "members"));
+window.editMember = async (id) => {
 
-    snapshot.forEach((doc) => {
-      const m = doc.data();
+  const newName = prompt("New name?");
+  if (!newName) return;
 
-      const date = m.createdAt
-        ? new Date(m.createdAt.seconds * 1000).toLocaleDateString()
-        : "-";
+  await updateDoc(doc(db, "members", id), {
+    name: newName
+  });
+};
 
-      membersTable.innerHTML += `
-        <tr>
-          <td>${m.name}</td>
-          <td>${m.phone}</td>
-          <td>${m.nid}</td>
-          <td>${m.savings} ETB</td>
-          <td>${m.loanTotal} ETB</td>
-          <td><span class="badge active">${m.status}</span></td>
-          <td>${m.createdBy}</td>
-          <td>${date}</td>
-        </tr>
-      `;
-    });
+/* =========================
+   PAGINATION
+========================= */
 
-  } catch (error) {
-    console.error(error);
+window.nextPage = () => {
+  if ((currentPage * perPage) < membersCache.length) {
+    currentPage++;
+    renderTable();
   }
-}
+};
 
-loadMembers();
+window.prevPage = () => {
+  if (currentPage > 1) {
+    currentPage--;
+    renderTable();
+  }
+};
 
-/* =========================================================
-   SEARCH MEMBER (LIVE FILTER)
-========================================================= */
+/* =========================
+   SEARCH
+========================= */
 
-if (searchInput) {
-  searchInput.addEventListener("input", async () => {
-    const value = searchInput.value.toLowerCase();
+document.getElementById("searchInput").addEventListener("input", (e) => {
 
-    searchResults.innerHTML = "";
-    if (!value) return;
+  const value = e.target.value.toLowerCase();
 
-    const snapshot = await getDocs(collection(db, "members"));
+  const filtered = membersCache.filter(m =>
+    m.name.toLowerCase().includes(value) ||
+    m.phone.includes(value) ||
+    m.nid.includes(value)
+  );
 
-    snapshot.forEach((doc) => {
-      const m = doc.data();
+  const table = document.getElementById("membersTable");
+  table.innerHTML = "";
 
-      if (
-        m.name.toLowerCase().includes(value) ||
-        m.phone.includes(value) ||
-        m.nid.includes(value)
-      ) {
-        const div = document.createElement("div");
-        div.className = "search-item";
+  filtered.forEach(m => {
+    const row = document.createElement("tr");
 
-        div.innerHTML = `
-          <strong>${m.name}</strong>
-          <small>${m.phone}</small>
-        `;
+    row.innerHTML = `
+      <td>${m.name}</td>
+      <td>${m.phone}</td>
+      <td>${m.nid}</td>
+      <td>${m.savings} ETB</td>
+      <td>${m.loanTotal} ETB</td>
+      <td><span class="badge ${m.status}">${m.status}</span></td>
+      <td>${m.createdBy}</td>
+      <td>⚙</td>
+    `;
 
-        div.onclick = () => {
-          selectedMember.innerHTML = `
-            👤 ${m.name}<br>
-            📱 ${m.phone}<br>
-            🆔 ${m.nid}<br>
-            💰 Savings: ${m.savings} ETB
-          `;
-
-          searchResults.innerHTML = "";
-          searchInput.value = m.name;
-        };
-
-        searchResults.appendChild(div);
-      }
-    });
+    table.appendChild(row);
   });
-}
+
+});
