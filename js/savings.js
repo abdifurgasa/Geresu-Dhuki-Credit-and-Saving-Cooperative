@@ -1,45 +1,47 @@
-// js/savings.js (UPGRADED REAL-TIME VERSION)
-
 import { db, auth } from "./firebase.js";
 
 import {
   collection,
-  getDocs,
   addDoc,
   doc,
   getDoc,
   updateDoc,
-  serverTimestamp,
-  onSnapshot
+  getDocs,
+  query,
+  serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-/* =========================
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+/* =========================================================
+   AUTH SAFE USER
+========================================================= */
+
+let currentUser = null;
+
+onAuthStateChanged(auth, (user) => {
+  currentUser = user;
+});
+
+/* =========================================================
    ELEMENTS
-========================= */
+========================================================= */
 
-const table = document.getElementById("savingsTable");
 const memberSelect = document.getElementById("member");
+const amountInput = document.getElementById("amount");
+const table = document.getElementById("savingTable");
+const selectedBox = document.getElementById("selectedBox");
 
-/* =========================
-   CURRENT USER INFO
-   (YOU SHOULD REPLACE WITH ROLES SYSTEM LATER)
-========================= */
-
-function getUserName() {
-  const user = auth.currentUser;
-  return user ? user.email || user.uid : "unknown";
-}
-
-/* =========================
-   LOAD MEMBERS (ONE TIME)
-========================= */
+/* =========================================================
+   LOAD MEMBERS
+========================================================= */
 
 async function loadMembers() {
-  const snapshot = await getDocs(collection(db, "members"));
+  const snap = await getDocs(collection(db, "members"));
 
-  memberSelect.innerHTML = `<option value="">Select member</option>`;
+  memberSelect.innerHTML = "";
 
-  snapshot.forEach((docSnap) => {
+  snap.forEach((docSnap) => {
     const m = docSnap.data();
 
     memberSelect.innerHTML += `
@@ -50,87 +52,22 @@ async function loadMembers() {
   });
 }
 
-/* =========================
-   REAL-TIME SAVINGS LIST
-========================= */
+loadMembers();
 
-function loadSavings() {
+/* =========================================================
+   SAVE SAVINGS (MAIN LOGIC)
+========================================================= */
 
-  onSnapshot(collection(db, "savings"), (snapshot) => {
-
-    table.innerHTML = "";
-
-    if (snapshot.empty) {
-      table.innerHTML = `
-        <tr>
-          <td colspan="9">No savings found</td>
-        </tr>
-      `;
-      return;
-    }
-
-    snapshot.forEach((docSnap) => {
-
-      const s = docSnap.data();
-
-      table.innerHTML += `
-        <tr>
-
-          <td>${s.memberName}</td>
-
-          <td>${s.amount} ETB</td>
-
-          <td>${s.previousBalance ?? 0} ETB</td>
-
-          <td>${s.newBalance ?? 0} ETB</td>
-
-          <td>${s.paymentMethod || "-"}</td>
-
-          <td>${s.note || "-"}</td>
-
-          <td>
-            ${s.createdAt
-              ? new Date(s.createdAt.seconds * 1000).toLocaleString()
-              : "-"}
-          </td>
-
-          <td><b>${s.createdByName || "unknown"}</b></td>
-
-          <td>
-            <span class="badge active">
-              ${s.status || "completed"}
-            </span>
-          </td>
-
-        </tr>
-      `;
-    });
-
-  });
-}
-
-/* =========================
-   ADD SAVINGS
-========================= */
-
-document.getElementById("savingForm")
-.addEventListener("submit", async (e) => {
-
-  e.preventDefault();
-
+document.getElementById("saveBtn").addEventListener("click", async () => {
   try {
+    const memberId = memberSelect.value;
+    const amount = Number(amountInput.value);
 
-    const memberId = document.getElementById("member").value;
-    const amount = Number(document.getElementById("amount").value);
-    const paymentMethod = document.getElementById("paymentMethod").value;
-    const note = document.getElementById("note").value;
-
-    if (!memberId || !amount) {
-      alert("Fill all required fields");
+    if (!memberId || amount <= 0) {
+      alert("Enter valid data");
       return;
     }
 
-    /* GET MEMBER */
     const memberRef = doc(db, "members", memberId);
     const memberSnap = await getDoc(memberRef);
 
@@ -141,69 +78,65 @@ document.getElementById("savingForm")
 
     const member = memberSnap.data();
 
-    const previousBalance = member.savings || 0;
+    const previousBalance = member.savingsBalance || 0;
     const newBalance = previousBalance + amount;
 
-    const userName = getUserName();
+    // 1. UPDATE MEMBER BALANCE
+    await updateDoc(memberRef, {
+      savingsBalance: newBalance
+    });
 
-    /* SAVE SAVINGS */
+    // 2. SAVE TRANSACTION (LEDGER)
     await addDoc(collection(db, "savings"), {
       memberId,
       memberName: member.name,
       amount,
       previousBalance,
       newBalance,
-      paymentMethod,
-      note,
-
-      status: "completed",
-
+      type: "deposit",
       createdAt: serverTimestamp(),
-
-      createdByName: userName
+      createdBy: currentUser?.email || "system"
     });
 
-    /* UPDATE MEMBER BALANCE */
-    await updateDoc(memberRef, {
-      savings: newBalance,
-      lastUpdatedAt: serverTimestamp(),
-      lastUpdatedBy: userName
-    });
+    alert("✅ Savings added successfully");
 
-    alert("Savings added successfully");
+    amountInput.value = "";
 
-    document.getElementById("savingForm").reset();
+    loadSavings();
 
-  } catch (error) {
-    console.error(error);
-    alert("Failed to save savings");
+  } catch (err) {
+    console.error(err);
+    alert("❌ Error saving deposit");
   }
-
 });
 
-/* =========================
-   SEARCH FILTER
-========================= */
+/* =========================================================
+   LOAD SAVINGS HISTORY
+========================================================= */
 
-document.getElementById("searchInput")
-.addEventListener("keyup", function () {
+async function loadSavings() {
+  const snap = await getDocs(collection(db, "savings"));
 
-  const value = this.value.toLowerCase();
+  table.innerHTML = "";
 
-  document.querySelectorAll("#savingsTable tr").forEach(row => {
+  snap.forEach((docSnap) => {
+    const s = docSnap.data();
 
-    row.style.display =
-      row.innerText.toLowerCase().includes(value)
-        ? ""
-        : "none";
-
+    table.innerHTML += `
+      <tr>
+        <td>${s.memberName}</td>
+        <td>${s.amount}</td>
+        <td>${s.previousBalance}</td>
+        <td>${s.newBalance}</td>
+        <td>${s.createdBy}</td>
+        <td>${
+          s.createdAt
+            ? new Date(s.createdAt.seconds * 1000).toLocaleDateString()
+            : "-"
+        }</td>
+      </tr>
+    `;
   });
+}
 
-});
-
-/* =========================
-   INIT
-========================= */
-
-loadMembers();
 loadSavings();
