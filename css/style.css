@@ -356,7 +356,76 @@ h1{
   background:#fffbeb;
   border:1px solid #fde68a;
 }
+/* =========================================================
+   CARDS GRID WRAPPER (IMPORTANT FIX)
+========================================================= */
 
+.cards{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));
+  gap:20px;
+  margin-top:20px;
+}
+
+/* =========================================================
+   BASE CARD STYLE
+========================================================= */
+
+.card{
+  padding:20px;
+  border-radius:18px;
+  color:white;
+  box-shadow:0 10px 25px rgba(0,0,0,0.08);
+  transition:0.3s ease;
+}
+
+.card:hover{
+  transform:translateY(-5px);
+  box-shadow:0 15px 35px rgba(0,0,0,0.15);
+}
+
+/* =========================================================
+   CARD COLORS (MATCH YOUR HTML)
+========================================================= */
+
+.blue{
+  background:linear-gradient(135deg,#17a8d3,#33b9df);
+}
+
+.green{
+  background:linear-gradient(135deg,#22c55e,#16a34a);
+}
+
+.orange{
+  background:linear-gradient(135deg,#f59e0b,#d97706);
+}
+
+.red{
+  background:linear-gradient(135deg,#ef4444,#dc2626);
+}
+
+.purple{
+  background:linear-gradient(135deg,#8b5cf6,#7c3aed);
+}
+
+.teal{
+  background:linear-gradient(135deg,#14b8a6,#0d9488);
+}
+
+/* =========================================================
+   CARD TEXT STYLE (OPTIONAL BUT CLEAN)
+========================================================= */
+
+.card h3{
+  font-size:16px;
+  opacity:0.9;
+  margin-bottom:10px;
+}
+
+.card p{
+  font-size:32px;
+  font-weight:800;
+}
 /* =========================================================
    📊 COUNTER (BANK STYLE)
 ========================================================= */
