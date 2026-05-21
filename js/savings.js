@@ -65,8 +65,8 @@ async function loadMembers(queryText) {
 
       selectedBox.innerHTML = `
         👤 ${m.name}<br>
-        📱 ${m.phone}<br>
-        🆔 ${m.nid}<br>
+        📞 ${m.phone}<br>
+        🪪 ${m.nid}<br>
         💰 Savings: ${m.savings || 0} ETB
       `;
 
