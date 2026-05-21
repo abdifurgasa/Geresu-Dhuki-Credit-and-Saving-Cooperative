@@ -2,25 +2,19 @@
 <html lang="en">
 
 <head>
-
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title data-i18n="dashboard">Dashboard</title>
 
-  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/style.css">
 
-  <!-- CHART JS -->
+  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 </head>
 
 <body>
 
-<!-- =========================================================
-     SIDEBAR
-========================================================= -->
-
+<!-- SIDEBAR -->
 <aside class="sidebar" id="sidebar">
 
   <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
@@ -34,7 +28,7 @@
       <span class="text" data-i18n="dashboard">Dashboard</span>
     </a>
 
-    <a href="members.html" class="nav-item">
+    <a href="members.html" class="nav-item admin-only">
       <span class="icon">👥</span>
       <span class="text" data-i18n="members">Members</span>
     </a>
@@ -49,13 +43,23 @@
       <span class="text" data-i18n="loans">Loans</span>
     </a>
 
-    <a href="withdrawals.html" class="nav-item">
-      <span class="icon">📤</span>
+    <a href="repayments.html" class="nav-item">
+      <span class="icon">💵</span>
+      <span class="text" data-i18n="repayments">Repayments</span>
+    </a>
+
+    <a href="withdrawals.html" class="nav-item admin-only">
+      <span class="icon">💸</span>
       <span class="text" data-i18n="withdrawals">Withdrawals</span>
     </a>
 
-    <a href="users.html" class="nav-item">
-      <span class="icon">👨‍💼</span>
+    <a href="reports.html" class="nav-item admin-only">
+      <span class="icon">📄</span>
+      <span class="text" data-i18n="reports">Reports</span>
+    </a>
+
+    <a href="users.html" class="nav-item admin-only">
+      <span class="icon">👤</span>
       <span class="text" data-i18n="users">Users</span>
     </a>
 
@@ -73,39 +77,37 @@
 
 </aside>
 
-<!-- =========================================================
-     MAIN CONTENT
-========================================================= -->
+<!-- MAIN -->
+<main class="main" id="main">
 
-<main class="main">
-
-  <!-- TOPBAR -->
   <div class="topbar">
 
     <h2 data-i18n="financialDashboard">Financial Dashboard</h2>
 
-    <div style="display:flex; gap:15px; align-items:center;">
+    <div class="topbar-actions">
 
-      <!-- LANGUAGE -->
+      <!-- LANGUAGE SWITCH -->
       <select id="languageSelect" onchange="changeLanguage(this.value)">
         <option value="en">English</option>
         <option value="am">አማርኛ</option>
         <option value="om">Afaan Oromoo</option>
       </select>
 
-      <!-- ROLE BOX -->
-      <div id="roleBox" style="color:white; font-weight:bold;">
-        👑 ADMIN
+      <!-- ✅ FIXED: ROLE BOX ADDED HERE -->
+      <div class="selected-box" id="roleBox">
+        👤 Loading...
       </div>
 
     </div>
 
   </div>
 
-  <!-- =========================================================
-       KPI CARDS
-  ========================================================= -->
+  <div style="margin-top:25px;">
+    <h1 data-i18n="overview">DASHBOARD OVERVIEW</h1>
+    <p data-i18n="welcome">Welcome to SACCO Banking System</p>
+  </div>
 
+  <!-- CARDS -->
   <section class="cards">
 
     <div class="card blue">
@@ -124,7 +126,7 @@
     </div>
 
     <div class="card red">
-      <h3 data-i18n="withdrawals">Withdrawals</h3>
+      <h3 data-i18n="withdrawals">Total Withdrawals</h3>
       <p id="withdrawals">0 ETB</p>
     </div>
 
@@ -135,65 +137,49 @@
 
   </section>
 
-  <!-- =========================================================
-       QUICK ACTIONS
-  ========================================================= -->
-
+  <!-- QUICK ACTIONS -->
   <section style="margin-top:35px;">
 
     <h2 data-i18n="quickActions">Quick Actions</h2>
 
     <div class="cards">
 
-      <a href="members.html" class="card teal">
+      <a href="members.html" class="card teal admin-only">
         <h3 data-i18n="addMember">Add Member</h3>
-        <p>👥</p>
+        👥
       </a>
 
       <a href="savings.html" class="card green">
         <h3 data-i18n="depositSavings">Savings</h3>
-        <p>💰</p>
+        💰
       </a>
 
       <a href="loans.html" class="card orange">
         <h3 data-i18n="createLoan">Loans</h3>
-        <p>🏦</p>
+        🏦
       </a>
 
-      <a href="withdrawals.html" class="card red">
-        <h3 data-i18n="withdrawals">Withdraw</h3>
-        <p>💸</p>
+      <a href="withdrawals.html" class="card red admin-only">
+        <h3 data-i18n="withdrawals">Withdrawals</h3>
+        💸
       </a>
 
     </div>
 
   </section>
 
-  <!-- =========================================================
-       CHART SECTION
-  ========================================================= -->
-
+  <!-- CHART -->
   <section style="margin-top:40px;">
-
-    <div class="table-card" style="padding:25px;">
-
-      <h2 data-i18n="overview">Financial Overview</h2>
-
-      <canvas id="financeChart"></canvas>
-
-    </div>
-
+    <h2 data-i18n="overview">Performance Overview</h2>
+    <canvas id="financeChart"></canvas>
   </section>
 
 </main>
 
-<!-- =========================================================
-     SCRIPTS
-========================================================= -->
-
-<script type="module" src="js/dashboard.js"></script>
+<!-- SCRIPTS -->
 <script type="module" src="js/layout.js"></script>
 <script src="js/i18n.js"></script>
+<script type="module" src="js/dashboard.js"></script>
 
 </body>
 </html>
