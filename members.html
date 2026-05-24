@@ -39,7 +39,6 @@
 
   <nav class="nav">
 
-    <!-- DASHBOARD -->
     <a
       href="dashboard.html"
       class="nav-item"
@@ -54,7 +53,6 @@
       </span>
     </a>
 
-    <!-- MEMBERS -->
     <a
       href="members.html"
       class="nav-item active admin-only"
@@ -69,7 +67,6 @@
       </span>
     </a>
 
-    <!-- SAVINGS -->
     <a
       href="savings.html"
       class="nav-item"
@@ -84,7 +81,6 @@
       </span>
     </a>
 
-    <!-- LOANS -->
     <a
       href="loans.html"
       class="nav-item"
@@ -99,7 +95,6 @@
       </span>
     </a>
 
-    <!-- REPAYMENTS -->
     <a
       href="repayments.html"
       class="nav-item"
@@ -114,7 +109,6 @@
       </span>
     </a>
 
-    <!-- WITHDRAWALS -->
     <a
       href="withdrawals.html"
       class="nav-item admin-only"
@@ -129,7 +123,6 @@
       </span>
     </a>
 
-    <!-- REPORTS -->
     <a
       href="reports.html"
       class="nav-item admin-only"
@@ -144,7 +137,6 @@
       </span>
     </a>
 
-    <!-- USERS -->
     <a
       href="users.html"
       class="nav-item admin-only"
@@ -159,7 +151,6 @@
       </span>
     </a>
 
-    <!-- SETTINGS -->
     <a
       href="settings.html"
       class="nav-item"
@@ -174,7 +165,6 @@
       </span>
     </a>
 
-    <!-- LOGOUT -->
     <a
       href="#"
       class="nav-item logout"
@@ -278,13 +268,16 @@
 
       <div class="grid-2">
 
+        <!-- NID -->
         <input
           type="text"
           id="memberId"
-          placeholder="Member ID"
+          placeholder="National ID (16 Digits)"
+          maxlength="16"
           required
         >
 
+        <!-- FULL NAME -->
         <input
           type="text"
           id="fullName"
@@ -296,6 +289,7 @@
 
       <div class="grid-2">
 
+        <!-- GENDER -->
         <select id="gender">
 
           <option value="Male">
@@ -308,20 +302,24 @@
 
         </select>
 
+        <!-- PHONE -->
         <input
           type="text"
           id="phone"
-          placeholder="Phone Number"
+          placeholder="Phone Number (9 Digits)"
+          maxlength="9"
           required
         >
 
       </div>
 
+      <!-- ADDRESS -->
       <textarea
         id="address"
         placeholder="Address"
       ></textarea>
 
+      <!-- BUTTON -->
       <button
         type="submit"
         class="primary-btn"
@@ -372,7 +370,7 @@
 
           <tr>
 
-            <th>Member ID</th>
+            <th>NID</th>
 
             <th>Full Name</th>
 
