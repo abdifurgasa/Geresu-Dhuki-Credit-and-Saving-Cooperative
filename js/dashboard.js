@@ -10,8 +10,8 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 import {
-  signOut,
-  onAuthStateChanged
+  onAuthStateChanged,
+  signOut
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 /* ======================================================
@@ -24,46 +24,98 @@ const loansEl = document.getElementById("loans");
 const withdrawalsEl = document.getElementById("withdrawals");
 const profitEl = document.getElementById("profit");
 
-const logoutBtn = document.getElementById("logoutBtn");
 const roleBox = document.getElementById("roleBox");
+const logoutBtn = document.getElementById("logoutBtn");
+
+const transactionsTable =
+  document.getElementById("recentTransactions");
+
+const notificationsBox =
+  document.getElementById("notifications");
+
+/* ======================================================
+   GLOBAL DATA
+====================================================== */
+
+let totalMembers = 0;
+let totalSavings = 0;
+let totalLoans = 0;
+let totalWithdrawals = 0;
+let totalProfit = 0;
+
+let financeChart;
 
 /* ======================================================
    SIDEBAR TOGGLE
 ====================================================== */
 
 window.toggleSidebar = function () {
-  document.getElementById("sidebar").classList.toggle("collapsed");
-  document.getElementById("main").classList.toggle("expanded");
+
+  document
+    .getElementById("sidebar")
+    .classList.toggle("collapsed");
+
+  document
+    .getElementById("main")
+    .classList.toggle("expanded");
 };
 
 /* ======================================================
-   AUTH CHECK
+   FORMAT MONEY
+====================================================== */
+
+function formatMoney(amount) {
+
+  return Number(amount || 0)
+    .toLocaleString() + " ETB";
+}
+
+/* ======================================================
+   AUTH GUARD
 ====================================================== */
 
 onAuthStateChanged(auth, async (user) => {
 
   if (!user) {
+
     window.location.href = "index.html";
+
     return;
   }
 
-  loadDashboard();
-  loadRole(user);
+  await loadRole(user);
+
+  loadMembers();
+
+  loadSavings();
+
+  loadLoans();
+
+  loadWithdrawals();
+
+  loadProfit();
+
+  loadChart();
+
+  loadRecentTransactions();
+
+  loadNotifications();
 });
 
 /* ======================================================
-   LOAD ROLE
+   LOAD USER ROLE
 ====================================================== */
 
 async function loadRole(user) {
 
   try {
 
-    const usersSnapshot = await getDocs(collection(db, "users"));
+    const snapshot =
+      await getDocs(collection(db, "users"));
 
     let found = false;
 
-    usersSnapshot.forEach((doc) => {
+    snapshot.forEach((doc) => {
 
       const data = doc.data();
 
@@ -72,22 +124,22 @@ async function loadRole(user) {
         found = true;
 
         roleBox.innerHTML = `
-          👤 ${data.name || "User"} 
+          👤 ${data.name || "User"}
           <br>
           <small>${data.role || "Staff"}</small>
         `;
 
-        // ADMIN ACCESS
         if (data.role !== "Admin") {
 
-          document.querySelectorAll(".admin-only").forEach(el => {
-            el.style.display = "none";
-          });
+          document
+            .querySelectorAll(".admin-only")
+            .forEach((el) => {
 
+              el.style.display = "none";
+
+            });
         }
-
       }
-
     });
 
     if (!found) {
@@ -101,269 +153,210 @@ async function loadRole(user) {
 
   } catch (error) {
 
-    console.error("Role Load Error:", error);
-
+    console.error(error);
   }
-
 }
 
 /* ======================================================
-   FORMAT MONEY
+   MEMBERS MODULE
 ====================================================== */
 
-function formatMoney(amount) {
+function loadMembers() {
 
-  return Number(amount || 0).toLocaleString() + " ETB";
+  onSnapshot(collection(db, "members"), (snapshot) => {
 
+    totalMembers = snapshot.size;
+
+    membersEl.textContent = totalMembers;
+  });
 }
 
 /* ======================================================
-   DASHBOARD DATA
+   SAVINGS MODULE
 ====================================================== */
 
-async function loadDashboard() {
+function loadSavings() {
 
-  try {
+  onSnapshot(collection(db, "savings"), (snapshot) => {
 
-    /* ================================
-       MEMBERS
-    ================================ */
+    totalSavings = 0;
 
-    onSnapshot(collection(db, "members"), (snapshot) => {
+    snapshot.forEach((doc) => {
 
-      membersEl.textContent = snapshot.size;
-
-    });
-
-    /* ================================
-       SAVINGS
-    ================================ */
-
-    onSnapshot(collection(db, "savings"), (snapshot) => {
-
-      let total = 0;
-
-      snapshot.forEach(doc => {
-
-        total += Number(doc.data().amount || 0);
-
-      });
-
-      savingsEl.textContent = formatMoney(total);
-
-      updateProfit();
-
-      updateChart();
+      totalSavings +=
+        Number(doc.data().amount || 0);
 
     });
 
-    /* ================================
-       LOANS
-    ================================ */
+    savingsEl.textContent =
+      formatMoney(totalSavings);
 
-    onSnapshot(collection(db, "loans"), (snapshot) => {
+    loadProfit();
 
-      let total = 0;
-
-      snapshot.forEach(doc => {
-
-        total += Number(doc.data().amount || 0);
-
-      });
-
-      loansEl.textContent = formatMoney(total);
-
-      updateProfit();
-
-      updateChart();
-
-    });
-
-    /* ================================
-       WITHDRAWALS
-    ================================ */
-
-    onSnapshot(collection(db, "withdrawals"), (snapshot) => {
-
-      let total = 0;
-
-      snapshot.forEach(doc => {
-
-        total += Number(doc.data().amount || 0);
-
-      });
-
-      withdrawalsEl.textContent = formatMoney(total);
-
-      updateProfit();
-
-      updateChart();
-
-    });
-
-  } catch (error) {
-
-    console.error("Dashboard Error:", error);
-
-  }
-
+    updateChart();
+  });
 }
 
 /* ======================================================
-   NET PROFIT
+   LOANS MODULE
 ====================================================== */
 
-async function updateProfit() {
+function loadLoans() {
 
-  try {
+  onSnapshot(collection(db, "loans"), (snapshot) => {
 
-    const savingsSnap = await getDocs(collection(db, "savings"));
-    const loansSnap = await getDocs(collection(db, "loans"));
-    const withdrawalsSnap = await getDocs(collection(db, "withdrawals"));
+    totalLoans = 0;
 
-    let savings = 0;
-    let loans = 0;
-    let withdrawals = 0;
+    snapshot.forEach((doc) => {
 
-    savingsSnap.forEach(doc => {
-      savings += Number(doc.data().amount || 0);
+      totalLoans +=
+        Number(doc.data().amount || 0);
+
     });
 
-    loansSnap.forEach(doc => {
-      loans += Number(doc.data().amount || 0);
-    });
+    loansEl.textContent =
+      formatMoney(totalLoans);
 
-    withdrawalsSnap.forEach(doc => {
-      withdrawals += Number(doc.data().amount || 0);
-    });
-
-    const profit = savings - withdrawals;
-
-    profitEl.textContent = formatMoney(profit);
-
-  } catch (error) {
-
-    console.error("Profit Error:", error);
-
-  }
-
+    updateChart();
+  });
 }
 
 /* ======================================================
-   CHART.JS
+   WITHDRAWALS MODULE
 ====================================================== */
 
-let financeChart;
+function loadWithdrawals() {
 
-async function updateChart() {
+  onSnapshot(collection(db, "withdrawals"), (snapshot) => {
 
-  try {
+    totalWithdrawals = 0;
 
-    const savingsSnap = await getDocs(collection(db, "savings"));
-    const loansSnap = await getDocs(collection(db, "loans"));
-    const withdrawalsSnap = await getDocs(collection(db, "withdrawals"));
+    snapshot.forEach((doc) => {
 
-    let savings = 0;
-    let loans = 0;
-    let withdrawals = 0;
+      totalWithdrawals +=
+        Number(doc.data().amount || 0);
 
-    savingsSnap.forEach(doc => {
-      savings += Number(doc.data().amount || 0);
     });
 
-    loansSnap.forEach(doc => {
-      loans += Number(doc.data().amount || 0);
-    });
+    withdrawalsEl.textContent =
+      formatMoney(totalWithdrawals);
 
-    withdrawalsSnap.forEach(doc => {
-      withdrawals += Number(doc.data().amount || 0);
-    });
+    loadProfit();
 
-    const ctx = document.getElementById("financeChart");
+    updateChart();
+  });
+}
 
-    if (financeChart) {
-      financeChart.destroy();
-    }
+/* ======================================================
+   PROFIT MODULE
+====================================================== */
 
-    financeChart = new Chart(ctx, {
+function loadProfit() {
 
-      type: "bar",
+  totalProfit =
+    totalSavings - totalWithdrawals;
 
-      data: {
+  profitEl.textContent =
+    formatMoney(totalProfit);
+}
 
-        labels: [
-          "Savings",
-          "Loans",
-          "Withdrawals"
+/* ======================================================
+   CHART MODULE
+====================================================== */
+
+function loadChart() {
+
+  const ctx =
+    document.getElementById("financeChart");
+
+  if (!ctx) return;
+
+  financeChart = new Chart(ctx, {
+
+    type: "bar",
+
+    data: {
+
+      labels: [
+        "Savings",
+        "Loans",
+        "Withdrawals"
+      ],
+
+      datasets: [{
+
+        label: "Financial Overview",
+
+        data: [
+          totalSavings,
+          totalLoans,
+          totalWithdrawals
         ],
 
-        datasets: [{
-          label: "Financial Overview",
+        backgroundColor: [
+          "#16a34a",
+          "#ea580c",
+          "#dc2626"
+        ],
 
-          data: [
-            savings,
-            loans,
-            withdrawals
-          ],
+        borderRadius: 10,
+        borderWidth: 0
+      }]
+    },
 
-          backgroundColor: [
-            "#16a34a",
-            "#ea580c",
-            "#dc2626"
-          ],
+    options: {
 
-          borderRadius: 10,
-          borderWidth: 0
-        }]
+      responsive: true,
+
+      plugins: {
+
+        legend: {
+
+          display: false
+        }
       },
 
-      options: {
+      scales: {
 
-        responsive: true,
+        y: {
 
-        plugins: {
-
-          legend: {
-            display: false
-          }
-
-        },
-
-        scales: {
-
-          y: {
-
-            beginAtZero: true
-
-          }
-
+          beginAtZero: true
         }
-
       }
-
-    });
-
-  } catch (error) {
-
-    console.error("Chart Error:", error);
-
-  }
-
+    }
+  });
 }
 
 /* ======================================================
-   RECENT TRANSACTIONS
+   UPDATE CHART
+====================================================== */
+
+function updateChart() {
+
+  if (!financeChart) return;
+
+  financeChart.data.datasets[0].data = [
+
+    totalSavings,
+    totalLoans,
+    totalWithdrawals
+
+  ];
+
+  financeChart.update();
+}
+
+/* ======================================================
+   RECENT TRANSACTIONS MODULE
 ====================================================== */
 
 async function loadRecentTransactions() {
 
+  if (!transactionsTable) return;
+
+  transactionsTable.innerHTML = "";
+
   try {
-
-    const tbody = document.getElementById("recentTransactions");
-
-    if (!tbody) return;
-
-    tbody.innerHTML = "";
 
     const savingsQuery = query(
       collection(db, "savings"),
@@ -371,45 +364,84 @@ async function loadRecentTransactions() {
       limit(5)
     );
 
-    const snapshot = await getDocs(savingsQuery);
+    const snapshot =
+      await getDocs(savingsQuery);
 
-    snapshot.forEach(doc => {
+    snapshot.forEach((doc) => {
 
       const data = doc.data();
 
-      const tr = document.createElement("tr");
+      const tr =
+        document.createElement("tr");
 
       tr.innerHTML = `
-        <td>${data.memberName || "-"}</td>
-        <td>Saving</td>
-        <td>${formatMoney(data.amount)}</td>
+
         <td>
-          ${data.createdAt
-            ? new Date(data.createdAt.seconds * 1000).toLocaleDateString()
-            : "-"
+          ${data.memberName || "-"}
+        </td>
+
+        <td>
+          Savings
+        </td>
+
+        <td>
+          ${formatMoney(data.amount)}
+        </td>
+
+        <td>
+          ${
+            data.createdAt
+              ? new Date(
+                  data.createdAt.seconds * 1000
+                ).toLocaleDateString()
+              : "-"
           }
         </td>
+
       `;
 
-      tbody.appendChild(tr);
-
+      transactionsTable.appendChild(tr);
     });
 
   } catch (error) {
 
-    console.error("Recent Transactions Error:", error);
-
+    console.error(error);
   }
-
 }
 
 /* ======================================================
-   LOGOUT
+   NOTIFICATIONS MODULE
+====================================================== */
+
+function loadNotifications() {
+
+  if (!notificationsBox) return;
+
+  notificationsBox.innerHTML = `
+
+    <div class="notification success">
+      ✅ Dashboard loaded successfully
+    </div>
+
+    <div class="notification info">
+      📊 Financial report updated
+    </div>
+
+    <div class="notification warning">
+      ⚠ Monitor loan repayments
+    </div>
+
+  `;
+}
+
+/* ======================================================
+   LOGOUT MODULE
 ====================================================== */
 
 logoutBtn.addEventListener("click", async () => {
 
-  const confirmLogout = confirm("Are you sure you want to logout?");
+  const confirmLogout =
+    confirm("Are you sure to logout?");
 
   if (!confirmLogout) return;
 
@@ -421,18 +453,84 @@ logoutBtn.addEventListener("click", async () => {
 
   } catch (error) {
 
-    console.error("Logout Error:", error);
+    console.error(error);
 
     alert(error.message);
-
   }
-
 });
 
 /* ======================================================
-   AUTO LOAD
+   REALTIME ACTIVITY LOGS
 ====================================================== */
 
-loadRecentTransactions();
-updateChart();
-updateProfit();
+function loadActivityLogs() {
+
+  const activityBox =
+    document.getElementById("activityLogs");
+
+  if (!activityBox) return;
+
+  activityBox.innerHTML = `
+
+    <div class="activity-item">
+      👤 New member registered
+    </div>
+
+    <div class="activity-item">
+      💰 Savings deposited
+    </div>
+
+    <div class="activity-item">
+      🏦 Loan approved
+    </div>
+
+  `;
+}
+
+loadActivityLogs();
+
+/* ======================================================
+   QUICK SEARCH MODULE
+====================================================== */
+
+window.searchDashboard = function () {
+
+  const input =
+    document.getElementById("dashboardSearch");
+
+  if (!input) return;
+
+  const filter =
+    input.value.toLowerCase();
+
+  document
+    .querySelectorAll(".card")
+    .forEach((card) => {
+
+      const text =
+        card.innerText.toLowerCase();
+
+      card.style.display =
+        text.includes(filter)
+          ? "block"
+          : "none";
+    });
+};
+
+/* ======================================================
+   AUTO REFRESH
+====================================================== */
+
+setInterval(() => {
+
+  updateChart();
+
+}, 5000);
+
+/* ======================================================
+   SYSTEM READY
+====================================================== */
+
+console.log(
+  "GERESU DHUKI SACCO Dashboard Loaded"
+);
