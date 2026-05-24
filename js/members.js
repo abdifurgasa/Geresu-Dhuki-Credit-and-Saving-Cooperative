@@ -31,332 +31,214 @@ const memberForm =
 const roleBox =
   document.getElementById("roleBox");
 
-const logoutBtn =
-  document.getElementById("logoutBtn");
-
 const totalMembersEl =
   document.getElementById("totalMembers");
 
+const logoutBtn =
+  document.getElementById("logoutBtn");
+
 /* ======================================================
-   SIDEBAR TOGGLE
+   SIDEBAR
 ====================================================== */
 
 window.toggleSidebar = function () {
 
-  document
-    .getElementById("sidebar")
+  document.getElementById("sidebar")
     .classList.toggle("collapsed");
 
-  document
-    .getElementById("main")
+  document.getElementById("main")
     .classList.toggle("expanded");
 };
 
 /* ======================================================
-   AUTH STATE
+   MODAL
+====================================================== */
+
+window.openMemberModal = function () {
+
+  document.getElementById("memberModal")
+    .style.display = "flex";
+};
+
+window.closeMemberModal = function () {
+
+  document.getElementById("memberModal")
+    .style.display = "none";
+};
+
+window.onclick = function (e) {
+
+  const modal =
+    document.getElementById("memberModal");
+
+  if (e.target === modal) {
+
+    modal.style.display = "none";
+  }
+};
+
+/* ======================================================
+   AUTH
 ====================================================== */
 
 onAuthStateChanged(auth, async (user) => {
 
   if (!user) {
 
-    window.location.href =
-      "index.html";
-
+    window.location.href = "index.html";
     return;
   }
 
-  await loadRole(user);
-
+  loadRole(user);
   loadMembers();
 });
 
 /* ======================================================
-   LOAD ROLE
+   ROLE
 ====================================================== */
 
 async function loadRole(user) {
 
+  const snapshot =
+    await getDocs(collection(db, "users"));
+
+  snapshot.forEach((docu) => {
+
+    const data = docu.data();
+
+    if (data.email === user.email) {
+
+      roleBox.innerHTML =
+        `👤 ${data.name || user.email}
+         <br><small>${data.role || "Staff"}</small>`;
+    }
+  });
+}
+
+/* ======================================================
+   ADD MEMBER (VALIDATION + DUPLICATE)
+====================================================== */
+
+memberForm.addEventListener("submit", async (e) => {
+
+  e.preventDefault();
+
   try {
 
+    const currentUser = auth.currentUser;
+
+    const memberId =
+      document.getElementById("memberId").value.trim();
+
+    const fullName =
+      document.getElementById("fullName").value.trim();
+
+    const gender =
+      document.getElementById("gender").value;
+
+    const phone =
+      document.getElementById("phone").value.trim();
+
+    const address =
+      document.getElementById("address").value.trim();
+
+    /* ======================================================
+       VALIDATION
+    ====================================================== */
+
+    if (!/^[0-9]{16}$/.test(memberId)) {
+
+      alert("❌ NID must be exactly 16 digits");
+      return;
+    }
+
+    if (!/^[0-9]{9}$/.test(phone)) {
+
+      alert("❌ Phone must be exactly 9 digits");
+      return;
+    }
+
+    /* ======================================================
+       DUPLICATE CHECK
+    ====================================================== */
+
     const snapshot =
-      await getDocs(
-        collection(db, "users")
-      );
+      await getDocs(collection(db, "members"));
 
-    let found = false;
+    let duplicateNID = false;
+    let duplicatePhone = false;
 
-    snapshot.forEach((document) => {
+    snapshot.forEach((docu) => {
 
-      const data =
-        document.data();
+      const data = docu.data();
 
-      if (data.email === user.email) {
+      if (data.memberId === memberId) {
+        duplicateNID = true;
+      }
 
-        found = true;
-
-        roleBox.innerHTML = `
-          👤 ${data.name || "User"}
-          <br>
-          <small>${data.role || "Staff"}</small>
-        `;
-
-        // HIDE ADMIN MODULES
-        if (data.role !== "Admin") {
-
-          document
-            .querySelectorAll(".admin-only")
-            .forEach((el) => {
-
-              el.style.display = "none";
-
-            });
-        }
+      if (data.phone === phone) {
+        duplicatePhone = true;
       }
     });
 
-    if (!found) {
-
-      roleBox.innerHTML = `
-        👤 ${user.email}
-        <br>
-        <small>Staff</small>
-      `;
+    if (duplicateNID) {
+      alert("❌ NID already exists");
+      return;
     }
+
+    if (duplicatePhone) {
+      alert("❌ Phone number already exists");
+      return;
+    }
+
+    /* ======================================================
+       CREATED BY
+    ====================================================== */
+
+    let createdBy = currentUser.email;
+
+    const usersSnap =
+      await getDocs(collection(db, "users"));
+
+    usersSnap.forEach((docu) => {
+
+      const u = docu.data();
+
+      if (u.email === currentUser.email) {
+
+        createdBy = u.name || u.email;
+      }
+    });
+
+    /* ======================================================
+       SAVE MEMBER
+    ====================================================== */
+
+    await addDoc(collection(db, "members"), {
+
+      memberId,
+      fullName,
+      gender,
+      phone,
+      address,
+      status: "Active",
+      createdBy,
+      createdDate: new Date().toLocaleString(),
+      createdAt: serverTimestamp()
+    });
+
+    alert("✅ Member added successfully");
+
+    memberForm.reset();
+
+    closeMemberModal();
 
   } catch (error) {
 
     console.error(error);
+    alert(error.message);
   }
-}
-
-/* ======================================================
-   ADD MEMBER
-====================================================== */
-
-memberForm.addEventListener(
-  "submit",
-  async (e) => {
-
-    e.preventDefault();
-
-    try {
-
-      const currentUser =
-        auth.currentUser;
-
-      // FORM VALUES
-      const memberId =
-        document
-          .getElementById("memberId")
-          .value
-          .trim();
-
-      const fullName =
-        document
-          .getElementById("fullName")
-          .value
-          .trim();
-
-      const gender =
-        document
-          .getElementById("gender")
-          .value;
-
-      const phone =
-        document
-          .getElementById("phone")
-          .value
-          .trim();
-
-      const address =
-        document
-          .getElementById("address")
-          .value
-          .trim();
-
-      /* ======================================================
-         VALIDATION
-      ====================================================== */
-
-      // PHONE ONLY NUMBERS
-      const phoneRegex =
-        /^[0-9]+$/;
-
-      if (!phoneRegex.test(phone)) {
-
-        showToast(
-          "Phone must contain only numbers"
-        );
-
-        return;
-      }
-
-      // PHONE EXACTLY 9 DIGITS
-      if (phone.length !== 9) {
-
-        showToast(
-          "Phone number must be exactly 9 digits"
-        );
-
-        return;
-      }
-
-      // NID ONLY NUMBERS
-      const nidRegex =
-        /^[0-9]+$/;
-
-      if (!nidRegex.test(memberId)) {
-
-        showToast(
-          "NID must contain only numbers"
-        );
-
-        return;
-      }
-
-      // NID EXACTLY 16 DIGITS
-      if (memberId.length !== 16) {
-
-        showToast(
-          "NID must be exactly 16 digits"
-        );
-
-        return;
-      }
-
-      /* ======================================================
-         CHECK DUPLICATES
-      ====================================================== */
-
-      const membersSnapshot =
-        await getDocs(
-          collection(db, "members")
-        );
-
-      let duplicatePhone =
-        false;
-
-      let duplicateNID =
-        false;
-
-      membersSnapshot.forEach((document) => {
-
-        const data =
-          document.data();
-
-        // DUPLICATE PHONE
-        if (data.phone === phone) {
-
-          duplicatePhone = true;
-        }
-
-        // DUPLICATE NID
-        if (
-          data.memberId ===
-          memberId
-        ) {
-
-          duplicateNID = true;
-        }
-      });
-
-      if (duplicatePhone) {
-
-        showToast(
-          "Phone number already exists"
-        );
-
-        return;
-      }
-
-      if (duplicateNID) {
-
-        showToast(
-          "NID already exists"
-        );
-
-        return;
-      }
-
-      /* ======================================================
-         FIND USER NAME
-      ====================================================== */
-
-      let createdBy =
-        currentUser.email;
-
-      const usersSnapshot =
-        await getDocs(
-          collection(db, "users")
-        );
-
-      usersSnapshot.forEach((document) => {
-
-        const userData =
-          document.data();
-
-        if (
-          userData.email ===
-          currentUser.email
-        ) {
-
-          createdBy =
-            userData.name ||
-            currentUser.email;
-        }
-      });
-
-      /* ======================================================
-         MEMBER DATA
-      ====================================================== */
-
-      const memberData = {
-
-        memberId: memberId,
-
-        fullName: fullName,
-
-        gender: gender,
-
-        phone: phone,
-
-        address: address,
-
-        status: "Active",
-
-        createdBy: createdBy,
-
-        createdDate:
-          new Date().toLocaleString(),
-
-        createdAt:
-          serverTimestamp()
-      };
-
-      /* ======================================================
-         SAVE TO FIREBASE
-      ====================================================== */
-
-      await addDoc(
-        collection(db, "members"),
-        memberData
-      );
-
-      showToast(
-        "Member added successfully"
-      );
-
-      memberForm.reset();
-
-    } catch (error) {
-
-      console.error(error);
-
-      alert(error.message);
-    }
-  }
-);
+});
 
 /* ======================================================
    LOAD MEMBERS
@@ -364,112 +246,51 @@ memberForm.addEventListener(
 
 function loadMembers() {
 
-  const q = query(
-    collection(db, "members"),
-    orderBy("createdAt", "desc")
-  );
+  const q =
+    query(collection(db, "members"), orderBy("createdAt", "desc"));
 
   onSnapshot(q, (snapshot) => {
 
     membersTable.innerHTML = "";
 
-    totalMembersEl.textContent =
-      snapshot.size;
+    totalMembersEl.textContent = snapshot.size;
 
-    snapshot.forEach((document) => {
+    snapshot.forEach((docu) => {
 
-      const data =
-        document.data();
+      const d = docu.data();
 
-      const tr =
-        document.createElement("tr");
+      const tr = document.createElement("tr");
 
       tr.innerHTML = `
 
-        <td>
-          ${data.memberId || "-"}
-        </td>
+        <td>${d.memberId}</td>
+        <td>${d.fullName}</td>
+        <td>${d.gender}</td>
+        <td>${d.phone}</td>
+        <td>${d.address}</td>
 
         <td>
-          ${data.fullName || "-"}
-        </td>
-
-        <td>
-          ${data.gender || "-"}
-        </td>
-
-        <td>
-          ${data.phone || "-"}
-        </td>
-
-        <td>
-          ${data.address || "-"}
-        </td>
-
-        <td>
-
-          <span class="
-            status-badge
-            ${data.status}
-          ">
-
-            ${data.status}
-
+          <span class="status-badge ${d.status}">
+            ${d.status}
           </span>
-
         </td>
 
-        <td>
-          ${data.createdBy || "-"}
-        </td>
-
-        <td>
-          ${data.createdDate || "-"}
-        </td>
+        <td>${d.createdBy}</td>
+        <td>${d.createdDate}</td>
 
         <td>
 
-          <div class="action-buttons">
+          <button onclick="editMember('${docu.id}','${d.fullName}')">
+            Edit
+          </button>
 
-            <!-- EDIT -->
-            <button
-              class="edit-btn"
-              onclick="editMember(
-                '${document.id}',
-                '${data.fullName}',
-                '${data.phone}',
-                '${data.address}'
-              )"
-            >
-              Edit
-            </button>
+          <button onclick="toggleStatus('${docu.id}','${d.status}')">
+            ${d.status === "Active" ? "Suspend" : "Activate"}
+          </button>
 
-            <!-- STATUS -->
-            <button
-              class="suspend-btn"
-              onclick="toggleStatus(
-                '${document.id}',
-                '${data.status}'
-              )"
-            >
-              ${
-                data.status === "Active"
-                  ? "Suspend"
-                  : "Activate"
-              }
-            </button>
-
-            <!-- DELETE -->
-            <button
-              class="delete-btn"
-              onclick="deleteMember(
-                '${document.id}'
-              )"
-            >
-              Delete
-            </button>
-
-          </div>
+          <button onclick="deleteMember('${docu.id}')">
+            Delete
+          </button>
 
         </td>
       `;
@@ -480,295 +301,117 @@ function loadMembers() {
 }
 
 /* ======================================================
-   EDIT MEMBER
+   EDIT
 ====================================================== */
 
-window.editMember = async function (
-  id,
-  fullName,
-  phone,
-  address
-) {
+window.editMember = async function (id, name) {
 
-  try {
+  const newName = prompt("Edit Name", name);
 
-    const newName =
-      prompt(
-        "Edit Full Name",
-        fullName
-      );
+  if (!newName) return;
 
-    if (!newName) return;
-
-    const newPhone =
-      prompt(
-        "Edit Phone Number",
-        phone
-      );
-
-    if (!newPhone) return;
-
-    // PHONE VALIDATION
-    const phoneRegex =
-      /^[0-9]+$/;
-
-    if (!phoneRegex.test(newPhone)) {
-
-      showToast(
-        "Phone must contain only numbers"
-      );
-
-      return;
-    }
-
-    if (newPhone.length !== 9) {
-
-      showToast(
-        "Phone number must be exactly 9 digits"
-      );
-
-      return;
-    }
-
-    const newAddress =
-      prompt(
-        "Edit Address",
-        address
-      );
-
-    await updateDoc(
-      doc(db, "members", id),
-      {
-
-        fullName: newName,
-
-        phone: newPhone,
-
-        address: newAddress
-      }
-    );
-
-    showToast(
-      "Member updated successfully"
-    );
-
-  } catch (error) {
-
-    console.error(error);
-  }
-};
-
-/* ======================================================
-   TOGGLE STATUS
-====================================================== */
-
-window.toggleStatus =
-  async function (
-    id,
-    currentStatus
-  ) {
-
-  try {
-
-    const newStatus =
-      currentStatus === "Active"
-        ? "Suspended"
-        : "Active";
-
-    await updateDoc(
-      doc(db, "members", id),
-      {
-
-        status: newStatus
-      }
-    );
-
-    showToast(
-      `Member ${newStatus}`
-    );
-
-  } catch (error) {
-
-    console.error(error);
-  }
-};
-
-/* ======================================================
-   DELETE MEMBER
-====================================================== */
-
-window.deleteMember =
-  async function (id) {
-
-  const confirmDelete =
-    confirm(
-      "Delete this member?"
-    );
-
-  if (!confirmDelete) return;
-
-  try {
-
-    await deleteDoc(
-      doc(db, "members", id)
-    );
-
-    showToast(
-      "Member deleted successfully"
-    );
-
-  } catch (error) {
-
-    console.error(error);
-  }
-};
-
-/* ======================================================
-   SEARCH MEMBERS
-====================================================== */
-
-window.searchMembers =
-  function () {
-
-  const input =
-    document.getElementById(
-      "searchInput"
-    );
-
-  const filter =
-    input.value.toLowerCase();
-
-  const rows =
-    membersTable.querySelectorAll(
-      "tr"
-    );
-
-  rows.forEach((row) => {
-
-    const text =
-      row.innerText.toLowerCase();
-
-    row.style.display =
-      text.includes(filter)
-        ? ""
-        : "none";
+  await updateDoc(doc(db, "members", id), {
+    fullName: newName
   });
+
+  alert("Updated");
 };
 
 /* ======================================================
-   EXPORT CSV
+   STATUS
 ====================================================== */
 
-window.exportMembersCSV =
-  function () {
+window.toggleStatus = async function (id, status) {
+
+  const newStatus =
+    status === "Active" ? "Suspended" : "Active";
+
+  await updateDoc(doc(db, "members", id), {
+    status: newStatus
+  });
+
+  alert("Status updated");
+};
+
+/* ======================================================
+   DELETE
+====================================================== */
+
+window.deleteMember = async function (id) {
+
+  if (!confirm("Delete member?")) return;
+
+  await deleteDoc(doc(db, "members", id));
+
+  alert("Deleted");
+};
+
+/* ======================================================
+   SEARCH
+====================================================== */
+
+window.searchMembers = function () {
+
+  const value =
+    document.getElementById("searchInput").value.toLowerCase();
+
+  document.querySelectorAll("#membersTable tr")
+    .forEach(row => {
+
+      row.style.display =
+        row.innerText.toLowerCase().includes(value)
+          ? ""
+          : "none";
+    });
+};
+
+/* ======================================================
+   CSV EXPORT
+====================================================== */
+
+window.exportMembersCSV = function () {
 
   let csv =
-`NID,Full Name,Gender,Phone,Address,Status,Created By,Created Date\n`;
+    "NID,Name,Gender,Phone,Address,Status,CreatedBy,Date\n";
 
-  const rows =
-    membersTable.querySelectorAll(
-      "tr"
-    );
+  document.querySelectorAll("#membersTable tr")
+    .forEach(row => {
 
-  rows.forEach((row) => {
+      const cols = row.querySelectorAll("td");
 
-    const cols =
-      row.querySelectorAll("td");
+      if (cols.length) {
 
-    if (cols.length > 0) {
-
-      csv +=
-`${cols[0].innerText},
+        csv += `
+${cols[0].innerText},
 ${cols[1].innerText},
 ${cols[2].innerText},
 ${cols[3].innerText},
 ${cols[4].innerText},
 ${cols[5].innerText},
 ${cols[6].innerText},
-${cols[7].innerText}\n`;
-    }
-  });
-
-  const blob =
-    new Blob([csv], {
-      type: "text/csv"
+${cols[7].innerText}
+`;
+      }
     });
 
-  const link =
-    document.createElement("a");
+  const blob = new Blob([csv], { type: "text/csv" });
 
-  link.href =
-    URL.createObjectURL(blob);
+  const link = document.createElement("a");
 
-  link.download =
-    "members.csv";
-
+  link.href = URL.createObjectURL(blob);
+  link.download = "members.csv";
   link.click();
-
-  showToast(
-    "CSV exported successfully"
-  );
 };
-
-/* ======================================================
-   TOAST
-====================================================== */
-
-function showToast(message) {
-
-  const toast =
-    document.createElement("div");
-
-  toast.className =
-    "toast";
-
-  toast.innerText =
-    message;
-
-  document.body.appendChild(
-    toast
-  );
-
-  setTimeout(() => {
-
-    toast.remove();
-
-  }, 3000);
-}
 
 /* ======================================================
    LOGOUT
 ====================================================== */
 
-logoutBtn.addEventListener(
-  "click",
-  async () => {
+logoutBtn.addEventListener("click", async () => {
 
-    const confirmLogout =
-      confirm(
-        "Logout from system?"
-      );
+  if (!confirm("Logout?")) return;
 
-    if (!confirmLogout) return;
+  await signOut(auth);
 
-    try {
-
-      await signOut(auth);
-
-      window.location.href =
-        "index.html";
-
-    } catch (error) {
-
-      console.error(error);
-    }
-  }
-);
-
-/* ======================================================
-   READY
-====================================================== */
-
-console.log(
-  "GERESU DHUKI SACCO Members Module Loaded"
-);
+  window.location.href = "index.html";
+});
