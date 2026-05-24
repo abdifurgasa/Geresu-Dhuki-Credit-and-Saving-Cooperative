@@ -53,14 +53,15 @@ window.toggleSidebar = function () {
 };
 
 /* ======================================================
-   AUTH CHECK
+   AUTH STATE
 ====================================================== */
 
 onAuthStateChanged(auth, async (user) => {
 
   if (!user) {
 
-    window.location.href = "index.html";
+    window.location.href =
+      "index.html";
 
     return;
   }
@@ -100,7 +101,7 @@ async function loadRole(user) {
           <small>${data.role || "Staff"}</small>
         `;
 
-        // HIDE ADMIN FEATURES
+        // HIDE ADMIN MODULES
         if (data.role !== "Admin") {
 
           document
@@ -144,10 +145,147 @@ memberForm.addEventListener(
       const currentUser =
         auth.currentUser;
 
+      // FORM VALUES
+      const memberId =
+        document
+          .getElementById("memberId")
+          .value
+          .trim();
+
+      const fullName =
+        document
+          .getElementById("fullName")
+          .value
+          .trim();
+
+      const gender =
+        document
+          .getElementById("gender")
+          .value;
+
+      const phone =
+        document
+          .getElementById("phone")
+          .value
+          .trim();
+
+      const address =
+        document
+          .getElementById("address")
+          .value
+          .trim();
+
+      /* ======================================================
+         VALIDATION
+      ====================================================== */
+
+      // PHONE ONLY NUMBERS
+      const phoneRegex =
+        /^[0-9]+$/;
+
+      if (!phoneRegex.test(phone)) {
+
+        showToast(
+          "Phone must contain only numbers"
+        );
+
+        return;
+      }
+
+      // PHONE EXACTLY 9 DIGITS
+      if (phone.length !== 9) {
+
+        showToast(
+          "Phone number must be exactly 9 digits"
+        );
+
+        return;
+      }
+
+      // NID ONLY NUMBERS
+      const nidRegex =
+        /^[0-9]+$/;
+
+      if (!nidRegex.test(memberId)) {
+
+        showToast(
+          "NID must contain only numbers"
+        );
+
+        return;
+      }
+
+      // NID EXACTLY 16 DIGITS
+      if (memberId.length !== 16) {
+
+        showToast(
+          "NID must be exactly 16 digits"
+        );
+
+        return;
+      }
+
+      /* ======================================================
+         CHECK DUPLICATES
+      ====================================================== */
+
+      const membersSnapshot =
+        await getDocs(
+          collection(db, "members")
+        );
+
+      let duplicatePhone =
+        false;
+
+      let duplicateNID =
+        false;
+
+      membersSnapshot.forEach((document) => {
+
+        const data =
+          document.data();
+
+        // DUPLICATE PHONE
+        if (data.phone === phone) {
+
+          duplicatePhone = true;
+        }
+
+        // DUPLICATE NID
+        if (
+          data.memberId ===
+          memberId
+        ) {
+
+          duplicateNID = true;
+        }
+      });
+
+      if (duplicatePhone) {
+
+        showToast(
+          "Phone number already exists"
+        );
+
+        return;
+      }
+
+      if (duplicateNID) {
+
+        showToast(
+          "NID already exists"
+        );
+
+        return;
+      }
+
+      /* ======================================================
+         FIND USER NAME
+      ====================================================== */
+
       let createdBy =
         currentUser.email;
 
-      // FIND USER NAME
       const usersSnapshot =
         await getDocs(
           collection(db, "users")
@@ -169,33 +307,21 @@ memberForm.addEventListener(
         }
       });
 
-      // MEMBER DATA
+      /* ======================================================
+         MEMBER DATA
+      ====================================================== */
+
       const memberData = {
 
-        memberId:
-          document.getElementById(
-            "memberId"
-          ).value,
+        memberId: memberId,
 
-        fullName:
-          document.getElementById(
-            "fullName"
-          ).value,
+        fullName: fullName,
 
-        gender:
-          document.getElementById(
-            "gender"
-          ).value,
+        gender: gender,
 
-        phone:
-          document.getElementById(
-            "phone"
-          ).value,
+        phone: phone,
 
-        address:
-          document.getElementById(
-            "address"
-          ).value,
+        address: address,
 
         status: "Active",
 
@@ -208,7 +334,10 @@ memberForm.addEventListener(
           serverTimestamp()
       };
 
-      // SAVE MEMBER
+      /* ======================================================
+         SAVE TO FIREBASE
+      ====================================================== */
+
       await addDoc(
         collection(db, "members"),
         memberData
@@ -307,9 +436,7 @@ function loadMembers() {
               class="edit-btn"
               onclick="editMember(
                 '${document.id}',
-                '${data.memberId}',
                 '${data.fullName}',
-                '${data.gender}',
                 '${data.phone}',
                 '${data.address}'
               )"
@@ -358,9 +485,7 @@ function loadMembers() {
 
 window.editMember = async function (
   id,
-  memberId,
   fullName,
-  gender,
   phone,
   address
 ) {
@@ -377,11 +502,33 @@ window.editMember = async function (
 
     const newPhone =
       prompt(
-        "Edit Phone",
+        "Edit Phone Number",
         phone
       );
 
     if (!newPhone) return;
+
+    // PHONE VALIDATION
+    const phoneRegex =
+      /^[0-9]+$/;
+
+    if (!phoneRegex.test(newPhone)) {
+
+      showToast(
+        "Phone must contain only numbers"
+      );
+
+      return;
+    }
+
+    if (newPhone.length !== 9) {
+
+      showToast(
+        "Phone number must be exactly 9 digits"
+      );
+
+      return;
+    }
 
     const newAddress =
       prompt(
@@ -393,10 +540,10 @@ window.editMember = async function (
       doc(db, "members", id),
       {
 
-        memberId,
         fullName: newName,
-        gender,
+
         phone: newPhone,
+
         address: newAddress
       }
     );
@@ -467,7 +614,7 @@ window.deleteMember =
     );
 
     showToast(
-      "Member deleted"
+      "Member deleted successfully"
     );
 
   } catch (error) {
@@ -516,7 +663,7 @@ window.exportMembersCSV =
   function () {
 
   let csv =
-`Member ID,Full Name,Gender,Phone,Address,Status,Created By,Created Date\n`;
+`NID,Full Name,Gender,Phone,Address,Status,Created By,Created Date\n`;
 
   const rows =
     membersTable.querySelectorAll(
@@ -564,7 +711,7 @@ ${cols[7].innerText}\n`;
 };
 
 /* ======================================================
-   TOAST MESSAGE
+   TOAST
 ====================================================== */
 
 function showToast(message) {
@@ -572,11 +719,15 @@ function showToast(message) {
   const toast =
     document.createElement("div");
 
-  toast.className = "toast";
+  toast.className =
+    "toast";
 
-  toast.innerText = message;
+  toast.innerText =
+    message;
 
-  document.body.appendChild(toast);
+  document.body.appendChild(
+    toast
+  );
 
   setTimeout(() => {
 
