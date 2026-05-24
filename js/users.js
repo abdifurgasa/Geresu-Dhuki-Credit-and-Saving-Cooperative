@@ -1,79 +1,51 @@
-import { db } from "./firebase.js";
 import {
-  collection,
-  getDocs,
-  doc,
-  updateDoc,
-  deleteDoc
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  createUserAccount,
+  loadUsers,
+  deleteUserAccount,
+  toggleUserStatus
+} from "./usersModule.js";
 
-/* =========================
-   LOAD USERS
-========================= */
+import { authGuard, logoutUser } from "./auth.js";
+import { checkRole } from "./roles.js";
 
-async function loadUsers() {
+window.toggleSidebar = function () {
 
-  const table = document.getElementById("usersTable");
+  document.getElementById("sidebar")
+    .classList.toggle("collapsed");
 
-  const snap = await getDocs(collection(db, "users"));
-
-  table.innerHTML = "";
-
-  snap.forEach((docSnap) => {
-
-    const u = docSnap.data();
-
-    table.innerHTML += `
-      <tr>
-        <td>${u.name || "-"}</td>
-        <td>${u.email}</td>
-        <td>${u.role}</td>
-
-        <td>
-          <select onchange="changeRole('${docSnap.id}', this.value)">
-            <option value="admin" ${u.role === "admin" ? "selected" : ""}>Admin</option>
-            <option value="teller" ${u.role === "teller" ? "selected" : ""}>Teller</option>
-            <option value="member" ${u.role === "member" ? "selected" : ""}>Member</option>
-          </select>
-        </td>
-
-        <td>
-          <button class="btn danger"
-                  onclick="deleteUser('${docSnap.id}')">
-            Delete
-          </button>
-        </td>
-      </tr>
-    `;
-  });
-}
-
-loadUsers();
-
-/* =========================
-   CHANGE ROLE
-========================= */
-
-window.changeRole = async function (uid, newRole) {
-
-  await updateDoc(doc(db, "users", uid), {
-    role: newRole
-  });
-
-  alert("Role updated");
+  document.getElementById("main")
+    .classList.toggle("expanded");
 };
 
-/* =========================
-   DELETE USER
-========================= */
+const form = document.getElementById("userForm");
+const logoutBtn = document.getElementById("logoutBtn");
 
-window.deleteUser = async function (uid) {
+initializePage();
 
-  if (!confirm("Delete this user?")) return;
+async function initializePage() {
 
-  await deleteDoc(doc(db, "users", uid));
+  await authGuard();
 
-  alert("User deleted");
+  await checkRole();
 
   loadUsers();
-};
+}
+
+form.addEventListener("submit", async (e) => {
+
+  e.preventDefault();
+
+  const name = document.getElementById("name").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
+  const role = document.getElementById("role").value;
+
+  await createUserAccount(name, email, password, role);
+
+  form.reset();
+});
+
+logoutBtn.addEventListener("click", logoutUser);
+
+window.deleteUserAccount = deleteUserAccount;
+window.toggleUserStatus = toggleUserStatus;
