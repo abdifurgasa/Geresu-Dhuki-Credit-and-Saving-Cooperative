@@ -1,197 +1,623 @@
 import { db, auth } from "./firebase.js";
+
 import {
   collection,
   addDoc,
-  updateDoc,
+  getDocs,
+  onSnapshot,
   deleteDoc,
+  updateDoc,
   doc,
   serverTimestamp,
-  onSnapshot
+  query,
+  orderBy
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-let membersCache = [];
-let currentPage = 1;
-const perPage = 5;
+import {
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-/* =========================
-   MODAL
-========================= */
+/* ======================================================
+   ELEMENTS
+====================================================== */
 
-window.openModal = () => {
-  document.getElementById("memberModal").style.display = "flex";
+const membersTable =
+  document.getElementById("membersTable");
+
+const memberForm =
+  document.getElementById("memberForm");
+
+const roleBox =
+  document.getElementById("roleBox");
+
+const logoutBtn =
+  document.getElementById("logoutBtn");
+
+const totalMembersEl =
+  document.getElementById("totalMembers");
+
+/* ======================================================
+   SIDEBAR TOGGLE
+====================================================== */
+
+window.toggleSidebar = function () {
+
+  document
+    .getElementById("sidebar")
+    .classList.toggle("collapsed");
+
+  document
+    .getElementById("main")
+    .classList.toggle("expanded");
 };
 
-window.closeModal = () => {
-  document.getElementById("memberModal").style.display = "none";
-};
+/* ======================================================
+   AUTH CHECK
+====================================================== */
 
-/* =========================
-   SAVE MEMBER
-========================= */
+onAuthStateChanged(auth, async (user) => {
 
-document.getElementById("memberForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
+  if (!user) {
 
-  const name = document.getElementById("name").value;
-  const phone = document.getElementById("phone").value;
-  const nid = document.getElementById("nid").value;
+    window.location.href = "index.html";
 
-  await addDoc(collection(db, "members"), {
-    name,
-    phone,
-    nid,
-    savings: 0,
-    loanTotal: 0,
-    status: "active",
-    createdAt: serverTimestamp(),
-    createdBy: auth.currentUser?.email || "admin"
-  });
+    return;
+  }
 
-  closeModal();
+  await loadRole(user);
+
+  loadMembers();
 });
 
-/* =========================
-   REAL TIME LOAD
-========================= */
+/* ======================================================
+   LOAD ROLE
+====================================================== */
 
-onSnapshot(collection(db, "members"), (snapshot) => {
+async function loadRole(user) {
 
-  membersCache = [];
+  try {
 
-  snapshot.forEach((docSnap) => {
-    membersCache.push({ id: docSnap.id, ...docSnap.data() });
-  });
+    const snapshot =
+      await getDocs(
+        collection(db, "users")
+      );
 
-  renderTable();
-});
+    let found = false;
 
-/* =========================
-   TABLE RENDER
-========================= */
+    snapshot.forEach((document) => {
 
-function renderTable() {
+      const data =
+        document.data();
 
-  const table = document.getElementById("membersTable");
-  table.innerHTML = "";
+      if (data.email === user.email) {
 
-  const start = (currentPage - 1) * perPage;
-  const end = start + perPage;
+        found = true;
 
-  const pageItems = membersCache.slice(start, end);
+        roleBox.innerHTML = `
+          👤 ${data.name || "User"}
+          <br>
+          <small>${data.role || "Staff"}</small>
+        `;
 
-  pageItems.forEach(m => {
+        // HIDE ADMIN FEATURES
+        if (data.role !== "Admin") {
 
-    const row = document.createElement("tr");
+          document
+            .querySelectorAll(".admin-only")
+            .forEach((el) => {
 
-    row.innerHTML = `
-      <td>${m.name}</td>
-      <td>${m.phone}</td>
-      <td>${m.nid}</td>
-      <td>${m.savings} ETB</td>
-      <td>${m.loanTotal} ETB</td>
+              el.style.display = "none";
 
-      <td>
-        <span class="badge ${m.status}">
-          ${m.status}
-        </span>
-      </td>
+            });
+        }
+      }
+    });
 
-      <td>${m.createdBy}</td>
+    if (!found) {
 
-      <td>
-        <button onclick="editMember('${m.id}')">✏</button>
-        <button onclick="deleteMember('${m.id}')">🗑</button>
-      </td>
-    `;
+      roleBox.innerHTML = `
+        👤 ${user.email}
+        <br>
+        <small>Staff</small>
+      `;
+    }
 
-    /* CLICK ROW → PROFILE */
-    row.onclick = () => {
-      alert(`
-Member Profile:
-Name: ${m.name}
-Phone: ${m.phone}
-NID: ${m.nid}
-Savings: ${m.savings}
-Loans: ${m.loanTotal}
-`);
-    };
+  } catch (error) {
 
-    table.appendChild(row);
+    console.error(error);
+  }
+}
+
+/* ======================================================
+   ADD MEMBER
+====================================================== */
+
+memberForm.addEventListener(
+  "submit",
+  async (e) => {
+
+    e.preventDefault();
+
+    try {
+
+      const currentUser =
+        auth.currentUser;
+
+      let createdBy =
+        currentUser.email;
+
+      // FIND USER NAME
+      const usersSnapshot =
+        await getDocs(
+          collection(db, "users")
+        );
+
+      usersSnapshot.forEach((document) => {
+
+        const userData =
+          document.data();
+
+        if (
+          userData.email ===
+          currentUser.email
+        ) {
+
+          createdBy =
+            userData.name ||
+            currentUser.email;
+        }
+      });
+
+      // MEMBER DATA
+      const memberData = {
+
+        memberId:
+          document.getElementById(
+            "memberId"
+          ).value,
+
+        fullName:
+          document.getElementById(
+            "fullName"
+          ).value,
+
+        gender:
+          document.getElementById(
+            "gender"
+          ).value,
+
+        phone:
+          document.getElementById(
+            "phone"
+          ).value,
+
+        address:
+          document.getElementById(
+            "address"
+          ).value,
+
+        status: "Active",
+
+        createdBy: createdBy,
+
+        createdDate:
+          new Date().toLocaleString(),
+
+        createdAt:
+          serverTimestamp()
+      };
+
+      // SAVE MEMBER
+      await addDoc(
+        collection(db, "members"),
+        memberData
+      );
+
+      showToast(
+        "Member added successfully"
+      );
+
+      memberForm.reset();
+
+    } catch (error) {
+
+      console.error(error);
+
+      alert(error.message);
+    }
+  }
+);
+
+/* ======================================================
+   LOAD MEMBERS
+====================================================== */
+
+function loadMembers() {
+
+  const q = query(
+    collection(db, "members"),
+    orderBy("createdAt", "desc")
+  );
+
+  onSnapshot(q, (snapshot) => {
+
+    membersTable.innerHTML = "";
+
+    totalMembersEl.textContent =
+      snapshot.size;
+
+    snapshot.forEach((document) => {
+
+      const data =
+        document.data();
+
+      const tr =
+        document.createElement("tr");
+
+      tr.innerHTML = `
+
+        <td>
+          ${data.memberId || "-"}
+        </td>
+
+        <td>
+          ${data.fullName || "-"}
+        </td>
+
+        <td>
+          ${data.gender || "-"}
+        </td>
+
+        <td>
+          ${data.phone || "-"}
+        </td>
+
+        <td>
+          ${data.address || "-"}
+        </td>
+
+        <td>
+
+          <span class="
+            status-badge
+            ${data.status}
+          ">
+
+            ${data.status}
+
+          </span>
+
+        </td>
+
+        <td>
+          ${data.createdBy || "-"}
+        </td>
+
+        <td>
+          ${data.createdDate || "-"}
+        </td>
+
+        <td>
+
+          <div class="action-buttons">
+
+            <!-- EDIT -->
+            <button
+              class="edit-btn"
+              onclick="editMember(
+                '${document.id}',
+                '${data.memberId}',
+                '${data.fullName}',
+                '${data.gender}',
+                '${data.phone}',
+                '${data.address}'
+              )"
+            >
+              Edit
+            </button>
+
+            <!-- STATUS -->
+            <button
+              class="suspend-btn"
+              onclick="toggleStatus(
+                '${document.id}',
+                '${data.status}'
+              )"
+            >
+              ${
+                data.status === "Active"
+                  ? "Suspend"
+                  : "Activate"
+              }
+            </button>
+
+            <!-- DELETE -->
+            <button
+              class="delete-btn"
+              onclick="deleteMember(
+                '${document.id}'
+              )"
+            >
+              Delete
+            </button>
+
+          </div>
+
+        </td>
+      `;
+
+      membersTable.appendChild(tr);
+    });
   });
 }
 
-/* =========================
-   DELETE
-========================= */
+/* ======================================================
+   EDIT MEMBER
+====================================================== */
 
-window.deleteMember = async (id) => {
-  await deleteDoc(doc(db, "members", id));
+window.editMember = async function (
+  id,
+  memberId,
+  fullName,
+  gender,
+  phone,
+  address
+) {
+
+  try {
+
+    const newName =
+      prompt(
+        "Edit Full Name",
+        fullName
+      );
+
+    if (!newName) return;
+
+    const newPhone =
+      prompt(
+        "Edit Phone",
+        phone
+      );
+
+    if (!newPhone) return;
+
+    const newAddress =
+      prompt(
+        "Edit Address",
+        address
+      );
+
+    await updateDoc(
+      doc(db, "members", id),
+      {
+
+        memberId,
+        fullName: newName,
+        gender,
+        phone: newPhone,
+        address: newAddress
+      }
+    );
+
+    showToast(
+      "Member updated successfully"
+    );
+
+  } catch (error) {
+
+    console.error(error);
+  }
 };
 
-/* =========================
-   EDIT (INLINE SIMPLE)
-========================= */
+/* ======================================================
+   TOGGLE STATUS
+====================================================== */
 
-window.editMember = async (id) => {
+window.toggleStatus =
+  async function (
+    id,
+    currentStatus
+  ) {
 
-  const newName = prompt("New name?");
-  if (!newName) return;
+  try {
 
-  await updateDoc(doc(db, "members", id), {
-    name: newName
+    const newStatus =
+      currentStatus === "Active"
+        ? "Suspended"
+        : "Active";
+
+    await updateDoc(
+      doc(db, "members", id),
+      {
+
+        status: newStatus
+      }
+    );
+
+    showToast(
+      `Member ${newStatus}`
+    );
+
+  } catch (error) {
+
+    console.error(error);
+  }
+};
+
+/* ======================================================
+   DELETE MEMBER
+====================================================== */
+
+window.deleteMember =
+  async function (id) {
+
+  const confirmDelete =
+    confirm(
+      "Delete this member?"
+    );
+
+  if (!confirmDelete) return;
+
+  try {
+
+    await deleteDoc(
+      doc(db, "members", id)
+    );
+
+    showToast(
+      "Member deleted"
+    );
+
+  } catch (error) {
+
+    console.error(error);
+  }
+};
+
+/* ======================================================
+   SEARCH MEMBERS
+====================================================== */
+
+window.searchMembers =
+  function () {
+
+  const input =
+    document.getElementById(
+      "searchInput"
+    );
+
+  const filter =
+    input.value.toLowerCase();
+
+  const rows =
+    membersTable.querySelectorAll(
+      "tr"
+    );
+
+  rows.forEach((row) => {
+
+    const text =
+      row.innerText.toLowerCase();
+
+    row.style.display =
+      text.includes(filter)
+        ? ""
+        : "none";
   });
 };
 
-/* =========================
-   PAGINATION
-========================= */
+/* ======================================================
+   EXPORT CSV
+====================================================== */
 
-window.nextPage = () => {
-  if ((currentPage * perPage) < membersCache.length) {
-    currentPage++;
-    renderTable();
-  }
-};
+window.exportMembersCSV =
+  function () {
 
-window.prevPage = () => {
-  if (currentPage > 1) {
-    currentPage--;
-    renderTable();
-  }
-};
+  let csv =
+`Member ID,Full Name,Gender,Phone,Address,Status,Created By,Created Date\n`;
 
-/* =========================
-   SEARCH
-========================= */
+  const rows =
+    membersTable.querySelectorAll(
+      "tr"
+    );
 
-document.getElementById("searchInput").addEventListener("input", (e) => {
+  rows.forEach((row) => {
 
-  const value = e.target.value.toLowerCase();
+    const cols =
+      row.querySelectorAll("td");
 
-  const filtered = membersCache.filter(m =>
-    m.name.toLowerCase().includes(value) ||
-    m.phone.includes(value) ||
-    m.nid.includes(value)
+    if (cols.length > 0) {
+
+      csv +=
+`${cols[0].innerText},
+${cols[1].innerText},
+${cols[2].innerText},
+${cols[3].innerText},
+${cols[4].innerText},
+${cols[5].innerText},
+${cols[6].innerText},
+${cols[7].innerText}\n`;
+    }
+  });
+
+  const blob =
+    new Blob([csv], {
+      type: "text/csv"
+    });
+
+  const link =
+    document.createElement("a");
+
+  link.href =
+    URL.createObjectURL(blob);
+
+  link.download =
+    "members.csv";
+
+  link.click();
+
+  showToast(
+    "CSV exported successfully"
   );
+};
 
-  const table = document.getElementById("membersTable");
-  table.innerHTML = "";
+/* ======================================================
+   TOAST MESSAGE
+====================================================== */
 
-  filtered.forEach(m => {
-    const row = document.createElement("tr");
+function showToast(message) {
 
-    row.innerHTML = `
-      <td>${m.name}</td>
-      <td>${m.phone}</td>
-      <td>${m.nid}</td>
-      <td>${m.savings} ETB</td>
-      <td>${m.loanTotal} ETB</td>
-      <td><span class="badge ${m.status}">${m.status}</span></td>
-      <td>${m.createdBy}</td>
-      <td>⚙</td>
-    `;
+  const toast =
+    document.createElement("div");
 
-    table.appendChild(row);
-  });
+  toast.className = "toast";
 
-});
+  toast.innerText = message;
+
+  document.body.appendChild(toast);
+
+  setTimeout(() => {
+
+    toast.remove();
+
+  }, 3000);
+}
+
+/* ======================================================
+   LOGOUT
+====================================================== */
+
+logoutBtn.addEventListener(
+  "click",
+  async () => {
+
+    const confirmLogout =
+      confirm(
+        "Logout from system?"
+      );
+
+    if (!confirmLogout) return;
+
+    try {
+
+      await signOut(auth);
+
+      window.location.href =
+        "index.html";
+
+    } catch (error) {
+
+      console.error(error);
+    }
+  }
+);
+
+/* ======================================================
+   READY
+====================================================== */
+
+console.log(
+  "GERESU DHUKI SACCO Members Module Loaded"
+);
