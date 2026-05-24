@@ -1,42 +1,44 @@
 import { db, auth } from "./firebase.js";
 
 import {
-  doc,
-  getDoc,
   collection,
+  getDocs,
   onSnapshot,
   query,
-  where
+  orderBy,
+  limit
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 import {
-  onAuthStateChanged,
-  signOut
+  signOut,
+  onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-/* =========================
-   STATE
-========================= */
+/* ======================================================
+   ELEMENTS
+====================================================== */
 
-let role = null;
-let chartsInitialized = false;
+const membersEl = document.getElementById("members");
+const savingsEl = document.getElementById("savings");
+const loansEl = document.getElementById("loans");
+const withdrawalsEl = document.getElementById("withdrawals");
+const profitEl = document.getElementById("profit");
 
-/* =========================
-   GLOBAL STATS
-========================= */
+const logoutBtn = document.getElementById("logoutBtn");
+const roleBox = document.getElementById("roleBox");
 
-let stats = {
-  members: 0,
-  savings: 0,
-  loans: 0,
-  repayments: 0,
-  withdrawals: 0,
-  outstanding: 0
+/* ======================================================
+   SIDEBAR TOGGLE
+====================================================== */
+
+window.toggleSidebar = function () {
+  document.getElementById("sidebar").classList.toggle("collapsed");
+  document.getElementById("main").classList.toggle("expanded");
 };
 
-/* =========================
-   AUTH
-========================= */
+/* ======================================================
+   AUTH CHECK
+====================================================== */
 
 onAuthStateChanged(auth, async (user) => {
 
@@ -45,206 +47,392 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
 
-  const userRef = doc(db, "users", user.uid);
-  const snap = await getDoc(userRef);
-
-  role = snap.data().role;
-
-  document.getElementById("roleBox").innerText =
-    role === "admin" ? "👑 Admin" : "👤 Member";
-
-  if (role === "admin") {
-    loadAdminDashboard();
-  } else {
-    loadMemberDashboard(user.uid);
-
-    document.querySelectorAll(".admin-only")
-      .forEach(el => el.style.display = "none");
-  }
+  loadDashboard();
+  loadRole(user);
 });
 
-/* =========================
-   ADMIN DASHBOARD
-========================= */
+/* ======================================================
+   LOAD ROLE
+====================================================== */
 
-function loadAdminDashboard() {
+async function loadRole(user) {
 
-  /* MEMBERS */
-  onSnapshot(collection(db, "members"), snap => {
-    stats.members = snap.size;
-    document.getElementById("members").innerText = stats.members;
-  });
+  try {
 
-  /* SAVINGS */
-  onSnapshot(collection(db, "savings"), snap => {
+    const usersSnapshot = await getDocs(collection(db, "users"));
 
-    stats.savings = 0;
+    let found = false;
 
-    snap.forEach(d => {
-      stats.savings += Number(d.data().amount || 0);
+    usersSnapshot.forEach((doc) => {
+
+      const data = doc.data();
+
+      if (data.email === user.email) {
+
+        found = true;
+
+        roleBox.innerHTML = `
+          👤 ${data.name || "User"} 
+          <br>
+          <small>${data.role || "Staff"}</small>
+        `;
+
+        // ADMIN ACCESS
+        if (data.role !== "Admin") {
+
+          document.querySelectorAll(".admin-only").forEach(el => {
+            el.style.display = "none";
+          });
+
+        }
+
+      }
+
     });
 
-    document.getElementById("savings").innerText =
-      stats.savings.toLocaleString() + " ETB";
+    if (!found) {
 
-    updateDashboard();
-  });
-
-  /* LOANS */
-  onSnapshot(collection(db, "loans"), snap => {
-
-    stats.loans = 0;
-    stats.outstanding = 0;
-
-    snap.forEach(d => {
-      const l = d.data();
-      stats.loans += Number(l.totalAmount || 0);
-      stats.outstanding += Number(l.remaining || 0);
-    });
-
-    document.getElementById("loans").innerText =
-      stats.loans.toLocaleString() + " ETB";
-
-    updateDashboard();
-  });
-
-  /* REPAYMENTS */
-  onSnapshot(collection(db, "repayments"), snap => {
-
-    stats.repayments = 0;
-
-    snap.forEach(d => {
-      stats.repayments += Number(d.data().amount || 0);
-    });
-
-    updateDashboard();
-  });
-
-  /* 💸 WITHDRAWALS (NEW FIX) */
-  onSnapshot(collection(db, "withdrawals"), snap => {
-
-    stats.withdrawals = 0;
-
-    snap.forEach(d => {
-      stats.withdrawals += Number(d.data().amount || 0);
-    });
-
-    document.getElementById("withdrawals").innerText =
-      stats.withdrawals.toLocaleString() + " ETB";
-
-    updateDashboard();
-  });
-}
-
-/* =========================
-   MEMBER DASHBOARD
-========================= */
-
-function loadMemberDashboard(uid) {
-
-  onSnapshot(
-    query(collection(db, "savings"), where("memberId", "==", uid)),
-    snap => {
-      let total = 0;
-      snap.forEach(d => total += Number(d.data().amount || 0));
-
-      document.getElementById("savings").innerText =
-        total.toLocaleString() + " ETB";
+      roleBox.innerHTML = `
+        👤 ${user.email}
+        <br>
+        <small>Staff</small>
+      `;
     }
-  );
-}
 
-/* =========================
-   PROFIT CALCULATION (FIXED)
-========================= */
+  } catch (error) {
 
-function calculateProfit() {
+    console.error("Role Load Error:", error);
 
-  return stats.savings
-    - stats.loans
-    - stats.withdrawals;
-}
-
-/* =========================
-   UPDATE DASHBOARD
-========================= */
-
-function updateDashboard() {
-
-  const profit = calculateProfit();
-
-  document.getElementById("profit").innerText =
-    profit.toLocaleString() + " ETB";
-
-  updateCharts();
-}
-
-/* =========================
-   CHARTS
-========================= */
-
-let financeChart;
-let repaymentChart;
-
-function updateCharts() {
-
-  if (!chartsInitialized) {
-    initCharts();
-    chartsInitialized = true;
   }
 
-  financeChart.data.datasets[0].data = [
-    stats.savings,
-    stats.loans,
-    stats.repayments
-  ];
-
-  financeChart.update();
-
-  repaymentChart.data.datasets[0].data = [
-    stats.loans,
-    stats.repayments,
-    stats.outstanding
-  ];
-
-  repaymentChart.update();
 }
 
-/* =========================
-   INIT CHARTS
-========================= */
+/* ======================================================
+   FORMAT MONEY
+====================================================== */
 
-function initCharts() {
+function formatMoney(amount) {
 
-  financeChart = new Chart(
-    document.getElementById("dashboardChart"),
-    {
+  return Number(amount || 0).toLocaleString() + " ETB";
+
+}
+
+/* ======================================================
+   DASHBOARD DATA
+====================================================== */
+
+async function loadDashboard() {
+
+  try {
+
+    /* ================================
+       MEMBERS
+    ================================ */
+
+    onSnapshot(collection(db, "members"), (snapshot) => {
+
+      membersEl.textContent = snapshot.size;
+
+    });
+
+    /* ================================
+       SAVINGS
+    ================================ */
+
+    onSnapshot(collection(db, "savings"), (snapshot) => {
+
+      let total = 0;
+
+      snapshot.forEach(doc => {
+
+        total += Number(doc.data().amount || 0);
+
+      });
+
+      savingsEl.textContent = formatMoney(total);
+
+      updateProfit();
+
+      updateChart();
+
+    });
+
+    /* ================================
+       LOANS
+    ================================ */
+
+    onSnapshot(collection(db, "loans"), (snapshot) => {
+
+      let total = 0;
+
+      snapshot.forEach(doc => {
+
+        total += Number(doc.data().amount || 0);
+
+      });
+
+      loansEl.textContent = formatMoney(total);
+
+      updateProfit();
+
+      updateChart();
+
+    });
+
+    /* ================================
+       WITHDRAWALS
+    ================================ */
+
+    onSnapshot(collection(db, "withdrawals"), (snapshot) => {
+
+      let total = 0;
+
+      snapshot.forEach(doc => {
+
+        total += Number(doc.data().amount || 0);
+
+      });
+
+      withdrawalsEl.textContent = formatMoney(total);
+
+      updateProfit();
+
+      updateChart();
+
+    });
+
+  } catch (error) {
+
+    console.error("Dashboard Error:", error);
+
+  }
+
+}
+
+/* ======================================================
+   NET PROFIT
+====================================================== */
+
+async function updateProfit() {
+
+  try {
+
+    const savingsSnap = await getDocs(collection(db, "savings"));
+    const loansSnap = await getDocs(collection(db, "loans"));
+    const withdrawalsSnap = await getDocs(collection(db, "withdrawals"));
+
+    let savings = 0;
+    let loans = 0;
+    let withdrawals = 0;
+
+    savingsSnap.forEach(doc => {
+      savings += Number(doc.data().amount || 0);
+    });
+
+    loansSnap.forEach(doc => {
+      loans += Number(doc.data().amount || 0);
+    });
+
+    withdrawalsSnap.forEach(doc => {
+      withdrawals += Number(doc.data().amount || 0);
+    });
+
+    const profit = savings - withdrawals;
+
+    profitEl.textContent = formatMoney(profit);
+
+  } catch (error) {
+
+    console.error("Profit Error:", error);
+
+  }
+
+}
+
+/* ======================================================
+   CHART.JS
+====================================================== */
+
+let financeChart;
+
+async function updateChart() {
+
+  try {
+
+    const savingsSnap = await getDocs(collection(db, "savings"));
+    const loansSnap = await getDocs(collection(db, "loans"));
+    const withdrawalsSnap = await getDocs(collection(db, "withdrawals"));
+
+    let savings = 0;
+    let loans = 0;
+    let withdrawals = 0;
+
+    savingsSnap.forEach(doc => {
+      savings += Number(doc.data().amount || 0);
+    });
+
+    loansSnap.forEach(doc => {
+      loans += Number(doc.data().amount || 0);
+    });
+
+    withdrawalsSnap.forEach(doc => {
+      withdrawals += Number(doc.data().amount || 0);
+    });
+
+    const ctx = document.getElementById("financeChart");
+
+    if (financeChart) {
+      financeChart.destroy();
+    }
+
+    financeChart = new Chart(ctx, {
+
       type: "bar",
-      data: {
-        labels: ["Savings", "Loans", "Repayments"],
-        datasets: [{ data: [0, 0, 0] }]
-      }
-    }
-  );
 
-  repaymentChart = new Chart(
-    document.getElementById("repaymentChart"),
-    {
-      type: "doughnut",
       data: {
-        labels: ["Loans", "Repayments", "Outstanding"],
-        datasets: [{ data: [0, 0, 0] }]
+
+        labels: [
+          "Savings",
+          "Loans",
+          "Withdrawals"
+        ],
+
+        datasets: [{
+          label: "Financial Overview",
+
+          data: [
+            savings,
+            loans,
+            withdrawals
+          ],
+
+          backgroundColor: [
+            "#16a34a",
+            "#ea580c",
+            "#dc2626"
+          ],
+
+          borderRadius: 10,
+          borderWidth: 0
+        }]
+      },
+
+      options: {
+
+        responsive: true,
+
+        plugins: {
+
+          legend: {
+            display: false
+          }
+
+        },
+
+        scales: {
+
+          y: {
+
+            beginAtZero: true
+
+          }
+
+        }
+
       }
-    }
-  );
+
+    });
+
+  } catch (error) {
+
+    console.error("Chart Error:", error);
+
+  }
+
 }
 
-/* =========================
-   LOGOUT
-========================= */
+/* ======================================================
+   RECENT TRANSACTIONS
+====================================================== */
 
-window.logoutUser = async function () {
-  await signOut(auth);
-  localStorage.clear();
-  window.location.href = "index.html";
-};
+async function loadRecentTransactions() {
+
+  try {
+
+    const tbody = document.getElementById("recentTransactions");
+
+    if (!tbody) return;
+
+    tbody.innerHTML = "";
+
+    const savingsQuery = query(
+      collection(db, "savings"),
+      orderBy("createdAt", "desc"),
+      limit(5)
+    );
+
+    const snapshot = await getDocs(savingsQuery);
+
+    snapshot.forEach(doc => {
+
+      const data = doc.data();
+
+      const tr = document.createElement("tr");
+
+      tr.innerHTML = `
+        <td>${data.memberName || "-"}</td>
+        <td>Saving</td>
+        <td>${formatMoney(data.amount)}</td>
+        <td>
+          ${data.createdAt
+            ? new Date(data.createdAt.seconds * 1000).toLocaleDateString()
+            : "-"
+          }
+        </td>
+      `;
+
+      tbody.appendChild(tr);
+
+    });
+
+  } catch (error) {
+
+    console.error("Recent Transactions Error:", error);
+
+  }
+
+}
+
+/* ======================================================
+   LOGOUT
+====================================================== */
+
+logoutBtn.addEventListener("click", async () => {
+
+  const confirmLogout = confirm("Are you sure you want to logout?");
+
+  if (!confirmLogout) return;
+
+  try {
+
+    await signOut(auth);
+
+    window.location.href = "index.html";
+
+  } catch (error) {
+
+    console.error("Logout Error:", error);
+
+    alert(error.message);
+
+  }
+
+});
+
+/* ======================================================
+   AUTO LOAD
+====================================================== */
+
+loadRecentTransactions();
+updateChart();
+updateProfit();
