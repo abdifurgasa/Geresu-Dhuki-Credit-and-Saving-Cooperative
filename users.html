@@ -2,207 +2,385 @@
 <html lang="en">
 
 <head>
+
   <meta charset="UTF-8">
-  <title>Users Management</title>
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title data-i18n="users">
+    Users
+  </title>
+
   <link rel="stylesheet" href="css/style.css">
+
 </head>
 
 <body>
- <!-- TOGGLE -->
-  <button class="toggle-btn"
-          onclick="toggleSidebar()">
 
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+
+  <!-- TOGGLE -->
+  <button
+    class="toggle-btn"
+    onclick="toggleSidebar()"
+  >
     ☰
-
   </button>
 
   <!-- LOGO -->
   <h2 class="logo">
-
-    🏦 SACCO
-
+    🏦 GERESU DHUKI SACCO
   </h2>
 
   <!-- NAVIGATION -->
   <nav class="nav">
 
     <!-- DASHBOARD -->
-    <a href="dashboard.html"
-       class="nav-item active">
-
+    <a
+      href="dashboard.html"
+      class="nav-item"
+    >
       <span class="icon">📊</span>
 
-      <span class="text"
-            data-i18n="dashboard">
-
+      <span
+        class="text"
+        data-i18n="dashboard"
+      >
         Dashboard
-
       </span>
-
     </a>
 
     <!-- MEMBERS -->
-    <a href="members.html"
-       class="nav-item admin-only">
-
+    <a
+      href="members.html"
+      class="nav-item admin-only"
+    >
       <span class="icon">👥</span>
 
-      <span class="text"
-            data-i18n="members">
-
+      <span
+        class="text"
+        data-i18n="members"
+      >
         Members
-
       </span>
-
     </a>
 
     <!-- SAVINGS -->
-    <a href="savings.html"
-       class="nav-item">
-
+    <a
+      href="savings.html"
+      class="nav-item"
+    >
       <span class="icon">💰</span>
 
-      <span class="text"
-            data-i18n="savings">
-
+      <span
+        class="text"
+        data-i18n="savings"
+      >
         Savings
-
       </span>
-
     </a>
 
     <!-- LOANS -->
-    <a href="loans.html"
-       class="nav-item">
-
+    <a
+      href="loans.html"
+      class="nav-item"
+    >
       <span class="icon">🏦</span>
 
-      <span class="text"
-            data-i18n="loans">
-
+      <span
+        class="text"
+        data-i18n="loans"
+      >
         Loans
-
       </span>
-
     </a>
 
     <!-- REPAYMENTS -->
-    <a href="repayments.html"
-       class="nav-item">
-
+    <a
+      href="repayments.html"
+      class="nav-item"
+    >
       <span class="icon">💵</span>
 
-      <span class="text"
-            data-i18n="repayments">
-
+      <span
+        class="text"
+        data-i18n="repayments"
+      >
         Repayments
-
       </span>
-
     </a>
 
-    <!-- TRANSACTIONS -->
-    <a href="transactions.html"
-       class="nav-item admin-only">
+    <!-- WITHDRAWALS -->
+    <a
+      href="withdrawals.html"
+      class="nav-item admin-only"
+    >
+      <span class="icon">💸</span>
 
-      <span class="icon">💱</span>
-
-      <span class="text"
-            data-i18n="transactions">
-
-        Transactions
-
-      </span>
-
-    </a>
-    
-<!-- WITHDRAWALS -->
-    <a href="withdrawals.html"
-       class="nav-item admin-only">
-
-      <span class="icon">💵</span>
-
-      <span class="text"
-            data-i18n="withdrawals">
-
+      <span
+        class="text"
+        data-i18n="withdrawals"
+      >
         Withdrawals
-
       </span>
-
     </a>
-    <!-- REPORTS -->
-    <a href="reports.html"
-       class="nav-item admin-only">
 
+    <!-- REPORTS -->
+    <a
+      href="reports.html"
+      class="nav-item admin-only"
+    >
       <span class="icon">📄</span>
 
-      <span class="text"
-            data-i18n="reports">
-
+      <span
+        class="text"
+        data-i18n="reports"
+      >
         Reports
-
       </span>
-
     </a>
 
     <!-- USERS -->
-    <a href="users.html"
-       class="nav-item admin-only">
-
+    <a
+      href="users.html"
+      class="nav-item active admin-only"
+    >
       <span class="icon">👤</span>
 
-      <span class="text"
-            data-i18n="users">
-
+      <span
+        class="text"
+        data-i18n="users"
+      >
         Users
-
       </span>
-
     </a>
 
     <!-- SETTINGS -->
-    <a href="settings.html"
-       class="nav-item">
-
+    <a
+      href="settings.html"
+      class="nav-item"
+    >
       <span class="icon">⚙️</span>
 
-      <span class="text"
-            data-i18n="settings">
-
+      <span
+        class="text"
+        data-i18n="settings"
+      >
         Settings
-
       </span>
+    </a>
 
+    <!-- LOGOUT -->
+    <a
+      href="#"
+      class="nav-item logout"
+      id="logoutBtn"
+    >
+      <span class="icon">🚪</span>
+
+      <span
+        class="text"
+        data-i18n="logout"
+      >
+        Logout
+      </span>
     </a>
 
   </nav>
 
 </aside>
 
-<div class="container">
+<!-- MAIN -->
+<main class="main" id="main">
 
-  <h1>👤 USERS MANAGEMENT</h1>
+  <!-- TOPBAR -->
+  <div class="topbar">
+
+    <h2 data-i18n="usersManagement">
+      Users Management
+    </h2>
+
+    <div class="topbar-actions">
+
+      <!-- LANGUAGE -->
+      <select
+        id="languageSelect"
+        onchange="changeLanguage(this.value)"
+      >
+        <option value="en">
+          English
+        </option>
+
+        <option value="am">
+          አማርኛ
+        </option>
+
+        <option value="om">
+          Afaan Oromoo
+        </option>
+
+      </select>
+
+      <!-- ROLE -->
+      <div
+        class="selected-box"
+        id="roleBox"
+      >
+        👤 Loading...
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+
+    <h1 data-i18n="usersManagement">
+      Users Management
+    </h1>
+
+    <p data-i18n="manageUsers">
+      Manage SACCO system users
+    </p>
+
+  </div>
+
+  <!-- USER FORM -->
+  <section class="form-card">
+
+    <h3 data-i18n="createUser">
+      Create User
+    </h3>
+
+    <form id="userForm">
+
+      <div class="grid-2">
+
+        <!-- NAME -->
+        <input
+          type="text"
+          id="name"
+          data-i18n-placeholder="fullName"
+          placeholder="Full Name"
+          required
+        >
+
+        <!-- EMAIL -->
+        <input
+          type="email"
+          id="email"
+          data-i18n-placeholder="email"
+          placeholder="Email"
+          required
+        >
+
+      </div>
+
+      <div class="grid-2">
+
+        <!-- PASSWORD -->
+        <input
+          type="password"
+          id="password"
+          data-i18n-placeholder="password"
+          placeholder="Password"
+          required
+        >
+
+        <!-- ROLE -->
+        <select id="role">
+
+          <option value="Staff">
+            Staff
+          </option>
+
+          <option value="Admin">
+            Admin
+          </option>
+
+        </select>
+
+      </div>
+
+      <!-- BUTTON -->
+      <button
+        type="submit"
+        class="primary-btn"
+        data-i18n="createUser"
+      >
+        Create User
+      </button>
+
+    </form>
+
+  </section>
 
   <!-- USERS TABLE -->
-  <table class="table">
+  <section class="table-card">
 
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Email</th>
-        <th>Role</th>
-        <th>Change Role</th>
-        <th>Action</th>
-      </tr>
-    </thead>
+    <div class="table-header">
 
-    <tbody id="usersTable"></tbody>
+      <h3 data-i18n="systemUsers">
+        System Users
+      </h3>
 
-  </table>
+    </div>
 
-</div>
+    <div class="table-wrapper">
 
-<script type="module" src="js/users.js"></script>
+      <table class="data-table">
+
+        <thead>
+
+          <tr>
+
+            <th data-i18n="fullName">
+              Full Name
+            </th>
+
+            <th data-i18n="email">
+              Email
+            </th>
+
+            <th data-i18n="role">
+              Role
+            </th>
+
+            <th data-i18n="status">
+              Status
+            </th>
+
+            <th data-i18n="actions">
+              Actions
+            </th>
+
+          </tr>
+
+        </thead>
+
+        <tbody id="usersTable"></tbody>
+
+      </table>
+
+    </div>
+
+  </section>
+
+</main>
+
+<!-- I18N -->
+<script src="js/i18n.js"></script>
+
+<!-- USERS -->
+<script
+  type="module"
+  src="js/users.js"
+></script>
 
 </body>
 </html>
