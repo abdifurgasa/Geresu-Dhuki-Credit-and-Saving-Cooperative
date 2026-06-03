@@ -37,7 +37,7 @@
     </div>
 
     <div class="action-buttons">
-        <button class="btn-primary" onclick="openAddMemberModal()">
+        <button class="btn-primary" id="addMemberBtn">
             <i class="fas fa-user-plus"></i> Add New Member
         </button>
     </div>
@@ -56,7 +56,7 @@
                 </tr>
             </thead>
             <tbody id="membersList">
-                <tr><td colspan="7" class="loading">Loading members...</td></tr>
+                <tr><td colspan="7" class="loading">Loading members...<\/td><\/tr>
             </tbody>
         </table>
     </div>
@@ -102,14 +102,14 @@
     // Load members
     async function loadMembers() {
         const membersList = document.getElementById('membersList');
-        membersList.innerHTML = '<tr><td colspan="7" class="loading">Loading...</td></tr>';
+        membersList.innerHTML = '<tr><td colspan="7" class="loading">Loading...<\/td><\/tr>';
         
         try {
             const querySnapshot = await getDocs(collection(db, "members"));
             membersList.innerHTML = '';
             
             if (querySnapshot.empty) {
-                membersList.innerHTML = '<tr><td colspan="7">No members found. Add your first member!</td></tr>';
+                membersList.innerHTML = '<tr><td colspan="7">No members found. Add your first member!<\/td><\/tr>';
                 return;
             }
             
@@ -117,24 +117,41 @@
                 const member = doc.data();
                 const row = `
                     <tr>
-                        <td>${doc.id.slice(0, 8)}</td>
-                        <td>${member.fullName || ''}</td>
-                        <td>${member.email || ''}</td>
-                        <td>${member.phone || ''}</td>
-                        <td>${formatDate(member.joinDate)}</td>
-                        <td>${formatCurrency(member.savingsBalance || 0)}</td>
+                        <td>${doc.id.slice(0, 8)}<\/td>
+                        <td>${member.fullName || ''}<\/td>
+                        <td>${member.email || ''}<\/td>
+                        <td>${member.phone || ''}<\/td>
+                        <td>${formatDate(member.joinDate)}<\/td>
+                        <td>${formatCurrency(member.savingsBalance || 0)}<\/td>
                         <td>
-                            <button class="btn-edit" onclick='editMember("${doc.id}", ${JSON.stringify(member).replace(/'/g, "&#39;")})'>Edit</button>
-                            <button class="btn-danger" onclick='deleteMember("${doc.id}")'>Delete</button>
-                        </td>
-                    </tr>
+                            <button class="btn-edit" data-id="${doc.id}" data-member='${JSON.stringify(member).replace(/'/g, "&#39;")}'>Edit</button>
+                            <button class="btn-danger" data-id="${doc.id}">Delete</button>
+                        <\/td>
+                    <\/tr>
                 `;
                 membersList.innerHTML += row;
             });
+            
+            // Add event listeners to dynamically created buttons
+            document.querySelectorAll('.btn-edit').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const id = btn.getAttribute('data-id');
+                    const member = JSON.parse(btn.getAttribute('data-member'));
+                    editMember(id, member);
+                });
+            });
+            
+            document.querySelectorAll('.btn-danger').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const id = btn.getAttribute('data-id');
+                    deleteMember(id);
+                });
+            });
+            
         } catch (error) {
             console.error("Error loading members:", error);
             showError('Failed to load members');
-            membersList.innerHTML = '<tr><td colspan="7">Error loading members. Check console.</td></tr>';
+            membersList.innerHTML = '<tr><td colspan="7">Error loading members. Check console.<\/td><\/tr>';
         }
     }
     
@@ -179,14 +196,14 @@
     });
     
     // Edit member
-    window.editMember = (id, member) => {
+    function editMember(id, member) {
         currentEditId = id;
         document.getElementById('editFullName').value = member.fullName;
         document.getElementById('editEmail').value = member.email;
         document.getElementById('editPhone').value = member.phone;
         document.getElementById('editAddress').value = member.address || '';
         openModal('editMemberModal');
-    };
+    }
     
     // Update member
     document.getElementById('editMemberForm').addEventListener('submit', async (e) => {
@@ -213,7 +230,7 @@
     });
     
     // Delete member
-    window.deleteMember = async (id) => {
+    async function deleteMember(id) {
         if (confirm('Are you sure you want to delete this member? This action cannot be undone.')) {
             try {
                 await deleteDoc(doc(db, "members", id));
@@ -224,21 +241,23 @@
                 showError('Error deleting member: ' + error.message);
             }
         }
-    };
-    
-    window.openAddMemberModal = () => {
-        openModal('memberModal');
-    };
-    
-    // Make closeModal available globally
-    window.closeModal = closeModal;
+    }
     
     // Setup modal handlers
     setupModalHandlers();
+    
+    // Make functions available globally for onclick
+    window.closeModal = closeModal;
+    window.openModal = openModal;
+    
+    // Add event listener for the Add Member button
+    document.getElementById('addMemberBtn').addEventListener('click', () => {
+        openModal('memberModal');
+    });
     
     // Initial load
     loadMembers();
 </script>
 
 </body>
-</html>
+                </html>
