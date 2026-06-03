@@ -37,7 +37,7 @@
     </div>
 
     <div class="action-buttons">
-        <button class="btn-primary" onclick="openSavingsModal()">
+        <button class="btn-primary" id="recordSavingsBtn">
             <i class="fas fa-save"></i> Record Savings
         </button>
     </div>
@@ -54,7 +54,7 @@
                 </tr>
             </thead>
             <tbody id="savingsList">
-                <tr><td colspan="5" class="loading">Loading savings records...</td></tr>
+                <tr><td colspan="5" class="loading">Loading savings records...<\/td><\/tr>
             </tbody>
         </table>
     </div>
@@ -106,37 +106,36 @@
     // Load savings records
     async function loadSavings() {
         const savingsList = document.getElementById('savingsList');
-        savingsList.innerHTML = '<tr><td colspan="5" class="loading">Loading...</td></tr>';
+        savingsList.innerHTML = '<tr><td colspan="5" class="loading">Loading...<\/td><\/tr>';
         
         try {
             const querySnapshot = await getDocs(collection(db, "savings"));
             savingsList.innerHTML = '';
             
             if (querySnapshot.empty) {
-                savingsList.innerHTML = '<tr><td colspan="5">No savings records found.</td></tr>';
+                savingsList.innerHTML = '<tr><td colspan="5">No savings records found.<\/td><\/tr>';
                 return;
             }
             
+            // Get all members once for lookup
+            const membersSnapshot = await getDocs(collection(db, "members"));
+            const membersMap = new Map();
+            membersSnapshot.forEach(doc => {
+                membersMap.set(doc.id, doc.data().fullName);
+            });
+            
             for (const docSnap of querySnapshot.docs) {
                 const saving = docSnap.data();
-                // Get member name
-                const memberDoc = await getDocs(collection(db, "members"));
-                let memberName = 'Unknown';
-                for (const member of memberDoc.docs) {
-                    if (member.id === saving.memberId) {
-                        memberName = member.data().fullName;
-                        break;
-                    }
-                }
+                const memberName = membersMap.get(saving.memberId) || 'Unknown';
                 
                 const row = `
                     <tr>
-                        <td>${docSnap.id.slice(0, 8)}</td>
-                        <td>${memberName}</td>
-                        <td>${formatCurrency(saving.amount)}</td>
-                        <td>${formatDate(saving.date)}</td>
-                        <td>${saving.paymentMethod || 'cash'}</td>
-                    </tr>
+                        <td>${docSnap.id.slice(0, 8)}<\/td>
+                        <td>${memberName}<\/td>
+                        <td>${formatCurrency(saving.amount)}<\/td>
+                        <td>${formatDate(saving.date)}<\/td>
+                        <td>${saving.paymentMethod || 'cash'}<\/td>
+                    <\/tr>
                 `;
                 savingsList.innerHTML += row;
             }
@@ -165,6 +164,17 @@
         }
         
         try {
+            // Get current member balance
+            const memberRef = doc(db, "members", memberId);
+            const memberDoc = await getDocs(collection(db, "members"));
+            let currentBalance = 0;
+            for (const member of memberDoc.docs) {
+                if (member.id === memberId) {
+                    currentBalance = member.data().savingsBalance || 0;
+                    break;
+                }
+            }
+            
             // Record savings transaction
             await addDoc(collection(db, "savings"), {
                 memberId: memberId,
@@ -177,15 +187,6 @@
             });
             
             // Update member's savings balance
-            const memberRef = doc(db, "members", memberId);
-            const memberSnap = await getDocs(collection(db, "members"));
-            let currentBalance = 0;
-            for (const member of memberSnap.docs) {
-                if (member.id === memberId) {
-                    currentBalance = member.data().savingsBalance || 0;
-                    break;
-                }
-            }
             await updateDoc(memberRef, { savingsBalance: currentBalance + amount });
             
             showSuccess(`Savings of ${formatCurrency(amount)} recorded successfully!`);
@@ -198,17 +199,21 @@
         }
     });
     
-    window.openSavingsModal = () => {
-        openModal('savingsModal');
-        loadMembersForDropdown();
-    };
-    
-    window.closeModal = closeModal;
+    // Setup modal handlers
     setupModalHandlers();
+    
+    // Make functions available globally
+    window.closeModal = closeModal;
+    
+    // Add event listener for the Record Savings button
+    document.getElementById('recordSavingsBtn').addEventListener('click', () => {
+        loadMembersForDropdown();
+        openModal('savingsModal');
+    });
     
     // Initial load
     loadSavings();
 </script>
 
 </body>
-</html>
+                </html>
