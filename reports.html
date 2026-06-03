@@ -1,182 +1,290 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <title>Financial Reports</title>
-
-  <link rel="stylesheet" href="css/style.css">
-
-  <!-- CHART LIBRARY -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-  <!-- PDF EXPORT -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SACCO | Reports</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-
 <body>
 
-<!-- =========================
-     SIDEBAR
-========================= -->
-<aside class="sidebar" id="sidebar">
+<div class="sidebar">
+    <div class="logo">
+        <h2><i class="fas fa-piggy-bank"></i> SACCO</h2>
+        <p>Banking System</p>
+    </div>
+    <ul class="nav-menu">
+        <li class="nav-item"><a href="index.html"><i class="fas fa-chart-line"></i> <span>Dashboard</span></a></li>
+        <li class="nav-item"><a href="members.html"><i class="fas fa-users"></i> <span>Members</span></a></li>
+        <li class="nav-item"><a href="savings.html"><i class="fas fa-coins"></i> <span>Savings</span></a></li>
+        <li class="nav-item"><a href="loans.html"><i class="fas fa-hand-holding-usd"></i> <span>Loans</span></a></li>
+        <li class="nav-item"><a href="withdrawals.html"><i class="fas fa-money-bill-wave"></i> <span>Withdrawals</span></a></li>
+        <li class="nav-item active"><a href="reports.html"><i class="fas fa-file-alt"></i> <span>Reports</span></a></li>
+        <li class="nav-item"><a href="users.html"><i class="fas fa-user-cog"></i> <span>Users</span></a></li>
+        <li class="nav-item"><a href="settings.html"><i class="fas fa-cog"></i> <span>Settings</span></a></li>
+    </ul>
+</div>
 
-  <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
-
-  <h2 class="logo">🏦 SACCO</h2>
-
-  <nav class="nav">
-
-    <a href="dashboard.html" class="nav-item">📊 Dashboard</a>
-    <a href="members.html" class="nav-item">👥 Members</a>
-    <a href="savings.html" class="nav-item">💰 Savings</a>
-    <a href="loans.html" class="nav-item">🏦 Loans</a>
-    <a href="transactions.html" class="nav-item">💱 Transactions</a>
-
-    <a href="reports.html" class="nav-item active">📄 Reports</a>
-
-    <a href="users.html" class="nav-item admin-only">👤 Users</a>
-    <a href="settings.html" class="nav-item">⚙️ Settings</a>
-
-  </nav>
-
-</aside>
-
-<!-- =========================
-     MAIN CONTENT
-========================= -->
-<main class="main">
-
-  <!-- TOPBAR -->
-  <div class="topbar">
-
-    <h2>Financial Reports</h2>
-
-    <button class="btn danger" onclick="logout()">Logout</button>
-
-  </div>
-
-  <h1>📊 FINANCIAL REPORTING SYSTEM</h1>
-
-  <!-- =========================
-       KPI CARDS (MAIN)
-  ========================== -->
-  <section class="cards">
-
-    <div class="card blue">
-      <h3>Total Members</h3>
-      <p id="totalMembers">0</p>
+<div class="main-content">
+    <div class="header">
+        <h1>Financial Reports</h1>
+        <div class="user-info">
+            <span>Welcome, Admin</span>
+            <i class="fas fa-bell"></i>
+            <i class="fas fa-user-circle fa-2x"></i>
+        </div>
     </div>
 
-    <div class="card green">
-      <h3>Total Savings</h3>
-      <p id="totalSavings">0 ETB</p>
+    <div class="performance-grid">
+        <div class="kpi-card">
+            <h4>Total Members</h4>
+            <div class="value" id="totalMembers">0</div>
+        </div>
+        <div class="kpi-card">
+            <h4>Active Loans</h4>
+            <div class="value" id="activeLoans">0</div>
+        </div>
+        <div class="kpi-card">
+            <h4>Total Savings</h4>
+            <div class="value" id="totalSavingsReport">0</div>
+        </div>
+        <div class="kpi-card">
+            <h4>Total Loans</h4>
+            <div class="value" id="totalLoansReport">0</div>
+        </div>
     </div>
 
-    <div class="card orange">
-      <h3>Total Loans</h3>
-      <p id="totalLoans">0 ETB</p>
+    <div class="charts-row">
+        <div class="chart-card">
+            <h3>Income vs Expenses</h3>
+            <canvas id="incomeExpenseChart"></canvas>
+        </div>
+        <div class="chart-card">
+            <h3>Member Growth</h3>
+            <canvas id="memberGrowthChart"></canvas>
+        </div>
     </div>
 
-    <div class="card purple">
-      <h3>Total Repayments</h3>
-      <p id="totalRepayments">0 ETB</p>
+    <div class="data-table">
+        <h3>Transaction History</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Type</th>
+                    <th>Member</th>
+                    <th>Amount (ETB)</th>
+                </tr>
+            </thead>
+            <tbody id="transactionHistory">
+                <tr><td colspan="4" class="loading">Loading transactions...</td></tr>
+            </tbody>
+        </table>
     </div>
+</div>
 
-  </section>
+<script type="module">
+    import { db, collection, getDocs, query, orderBy, limit } from './js/firebase.js';
+    import { formatCurrency, formatDate, showError } from './js/utils.js';
+    
+    async function loadReports() {
+        try {
+            // Get total members
+            const membersSnap = await getDocs(collection(db, "members"));
+            document.getElementById('totalMembers').innerText = membersSnap.size;
+            
+            // Get total savings
+            const savingsSnap = await getDocs(collection(db, "savings"));
+            let totalSavings = 0;
+            savingsSnap.forEach(doc => totalSavings += doc.data().amount);
+            document.getElementById('totalSavingsReport').innerText = formatCurrency(totalSavings);
+            
+            // Get total loans
+            const loansSnap = await getDocs(collection(db, "loans"));
+            let totalLoans = 0;
+            let activeLoans = 0;
+            loansSnap.forEach(doc => {
+                totalLoans += doc.data().amount;
+                if (doc.data().remainingBalance > 0) activeLoans++;
+            });
+            document.getElementById('totalLoansReport').innerText = formatCurrency(totalLoans);
+            document.getElementById('activeLoans').innerText = activeLoans;
+            
+            // Load charts
+            await loadIncomeExpenseChart();
+            await loadMemberGrowthChart();
+            await loadTransactionHistory();
+            
+        } catch (error) {
+            console.error("Error loading reports:", error);
+            showError('Failed to load reports');
+        }
+    }
+    
+    async function loadIncomeExpenseChart() {
+        const savingsSnap = await getDocs(collection(db, "savings"));
+        const withdrawalsSnap = await getDocs(collection(db, "withdrawals"));
+        
+        let totalIncome = 0;
+        let totalExpenses = 0;
+        
+        savingsSnap.forEach(doc => totalIncome += doc.data().amount);
+        withdrawalsSnap.forEach(doc => totalExpenses += doc.data().amount);
+        
+        const ctx = document.getElementById('incomeExpenseChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ['Income (Savings)', 'Expenses (Withdrawals)'],
+                datasets: [{
+                    data: [totalIncome, totalExpenses],
+                    backgroundColor: ['#28a745', '#dc3545'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'bottom' },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return formatCurrency(context.raw);
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    async function loadMemberGrowthChart() {
+        const membersSnap = await getDocs(collection(db, "members"));
+        const monthlyGrowth = new Array(12).fill(0);
+        
+        membersSnap.forEach(doc => {
+            const joinDate = doc.data().joinDate;
+            if (joinDate && joinDate.toDate) {
+                const month = joinDate.toDate().getMonth();
+                monthlyGrowth[month]++;
+            }
+        });
+        
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const ctx = document.getElementById('memberGrowthChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: months,
+                datasets: [{
+                    label: 'New Members',
+                    data: monthlyGrowth,
+                    borderColor: '#1a3c34',
+                    backgroundColor: 'rgba(26, 60, 52, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: { beginAtZero: true, stepSize: 1 }
+                }
+            }
+        });
+    }
+    
+    async function loadTransactionHistory() {
+        const transactions = [];
+        
+        // Get savings
+        const savingsSnap = await getDocs(query(collection(db, "savings"), orderBy("date", "desc"), limit(20)));
+        for (const doc of savingsSnap.docs) {
+            const data = doc.data();
+            const memberDoc = await getDocs(collection(db, "members"));
+            let memberName = 'Unknown';
+            for (const member of memberDoc.docs) {
+                if (member.id === data.memberId) {
+                    memberName = member.data().fullName;
+                    break;
+                }
+            }
+            transactions.push({
+                date: data.date,
+                type: 'Savings Deposit',
+                member: memberName,
+                amount: data.amount
+            });
+        }
+        
+        // Get withdrawals
+        const withdrawalsSnap = await getDocs(query(collection(db, "withdrawals"), orderBy("date", "desc"), limit(20)));
+        for (const doc of withdrawalsSnap.docs) {
+            const data = doc.data();
+            const memberDoc = await getDocs(collection(db, "members"));
+            let memberName = 'Unknown';
+            for (const member of memberDoc.docs) {
+                if (member.id === data.memberId) {
+                    memberName = member.data().fullName;
+                    break;
+                }
+            }
+            transactions.push({
+                date: data.date,
+                type: 'Withdrawal',
+                member: memberName,
+                amount: data.amount
+            });
+        }
+        
+        // Sort by date
+        transactions.sort((a, b) => {
+            if (!a.date || !b.date) return 0;
+            return b.date.toDate() - a.date.toDate();
+        });
+        
+        const tbody = document.getElementById('transactionHistory');
+        tbody.innerHTML = '';
+        
+        if (transactions.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4">No transactions found.</td></tr>';
+            return;
+        }
+        
+        transactions.slice(0, 20).forEach(t => {
+            const row = `
+                <tr>
+                    <td>${formatDate(t.date)}</td>
+                    <td><span class="type-badge ${t.type === 'Savings Deposit' ? 'deposit' : 'withdrawal'}">${t.type}</span></td>
+                    <td>${t.member}</td>
+                    <td>${formatCurrency(t.amount)}</td>
+                </tr>
+            `;
+            tbody.innerHTML += row;
+        });
+    }
+    
+    loadReports();
+</script>
 
-  <!-- =========================
-       EXTRA FINANCIAL KPIs
-  ========================== -->
-  <section class="cards" style="margin-top:20px;">
-
-    <div class="card teal">
-      <h3>Outstanding Loans</h3>
-      <p id="outstandingLoans">0 ETB</p>
-    </div>
-
-    <div class="card red">
-      <h3>Net Balance</h3>
-      <p id="netBalance">0 ETB</p>
-    </div>
-
-    <div class="card Blue">
-      <h3>Risk Level</h3>
-      <p id="riskLevel">0%</p>
-    </div>
-
-  </section>
-
-  <!-- =========================
-       CHART SECTION (ADVANCED)
-  ========================== -->
-
-  <section style="margin-top:30px;">
-
-    <h2>📈 Financial Analytics</h2>
-    <canvas id="financeChart"></canvas>
-
-  </section>
-
-  <section style="margin-top:30px;">
-
-    <h2>📊 Trend Analysis</h2>
-    <canvas id="trendChart"></canvas>
-
-  </section>
-
-  <section style="margin-top:30px;">
-
-    <h2>🥧 Portfolio Distribution</h2>
-    <canvas id="pieChart"></canvas>
-
-  </section>
-
-  <!-- =========================
-       PDF EXPORT
-  ========================== -->
-  <div style="margin-top:25px;">
-
-    <button class="btn primary" onclick="downloadPDF()">
-      Export PDF
-    </button>
-
-  </div>
-
-  <!-- =========================
-       TABLE SUMMARY
-  ========================== -->
-  <div style="margin-top:30px;">
-
-    <h2>Financial Summary</h2>
-
-    <table class="table">
-
-      <thead>
-        <tr>
-          <th>Category</th>
-          <th>Amount</th>
-        </tr>
-      </thead>
-
-      <tbody id="reportTable"></tbody>
-
-    </table>
-
-  </div>
-
-</main>
-
-<!-- =========================
-     SCRIPTS
-========================= -->
-
-<script type="module" src="js/auth.js"></script>
-<script type="module" src="js/reports.js"></script>
+<style>
+    .type-badge {
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+    .type-badge.deposit {
+        background: #d4edda;
+        color: #155724;
+    }
+    .type-badge.withdrawal {
+        background: #f8d7da;
+        color: #721c24;
+    }
+</style>
 
 </body>
 </html>
