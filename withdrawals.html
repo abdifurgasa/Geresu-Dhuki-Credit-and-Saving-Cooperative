@@ -1,305 +1,222 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <title data-i18n="withdrawalsModule">Withdrawals Module</title>
-
-  <link rel="stylesheet" href="css/style.css">
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SACCO | Withdrawals Management</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-
 <body>
 
- <!-- TOGGLE -->
-  <button class="toggle-btn"
-          onclick="toggleSidebar()">
-
-    ☰
-
-  </button>
-
-  <!-- LOGO -->
-  <h2 class="logo">
-
-    🏦 SACCO
-
-  </h2>
-
-  <!-- NAVIGATION -->
-  <nav class="nav">
-
-    <!-- DASHBOARD -->
-    <a href="dashboard.html"
-       class="nav-item active">
-
-      <span class="icon">📊</span>
-
-      <span class="text"
-            data-i18n="dashboard">
-
-        Dashboard
-
-      </span>
-
-    </a>
-
-    <!-- MEMBERS -->
-    <a href="members.html"
-       class="nav-item admin-only">
-
-      <span class="icon">👥</span>
-
-      <span class="text"
-            data-i18n="members">
-
-        Members
-
-      </span>
-
-    </a>
-
-    <!-- SAVINGS -->
-    <a href="savings.html"
-       class="nav-item">
-
-      <span class="icon">💰</span>
-
-      <span class="text"
-            data-i18n="savings">
-
-        Savings
-
-      </span>
-
-    </a>
-
-    <!-- LOANS -->
-    <a href="loans.html"
-       class="nav-item">
-
-      <span class="icon">🏦</span>
-
-      <span class="text"
-            data-i18n="loans">
-
-        Loans
-
-      </span>
-
-    </a>
-
-    <!-- REPAYMENTS -->
-    <a href="repayments.html"
-       class="nav-item">
-
-      <span class="icon">💵</span>
-
-      <span class="text"
-            data-i18n="repayments">
-
-        Repayments
-
-      </span>
-
-    </a>
-
-    <!-- TRANSACTIONS -->
-    <a href="transactions.html"
-       class="nav-item admin-only">
-
-      <span class="icon">💱</span>
-
-      <span class="text"
-            data-i18n="transactions">
-
-        Transactions
-
-      </span>
-
-    </a>
-    
-<!-- WITHDRAWALS -->
-    <a href="withdrawals.html"
-       class="nav-item admin-only">
-
-      <span class="icon">💵</span>
-
-      <span class="text"
-            data-i18n="withdrawals">
-
-        Withdrawals
-
-      </span>
-
-    </a>
-    <!-- REPORTS -->
-    <a href="reports.html"
-       class="nav-item admin-only">
-
-      <span class="icon">📄</span>
-
-      <span class="text"
-            data-i18n="reports">
-
-        Reports
-
-      </span>
-
-    </a>
-
-    <!-- USERS -->
-    <a href="users.html"
-       class="nav-item admin-only">
-
-      <span class="icon">👤</span>
-
-      <span class="text"
-            data-i18n="users">
-
-        Users
-
-      </span>
-
-    </a>
-
-    <!-- SETTINGS -->
-    <a href="settings.html"
-       class="nav-item">
-
-      <span class="icon">⚙️</span>
-
-      <span class="text"
-            data-i18n="settings">
-
-        Settings
-
-      </span>
-
-    </a>
-
-  </nav>
-
-</aside>
-
-<!-- MAIN -->
-<main class="main" id="main">
-
-  <!-- TOPBAR -->
-  <div class="topbar">
-
-    <h2 data-i18n="withdrawalsManagement">Withdrawals Management</h2>
-
-    <div style="display:flex; gap:10px; align-items:center;">
-
-      <!-- LANGUAGE -->
-      <select id="langSelect" class="lang-select" onchange="changeLang(this.value)">
-
-        <option value="EN">EN</option>
-        <option value="AM">AM</option>
-        <option value="OR">OR</option>
-
-      </select>
-
-      <div class="selected-box">👑 ADMIN</div>
-
+<div class="sidebar">
+    <div class="logo">
+        <h2><i class="fas fa-piggy-bank"></i> SACCO</h2>
+        <p>Banking System</p>
+    </div>
+    <ul class="nav-menu">
+        <li class="nav-item"><a href="index.html"><i class="fas fa-chart-line"></i> <span>Dashboard</span></a></li>
+        <li class="nav-item"><a href="members.html"><i class="fas fa-users"></i> <span>Members</span></a></li>
+        <li class="nav-item"><a href="savings.html"><i class="fas fa-coins"></i> <span>Savings</span></a></li>
+        <li class="nav-item"><a href="loans.html"><i class="fas fa-hand-holding-usd"></i> <span>Loans</span></a></li>
+        <li class="nav-item active"><a href="withdrawals.html"><i class="fas fa-money-bill-wave"></i> <span>Withdrawals</span></a></li>
+        <li class="nav-item"><a href="reports.html"><i class="fas fa-file-alt"></i> <span>Reports</span></a></li>
+        <li class="nav-item"><a href="users.html"><i class="fas fa-user-cog"></i> <span>Users</span></a></li>
+        <li class="nav-item"><a href="settings.html"><i class="fas fa-cog"></i> <span>Settings</span></a></li>
+    </ul>
+</div>
+
+<div class="main-content">
+    <div class="header">
+        <h1>Withdrawals Management</h1>
+        <div class="user-info">
+            <span>Welcome, Admin</span>
+            <i class="fas fa-bell"></i>
+            <i class="fas fa-user-circle fa-2x"></i>
+        </div>
     </div>
 
-  </div>
-
-  <!-- HEADER -->
-  <div style="margin-top:25px;">
-    <h1 data-i18n="withdrawalModule">WITHDRAWAL MODULE</h1>
-    <p data-i18n="manageWithdrawals">Manage SACCO withdrawal expenses</p>
-  </div>
-
-  <!-- CARDS -->
-  <section class="cards">
-
-    <div class="card red">
-      <h3 data-i18n="totalWithdrawals">Total Withdrawals</h3>
-      <p id="totalWithdrawals">0 ETB</p>
+    <div class="action-buttons">
+        <button class="btn-primary" onclick="openWithdrawalModal()">
+            <i class="fas fa-money-bill-wave"></i> Process Withdrawal
+        </button>
     </div>
 
-    <div class="card blue">
-      <h3 data-i18n="totalRecords">Total Records</h3>
-      <p id="withdrawCount">0</p>
-    </div>
-
-  </section>
-
-  <!-- FORM -->
-  <section style="margin-top:30px;">
-
-    <div class="card">
-
-      <h2 data-i18n="newWithdrawal">💸 New Withdrawal</h2>
-
-      <input id="withdrawer" class="input" type="text" data-i18n-placeholder="withdrawerName">
-
-      <input id="withdrawAmount" class="input" type="number" data-i18n-placeholder="withdrawAmount">
-
-      <textarea id="withdrawReason" class="input" data-i18n-placeholder="withdrawReason"
-        style="min-height:120px;"></textarea>
-
-      <button class="btn danger" onclick="makeWithdrawal()" data-i18n="withdrawNow">
-        Withdraw Now
-      </button>
-
-    </div>
-
-  </section>
-
-  <!-- TABLE -->
-  <section style="margin-top:30px;">
-
-    <div class="card">
-
-      <h2 data-i18n="withdrawalHistory">Withdrawal History</h2>
-
-      <div style="overflow-x:auto;">
-
-        <table class="table">
-
-          <thead>
-
-            <tr>
-              <th data-i18n="withdrawer">Withdrawer</th>
-              <th data-i18n="amount">Amount</th>
-              <th data-i18n="reason">Reason</th>
-              <th data-i18n="actionBy">Action By</th>
-              <th data-i18n="date">Date</th>
-            </tr>
-
-          </thead>
-
-          <tbody id="withdrawTable"></tbody>
-
+    <div class="data-table">
+        <table>
+            <thead>
+                <tr>
+                    <th>Transaction ID</th>
+                    <th>Member Name</th>
+                    <th>Amount (ETB)</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="withdrawalsList">
+                <tr><td colspan="5" class="loading">Loading withdrawal records...</td></tr>
+            </tbody>
         </table>
-
-      </div>
-
     </div>
+</div>
 
-  </section>
+<!-- Process Withdrawal Modal -->
+<div id="withdrawalModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal('withdrawalModal')">&times;</span>
+        <h2>Process Withdrawal</h2>
+        <form id="withdrawalForm">
+            <select id="memberId" required>
+                <option value="">Select Member</option>
+            </select>
+            <input type="number" id="withdrawalAmount" placeholder="Amount (ETB)" required>
+            <input type="text" id="currentBalance" placeholder="Current Balance" readonly>
+            <button type="submit">Process Withdrawal</button>
+        </form>
+    </div>
+</div>
 
-</main>
-
-<!-- SIDEBAR -->
-<script>
-function toggleSidebar() {
-  document.getElementById("sidebar").classList.toggle("collapsed");
-}
+<script type="module">
+    import { db, collection, getDocs, addDoc, updateDoc, doc, Timestamp } from './js/firebase.js';
+    import { formatCurrency, formatDate, showError, showSuccess, closeModal, openModal, setupModalHandlers, getCurrentMonthYear } from './js/utils.js';
+    
+    let selectedMemberBalance = 0;
+    let selectedMemberId = null;
+    
+    // Load members for dropdown
+    async function loadMembersForDropdown() {
+        try {
+            const querySnapshot = await getDocs(collection(db, "members"));
+            const select = document.getElementById('memberId');
+            select.innerHTML = '<option value="">Select Member</option>';
+            
+            querySnapshot.forEach((doc) => {
+                const member = doc.data();
+                const option = document.createElement('option');
+                option.value = doc.id;
+                option.setAttribute('data-balance', member.savingsBalance || 0);
+                option.textContent = `${member.fullName} - ${member.email} (Balance: ${formatCurrency(member.savingsBalance || 0)})`;
+                select.appendChild(option);
+            });
+            
+            // Add event listener to show balance
+            select.addEventListener('change', (e) => {
+                const selectedOption = e.target.options[e.target.selectedIndex];
+                const balance = selectedOption.getAttribute('data-balance');
+                selectedMemberId = e.target.value;
+                selectedMemberBalance = parseFloat(balance) || 0;
+                document.getElementById('currentBalance').value = formatCurrency(selectedMemberBalance);
+            });
+        } catch (error) {
+            console.error("Error loading members:", error);
+        }
+    }
+    
+    // Load withdrawal records
+    async function loadWithdrawals() {
+        const withdrawalsList = document.getElementById('withdrawalsList');
+        withdrawalsList.innerHTML = '<tr><td colspan="5" class="loading">Loading...</td></tr>';
+        
+        try {
+            const querySnapshot = await getDocs(collection(db, "withdrawals"));
+            withdrawalsList.innerHTML = '';
+            
+            if (querySnapshot.empty) {
+                withdrawalsList.innerHTML = '<tr><td colspan="5">No withdrawal records found.</td></tr>';
+                return;
+            }
+            
+            for (const docSnap of querySnapshot.docs) {
+                const withdrawal = docSnap.data();
+                // Get member name
+                const memberDoc = await getDocs(collection(db, "members"));
+                let memberName = 'Unknown';
+                for (const member of memberDoc.docs) {
+                    if (member.id === withdrawal.memberId) {
+                        memberName = member.data().fullName;
+                        break;
+                    }
+                }
+                
+                const row = `
+                    <tr>
+                        <td>${docSnap.id.slice(0, 8)}</td>
+                        <td>${memberName}</td>
+                        <td>${formatCurrency(withdrawal.amount)}</td>
+                        <td>${formatDate(withdrawal.date)}</td>
+                        <td>${withdrawal.status || 'completed'}</td>
+                    </tr>
+                `;
+                withdrawalsList.innerHTML += row;
+            }
+        } catch (error) {
+            console.error("Error loading withdrawals:", error);
+            showError('Failed to load withdrawal records');
+        }
+    }
+    
+    // Process withdrawal
+    document.getElementById('withdrawalForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const memberId = document.getElementById('memberId').value;
+        const amount = parseFloat(document.getElementById('withdrawalAmount').value);
+        const { month, year } = getCurrentMonthYear();
+        
+        if (!memberId) {
+            showError('Please select a member');
+            return;
+        }
+        
+        if (amount <= 0) {
+            showError('Please enter a valid amount');
+            return;
+        }
+        
+        if (amount > selectedMemberBalance) {
+            showError('Insufficient balance!');
+            return;
+        }
+        
+        try {
+            // Record withdrawal transaction
+            await addDoc(collection(db, "withdrawals"), {
+                memberId: memberId,
+                amount: amount,
+                date: Timestamp.now(),
+                status: 'completed',
+                month: month,
+                year: year,
+                createdAt: Timestamp.now()
+            });
+            
+            // Update member's savings balance
+            const memberRef = doc(db, "members", memberId);
+            await updateDoc(memberRef, { savingsBalance: selectedMemberBalance - amount });
+            
+            showSuccess(`Withdrawal of ${formatCurrency(amount)} processed successfully!`);
+            closeModal('withdrawalModal');
+            document.getElementById('withdrawalForm').reset();
+            document.getElementById('currentBalance').value = '';
+            loadWithdrawals();
+            loadMembersForDropdown(); // Refresh dropdown balances
+        } catch (error) {
+            console.error("Error processing withdrawal:", error);
+            showError('Error processing withdrawal: ' + error.message);
+        }
+    });
+    
+    window.openWithdrawalModal = () => {
+        openModal('withdrawalModal');
+        loadMembersForDropdown();
+    };
+    
+    window.closeModal = closeModal;
+    setupModalHandlers();
+    
+    // Initial load
+    loadWithdrawals();
 </script>
-
-<!-- I18N SYSTEM -->
-<script src="js/i18n.js"></script>
-
-<!-- JS -->
-<script type="module" src="js/withdrawals.js"></script>
 
 </body>
 </html>
