@@ -1,188 +1,214 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <title data-i18n="savings">Savings</title>
-
-  <link rel="stylesheet" href="css/style.css" />
-
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SACCO | Savings Management</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-
 <body>
 
-<!-- =========================================================
-     SIDEBAR
-========================================================= -->
+<div class="sidebar">
+    <div class="logo">
+        <h2><i class="fas fa-piggy-bank"></i> SACCO</h2>
+        <p>Banking System</p>
+    </div>
+    <ul class="nav-menu">
+        <li class="nav-item"><a href="index.html"><i class="fas fa-chart-line"></i> <span>Dashboard</span></a></li>
+        <li class="nav-item"><a href="members.html"><i class="fas fa-users"></i> <span>Members</span></a></li>
+        <li class="nav-item active"><a href="savings.html"><i class="fas fa-coins"></i> <span>Savings</span></a></li>
+        <li class="nav-item"><a href="loans.html"><i class="fas fa-hand-holding-usd"></i> <span>Loans</span></a></li>
+        <li class="nav-item"><a href="withdrawals.html"><i class="fas fa-money-bill-wave"></i> <span>Withdrawals</span></a></li>
+        <li class="nav-item"><a href="reports.html"><i class="fas fa-file-alt"></i> <span>Reports</span></a></li>
+        <li class="nav-item"><a href="users.html"><i class="fas fa-user-cog"></i> <span>Users</span></a></li>
+        <li class="nav-item"><a href="settings.html"><i class="fas fa-cog"></i> <span>Settings</span></a></li>
+    </ul>
+</div>
 
-<aside class="sidebar" id="sidebar">
-
-  <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
-
-  <h2 class="logo">🏦 SACCO</h2>
-
-  <nav class="nav">
-
-    <a href="dashboard.html" class="nav-item">
-      <span class="icon">📊</span>
-      <span class="text" data-i18n="dashboard">Dashboard</span>
-    </a>
-
-    <a href="members.html" class="nav-item">
-      <span class="icon">👥</span>
-      <span class="text" data-i18n="members">Members</span>
-    </a>
-
-    <a href="savings.html" class="nav-item active">
-      <span class="icon">💰</span>
-      <span class="text" data-i18n="savings">Savings</span>
-    </a>
-
-    <a href="loans.html" class="nav-item">
-      <span class="icon">🏦</span>
-      <span class="text" data-i18n="loans">Loans</span>
-    </a>
-
-    <a href="withdrawals.html" class="nav-item">
-      <span class="icon">📤</span>
-      <span class="text" data-i18n="withdrawals">Withdrawals</span>
-    </a>
-
-    <a href="users.html" class="nav-item">
-      <span class="icon">👨‍💼</span>
-      <span class="text" data-i18n="users">Users</span>
-    </a>
-
-    <a href="settings.html" class="nav-item">
-      <span class="icon">⚙️</span>
-      <span class="text" data-i18n="settings">Settings</span>
-    </a>
-
-    <a href="#" class="nav-item logout">
-      <span class="icon">🚪</span>
-      <span class="text" data-i18n="logout">Logout</span>
-    </a>
-
-  </nav>
-
-</aside>
-
-<!-- =========================================================
-     MAIN CONTENT
-========================================================= -->
-
-<main class="main">
-
-  <!-- TOPBAR -->
-  <div class="topbar">
-
-    <h2 data-i18n="savings">💰 Savings Management</h2>
-
-    <div style="display:flex; gap:15px; align-items:center;">
-
-      <select id="languageSelect" onchange="changeLanguage(this.value)">
-        <option value="en">English</option>
-        <option value="am">አማርኛ</option>
-        <option value="om">Afaan Oromoo</option>
-      </select>
-
-      <div id="roleBox">👑 ADMIN</div>
-
+<div class="main-content">
+    <div class="header">
+        <h1>Savings Management</h1>
+        <div class="user-info">
+            <span>Welcome, Admin</span>
+            <i class="fas fa-bell"></i>
+            <i class="fas fa-user-circle fa-2x"></i>
+        </div>
     </div>
 
-  </div>
-
-  <!-- =========================================================
-       MEMBER SELECT
-  ========================================================= -->
-
-  <section style="margin-top:25px;">
-
-    <h2>Select Member</h2>
-
-    <select id="member" class="input" style="width:100%; padding:12px;">
-      <option value="">-- Select Member --</option>
-    </select>
-
-  </section>
-
-  <!-- =========================================================
-       DEPOSIT FORM
-  ========================================================= -->
-
-  <section style="margin-top:20px;">
-
-    <h2>Deposit Savings</h2>
-
-    <div class="cards" style="grid-template-columns:1fr;">
-
-      <input
-        type="number"
-        id="amount"
-        placeholder="Enter amount"
-        class="input"
-        style="padding:12px; border-radius:10px;"
-      />
-
-      <button id="saveBtn" class="add-btn">
-        💰 Deposit
-      </button>
-
+    <div class="action-buttons">
+        <button class="btn-primary" onclick="openSavingsModal()">
+            <i class="fas fa-save"></i> Record Savings
+        </button>
     </div>
 
-  </section>
-
-  <!-- =========================================================
-       SELECTED MEMBER INFO
-  ========================================================= -->
-
-  <div id="selectedBox" class="selected-box">
-    👤 Select a member to see details
-  </div>
-
-  <!-- =========================================================
-       SAVINGS HISTORY
-  ========================================================= -->
-
-  <section style="margin-top:30px;">
-
-    <h2>📜 Savings History</h2>
-
-    <div class="table-card">
-
-      <table class="table-modern">
-
-        <thead>
-          <tr>
-            <th>Member</th>
-            <th>Amount</th>
-            <th>Previous</th>
-            <th>New Balance</th>
-            <th>By</th>
-            <th>Date</th>
-          </tr>
-        </thead>
-
-        <tbody id="savingTable"></tbody>
-
-      </table>
-
+    <div class="data-table">
+        <table>
+            <thead>
+                <tr>
+                    <th>Transaction ID</th>
+                    <th>Member Name</th>
+                    <th>Amount (ETB)</th>
+                    <th>Date</th>
+                    <th>Payment Method</th>
+                </tr>
+            </thead>
+            <tbody id="savingsList">
+                <tr><td colspan="5" class="loading">Loading savings records...</td></tr>
+            </tbody>
+        </table>
     </div>
+</div>
 
-  </section>
+<!-- Record Savings Modal -->
+<div id="savingsModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal('savingsModal')">&times;</span>
+        <h2>Record Member Savings</h2>
+        <form id="savingsForm">
+            <select id="memberId" required>
+                <option value="">Select Member</option>
+            </select>
+            <input type="number" id="savingsAmount" placeholder="Amount (ETB)" required>
+            <select id="paymentMethod">
+                <option value="cash">Cash</option>
+                <option value="bank_transfer">Bank Transfer</option>
+                <option value="mobile_money">Mobile Money</option>
+            </select>
+            <button type="submit">Record Savings</button>
+        </form>
+    </div>
+</div>
 
-</main>
-
-<!-- =========================================================
-     SCRIPTS
-========================================================= -->
-
-<script type="module" src="js/savings.js"></script>
-<script type="module" src="js/layout.js"></script>
-<script src="js/i18n.js"></script>
+<script type="module">
+    import { db, collection, getDocs, addDoc, updateDoc, doc, Timestamp } from './js/firebase.js';
+    import { formatCurrency, formatDate, showError, showSuccess, closeModal, openModal, setupModalHandlers, getCurrentMonthYear } from './js/utils.js';
+    
+    // Load members for dropdown
+    async function loadMembersForDropdown() {
+        try {
+            const querySnapshot = await getDocs(collection(db, "members"));
+            const select = document.getElementById('memberId');
+            select.innerHTML = '<option value="">Select Member</option>';
+            
+            querySnapshot.forEach((doc) => {
+                const member = doc.data();
+                const option = document.createElement('option');
+                option.value = doc.id;
+                option.textContent = `${member.fullName} - ${member.email}`;
+                select.appendChild(option);
+            });
+        } catch (error) {
+            console.error("Error loading members:", error);
+        }
+    }
+    
+    // Load savings records
+    async function loadSavings() {
+        const savingsList = document.getElementById('savingsList');
+        savingsList.innerHTML = '<tr><td colspan="5" class="loading">Loading...</td></tr>';
+        
+        try {
+            const querySnapshot = await getDocs(collection(db, "savings"));
+            savingsList.innerHTML = '';
+            
+            if (querySnapshot.empty) {
+                savingsList.innerHTML = '<tr><td colspan="5">No savings records found.</td></tr>';
+                return;
+            }
+            
+            for (const docSnap of querySnapshot.docs) {
+                const saving = docSnap.data();
+                // Get member name
+                const memberDoc = await getDocs(collection(db, "members"));
+                let memberName = 'Unknown';
+                for (const member of memberDoc.docs) {
+                    if (member.id === saving.memberId) {
+                        memberName = member.data().fullName;
+                        break;
+                    }
+                }
+                
+                const row = `
+                    <tr>
+                        <td>${docSnap.id.slice(0, 8)}</td>
+                        <td>${memberName}</td>
+                        <td>${formatCurrency(saving.amount)}</td>
+                        <td>${formatDate(saving.date)}</td>
+                        <td>${saving.paymentMethod || 'cash'}</td>
+                    </tr>
+                `;
+                savingsList.innerHTML += row;
+            }
+        } catch (error) {
+            console.error("Error loading savings:", error);
+            showError('Failed to load savings records');
+        }
+    }
+    
+    // Record savings
+    document.getElementById('savingsForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const memberId = document.getElementById('memberId').value;
+        const amount = parseFloat(document.getElementById('savingsAmount').value);
+        const { month, year } = getCurrentMonthYear();
+        
+        if (!memberId) {
+            showError('Please select a member');
+            return;
+        }
+        
+        if (amount <= 0) {
+            showError('Please enter a valid amount');
+            return;
+        }
+        
+        try {
+            // Record savings transaction
+            await addDoc(collection(db, "savings"), {
+                memberId: memberId,
+                amount: amount,
+                date: Timestamp.now(),
+                paymentMethod: document.getElementById('paymentMethod').value,
+                month: month,
+                year: year,
+                createdAt: Timestamp.now()
+            });
+            
+            // Update member's savings balance
+            const memberRef = doc(db, "members", memberId);
+            const memberSnap = await getDocs(collection(db, "members"));
+            let currentBalance = 0;
+            for (const member of memberSnap.docs) {
+                if (member.id === memberId) {
+                    currentBalance = member.data().savingsBalance || 0;
+                    break;
+                }
+            }
+            await updateDoc(memberRef, { savingsBalance: currentBalance + amount });
+            
+            showSuccess(`Savings of ${formatCurrency(amount)} recorded successfully!`);
+            closeModal('savingsModal');
+            document.getElementById('savingsForm').reset();
+            loadSavings();
+        } catch (error) {
+            console.error("Error recording savings:", error);
+            showError('Error recording savings: ' + error.message);
+        }
+    });
+    
+    window.openSavingsModal = () => {
+        openModal('savingsModal');
+        loadMembersForDropdown();
+    };
+    
+    window.closeModal = closeModal;
+    setupModalHandlers();
+    
+    // Initial load
+    loadSavings();
+</script>
 
 </body>
 </html>
