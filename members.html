@@ -3,36 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SACCO | Members Management</title>
+    <title>SACCO | Member Management</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 
-<div class="sidebar">
-    <div class="logo">
-        <h2><i class="fas fa-piggy-bank"></i> SACCO</h2>
-        <p>Banking System</p>
-    </div>
-    <ul class="nav-menu">
-        <li class="nav-item"><a href="index.html"><i class="fas fa-chart-line"></i> <span>Dashboard</span></a></li>
-        <li class="nav-item active"><a href="members.html"><i class="fas fa-users"></i> <span>Members</span></a></li>
-        <li class="nav-item"><a href="savings.html"><i class="fas fa-coins"></i> <span>Savings</span></a></li>
-        <li class="nav-item"><a href="loans.html"><i class="fas fa-hand-holding-usd"></i> <span>Loans</span></a></li>
-        <li class="nav-item"><a href="withdrawals.html"><i class="fas fa-money-bill-wave"></i> <span>Withdrawals</span></a></li>
-        <li class="nav-item"><a href="reports.html"><i class="fas fa-file-alt"></i> <span>Reports</span></a></li>
-        <li class="nav-item"><a href="users.html"><i class="fas fa-user-cog"></i> <span>Users</span></a></li>
-        <li class="nav-item"><a href="settings.html"><i class="fas fa-cog"></i> <span>Settings</span></a></li>
-    </ul>
-</div>
+<div class="sidebar"></div>
 
 <div class="main-content">
-    <div class="header">
-        <h1>Member Management</h1>
-        <div class="user-info">
-            <span>Welcome, Admin</span>
-            <i class="fas fa-bell"></i>
-            <i class="fas fa-user-circle fa-2x"></i>
+    <div class="header"></div>
+
+    <!-- Stats Cards -->
+    <div class="performance-grid">
+        <div class="kpi-card">
+            <h4><i class="fas fa-users"></i> Total Members</h4>
+            <div class="value" id="totalMembers">0</div>
+            <div class="trend">Active accounts</div>
+        </div>
+        <div class="kpi-card">
+            <h4><i class="fas fa-user-plus"></i> New This Month</h4>
+            <div class="value" id="newMembersThisMonth">0</div>
+            <div class="trend">Last 30 days</div>
+        </div>
+        <div class="kpi-card">
+            <h4><i class="fas fa-coins"></i> Total Savings</h4>
+            <div class="value" id="totalSavings">0</div>
+            <div class="trend">All members combined</div>
+        </div>
+        <div class="kpi-card">
+            <h4><i class="fas fa-chart-line"></i> Avg Savings</h4>
+            <div class="value" id="avgSavings">0</div>
+            <div class="trend">Per member</div>
         </div>
     </div>
 
@@ -40,127 +42,321 @@
         <button class="btn-primary" id="addMemberBtn">
             <i class="fas fa-user-plus"></i> Add New Member
         </button>
+        <button class="btn-primary" id="importMembersBtn">
+            <i class="fas fa-upload"></i> Import CSV
+        </button>
+        <button class="btn-primary" id="exportMembersBtn">
+            <i class="fas fa-download"></i> Export CSV
+        </button>
     </div>
 
     <div class="data-table">
-        <table id="membersTable">
-            <thead>
-                <tr>
-                    <th>Member ID</th>
-                    <th>Full Name</th>
-                    <th>Email</th>
-                    <th>Phone</th>
-                    <th>Join Date</th>
-                    <th>Savings Balance</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody id="membersList">
-                <tr><td colspan="7" class="loading">Loading members...<\/td><\/tr>
-            </tbody>
-        </table>
+        <div class="table-header">
+            <input type="text" id="searchMember" placeholder="Search by name, phone, email or ID..." class="search-input">
+            <div class="filter-section" style="margin-top: 10px; display: flex; gap: 10px; flex-wrap: wrap;">
+                <select id="statusFilter" class="filter-select">
+                    <option value="all">All Status</option>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                </select>
+                <select id="sortBy" class="filter-select">
+                    <option value="name">Sort by Name</option>
+                    <option value="date">Sort by Join Date</option>
+                    <option value="savings">Sort by Savings</option>
+                </select>
+            </div>
+        </div>
+        <div style="overflow-x: auto;">
+            <table class="members-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Avatar</th>
+                        <th>Member ID</th>
+                        <th>Full Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>National ID</th>
+                        <th>Join Date</th>
+                        <th>Savings (ETB)</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="membersList">
+                    <tr><td colspan="11" class="loading">Loading members...<\/td><\/tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="pagination" id="pagination">
+            <!-- Pagination will be added here -->
+        </div>
     </div>
 </div>
 
-<!-- Add Member Modal -->
+<!-- Add/Edit Member Modal -->
 <div id="memberModal" class="modal">
     <div class="modal-content">
         <span class="close" onclick="closeModal('memberModal')">&times;</span>
-        <h2>Add New Member</h2>
+        <h2 id="modalTitle"><i class="fas fa-user-plus"></i> Add New Member</h2>
         <form id="memberForm">
-            <input type="text" id="fullName" placeholder="Full Name" required>
-            <input type="email" id="email" placeholder="Email" required>
-            <input type="tel" id="phone" placeholder="Phone Number (e.g., 0912345678)" required>
-            <textarea id="address" placeholder="Address" rows="3"></textarea>
-            <button type="submit">Register Member</button>
+            <input type="hidden" id="memberId">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Full Name *</label>
+                    <input type="text" id="fullName" placeholder="Enter full name" required>
+                </div>
+                <div class="form-group">
+                    <label>Email *</label>
+                    <input type="email" id="email" placeholder="example@email.com" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Phone Number *</label>
+                    <input type="tel" id="phone" placeholder="09xxxxxxxx" required>
+                    <small>Format: 09xxxxxxxx (Ethiopian)</small>
+                </div>
+                <div class="form-group">
+                    <label>National ID *</label>
+                    <input type="text" id="nid" placeholder="National ID number" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Date of Birth</label>
+                    <input type="date" id="dob">
+                </div>
+                <div class="form-group">
+                    <label>Gender</label>
+                    <select id="gender">
+                        <option value="">Select</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Address</label>
+                <textarea id="address" placeholder="Full address" rows="2"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Occupation</label>
+                <input type="text" id="occupation" placeholder="Occupation/Profession">
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Initial Deposit (ETB)</label>
+                    <input type="number" id="initialDeposit" placeholder="0" value="0">
+                </div>
+                <div class="form-group">
+                    <label>Status</label>
+                    <select id="status">
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                    </select>
+                </div>
+            </div>
+            <button type="submit" class="btn-primary" style="width: 100%;">Save Member</button>
         </form>
     </div>
 </div>
 
-<!-- Edit Member Modal -->
-<div id="editMemberModal" class="modal">
-    <div class="modal-content">
-        <span class="close" onclick="closeModal('editMemberModal')">&times;</span>
-        <h2>Edit Member</h2>
-        <form id="editMemberForm">
-            <input type="hidden" id="editMemberId">
-            <input type="text" id="editFullName" placeholder="Full Name" required>
-            <input type="email" id="editEmail" placeholder="Email" required>
-            <input type="tel" id="editPhone" placeholder="Phone Number" required>
-            <textarea id="editAddress" placeholder="Address" rows="3"></textarea>
-            <button type="submit">Update Member</button>
-        </form>
+<!-- View Member Modal -->
+<div id="viewMemberModal" class="modal">
+    <div class="modal-content" style="width: 600px;">
+        <span class="close" onclick="closeModal('viewMemberModal')">&times;</span>
+        <h2><i class="fas fa-id-card"></i> Member Details</h2>
+        <div id="memberDetails"></div>
+        <div class="member-actions" style="display: flex; gap: 10px; margin-top: 20px;">
+            <button onclick="editFromView()" class="btn-edit">Edit Member</button>
+            <button onclick="addSavingsFromView()" class="btn-primary">Add Savings</button>
+            <button onclick="applyLoanFromView()" class="btn-primary">Apply Loan</button>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="modal">
+    <div class="modal-content" style="width: 350px; text-align: center;">
+        <span class="close" onclick="closeModal('deleteModal')">&times;</span>
+        <i class="fas fa-exclamation-triangle" style="font-size: 48px; color: #dc3545; margin-bottom: 15px;"></i>
+        <h3>Delete Member</h3>
+        <p>Are you sure you want to delete <strong id="deleteMemberName"></strong>?</p>
+        <p style="color: #dc3545; font-size: 12px;">This action cannot be undone!</p>
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <button onclick="closeModal('deleteModal')" class="btn-secondary" style="flex: 1;">Cancel</button>
+            <button id="confirmDeleteBtn" class="btn-danger" style="flex: 1;">Delete</button>
+        </div>
     </div>
 </div>
 
 <script type="module">
-    import { db, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, Timestamp } from './js/firebase.js';
+    import { db, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, where, orderBy, Timestamp } from './js/firebase.js';
+    import { initLayout, createSidebarHTML, createHeaderHTML } from './js/layout.js';
     import { formatCurrency, formatDate, showError, showSuccess, closeModal, openModal, setupModalHandlers, isValidEmail, isValidPhone } from './js/utils.js';
-    
-    let currentEditId = null;
-    
-    // Load members
+    import { t } from './js/i18n.js';
+
+    // Load layout
+    document.querySelector('.sidebar').innerHTML = createSidebarHTML();
+    document.querySelector('.header').innerHTML = createHeaderHTML();
+    initLayout();
+
+    let allMembers = [];
+    let currentMemberId = null;
+    let currentViewMember = null;
+
+    // Load all members
     async function loadMembers() {
-        const membersList = document.getElementById('membersList');
-        membersList.innerHTML = '<tr><td colspan="7" class="loading">Loading...<\/td><\/tr>';
+        const tbody = document.getElementById('membersList');
+        tbody.innerHTML = '<tr><td colspan="11" class="loading">Loading...<\/td><\/tr>';
         
         try {
             const querySnapshot = await getDocs(collection(db, "members"));
-            membersList.innerHTML = '';
+            allMembers = [];
             
             if (querySnapshot.empty) {
-                membersList.innerHTML = '<tr><td colspan="7">No members found. Add your first member!<\/td><\/tr>';
+                tbody.innerHTML = '<tr><td colspan="11">No members found. Click "Add New Member" to get started.<\/td><\/tr>';
+                updateStats();
                 return;
             }
             
             querySnapshot.forEach((doc) => {
                 const member = doc.data();
-                const row = `
-                    <tr>
-                        <td>${doc.id.slice(0, 8)}<\/td>
-                        <td>${member.fullName || ''}<\/td>
-                        <td>${member.email || ''}<\/td>
-                        <td>${member.phone || ''}<\/td>
-                        <td>${formatDate(member.joinDate)}<\/td>
-                        <td>${formatCurrency(member.savingsBalance || 0)}<\/td>
-                        <td>
-                            <button class="btn-edit" data-id="${doc.id}" data-member='${JSON.stringify(member).replace(/'/g, "&#39;")}'>Edit</button>
-                            <button class="btn-danger" data-id="${doc.id}">Delete</button>
-                        <\/td>
-                    <\/tr>
-                `;
-                membersList.innerHTML += row;
+                allMembers.push({ id: doc.id, ...member });
             });
             
-            // Add event listeners to dynamically created buttons
-            document.querySelectorAll('.btn-edit').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const id = btn.getAttribute('data-id');
-                    const member = JSON.parse(btn.getAttribute('data-member'));
-                    editMember(id, member);
-                });
-            });
-            
-            document.querySelectorAll('.btn-danger').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const id = btn.getAttribute('data-id');
-                    deleteMember(id);
-                });
-            });
+            // Apply filters and sorting
+            applyFiltersAndSort();
             
         } catch (error) {
             console.error("Error loading members:", error);
             showError('Failed to load members');
-            membersList.innerHTML = '<tr><td colspan="7">Error loading members. Check console.<\/td><\/tr>';
+            tbody.innerHTML = '<tr><td colspan="11">Error loading members. Check console.<\/td><\/tr>';
         }
     }
     
-    // Add member
+    // Apply filters and sorting
+    function applyFiltersAndSort() {
+        const statusFilter = document.getElementById('statusFilter')?.value || 'all';
+        const sortBy = document.getElementById('sortBy')?.value || 'name';
+        const searchTerm = document.getElementById('searchMember')?.value.toLowerCase() || '';
+        
+        let filteredMembers = [...allMembers];
+        
+        // Filter by status
+        if (statusFilter !== 'all') {
+            filteredMembers = filteredMembers.filter(m => m.status === statusFilter);
+        }
+        
+        // Filter by search term
+        if (searchTerm) {
+            filteredMembers = filteredMembers.filter(m => 
+                (m.fullName || '').toLowerCase().includes(searchTerm) ||
+                (m.email || '').toLowerCase().includes(searchTerm) ||
+                (m.phone || '').toLowerCase().includes(searchTerm) ||
+                (m.nid || '').toLowerCase().includes(searchTerm)
+            );
+        }
+        
+        // Sort
+        filteredMembers.sort((a, b) => {
+            if (sortBy === 'name') {
+                return (a.fullName || '').localeCompare(b.fullName || '');
+            } else if (sortBy === 'date') {
+                const dateA = a.joinDate?.toDate?.() || new Date(0);
+                const dateB = b.joinDate?.toDate?.() || new Date(0);
+                return dateB - dateA;
+            } else if (sortBy === 'savings') {
+                return (b.savingsBalance || 0) - (a.savingsBalance || 0);
+            }
+            return 0;
+        });
+        
+        renderMembersTable(filteredMembers);
+        updateStats();
+    }
+    
+    // Render members table
+    function renderMembersTable(members) {
+        const tbody = document.getElementById('membersList');
+        tbody.innerHTML = '';
+        
+        if (members.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="11">No members match your filters.<\/td><\/tr>';
+            return;
+        }
+        
+        members.forEach((member, index) => {
+            const avatar = (member.fullName || 'U')[0].toUpperCase();
+            const row = `
+                <tr>
+                    <td>${index + 1}<\/td>
+                    <td><div class="member-avatar" style="width: 35px; height: 35px; background: ${getAvatarColor(member.fullName)}; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">${avatar}<\/div><\/td>
+                    <td>${member.memberId || member.id.slice(0, 8)}<\/td>
+                    <td><strong>${member.fullName || 'N/A'}<\/strong><\/td>
+                    <td>${member.email || 'N/A'}<\/td>
+                    <td>${member.phone || 'N/A'}<\/td>
+                    <td>${member.nid || 'N/A'}<\/td>
+                    <td>${formatDate(member.joinDate)}<\/td>
+                    <td>${formatCurrency(member.savingsBalance || 0)}<\/td>
+                    <td><span class="status ${member.status || 'active'}">${member.status || 'active'}<\/span><\/td>
+                    <td>
+                        <button class="btn-view" onclick="viewMember('${member.id}')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn-edit" onclick="editMember('${member.id}')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn-danger" onclick="confirmDelete('${member.id}', '${member.fullName}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    <\/td>
+                </tr>
+            `;
+            tbody.innerHTML += row;
+        });
+    }
+    
+    // Get avatar color based on name
+    function getAvatarColor(name) {
+        const colors = ['#1a3c34', '#ffc107', '#dc3545', '#17a2b8', '#28a745', '#6f42c1'];
+        const index = (name || '').length % colors.length;
+        return colors[index];
+    }
+    
+    // Update statistics
+    async function updateStats() {
+        const total = allMembers.length;
+        const active = allMembers.filter(m => m.status === 'active').length;
+        const totalSavings = allMembers.reduce((sum, m) => sum + (m.savingsBalance || 0), 0);
+        const avgSavings = total > 0 ? totalSavings / total : 0;
+        
+        // Count new members this month
+        const now = new Date();
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        const newThisMonth = allMembers.filter(m => {
+            const joinDate = m.joinDate?.toDate?.();
+            return joinDate && joinDate >= startOfMonth;
+        }).length;
+        
+        document.getElementById('totalMembers').innerText = `${active}/${total}`;
+        document.getElementById('newMembersThisMonth').innerText = newThisMonth;
+        document.getElementById('totalSavings').innerText = formatCurrency(totalSavings);
+        document.getElementById('avgSavings').innerText = formatCurrency(avgSavings);
+    }
+    
+    // Add/Update member
     document.getElementById('memberForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         
+        const memberId = document.getElementById('memberId').value;
+        const fullName = document.getElementById('fullName').value;
         const email = document.getElementById('email').value;
         const phone = document.getElementById('phone').value;
+        const nid = document.getElementById('nid').value;
+        const initialDeposit = parseFloat(document.getElementById('initialDeposit').value) || 0;
         
         if (!isValidEmail(email)) {
             showError('Please enter a valid email address');
@@ -173,91 +369,389 @@
         }
         
         const memberData = {
-            fullName: document.getElementById('fullName').value,
+            fullName: fullName,
             email: email,
             phone: phone,
+            nid: nid,
+            dob: document.getElementById('dob').value,
+            gender: document.getElementById('gender').value,
             address: document.getElementById('address').value,
-            joinDate: Timestamp.now(),
-            savingsBalance: 0,
-            active: true,
-            createdAt: Timestamp.now()
-        };
-        
-        try {
-            await addDoc(collection(db, "members"), memberData);
-            showSuccess('Member added successfully!');
-            closeModal('memberModal');
-            document.getElementById('memberForm').reset();
-            loadMembers();
-        } catch (error) {
-            console.error("Error adding member:", error);
-            showError('Error adding member: ' + error.message);
-        }
-    });
-    
-    // Edit member
-    function editMember(id, member) {
-        currentEditId = id;
-        document.getElementById('editFullName').value = member.fullName;
-        document.getElementById('editEmail').value = member.email;
-        document.getElementById('editPhone').value = member.phone;
-        document.getElementById('editAddress').value = member.address || '';
-        openModal('editMemberModal');
-    }
-    
-    // Update member
-    document.getElementById('editMemberForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        const memberRef = doc(db, "members", currentEditId);
-        const updatedData = {
-            fullName: document.getElementById('editFullName').value,
-            email: document.getElementById('editEmail').value,
-            phone: document.getElementById('editPhone').value,
-            address: document.getElementById('editAddress').value,
+            occupation: document.getElementById('occupation').value,
+            status: document.getElementById('status').value,
             updatedAt: Timestamp.now()
         };
         
         try {
-            await updateDoc(memberRef, updatedData);
-            showSuccess('Member updated successfully!');
-            closeModal('editMemberModal');
+            if (memberId) {
+                // Update existing member
+                await updateDoc(doc(db, "members", memberId), memberData);
+                showSuccess('Member updated successfully!');
+            } else {
+                // Add new member
+                memberData.joinDate = Timestamp.now();
+                memberData.createdAt = Timestamp.now();
+                memberData.savingsBalance = initialDeposit;
+                memberData.memberId = 'M' + Date.now().toString().slice(-8);
+                
+                const docRef = await addDoc(collection(db, "members"), memberData);
+                
+                // If initial deposit > 0, record savings transaction
+                if (initialDeposit > 0) {
+                    await addDoc(collection(db, "savings"), {
+                        memberId: docRef.id,
+                        memberName: fullName,
+                        amount: initialDeposit,
+                        previousBalance: 0,
+                        newBalance: initialDeposit,
+                        paymentMethod: 'cash',
+                        month: new Date().getMonth() + 1,
+                        year: new Date().getFullYear(),
+                        createdAt: Timestamp.now()
+                    });
+                }
+                
+                showSuccess(`Member ${fullName} added successfully with ${formatCurrency(initialDeposit)} initial deposit!`);
+            }
+            
+            closeModal('memberModal');
+            document.getElementById('memberForm').reset();
+            document.getElementById('memberId').value = '';
+            document.getElementById('initialDeposit').value = '0';
             loadMembers();
+            
         } catch (error) {
-            console.error("Error updating member:", error);
-            showError('Error updating member: ' + error.message);
+            console.error("Error saving member:", error);
+            showError('Error saving member: ' + error.message);
         }
     });
     
+    // View member
+    window.viewMember = async (memberId) => {
+        const member = allMembers.find(m => m.id === memberId);
+        if (!member) return;
+        
+        currentViewMember = member;
+        
+        const detailsDiv = document.getElementById('memberDetails');
+        detailsDiv.innerHTML = `
+            <div class="detail-row">
+                <div class="detail-label">Full Name:</div>
+                <div class="detail-value"><strong>${member.fullName || 'N/A'}</strong></div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Member ID:</div>
+                <div class="detail-value">${member.memberId || member.id.slice(0, 8)}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Email:</div>
+                <div class="detail-value">${member.email || 'N/A'}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Phone:</div>
+                <div class="detail-value">${member.phone || 'N/A'}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">National ID:</div>
+                <div class="detail-value">${member.nid || 'N/A'}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Date of Birth:</div>
+                <div class="detail-value">${member.dob || 'N/A'}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Gender:</div>
+                <div class="detail-value">${member.gender || 'N/A'}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Occupation:</div>
+                <div class="detail-value">${member.occupation || 'N/A'}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Address:</div>
+                <div class="detail-value">${member.address || 'N/A'}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Join Date:</div>
+                <div class="detail-value">${formatDate(member.joinDate)}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Savings Balance:</div>
+                <div class="detail-value" style="color: #28a745; font-size: 18px;">${formatCurrency(member.savingsBalance || 0)}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Status:</div>
+                <div class="detail-value"><span class="status ${member.status}">${member.status}</span></div>
+            </div>
+        `;
+        
+        openModal('viewMemberModal');
+    };
+    
+    // Edit from view
+    window.editFromView = () => {
+        if (currentViewMember) {
+            closeModal('viewMemberModal');
+            editMember(currentViewMember.id);
+        }
+    };
+    
+    // Add savings from view
+    window.addSavingsFromView = () => {
+        if (currentViewMember) {
+            closeModal('viewMemberModal');
+            window.location.href = 'savings.html';
+            localStorage.setItem('selectedMemberId', currentViewMember.id);
+        }
+    };
+    
+    // Apply loan from view
+    window.applyLoanFromView = () => {
+        if (currentViewMember) {
+            closeModal('viewMemberModal');
+            window.location.href = 'loans.html';
+            localStorage.setItem('selectedMemberId', currentViewMember.id);
+        }
+    };
+    
+    // Edit member
+    window.editMember = (memberId) => {
+        const member = allMembers.find(m => m.id === memberId);
+        if (!member) return;
+        
+        document.getElementById('memberId').value = memberId;
+        document.getElementById('fullName').value = member.fullName || '';
+        document.getElementById('email').value = member.email || '';
+        document.getElementById('phone').value = member.phone || '';
+        document.getElementById('nid').value = member.nid || '';
+        document.getElementById('dob').value = member.dob || '';
+        document.getElementById('gender').value = member.gender || '';
+        document.getElementById('address').value = member.address || '';
+        document.getElementById('occupation').value = member.occupation || '';
+        document.getElementById('status').value = member.status || 'active';
+        document.getElementById('initialDeposit').value = 0;
+        document.getElementById('initialDeposit').parentElement.style.display = 'none';
+        document.getElementById('modalTitle').innerHTML = '<i class="fas fa-edit"></i> Edit Member';
+        
+        openModal('memberModal');
+    };
+    
+    // Confirm delete
+    let deleteMemberId = null;
+    window.confirmDelete = (memberId, memberName) => {
+        deleteMemberId = memberId;
+        document.getElementById('deleteMemberName').textContent = memberName;
+        openModal('deleteModal');
+    };
+    
     // Delete member
-    async function deleteMember(id) {
-        if (confirm('Are you sure you want to delete this member? This action cannot be undone.')) {
+    document.getElementById('confirmDeleteBtn').addEventListener('click', async () => {
+        if (deleteMemberId) {
             try {
-                await deleteDoc(doc(db, "members", id));
+                await deleteDoc(doc(db, "members", deleteMemberId));
                 showSuccess('Member deleted successfully!');
+                closeModal('deleteModal');
                 loadMembers();
             } catch (error) {
                 console.error("Error deleting member:", error);
                 showError('Error deleting member: ' + error.message);
             }
+            deleteMemberId = null;
         }
-    }
+    });
+    
+    // Import CSV
+    document.getElementById('importMembersBtn')?.addEventListener('click', () => {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.csv';
+        input.onchange = async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const text = await file.text();
+            const rows = text.split('\n');
+            const headers = rows[0].split(',');
+            
+            for (let i = 1; i < rows.length; i++) {
+                const values = rows[i].split(',');
+                if (values.length >= 4) {
+                    const memberData = {
+                        fullName: values[0],
+                        email: values[1],
+                        phone: values[2],
+                        nid: values[3],
+                        joinDate: Timestamp.now(),
+                        createdAt: Timestamp.now(),
+                        savingsBalance: 0,
+                        status: 'active',
+                        memberId: 'M' + Date.now().toString().slice(-8) + i
+                    };
+                    await addDoc(collection(db, "members"), memberData);
+                }
+            }
+            showSuccess('Members imported successfully!');
+            loadMembers();
+        };
+        input.click();
+    });
+    
+    // Export CSV
+    document.getElementById('exportMembersBtn')?.addEventListener('click', () => {
+        const headers = ['Full Name', 'Email', 'Phone', 'National ID', 'Join Date', 'Savings Balance', 'Status'];
+        const rows = [headers];
+        
+        allMembers.forEach(member => {
+            rows.push([
+                member.fullName || '',
+                member.email || '',
+                member.phone || '',
+                member.nid || '',
+                formatDate(member.joinDate),
+                member.savingsBalance || 0,
+                member.status || 'active'
+            ]);
+        });
+        
+        const csvContent = rows.map(row => row.join(',')).join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `members_${new Date().toISOString().split('T')[0]}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+        
+        showSuccess('Members exported successfully!');
+    });
+    
+    // Event listeners for filters
+    document.getElementById('statusFilter')?.addEventListener('change', applyFiltersAndSort);
+    document.getElementById('sortBy')?.addEventListener('change', applyFiltersAndSort);
+    document.getElementById('searchMember')?.addEventListener('keyup', applyFiltersAndSort);
+    
+    // Add member button
+    document.getElementById('addMemberBtn')?.addEventListener('click', () => {
+        document.getElementById('memberForm').reset();
+        document.getElementById('memberId').value = '';
+        document.getElementById('initialDeposit').parentElement.style.display = 'block';
+        document.getElementById('modalTitle').innerHTML = '<i class="fas fa-user-plus"></i> Add New Member';
+        openModal('memberModal');
+    });
     
     // Setup modal handlers
     setupModalHandlers();
-    
-    // Make functions available globally for onclick
     window.closeModal = closeModal;
-    window.openModal = openModal;
-    
-    // Add event listener for the Add Member button
-    document.getElementById('addMemberBtn').addEventListener('click', () => {
-        openModal('memberModal');
-    });
     
     // Initial load
     loadMembers();
 </script>
 
+<style>
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+    }
+    
+    .form-group {
+        margin-bottom: 15px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 500;
+        color: #555;
+    }
+    
+    .form-group input, .form-group select, .form-group textarea {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+    }
+    
+    .form-group small {
+        font-size: 11px;
+        color: #999;
+    }
+    
+    .detail-row {
+        display: flex;
+        padding: 10px 0;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .detail-label {
+        width: 120px;
+        font-weight: 600;
+        color: #555;
+    }
+    
+    .detail-value {
+        flex: 1;
+        color: #333;
+    }
+    
+    .btn-view {
+        background: #17a2b8;
+        color: white;
+        padding: 6px 10px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-right: 5px;
+    }
+    
+    .btn-view:hover {
+        background: #138496;
+    }
+    
+    .filter-select {
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background: white;
+        cursor: pointer;
+    }
+    
+    .search-input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+    }
+    
+    .pagination {
+        margin-top: 20px;
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+    }
+    
+    @media (max-width: 768px) {
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+        
+        .detail-row {
+            flex-direction: column;
+        }
+        
+        .detail-label {
+            width: 100%;
+            margin-bottom: 5px;
+        }
+        
+        .action-buttons {
+            flex-direction: column;
+        }
+        
+        .action-buttons button {
+            width: 100%;
+        }
+    }
+</style>
+
 </body>
-                </html>
+</html>
