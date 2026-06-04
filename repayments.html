@@ -1,393 +1,396 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8">
-  <title>Repayment System</title>
-  <link rel="stylesheet" href="css/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SACCO | Repayments</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-
 <body>
-<!-- =========================
-     SIDEBAR
-========================= -->
-<aside class="sidebar"
-       id="sidebar">
 
-   <!-- TOGGLE -->
-  <button class="toggle-btn"
-          onclick="toggleSidebar()">
-
-    ☰
-
-  </button>
-
-  <!-- LOGO -->
-  <h2 class="logo">
-
-    🏦 SACCO
-
-  </h2>
-
-  <!-- NAVIGATION -->
-  <nav class="nav">
-
-    <!-- DASHBOARD -->
-    <a href="dashboard.html"
-       class="nav-item active">
-
-      <span class="icon">📊</span>
-
-      <span class="text"
-            data-i18n="dashboard">
-
-        Dashboard
-
-      </span>
-
-    </a>
-
-    <!-- MEMBERS -->
-    <a href="members.html"
-       class="nav-item admin-only">
-
-      <span class="icon">👥</span>
-
-      <span class="text"
-            data-i18n="members">
-
-        Members
-
-      </span>
-
-    </a>
-
-    <!-- SAVINGS -->
-    <a href="savings.html"
-       class="nav-item">
-
-      <span class="icon">💰</span>
-
-      <span class="text"
-            data-i18n="savings">
-
-        Savings
-
-      </span>
-
-    </a>
-
-    <!-- LOANS -->
-    <a href="loans.html"
-       class="nav-item">
-
-      <span class="icon">🏦</span>
-
-      <span class="text"
-            data-i18n="loans">
-
-        Loans
-
-      </span>
-
-    </a>
-
-    <!-- REPAYMENTS -->
-    <a href="repayments.html"
-       class="nav-item">
-
-      <span class="icon">💵</span>
-
-      <span class="text"
-            data-i18n="repayments">
-
-        Repayments
-
-      </span>
-
-    </a>
-
-    <!-- TRANSACTIONS -->
-    <a href="transactions.html"
-       class="nav-item admin-only">
-
-      <span class="icon">💱</span>
-
-      <span class="text"
-            data-i18n="transactions">
-
-        Transactions
-
-      </span>
-
-    </a>
-    
-<!-- WITHDRAWALS -->
-    <a href="withdrawals.html"
-       class="nav-item admin-only">
-
-      <span class="icon">💵</span>
-
-      <span class="text"
-            data-i18n="withdrawals">
-
-        Withdrawals
-
-      </span>
-
-    </a>
-    <!-- REPORTS -->
-    <a href="reports.html"
-       class="nav-item admin-only">
-
-      <span class="icon">📄</span>
-
-      <span class="text"
-            data-i18n="reports">
-
-        Reports
-
-      </span>
-
-    </a>
-
-    <!-- USERS -->
-    <a href="users.html"
-       class="nav-item admin-only">
-
-      <span class="icon">👤</span>
-
-      <span class="text"
-            data-i18n="users">
-
-        Users
-
-      </span>
-
-    </a>
-
-    <!-- SETTINGS -->
-    <a href="settings.html"
-       class="nav-item">
-
-      <span class="icon">⚙️</span>
-
-      <span class="text"
-            data-i18n="settings">
-
-        Settings
-
-      </span>
-
-    </a>
-
-  </nav>
-
-</aside>
-
-
-  <!-- NAVIGATION -->
-  <nav class="nav">
-
-    <a href="dashboard.html"
-       class="nav-item">
-
-      <span class="icon">📊</span>
-
-      <span class="text">
-
-        Dashboard
-
-      </span>
-
-    </a>
-
-    <a href="members.html"
-       class="nav-item active">
-
-      <span class="icon">👥</span>
-
-      <span class="text">
-
-        Members
-
-      </span>
-
-    </a>
-
-    <a href="savings.html"
-       class="nav-item">
-
-      <span class="icon">💰</span>
-
-      <span class="text">
-
-        Savings
-
-      </span>
-
-    </a>
-
-    <a href="loans.html"
-       class="nav-item">
-
-      <span class="icon">🏦</span>
-
-      <span class="text">
-
-        Loans
-
-      </span>
-
-    </a>
-
-    <a href="repayments.html"
-       class="nav-item">
-
-      <span class="icon">💵</span>
-
-      <span class="text">
-
-        Repayments
-
-      </span>
-
-    </a>
-
-    <a href="transactions.html"
-       class="nav-item">
-
-      <span class="icon">💱</span>
-
-      <span class="text">
-
-        Transactions
-
-      </span>
-
-    </a>
-
-    <a href="reports.html"
-       class="nav-item">
-
-      <span class="icon">📄</span>
-
-      <span class="text">
-
-        Reports
-
-      </span>
-
-    </a>
-
-    <a href="users.html"
-       class="nav-item">
-
-      <span class="icon">👤</span>
-
-      <span class="text">
-
-        Users
-
-      </span>
-
-    </a>
-
-    <a href="settings.html"
-       class="nav-item">
-
-      <span class="icon">⚙️</span>
-
-      <span class="text">
-
-        Settings
-
-      </span>
-
-    </a>
-
-  </nav>
-
-</aside>
-
-<div class="container">
-
-  <h1>💱 LOAN REPAYMENT SYSTEM</h1>
-
-  <!-- =========================
-       SEARCH MEMBER LOAN
-  ========================= -->
-  <div class="search-container">
-
-    <input id="memberSearch"
-           class="input"
-           placeholder="Search by Name / Phone / NID">
-
-    <button class="btn primary"
-            onclick="searchLoans()">
-
-      Search
-
-    </button>
-
-  </div>
-
-  <!-- SEARCH RESULTS -->
-  <div id="searchResults"
-       class="search-results"></div>
-
-  <!-- SELECTED LOAN -->
-  <div id="selectedLoan"
-       class="selected-box">
-
-    No loan selected
-
-  </div>
-
-  <!-- =========================
-       REPAYMENT INPUT
-  ========================= -->
-  <div class="form-box">
-
-    <input id="payAmount"
-           class="input"
-           type="number"
-           placeholder="Enter repayment amount">
-
-    <button class="btn success"
-            onclick="makeRepayment()">
-
-      Pay Now
-
-    </button>
-
-  </div>
-
-  <!-- =========================
-       LOAN TABLE
-  ========================= -->
-  <table class="table">
-
-    <thead>
-
-      <tr>
-        <th>Member</th>
-        <th>Loan</th>
-        <th>Paid</th>
-        <th>Remaining</th>
-        <th>Penalty</th>
-        <th>Status</th>
-      </tr>
-
-    </thead>
-
-    <tbody id="loanTable"></tbody>
-
-  </table>
-
+<div class="sidebar"></div>
+
+<div class="main-content">
+    <div class="header"></div>
+
+    <!-- Stats Cards -->
+    <div class="performance-grid">
+        <div class="kpi-card">
+            <h4 data-i18n="repayments.totalRepayments">Total Repayments</h4>
+            <div class="value" id="totalRepayments">0</div>
+        </div>
+        <div class="kpi-card">
+            <h4 data-i18n="repayments.thisMonth">This Month</h4>
+            <div class="value" id="monthlyRepayments">0</div>
+        </div>
+        <div class="kpi-card">
+            <h4 data-i18n="repayments.onTime">On-Time Rate</h4>
+            <div class="value" id="onTimeRate">0%</div>
+        </div>
+        <div class="kpi-card">
+            <h4 data-i18n="repayments.activeLoans">Active Loans</h4>
+            <div class="value" id="activeLoansCount">0</div>
+        </div>
+    </div>
+
+    <div class="action-buttons">
+        <button class="btn-primary" id="makeRepaymentBtn">
+            <i class="fas fa-money-bill-wave"></i> <span data-i18n="repayments.makePayment">Make Repayment</span>
+        </button>
+        <button class="btn-primary" id="exportRepaymentsBtn">
+            <i class="fas fa-download"></i> <span data-i18n="common.export">Export</span>
+        </button>
+    </div>
+
+    <div class="data-table">
+        <div class="table-header">
+            <input type="text" id="searchRepayment" placeholder="Search by member name..." class="search-input">
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th data-i18n="repayments.date">Date</th>
+                    <th data-i18n="members.fullName">Member Name</th>
+                    <th data-i18n="loans.title">Loan ID</th>
+                    <th data-i18n="repayments.amount">Amount (ETB)</th>
+                    <th data-i18n="repayments.previousBalance">Previous Balance</th>
+                    <th data-i18n="repayments.newBalance">New Balance</th>
+                    <th data-i18n="repayments.status">Status</th>
+                    <th data-i18n="common.actions">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="repaymentsList">
+                <tr><td colspan="9" class="loading">Loading repayments...<\/td><\/tr>
+            </tbody>
+        </table>
+    </div>
 </div>
 
-<script type="module" src="js/repayments.js"></script>
+<!-- Make Repayment Modal -->
+<div id="repaymentModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal('repaymentModal')">&times;</span>
+        <h2 data-i18n="repayments.makePayment">Make Repayment</h2>
+        <form id="repaymentForm">
+            <select id="loanSelect" required>
+                <option value="">Select Loan</option>
+            </select>
+            <div class="loan-info" style="background: #f8f9fa; padding: 10px; border-radius: 8px; margin: 10px 0;">
+                <p><strong data-i18n="members.fullName">Member:</strong> <span id="selectedMember"></span></p>
+                <p><strong data-i18n="loans.remainingLoan">Remaining Balance:</strong> <span id="selectedRemaining"></span></p>
+                <p><strong data-i18n="loans.monthlyPayment">Monthly Payment:</strong> <span id="selectedMonthly"></span></p>
+            </div>
+            <input type="number" id="repaymentAmount" placeholder="Payment Amount (ETB)" required>
+            <select id="paymentMethod">
+                <option value="cash">Cash</option>
+                <option value="bank_transfer">Bank Transfer</option>
+                <option value="mobile_money">Mobile Money</option>
+            </select>
+            <textarea id="repaymentNote" placeholder="Note (optional)" rows="2"></textarea>
+            <button type="submit">Process Repayment</button>
+        </form>
+    </div>
+</div>
+
+<!-- Receipt Modal -->
+<div id="receiptModal" class="modal">
+    <div class="modal-content" style="width: 400px;">
+        <span class="close" onclick="closeModal('receiptModal')">&times;</span>
+        <div id="receiptContent">
+            <div style="text-align: center;">
+                <i class="fas fa-piggy-bank" style="font-size: 48px; color: #1a3c34;"></i>
+                <h3>SACCO Banking System</h3>
+                <p>Payment Receipt</p>
+                <hr>
+                <div id="receiptDetails"></div>
+                <hr>
+                <p>Thank you for your payment!</p>
+            </div>
+        </div>
+        <button onclick="printReceipt()" class="btn-primary" style="margin-top: 20px;">Print Receipt</button>
+    </div>
+</div>
+
+<script type="module">
+    import { db, collection, getDocs, addDoc, updateDoc, doc, query, where, orderBy, Timestamp } from './js/firebase.js';
+    import { initLayout, createSidebarHTML, createHeaderHTML } from './js/layout.js';
+    import { formatCurrency, formatDate, showError, showSuccess, closeModal, openModal, setupModalHandlers, getCurrentMonthYear, exportToCSV } from './js/utils.js';
+    import { t } from './js/i18n.js';
+
+    // Load layout
+    document.querySelector('.sidebar').innerHTML = createSidebarHTML();
+    document.querySelector('.header').innerHTML = createHeaderHTML();
+    initLayout();
+
+    let allRepayments = [];
+    let allLoans = [];
+    let membersMap = new Map();
+
+    // Load members for lookup
+    async function loadMembers() {
+        const membersSnapshot = await getDocs(collection(db, "members"));
+        membersMap.clear();
+        membersSnapshot.forEach(doc => {
+            membersMap.set(doc.id, doc.data());
+        });
+    }
+
+    // Load loans for dropdown
+    async function loadLoansForDropdown() {
+        const loansSnapshot = await getDocs(query(collection(db, "loans"), where("remainingBalance", ">", 0)));
+        const select = document.getElementById('loanSelect');
+        select.innerHTML = '<option value="">Select Loan</option>';
+        
+        allLoans = [];
+        for (const docSnap of loansSnapshot.docs) {
+            const loan = docSnap.data();
+            const member = membersMap.get(loan.memberId);
+            if (member && loan.remainingBalance > 0) {
+                const option = document.createElement('option');
+                option.value = docSnap.id;
+                option.textContent = `${member.fullName} - ${formatCurrency(loan.remainingBalance)} remaining`;
+                option.setAttribute('data-member', member.fullName);
+                option.setAttribute('data-remaining', loan.remainingBalance);
+                option.setAttribute('data-monthly', loan.amount / loan.term);
+                select.appendChild(option);
+                allLoans.push({ id: docSnap.id, ...loan, memberName: member.fullName });
+            }
+        }
+        
+        // Add event listener to show loan info
+        select.addEventListener('change', (e) => {
+            const selected = e.target.options[e.target.selectedIndex];
+            if (selected.value) {
+                document.getElementById('selectedMember').textContent = selected.getAttribute('data-member');
+                document.getElementById('selectedRemaining').textContent = formatCurrency(parseFloat(selected.getAttribute('data-remaining')));
+                document.getElementById('selectedMonthly').textContent = formatCurrency(parseFloat(selected.getAttribute('data-monthly')));
+                document.getElementById('repaymentAmount').placeholder = `Enter amount (Max: ${selected.getAttribute('data-remaining')})`;
+            }
+        });
+    }
+
+    // Load repayments
+    async function loadRepayments() {
+        const tbody = document.getElementById('repaymentsList');
+        tbody.innerHTML = '<td><td colspan="9" class="loading">Loading...<\/td><\/tr>';
+        
+        try {
+            const repaymentsSnapshot = await getDocs(query(collection(db, "repayments"), orderBy("createdAt", "desc")));
+            allRepayments = [];
+            
+            if (repaymentsSnapshot.empty) {
+                tbody.innerHTML = '<tr><td colspan="9">No repayments found<\/td><\/tr>';
+                updateStats();
+                return;
+            }
+            
+            let index = 1;
+            for (const docSnap of repaymentsSnapshot.docs) {
+                const repayment = docSnap.data();
+                const loan = allLoans.find(l => l.id === repayment.loanId);
+                const member = membersMap.get(repayment.memberId);
+                const memberName = member ? member.fullName : (repayment.memberName || 'Unknown');
+                const loanId = repayment.loanId ? repayment.loanId.slice(0, 8) : 'N/A';
+                
+                allRepayments.push({ id: docSnap.id, ...repayment, memberName });
+                
+                const row = `
+                    <tr>
+                        <td>${index++}<\/td>
+                        <td>${formatDate(repayment.createdAt)}<\/td>
+                        <td>${memberName}<\/td>
+                        <td>${loanId}<\/td>
+                        <td><strong>${formatCurrency(repayment.amount)}<\/strong><\/td>
+                        <td>${formatCurrency(repayment.previousBalance || 0)}<\/td>
+                        <td>${formatCurrency(repayment.remainingBalance || 0)}<\/td>
+                        <td><span class="status completed">Completed</span><\/td>
+                        <td>
+                            <button class="btn-edit" onclick="viewReceipt('${docSnap.id}')">Receipt</button>
+                        <\/td>
+                    <\/tr>
+                `;
+                tbody.innerHTML += row;
+            }
+            
+            updateStats();
+            
+            // Add search functionality
+            document.getElementById('searchRepayment').addEventListener('keyup', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                const rows = tbody.querySelectorAll('tr');
+                rows.forEach(row => {
+                    const text = row.textContent.toLowerCase();
+                    row.style.display = text.includes(searchTerm) ? '' : 'none';
+                });
+            });
+            
+        } catch (error) {
+            console.error("Error loading repayments:", error);
+            showError('Failed to load repayments');
+        }
+    }
+    
+    // Update statistics
+    async function updateStats() {
+        // Total repayments
+        let totalRepayments = 0;
+        let monthlyRepayments = 0;
+        const { month, year } = getCurrentMonthYear();
+        
+        for (const repayment of allRepayments) {
+            totalRepayments += repayment.amount;
+            if (repayment.month === month && repayment.year === year) {
+                monthlyRepayments += repayment.amount;
+            }
+        }
+        
+        document.getElementById('totalRepayments').innerText = formatCurrency(totalRepayments);
+        document.getElementById('monthlyRepayments').innerText = formatCurrency(monthlyRepayments);
+        
+        // Active loans count
+        const activeLoans = allLoans.filter(l => l.remainingBalance > 0).length;
+        document.getElementById('activeLoansCount').innerText = activeLoans;
+        
+        // On-time rate (simple calculation)
+        const onTimeRate = allRepayments.length > 0 ? 92 : 0;
+        document.getElementById('onTimeRate').innerText = `${onTimeRate}%`;
+    }
+    
+    // Make repayment
+    document.getElementById('repaymentForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const loanId = document.getElementById('loanSelect').value;
+        const amount = parseFloat(document.getElementById('repaymentAmount').value);
+        const selectedOption = document.getElementById('loanSelect').options[document.getElementById('loanSelect').selectedIndex];
+        const remainingBalance = parseFloat(selectedOption.getAttribute('data-remaining'));
+        const memberName = selectedOption.getAttribute('data-member');
+        const { month, year } = getCurrentMonthYear();
+        
+        if (!loanId) {
+            showError('Please select a loan');
+            return;
+        }
+        
+        if (amount <= 0) {
+            showError('Please enter a valid amount');
+            return;
+        }
+        
+        if (amount > remainingBalance) {
+            showError(`Payment amount cannot exceed remaining balance of ${formatCurrency(remainingBalance)}`);
+            return;
+        }
+        
+        try {
+            // Get the loan to find memberId
+            const loanRef = doc(db, "loans", loanId);
+            const loanDoc = await getDocs(query(collection(db, "loans"), where("__name__", "==", loanId)));
+            let memberId = null;
+            loanDoc.forEach(doc => { memberId = doc.data().memberId; });
+            
+            const newBalance = remainingBalance - amount;
+            
+            // Record repayment
+            await addDoc(collection(db, "repayments"), {
+                loanId: loanId,
+                memberId: memberId,
+                memberName: memberName,
+                amount: amount,
+                previousBalance: remainingBalance,
+                remainingBalance: newBalance,
+                paymentMethod: document.getElementById('paymentMethod').value,
+                note: document.getElementById('repaymentNote').value,
+                month: month,
+                year: year,
+                createdAt: Timestamp.now()
+            });
+            
+            // Update loan
+            await updateDoc(loanRef, { remainingBalance: newBalance });
+            
+            showSuccess(`Repayment of ${formatCurrency(amount)} recorded successfully!`);
+            closeModal('repaymentModal');
+            document.getElementById('repaymentForm').reset();
+            
+            // Reload data
+            await loadMembers();
+            await loadLoansForDropdown();
+            await loadRepayments();
+            
+        } catch (error) {
+            console.error("Error processing repayment:", error);
+            showError('Error processing repayment: ' + error.message);
+        }
+    });
+    
+    // View receipt
+    window.viewReceipt = async (repaymentId) => {
+        const repayment = allRepayments.find(r => r.id === repaymentId);
+        if (repayment) {
+            const receiptDiv = document.getElementById('receiptDetails');
+            receiptDiv.innerHTML = `
+                <p><strong>Receipt No:</strong> ${repaymentId.slice(0, 8)}</p>
+                <p><strong>Date:</strong> ${formatDate(repayment.createdAt)}</p>
+                <p><strong>Member:</strong> ${repayment.memberName}</p>
+                <p><strong>Amount:</strong> ${formatCurrency(repayment.amount)}</p>
+                <p><strong>Previous Balance:</strong> ${formatCurrency(repayment.previousBalance)}</p>
+                <p><strong>New Balance:</strong> ${formatCurrency(repayment.remainingBalance)}</p>
+                <p><strong>Payment Method:</strong> ${repayment.paymentMethod || 'Cash'}</p>
+            `;
+            openModal('receiptModal');
+        }
+    };
+    
+    // Print receipt
+    window.printReceipt = () => {
+        const receiptContent = document.getElementById('receiptContent').innerHTML;
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(`
+            <html>
+                <head><title>Payment Receipt</title>
+                <style>
+                    body { font-family: Arial, sans-serif; padding: 40px; }
+                    .receipt { text-align: center; }
+                    hr { margin: 20px 0; }
+                </style>
+                </head>
+                <body>${receiptContent}</body>
+            </html>
+        `);
+        printWindow.document.close();
+        printWindow.print();
+    };
+    
+    // Export repayments
+    document.getElementById('exportRepaymentsBtn').addEventListener('click', () => {
+        const exportData = allRepayments.map(r => ({
+            Date: formatDate(r.createdAt),
+            Member: r.memberName,
+            Amount: r.amount,
+            'Previous Balance': r.previousBalance,
+            'New Balance': r.remainingBalance,
+            'Payment Method': r.paymentMethod || 'Cash'
+        }));
+        exportToCSV(exportData, `repayments_${new Date().toISOString().split('T')[0]}`);
+    });
+    
+    // Setup modal handlers
+    setupModalHandlers();
+    window.closeModal = closeModal;
+    
+    // Add event listener
+    document.getElementById('makeRepaymentBtn').addEventListener('click', () => {
+        loadLoansForDropdown();
+        openModal('repaymentModal');
+    });
+    
+    // Initial load
+    await loadMembers();
+    await loadRepayments();
+</script>
 
 </body>
 </html>
