@@ -142,4 +142,228 @@
         e.preventDefault();
         localStorage.setItem('sacco_org_name', document.getElementById('orgName').value);
         localStorage.setItem('sacco_currency', document.getElementById('currency').value);
-        localStorage.set
+        localStorage.setItem('sacco_date_format', document.getElementById('dateFormat').value);
+        showSuccess('General settings saved!');
+    });
+    
+    // Save loan settings
+    document.getElementById('loanSettingsForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        localStorage.setItem('sacco_interest_rate', document.getElementById('interestRate').value);
+        localStorage.setItem('sacco_min_loan', document.getElementById('minLoanAmount').value);
+        localStorage.setItem('sacco_max_loan', document.getElementById('maxLoanAmount').value);
+        localStorage.setItem('sacco_max_term', document.getElementById('maxLoanTerm').value);
+        showSuccess('Loan settings saved!');
+    });
+    
+    // Backup data
+    document.getElementById('backupBtn').addEventListener('click', async () => {
+        try {
+            const collections = ['members', 'savings', 'loans', 'repayments', 'withdrawals', 'users'];
+            const backupData = {};
+            
+            for (const coll of collections) {
+                const snapshot = await getDocs(collection(db, coll));
+                backupData[coll] = [];
+                snapshot.forEach(doc => {
+                    backupData[coll].push({ id: doc.id, ...doc.data() });
+                });
+            }
+            
+            const backupJson = JSON.stringify(backupData, null, 2);
+            const blob = new Blob([backupJson], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `sacco_backup_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            localStorage.setItem('sacco_last_backup', new Date().toLocaleString());
+            document.getElementById('lastBackup').textContent = new Date().toLocaleString();
+            showSuccess('Backup created successfully!');
+        } catch (error) {
+            console.error("Backup error:", error);
+            showError('Backup failed: ' + error.message);
+        }
+    });
+    
+    // Restore data
+    document.getElementById('restoreBtn').addEventListener('click', () => {
+        document.getElementById('restoreFile').click();
+    });
+    
+    document.getElementById('restoreFile').addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        const confirmed = confirm('Restoring will overwrite existing data. Are you sure?');
+        if (!confirmed) return;
+        
+        try {
+            const text = await file.text();
+            const backupData = JSON.parse(text);
+            const batch = writeBatch(db);
+            
+            for (const [collectionName, documents] of Object.entries(backupData)) {
+                for (const doc of documents) {
+                    const docRef = doc(db, collectionName, doc.id);
+                    batch.set(docRef, doc);
+                }
+            }
+            
+            await batch.commit();
+            showSuccess('Data restored successfully!');
+            window.location.reload();
+        } catch (error) {
+            console.error("Restore error:", error);
+            showError('Restore failed: ' + error.message);
+        }
+    });
+    
+    // Clear all data
+    document.getElementById('clearDataBtn').addEventListener('click', async () => {
+        const confirmed = confirm('DANGER: This will delete ALL data. Are you ABSOLUTELY sure?');
+        if (!confirmed) return;
+        
+        try {
+            const collections = ['members', 'savings', 'loans', 'repayments', 'withdrawals'];
+            for (const coll of collections) {
+                const snapshot = await getDocs(collection(db, coll));
+                const batch = writeBatch(db);
+                snapshot.forEach(doc => {
+                    batch.delete(doc.ref);
+                });
+                await batch.commit();
+            }
+            showSuccess('All data cleared!');
+            window.location.reload();
+        } catch (error) {
+            console.error("Clear data error:", error);
+            showError('Failed to clear data: ' + error.message);
+        }
+    });
+    
+    // Reset system
+    document.getElementById('resetSystemBtn').addEventListener('click', async () => {
+        const confirmed = confirm('DANGER: This will reset the ENTIRE system including settings. Are you ABSOLUTELY sure?');
+        if (!confirmed) return;
+        
+        try {
+            // Clear all collections
+            const collections = ['members', 'savings', 'loans', 'repayments', 'withdrawals', 'users'];
+            for (const coll of collections) {
+                const snapshot = await getDocs(collection(db, coll));
+                const batch = writeBatch(db);
+                snapshot.forEach(doc => {
+                    batch.delete(doc.ref);
+                });
+                await batch.commit();
+            }
+            
+            // Clear localStorage
+            localStorage.clear();
+            
+            showSuccess('System reset successfully!');
+            window.location.href = 'login.html';
+        } catch (error) {
+            console.error("Reset error:", error);
+            showError('Reset failed: ' + error.message);
+        }
+    });
+    
+    loadSettings();
+</script>
+
+<style>
+    .settings-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 25px;
+    }
+    
+    .settings-card {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    }
+    
+    .settings-card h2 {
+        color: #1a3c34;
+        margin-bottom: 20px;
+        font-size: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .form-group {
+        margin-bottom: 15px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: #555;
+        font-weight: 500;
+    }
+    
+    .form-group input,
+    .form-group select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+    }
+    
+    .backup-buttons {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+    
+    .backup-info {
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px solid #eee;
+        color: #666;
+    }
+    
+    .system-info p {
+        padding: 8px 0;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .danger-zone {
+        border: 2px solid #dc3545;
+        background: #fff5f5;
+    }
+    
+    .danger-buttons {
+        display: flex;
+        gap: 10px;
+    }
+    
+    .btn-danger {
+        background: #dc3545;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+    }
+    
+    .btn-danger:hover {
+        background: #c82333;
+    }
+    
+    @media (max-width: 768px) {
+        .settings-container {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+</body>
+</html>
