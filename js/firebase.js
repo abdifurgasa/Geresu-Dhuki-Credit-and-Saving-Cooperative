@@ -97,3 +97,89 @@ export {
     getDownloadURL,
     deleteObject
 };
+// Users Collection
+users/{userId}
+{
+    uid: "firebase_auth_uid",
+    fullName: "John Doe",
+    email: "john@sacco.com",
+    role: "admin|officer|viewer",
+    status: "active|inactive",
+    createdAt: timestamp
+}
+
+// Members Collection
+members/{memberId}
+{
+    fullName: "Abebe Kebede",
+    email: "abebe@sacco.com",
+    phone: "0912345678",
+    nid: "12345678",
+    savingsBalance: 50000,
+    status: "active",
+    joinDate: timestamp,
+    createdBy: "userId",
+    createdAt: timestamp
+}
+
+// Savings Collection
+savings/{savingId}
+{
+    memberId: "memberId",
+    memberName: "Abebe Kebede",
+    amount: 5000,
+    previousBalance: 45000,
+    newBalance: 50000,
+    paymentMethod: "cash",
+    month: 1,
+    year: 2024,
+    createdBy: "userId",
+    createdAt: timestamp
+}
+
+// Loans Collection
+loans/{loanId}
+{
+    memberId: "memberId",
+    memberName: "Abebe Kebede",
+    principal: 50000,
+    interest: 6000,
+    totalLoan: 56000,
+    remainingLoan: 56000,
+    duration: 12,
+    monthlyPayment: 4666.67,
+    interestRate: 12,
+    status: "approved|pending|rejected",
+    createdBy: "userId",
+    createdAt: timestamp
+}
+
+// Repayments Collection
+repayments/{repaymentId}
+{
+    loanId: "loanId",
+    memberId: "memberId",
+    memberName: "Abebe Kebede",
+    amount: 4666.67,
+    previousBalance: 56000,
+    remainingBalance: 51333.33,
+    paymentMethod: "cash",
+    month: 1,
+    year: 2024,
+    createdBy: "userId",
+    createdAt: timestamp
+}
+
+// Withdrawals Collection
+withdrawals/{withdrawalId}
+{
+    memberId: "memberId",
+    memberName: "Abebe Kebede",
+    amount: 10000,
+    reason: "Emergency",
+    previousBalance: 50000,
+    newBalance: 40000,
+    status: "approved",
+    createdBy: "userId",
+    createdAt: timestamp
+}
