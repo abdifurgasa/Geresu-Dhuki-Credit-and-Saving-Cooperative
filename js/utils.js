@@ -7,7 +7,7 @@ export function formatCurrency(amount) {
         currency: 'ETB',
         minimumFractionDigits: 0,
         maximumFractionDigits: 0
-    }).format(amount);
+    }).format(amount || 0);
 }
 
 // Format date
@@ -17,6 +17,15 @@ export function formatDate(date) {
         return date.toDate().toLocaleDateString('en-US');
     }
     return new Date(date).toLocaleDateString('en-US');
+}
+
+// Format datetime
+export function formatDateTime(date) {
+    if (!date) return 'N/A';
+    if (date.toDate) {
+        return date.toDate().toLocaleString('en-US');
+    }
+    return new Date(date).toLocaleString('en-US');
 }
 
 // Show loading state
@@ -32,8 +41,13 @@ export function showError(message) {
     const errorDiv = document.createElement('div');
     errorDiv.className = 'alert alert-error';
     errorDiv.innerHTML = message;
-    document.querySelector('.main-content').insertBefore(errorDiv, document.querySelector('.main-content').firstChild);
-    setTimeout(() => errorDiv.remove(), 3000);
+    const mainContent = document.querySelector('.main-content');
+    if (mainContent) {
+        mainContent.insertBefore(errorDiv, mainContent.firstChild);
+        setTimeout(() => errorDiv.remove(), 5000);
+    } else {
+        alert(message);
+    }
 }
 
 // Show success message
@@ -41,8 +55,13 @@ export function showSuccess(message) {
     const successDiv = document.createElement('div');
     successDiv.className = 'alert alert-success';
     successDiv.innerHTML = message;
-    document.querySelector('.main-content').insertBefore(successDiv, document.querySelector('.main-content').firstChild);
-    setTimeout(() => successDiv.remove(), 3000);
+    const mainContent = document.querySelector('.main-content');
+    if (mainContent) {
+        mainContent.insertBefore(successDiv, mainContent.firstChild);
+        setTimeout(() => successDiv.remove(), 3000);
+    } else {
+        alert(message);
+    }
 }
 
 // Get current month and year
@@ -72,6 +91,12 @@ export function isValidPhone(phone) {
     return re.test(phone);
 }
 
+// Validate Ethiopian national ID
+export function isValidNID(nid) {
+    const re = /^[0-9]{8,}$/;
+    return re.test(nid);
+}
+
 // Close modal
 export function closeModal(modalId) {
     const modal = document.getElementById(modalId);
@@ -95,4 +120,43 @@ export function setupModalHandlers() {
             event.target.style.display = 'none';
         }
     };
+}
+
+// Export to CSV
+export function exportToCSV(data, filename) {
+    const headers = Object.keys(data[0]);
+    const csvRows = [];
+    csvRows.push(headers.join(','));
+    
+    for (const row of data) {
+        const values = headers.map(header => {
+            const val = row[header];
+            return `"${(val || '').toString().replace(/"/g, '""')}"`;
+        });
+        csvRows.push(values.join(','));
+    }
+    
+    const blob = new Blob([csvRows.join('\n')], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${filename}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+// Print report
+export function printReport(elementId) {
+    const content = document.getElementById(elementId).innerHTML;
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+        <html>
+            <head><title>Print Report</title>
+            <link rel="stylesheet" href="css/style.css">
+            </head>
+            <body>${content}</body>
+        </html>
+    `);
+    printWindow.document.close();
+    printWindow.print();
 }
