@@ -206,4 +206,103 @@ export async function processWithdrawal(event) {
         });
         
         showSuccess(`Withdrawal of ${formatCurrency(amount)} processed successfully!`);
-        closeWithdrawalModal
+        closeWithdrawalModal();
+        document.getElementById('withdrawalForm')?.reset();
+        loadWithdrawals();
+        
+        // Show receipt
+        showWithdrawalReceipt(memberName, amount, newBalance, reason);
+        
+        // Update dashboard if on dashboard page
+        if (typeof window.loadDashboardData === 'function') {
+            window.loadDashboardData();
+        }
+        
+    } catch (error) {
+        console.error("Error processing withdrawal:", error);
+        showError('Error processing withdrawal: ' + error.message);
+    }
+}
+
+// Show receipt
+function showWithdrawalReceipt(memberName, amount, newBalance, reason) {
+    const receiptContent = document.getElementById('withdrawalReceiptContent');
+    if (receiptContent) {
+        receiptContent.innerHTML = `
+            <div style="text-align: center;">
+                <i class="fas fa-piggy-bank" style="font-size: 48px; color: #1a3c34;"></i>
+                <h3>SACCO Banking System</h3>
+                <p>Withdrawal Receipt</p>
+                <hr>
+                <p><strong>Receipt No:</strong> WTH-${Date.now().toString().slice(-8)}</p>
+                <p><strong>Date:</strong> ${new Date().toLocaleString()}</p>
+                <p><strong>Member:</strong> ${memberName}</p>
+                <p><strong>Amount Withdrawn:</strong> ${formatCurrency(amount)}</p>
+                <p><strong>New Balance:</strong> ${formatCurrency(newBalance)}</p>
+                <p><strong>Reason:</strong> ${reason || 'Not specified'}</p>
+                <hr>
+                <p>Thank you for banking with us!</p>
+            </div>
+        `;
+        openReceiptModal();
+    }
+}
+
+// View withdrawal receipt
+window.viewWithdrawalReceipt = (withdrawalId) => {
+    const withdrawal = allWithdrawals.find(w => w.id === withdrawalId);
+    if (withdrawal) {
+        showWithdrawalReceipt(withdrawal.memberName, withdrawal.amount, withdrawal.newBalance, withdrawal.reason);
+    }
+};
+
+// Modal functions
+function closeWithdrawalModal() {
+    const modal = document.getElementById('withdrawalModal');
+    if (modal) modal.style.display = 'none';
+}
+
+function openReceiptModal() {
+    const modal = document.getElementById('receiptModal');
+    if (modal) modal.style.display = 'flex';
+}
+
+// Export functions
+window.closeModal = (modalId) => {
+    const modal = document.getElementById(modalId);
+    if (modal) modal.style.display = 'none';
+};
+
+window.printReceipt = () => {
+    const receiptContent = document.getElementById('withdrawalReceiptContent').innerHTML;
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+        <html>
+            <head><title>Withdrawal Receipt</title>
+            <style>
+                body { font-family: Arial, sans-serif; padding: 40px; }
+                hr { margin: 20px 0; }
+            </style>
+            </head>
+            <body>${receiptContent}</body>
+        </html>
+    `);
+    printWindow.document.close();
+    printWindow.print();
+};
+
+// Initialize withdrawals page
+export function initWithdrawalsPage() {
+    loadWithdrawals();
+    
+    const withdrawalForm = document.getElementById('withdrawalForm');
+    if (withdrawalForm) {
+        withdrawalForm.addEventListener('submit', processWithdrawal);
+    }
+    
+    window.onclick = (event) => {
+        if (event.target.classList.contains('modal')) {
+            event.target.style.display = 'none';
+        }
+    };
+}
