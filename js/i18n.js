@@ -238,6 +238,60 @@ const translations = {
         'auth.password': 'የይለፍ ቃል',
         'auth.welcome': 'እንኳን ወደ SACCO ባንክ በደህና መጡ'
     }
+    // Add these to the 'en' object in i18n.js
+'en': {
+    // ... existing translations ...
+    
+    'members.memberId': 'Member ID',
+    'members.address': 'Address',
+    'members.occupation': 'Occupation',
+    'members.initialDeposit': 'Initial Deposit',
+    'members.memberDetails': 'Member Details',
+    'members.deleteConfirm': 'Are you sure you want to delete',
+    'members.active': 'Active Members',
+    'dashboard.averageSavings': 'Average Savings',
+    'common.avatar': 'Avatar',
+    'common.import': 'Import CSV',
+    'common.importSuccess': 'Members imported successfully!',
+    'common.exportSuccess': 'Members exported successfully!',
+    'common.addSuccess': 'added successfully with',
+    'common.updateSuccess': 'Member updated successfully!',
+    'common.deleteSuccess': 'Member deleted successfully!',
+    'common.fillAllFields': 'Please fill all required fields!',
+    'common.cannotUndo': 'This action cannot be undone!',
+    'common.confirmDelete': 'Confirm Delete'
+},
+
+// Add to 'om' object
+'om': {
+    // ... existing translations ...
+    'members.memberId': 'ID Miseensaa',
+    'members.address': 'Teessoo',
+    'members.occupation': 'Hojii',
+    'members.initialDeposit': 'Kadhaa Jalqabaa',
+    'members.memberDetails': 'Ibsa Miseensaa',
+    'members.active': 'Miseensonni Hojjatan',
+    'dashboard.averageSavings': 'Kadhaa Giddugaleessaa',
+    'common.import': 'CSV Galmeessi',
+    'common.importSuccess': 'Miseensonni akka barbaadetti galmeessaman!',
+    'common.exportSuccess': 'Miseensonni akka barbaadetti baafaman!'
+},
+
+// Add to 'am' object
+'am': {
+    // ... existing translations ...
+    'members.memberId': 'የአባል መታወቂያ',
+    'members.address': 'አድራሻ',
+    'members.occupation': 'ሙያ',
+    'members.initialDeposit': 'የመጀመሪያ ተቀማጭ',
+    'members.memberDetails': 'የአባል ዝርዝር',
+    'members.active': 'ንቁ አባላት',
+    'dashboard.averageSavings': 'አማካይ ቁጠባ',
+    'common.import': 'CSV አምጣ',
+    'common.importSuccess': 'አባላት በሚገባ ተጭነዋል!',
+    'common.exportSuccess': 'አባላት በሚገባ ወጥተዋል!'
+}
+
 };
 
 // Current language
