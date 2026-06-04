@@ -1,386 +1,323 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
-  <meta charset="UTF-8">
-
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
-
-  <title data-i18n="users">
-    Users
-  </title>
-
-  <link rel="stylesheet" href="css/style.css">
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SACCO | User Management</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-
 <body>
 
-<!-- SIDEBAR -->
-<aside class="sidebar" id="sidebar">
+<div class="sidebar"></div>
 
-  <!-- TOGGLE -->
-  <button
-    class="toggle-btn"
-    onclick="toggleSidebar()"
-  >
-    ☰
-  </button>
+<div class="main-content">
+    <div class="header"></div>
 
-  <!-- LOGO -->
-  <h2 class="logo">
-    🏦 GERESU DHUKI SACCO
-  </h2>
-
-  <!-- NAVIGATION -->
-  <nav class="nav">
-
-    <!-- DASHBOARD -->
-    <a
-      href="dashboard.html"
-      class="nav-item"
-    >
-      <span class="icon">📊</span>
-
-      <span
-        class="text"
-        data-i18n="dashboard"
-      >
-        Dashboard
-      </span>
-    </a>
-
-    <!-- MEMBERS -->
-    <a
-      href="members.html"
-      class="nav-item admin-only"
-    >
-      <span class="icon">👥</span>
-
-      <span
-        class="text"
-        data-i18n="members"
-      >
-        Members
-      </span>
-    </a>
-
-    <!-- SAVINGS -->
-    <a
-      href="savings.html"
-      class="nav-item"
-    >
-      <span class="icon">💰</span>
-
-      <span
-        class="text"
-        data-i18n="savings"
-      >
-        Savings
-      </span>
-    </a>
-
-    <!-- LOANS -->
-    <a
-      href="loans.html"
-      class="nav-item"
-    >
-      <span class="icon">🏦</span>
-
-      <span
-        class="text"
-        data-i18n="loans"
-      >
-        Loans
-      </span>
-    </a>
-
-    <!-- REPAYMENTS -->
-    <a
-      href="repayments.html"
-      class="nav-item"
-    >
-      <span class="icon">💵</span>
-
-      <span
-        class="text"
-        data-i18n="repayments"
-      >
-        Repayments
-      </span>
-    </a>
-
-    <!-- WITHDRAWALS -->
-    <a
-      href="withdrawals.html"
-      class="nav-item admin-only"
-    >
-      <span class="icon">💸</span>
-
-      <span
-        class="text"
-        data-i18n="withdrawals"
-      >
-        Withdrawals
-      </span>
-    </a>
-
-    <!-- REPORTS -->
-    <a
-      href="reports.html"
-      class="nav-item admin-only"
-    >
-      <span class="icon">📄</span>
-
-      <span
-        class="text"
-        data-i18n="reports"
-      >
-        Reports
-      </span>
-    </a>
-
-    <!-- USERS -->
-    <a
-      href="users.html"
-      class="nav-item active admin-only"
-    >
-      <span class="icon">👤</span>
-
-      <span
-        class="text"
-        data-i18n="users"
-      >
-        Users
-      </span>
-    </a>
-
-    <!-- SETTINGS -->
-    <a
-      href="settings.html"
-      class="nav-item"
-    >
-      <span class="icon">⚙️</span>
-
-      <span
-        class="text"
-        data-i18n="settings"
-      >
-        Settings
-      </span>
-    </a>
-
-    <!-- LOGOUT -->
-    <a
-      href="#"
-      class="nav-item logout"
-      id="logoutBtn"
-    >
-      <span class="icon">🚪</span>
-
-      <span
-        class="text"
-        data-i18n="logout"
-      >
-        Logout
-      </span>
-    </a>
-
-  </nav>
-
-</aside>
-
-<!-- MAIN -->
-<main class="main" id="main">
-
-  <!-- TOPBAR -->
-  <div class="topbar">
-
-    <h2 data-i18n="usersManagement">
-      Users Management
-    </h2>
-
-    <div class="topbar-actions">
-
-      <!-- LANGUAGE -->
-      <select
-        id="languageSelect"
-        onchange="changeLanguage(this.value)"
-      >
-        <option value="en">
-          English
-        </option>
-
-        <option value="am">
-          አማርኛ
-        </option>
-
-        <option value="om">
-          Afaan Oromoo
-        </option>
-
-      </select>
-
-      <!-- ROLE -->
-      <div
-        class="selected-box"
-        id="roleBox"
-      >
-        👤 Loading...
-      </div>
-
+    <div class="action-buttons">
+        <button class="btn-primary" id="addUserBtn">
+            <i class="fas fa-user-plus"></i> <span data-i18n="users.addNew">Add New User</span>
+        </button>
     </div>
 
-  </div>
-
-  <!-- PAGE HEADER -->
-  <div class="page-header">
-
-    <h1 data-i18n="usersManagement">
-      Users Management
-    </h1>
-
-    <p data-i18n="manageUsers">
-      Manage SACCO system users
-    </p>
-
-  </div>
-
-  <!-- USER FORM -->
-  <section class="form-card">
-
-    <h3 data-i18n="createUser">
-      Create User
-    </h3>
-
-    <form id="userForm">
-
-      <div class="grid-2">
-
-        <!-- NAME -->
-        <input
-          type="text"
-          id="name"
-          data-i18n-placeholder="fullName"
-          placeholder="Full Name"
-          required
-        >
-
-        <!-- EMAIL -->
-        <input
-          type="email"
-          id="email"
-          data-i18n-placeholder="email"
-          placeholder="Email"
-          required
-        >
-
-      </div>
-
-      <div class="grid-2">
-
-        <!-- PASSWORD -->
-        <input
-          type="password"
-          id="password"
-          data-i18n-placeholder="password"
-          placeholder="Password"
-          required
-        >
-
-        <!-- ROLE -->
-        <select id="role">
-
-          <option value="Staff">
-            Staff
-          </option>
-
-          <option value="Admin">
-            Admin
-          </option>
-
-        </select>
-
-      </div>
-
-      <!-- BUTTON -->
-      <button
-        type="submit"
-        class="primary-btn"
-        data-i18n="createUser"
-      >
-        Create User
-      </button>
-
-    </form>
-
-  </section>
-
-  <!-- USERS TABLE -->
-  <section class="table-card">
-
-    <div class="table-header">
-
-      <h3 data-i18n="systemUsers">
-        System Users
-      </h3>
-
+    <div class="data-table">
+        <div class="table-header">
+            <input type="text" id="searchUser" placeholder="Search users..." class="search-input">
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th data-i18n="common.avatar">Avatar</th>
+                    <th data-i18n="members.fullName">Full Name</th>
+                    <th data-i18n="members.email">Email</th>
+                    <th data-i18n="users.role">Role</th>
+                    <th data-i18n="members.status">Status</th>
+                    <th data-i18n="members.joinDate">Joined</th>
+                    <th data-i18n="common.actions">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="usersList">
+                <tr><td colspan="8" class="loading">Loading users...<\/td><\/tr>
+            </tbody>
+        </table>
     </div>
+</div>
 
-    <div class="table-wrapper">
-
-      <table class="data-table">
-
-        <thead>
-
-          <tr>
-
-            <th data-i18n="fullName">
-              Full Name
-            </th>
-
-            <th data-i18n="email">
-              Email
-            </th>
-
-            <th data-i18n="role">
-              Role
-            </th>
-
-            <th data-i18n="status">
-              Status
-            </th>
-
-            <th data-i18n="actions">
-              Actions
-            </th>
-
-          </tr>
-
-        </thead>
-
-        <tbody id="usersTable"></tbody>
-
-      </table>
-
+<!-- Add/Edit User Modal -->
+<div id="userModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal('userModal')">&times;</span>
+        <h2 id="userModalTitle">Add New User</h2>
+        <form id="userForm">
+            <input type="hidden" id="userId">
+            <input type="text" id="userFullName" placeholder="Full Name" required>
+            <input type="email" id="userEmail" placeholder="Email" required>
+            <input type="password" id="userPassword" placeholder="Password (leave blank to keep current)">
+            <select id="userRole" required>
+                <option value="admin">Admin</option>
+                <option value="officer">Officer</option>
+                <option value="viewer">Viewer</option>
+            </select>
+            <select id="userStatus">
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+            </select>
+            <button type="submit">Save User</button>
+        </form>
     </div>
+</div>
 
-  </section>
+<!-- Reset Password Modal -->
+<div id="resetPasswordModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal('resetPasswordModal')">&times;</span>
+        <h2>Reset Password</h2>
+        <p>Reset password for: <strong id="resetUserName"></strong></p>
+        <input type="password" id="newPassword" placeholder="New Password" required>
+        <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
+        <button onclick="resetUserPassword()">Reset Password</button>
+    </div>
+</div>
 
-</main>
+<script type="module">
+    import { db, auth, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, Timestamp, createUserWithEmailAndPassword, sendPasswordResetEmail } from './js/firebase.js';
+    import { initLayout, createSidebarHTML, createHeaderHTML } from './js/layout.js';
+    import { formatDate, showError, showSuccess, closeModal, openModal, setupModalHandlers } from './js/utils.js';
+    import { t } from './js/i18n.js';
 
-<!-- I18N -->
-<script src="js/i18n.js"></script>
+    // Load layout
+    document.querySelector('.sidebar').innerHTML = createSidebarHTML();
+    document.querySelector('.header').innerHTML = createHeaderHTML();
+    initLayout();
 
-<!-- USERS -->
-<script
-  type="module"
-  src="js/users.js"
-></script>
+    let currentUserId = null;
+    let allUsers = [];
+
+    // Load users
+    async function loadUsers() {
+        const tbody = document.getElementById('usersList');
+        tbody.innerHTML = '<tr><td colspan="8" class="loading">Loading...<\/td><\/tr>';
+        
+        try {
+            const usersSnapshot = await getDocs(collection(db, "users"));
+            allUsers = [];
+            
+            if (usersSnapshot.empty) {
+                tbody.innerHTML = '<tr><td colspan="8">No users found<\/td><\/tr>';
+                return;
+            }
+            
+            let index = 1;
+            for (const docSnap of usersSnapshot.docs) {
+                const user = docSnap.data();
+                allUsers.push({ id: docSnap.id, ...user });
+                
+                const row = `
+                    <tr>
+                        <td>${index++}<\/td>
+                        <td><div class="user-avatar" style="width: 35px; height: 35px; font-size: 14px;">${(user.fullName || user.email)[0].toUpperCase()}<\/div><\/td>
+                        <td>${user.fullName || '-'}<\/td>
+                        <td>${user.email}<\/td>
+                        <td><span class="status ${user.role}">${user.role || 'viewer'}<\/span><\/td>
+                        <td><span class="status ${user.status}">${user.status || 'active'}<\/span><\/td>
+                        <td>${formatDate(user.createdAt)}<\/td>
+                        <td>
+                            <button class="btn-edit" onclick="editUser('${docSnap.id}')">Edit</button>
+                            <button class="btn-edit" onclick="resetUserPasswordModal('${docSnap.id}', '${user.fullName || user.email}')">Reset Pwd</button>
+                            <button class="btn-danger" onclick="deleteUser('${docSnap.id}')">Delete</button>
+                        <\/td>
+                    <\/tr>
+                `;
+                tbody.innerHTML += row;
+            }
+            
+            // Add search functionality
+            document.getElementById('searchUser').addEventListener('keyup', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                const rows = tbody.querySelectorAll('tr');
+                rows.forEach(row => {
+                    const text = row.textContent.toLowerCase();
+                    row.style.display = text.includes(searchTerm) ? '' : 'none';
+                });
+            });
+            
+        } catch (error) {
+            console.error("Error loading users:", error);
+            showError('Failed to load users');
+        }
+    }
+    
+    // Add/Edit user
+    document.getElementById('userForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const userId = document.getElementById('userId').value;
+        const fullName = document.getElementById('userFullName').value;
+        const email = document.getElementById('userEmail').value;
+        const password = document.getElementById('userPassword').value;
+        const role = document.getElementById('userRole').value;
+        const status = document.getElementById('userStatus').value;
+        
+        try {
+            if (userId) {
+                // Update existing user
+                const userRef = doc(db, "users", userId);
+                await updateDoc(userRef, {
+                    fullName: fullName,
+                    email: email,
+                    role: role,
+                    status: status,
+                    updatedAt: Timestamp.now()
+                });
+                showSuccess('User updated successfully!');
+            } else {
+                // Create new user
+                if (!password) {
+                    showError('Password is required for new users');
+                    return;
+                }
+                
+                // Create Firebase Auth user
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                
+                // Save to Firestore
+                await addDoc(collection(db, "users"), {
+                    uid: userCredential.user.uid,
+                    fullName: fullName,
+                    email: email,
+                    role: role,
+                    status: status,
+                    createdAt: Timestamp.now()
+                });
+                showSuccess('User created successfully!');
+            }
+            
+            closeModal('userModal');
+            document.getElementById('userForm').reset();
+            document.getElementById('userId').value = '';
+            loadUsers();
+            
+        } catch (error) {
+            console.error("Error saving user:", error);
+            showError('Error saving user: ' + error.message);
+        }
+    });
+    
+    // Edit user
+    window.editUser = async (userId) => {
+        const user = allUsers.find(u => u.id === userId);
+        if (user) {
+            document.getElementById('userId').value = userId;
+            document.getElementById('userFullName').value = user.fullName || '';
+            document.getElementById('userEmail').value = user.email;
+            document.getElementById('userRole').value = user.role || 'viewer';
+            document.getElementById('userStatus').value = user.status || 'active';
+            document.getElementById('userPassword').placeholder = 'Leave blank to keep current password';
+            document.getElementById('userModalTitle').textContent = 'Edit User';
+            openModal('userModal');
+        }
+    };
+    
+    // Reset password modal
+    let resetUserId = null;
+    window.resetUserPasswordModal = (userId, userName) => {
+        resetUserId = userId;
+        document.getElementById('resetUserName').textContent = userName;
+        openModal('resetPasswordModal');
+    };
+    
+    // Reset password
+    window.resetUserPassword = async () => {
+        const newPassword = document.getElementById('newPassword').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        
+        if (newPassword !== confirmPassword) {
+            showError('Passwords do not match');
+            return;
+        }
+        
+        if (newPassword.length < 6) {
+            showError('Password must be at least 6 characters');
+            return;
+        }
+        
+        try {
+            // Send password reset email
+            const user = allUsers.find(u => u.id === resetUserId);
+            if (user && user.email) {
+                await sendPasswordResetEmail(auth, user.email);
+                showSuccess(`Password reset email sent to ${user.email}`);
+            }
+            closeModal('resetPasswordModal');
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmPassword').value = '';
+        } catch (error) {
+            console.error("Error resetting password:", error);
+            showError('Error resetting password: ' + error.message);
+        }
+    };
+    
+    // Delete user
+    window.deleteUser = async (userId) => {
+        if (confirm('Are you sure you want to delete this user?')) {
+            try {
+                await deleteDoc(doc(db, "users", userId));
+                showSuccess('User deleted successfully!');
+                loadUsers();
+            } catch (error) {
+                console.error("Error deleting user:", error);
+                showError('Error deleting user: ' + error.message);
+            }
+        }
+    };
+    
+    // Setup modal handlers
+    setupModalHandlers();
+    window.closeModal = closeModal;
+    
+    // Add user button
+    document.getElementById('addUserBtn').addEventListener('click', () => {
+        document.getElementById('userId').value = '';
+        document.getElementById('userForm').reset();
+        document.getElementById('userModalTitle').textContent = 'Add New User';
+        document.getElementById('userPassword').required = true;
+        document.getElementById('userPassword').placeholder = 'Password';
+        openModal('userModal');
+    });
+    
+    // Initial load
+    loadUsers();
+</script>
+
+<style>
+    .status.admin, .status.active {
+        background: #d4edda;
+        color: #155724;
+    }
+    .status.officer {
+        background: #d1ecf1;
+        color: #0c5460;
+    }
+    .status.viewer {
+        background: #fff3cd;
+        color: #856404;
+    }
+    .status.inactive {
+        background: #f8d7da;
+        color: #721c24;
+    }
+    .search-input {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 15px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+    }
+    .table-header {
+        margin-bottom: 15px;
+    }
+</style>
 
 </body>
 </html>
