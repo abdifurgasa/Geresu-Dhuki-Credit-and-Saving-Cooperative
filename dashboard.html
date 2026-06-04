@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SACCO | Dashboard</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="logo">
+        <i class="fas fa-piggy-bank"></i>
+        <div>
+            <h2>SACCO</h2>
+            <p>Banking System</p>
+        </div>
+    </div>
+    <ul class="nav-menu">
+        <li class="nav-item active"><a href="dashboard.html"><i class="fas fa-chart-line"></i> <span>Dashboard</span></a></li>
+        <li class="nav-item"><a href="members.html"><i class="fas fa-users"></i> <span>Members</span></a></li>
+        <li class="nav-item"><a href="savings.html"><i class="fas fa-coins"></i> <span>Savings</span></a></li>
+        <li class="nav-item"><a href="loans.html"><i class="fas fa-hand-holding-usd"></i> <span>Loans</span></a></li>
+        <li class="nav-item"><a href="withdrawals.html"><i class="fas fa-money-bill-wave"></i> <span>Withdrawals</span></a></li>
+    </ul>
+    <div class="sidebar-footer">
+        <button id="logoutBtn" class="logout-btn">
+            <i class="fas fa-sign-out-alt"></i> <span>Logout</span>
+        </button>
+    </div>
+</div>
+
+<div class="main-content">
+    <div class="header">
+        <div class="header-left">
+            <button id="sidebarToggle" class="toggle-btn">
+                <i class="fas fa-bars"></i>
+            </button>
+            <h1>Dashboard</h1>
+        </div>
+        <div class="header-right">
+            <div class="user-info">
+                <div class="user-avatar" id="userAvatar">A</div>
+                <span id="userName">Welcome</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="quick-actions">
+        <div class="action-card" onclick="location.href='members.html'">
+            <i class="fas fa-user-plus"></i>
+            <h3>Add Member</h3>
+            <p>Register new member</p>
+        </div>
+        <div class="action-card" onclick="location.href='savings.html'">
+            <i class="fas fa-save"></i>
+            <h3>Record Savings</h3>
+            <p>Record member savings</p>
+        </div>
+        <div class="action-card" onclick="location.href='loans.html'">
+            <i class="fas fa-hand-holding-usd"></i>
+            <h3>Create Loan</h3>
+            <p>Create new loan</p>
+        </div>
+        <div class="action-card" onclick="location.href='withdrawals.html'">
+            <i class="fas fa-money-bill-wave"></i>
+            <h3>Withdrawals</h3>
+            <p>Process withdrawals</p>
+        </div>
+    </div>
+
+    <div class="performance-grid">
+        <div class="kpi-card">
+            <h4>Total Members</h4>
+            <div class="value" id="totalMembers">0</div>
+        </div>
+        <div class="kpi-card">
+            <h4>Total Savings</h4>
+            <div class="value" id="totalSavings">0 ETB</div>
+        </div>
+        <div class="kpi-card">
+            <h4>Total Loans</h4>
+            <div class="value" id="totalLoans">0 ETB</div>
+        </div>
+        <div class="kpi-card">
+            <h4>Total Withdrawals</h4>
+            <div class="value" id="totalWithdrawals">0 ETB</div>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { firebaseConfig } from './js/firebase-config.js';
+    
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+    
+    // Auth check
+    onAuthStateChanged(auth, (user) => {
+        if (!user) {
+            window.location.href = 'login.html';
+        } else {
+            document.getElementById('userName').innerHTML = `Welcome, ${user.email.split('@')[0]}`;
+            document.getElementById('userAvatar').textContent = user.email[0].toUpperCase();
+        }
+    });
+    
+    // Logout
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+        await signOut(auth);
+        window.location.href = 'login.html';
+    });
+    
+    // Sidebar toggle
+    document.getElementById('sidebarToggle').addEventListener('click', () => {
+        document.querySelector('.sidebar').classList.toggle('collapsed');
+        document.querySelector('.main-content').classList.toggle('expanded');
+    });
+    
+    // Load data
+    async function loadData() {
+        const membersSnap = await getDocs(collection(db, "members"));
+        document.getElementById('totalMembers').innerText = membersSnap.size;
+        
+        let totalSavings = 0;
+        const savingsSnap = await getDocs(collection(db, "savings"));
+        savingsSnap.forEach(doc => totalSavings += doc.data().amount || 0);
+        document.getElementById('totalSavings').innerHTML = totalSavings.toLocaleString() + ' ETB';
+        
+        let totalLoans = 0;
+        const loansSnap = await getDocs(collection(db, "loans"));
+        loansSnap.forEach(doc => totalLoans += doc.data().amount || 0);
+        document.getElementById('totalLoans').innerHTML = totalLoans.toLocaleString() + ' ETB';
+        
+        let totalWithdrawals = 0;
+        const withdrawalsSnap = await getDocs(collection(db, "withdrawals"));
+        withdrawalsSnap.forEach(doc => totalWithdrawals += doc.data().amount || 0);
+        document.getElementById('totalWithdrawals').innerHTML = totalWithdrawals.toLocaleString() + ' ETB';
+    }
+    
+    loadData();
+</script>
+</body>
+</html>
