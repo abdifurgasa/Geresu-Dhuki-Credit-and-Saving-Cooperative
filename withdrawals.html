@@ -9,54 +9,76 @@
 </head>
 <body>
 
-<div class="sidebar">
-    <div class="logo">
-        <h2><i class="fas fa-piggy-bank"></i> SACCO</h2>
-        <p>Banking System</p>
-    </div>
-    <ul class="nav-menu">
-        <li class="nav-item"><a href="index.html"><i class="fas fa-chart-line"></i> <span>Dashboard</span></a></li>
-        <li class="nav-item"><a href="members.html"><i class="fas fa-users"></i> <span>Members</span></a></li>
-        <li class="nav-item"><a href="savings.html"><i class="fas fa-coins"></i> <span>Savings</span></a></li>
-        <li class="nav-item"><a href="loans.html"><i class="fas fa-hand-holding-usd"></i> <span>Loans</span></a></li>
-        <li class="nav-item active"><a href="withdrawals.html"><i class="fas fa-money-bill-wave"></i> <span>Withdrawals</span></a></li>
-        <li class="nav-item"><a href="reports.html"><i class="fas fa-file-alt"></i> <span>Reports</span></a></li>
-        <li class="nav-item"><a href="users.html"><i class="fas fa-user-cog"></i> <span>Users</span></a></li>
-        <li class="nav-item"><a href="settings.html"><i class="fas fa-cog"></i> <span>Settings</span></a></li>
-    </ul>
-</div>
+<div class="sidebar"></div>
 
 <div class="main-content">
-    <div class="header">
-        <h1>Withdrawals Management</h1>
-        <div class="user-info">
-            <span>Welcome, Admin</span>
-            <i class="fas fa-bell"></i>
-            <i class="fas fa-user-circle fa-2x"></i>
+    <div class="header"></div>
+
+    <!-- Stats Cards -->
+    <div class="performance-grid">
+        <div class="kpi-card">
+            <h4><i class="fas fa-chart-line"></i> Total Withdrawals</h4>
+            <div class="value" id="totalWithdrawals">0</div>
+            <div class="trend">All time</div>
+        </div>
+        <div class="kpi-card">
+            <h4><i class="fas fa-calendar-alt"></i> This Month</h4>
+            <div class="value" id="monthlyWithdrawals">0</div>
+            <div class="trend">Current month</div>
+        </div>
+        <div class="kpi-card">
+            <h4><i class="fas fa-chart-bar"></i> Average</h4>
+            <div class="value" id="avgWithdrawal">0</div>
+            <div class="trend">Per transaction</div>
+        </div>
+        <div class="kpi-card">
+            <h4><i class="fas fa-clock"></i> Today</h4>
+            <div class="value" id="todayWithdrawals">0</div>
+            <div class="trend">24 hour activity</div>
         </div>
     </div>
 
     <div class="action-buttons">
-        <button class="btn-primary" onclick="openWithdrawalModal()">
+        <button class="btn-primary" id="newWithdrawalBtn">
             <i class="fas fa-money-bill-wave"></i> Process Withdrawal
+        </button>
+        <button class="btn-primary" id="exportWithdrawalsBtn">
+            <i class="fas fa-download"></i> Export Report
         </button>
     </div>
 
     <div class="data-table">
-        <table>
-            <thead>
-                <tr>
-                    <th>Transaction ID</th>
-                    <th>Member Name</th>
-                    <th>Amount (ETB)</th>
-                    <th>Date</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody id="withdrawalsList">
-                <tr><td colspan="5" class="loading">Loading withdrawal records...</td></tr>
-            </tbody>
-        </table>
+        <div class="table-header">
+            <input type="text" id="searchWithdrawal" placeholder="Search by member name, phone, or amount..." class="search-input">
+            <div class="filter-buttons" style="margin-top: 10px; display: flex; gap: 10px;">
+                <button class="filter-btn active" data-filter="all">All</button>
+                <button class="filter-btn" data-filter="today">Today</button>
+                <button class="filter-btn" data-filter="week">This Week</button>
+                <button class="filter-btn" data-filter="month">This Month</button>
+            </div>
+        </div>
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Transaction ID</th>
+                        <th>Member Name</th>
+                        <th>Phone</th>
+                        <th>Amount (ETB)</th>
+                        <th>Previous Balance</th>
+                        <th>New Balance</th>
+                        <th>Reason</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="withdrawalsList">
+                    <tr><td colspan="11" class="loading">Loading withdrawals...</td></tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
@@ -64,159 +86,383 @@
 <div id="withdrawalModal" class="modal">
     <div class="modal-content">
         <span class="close" onclick="closeModal('withdrawalModal')">&times;</span>
-        <h2>Process Withdrawal</h2>
+        <h2><i class="fas fa-money-bill-wave"></i> Process Withdrawal</h2>
         <form id="withdrawalForm">
             <select id="memberId" required>
                 <option value="">Select Member</option>
             </select>
-            <input type="number" id="withdrawalAmount" placeholder="Amount (ETB)" required>
-            <input type="text" id="currentBalance" placeholder="Current Balance" readonly>
+            <input type="text" id="memberPhone" placeholder="Phone Number" readonly>
+            <div class="balance-info" style="background: #f8f9fa; padding: 12px; border-radius: 8px; margin: 10px 0;">
+                <p><strong>Available Balance:</strong> <span id="currentBalance" style="font-size: 20px; font-weight: bold;">0 ETB</span></p>
+                <small>Maximum withdrawal cannot exceed available balance</small>
+            </div>
+            <input type="number" id="withdrawalAmount" placeholder="Withdrawal Amount (ETB)" required>
+            <select id="withdrawalReason" required>
+                <option value="">Select Reason</option>
+                <option value="Personal">Personal Expenses</option>
+                <option value="Business">Business Investment</option>
+                <option value="Emergency">Emergency</option>
+                <option value="Education">Education Fees</option>
+                <option value="Medical">Medical Expenses</option>
+                <option value="Housing">Housing/Rent</option>
+                <option value="Other">Other</option>
+            </select>
+            <textarea id="withdrawalNote" placeholder="Additional notes (optional)" rows="3"></textarea>
             <button type="submit">Process Withdrawal</button>
         </form>
     </div>
 </div>
 
+<!-- Receipt Modal -->
+<div id="receiptModal" class="modal">
+    <div class="modal-content" style="width: 400px;">
+        <span class="close" onclick="closeModal('receiptModal')">&times;</span>
+        <div id="withdrawalReceiptContent"></div>
+        <button onclick="window.printWithdrawalReceipt()" class="btn-primary" style="margin-top: 20px; width: 100%;">
+            <i class="fas fa-print"></i> Print Receipt
+        </button>
+    </div>
+</div>
+
+<!-- Confirmation Modal -->
+<div id="confirmModal" class="modal">
+    <div class="modal-content" style="width: 350px; text-align: center;">
+        <span class="close" onclick="closeModal('confirmModal')">&times;</span>
+        <i class="fas fa-exclamation-triangle" style="font-size: 48px; color: #ffc107; margin-bottom: 15px;"></i>
+        <h3>Confirm Withdrawal</h3>
+        <p id="confirmMessage"></p>
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <button onclick="closeModal('confirmModal')" class="btn-secondary" style="flex: 1;">Cancel</button>
+            <button id="confirmWithdrawalBtn" class="btn-primary" style="flex: 1;">Confirm</button>
+        </div>
+    </div>
+</div>
+
 <script type="module">
-    import { db, collection, getDocs, addDoc, updateDoc, doc, Timestamp } from './js/firebase.js';
-    import { formatCurrency, formatDate, showError, showSuccess, closeModal, openModal, setupModalHandlers, getCurrentMonthYear } from './js/utils.js';
-    
-    let selectedMemberBalance = 0;
-    let selectedMemberId = null;
-    
-    // Load members for dropdown
-    async function loadMembersForDropdown() {
-        try {
-            const querySnapshot = await getDocs(collection(db, "members"));
-            const select = document.getElementById('memberId');
-            select.innerHTML = '<option value="">Select Member</option>';
+    import { initLayout, createSidebarHTML, createHeaderHTML } from './js/layout.js';
+    import { initWithdrawalsPage, loadMembersForWithdrawal, processWithdrawal, loadWithdrawals } from './js/withdrawals.js';
+    import { closeModal, formatCurrency, showError, showSuccess } from './js/utils.js';
+    import { t } from './js/i18n.js';
+
+    // Load layout
+    document.querySelector('.sidebar').innerHTML = createSidebarHTML();
+    document.querySelector('.header').innerHTML = createHeaderHTML();
+    initLayout();
+
+    // Variables for confirmation
+    let pendingWithdrawalData = null;
+
+    // Open new withdrawal modal
+    document.getElementById('newWithdrawalBtn')?.addEventListener('click', async () => {
+        await loadMembersForWithdrawal();
+        document.getElementById('withdrawalModal').style.display = 'flex';
+        document.getElementById('withdrawalAmount').value = '';
+        document.getElementById('withdrawalReason').value = '';
+        document.getElementById('withdrawalNote').value = '';
+    });
+
+    // Handle withdrawal form submission with confirmation
+    const withdrawalForm = document.getElementById('withdrawalForm');
+    if (withdrawalForm) {
+        withdrawalForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
             
-            querySnapshot.forEach((doc) => {
-                const member = doc.data();
-                const option = document.createElement('option');
-                option.value = doc.id;
-                option.setAttribute('data-balance', member.savingsBalance || 0);
-                option.textContent = `${member.fullName} - ${member.email} (Balance: ${formatCurrency(member.savingsBalance || 0)})`;
-                select.appendChild(option);
-            });
+            const memberSelect = document.getElementById('memberId');
+            const selectedOption = memberSelect.options[memberSelect.selectedIndex];
+            const memberName = selectedOption.textContent.split(' - ')[0];
+            const amount = parseFloat(document.getElementById('withdrawalAmount').value);
+            const currentBalance = parseFloat(document.getElementById('currentBalance').textContent.replace(/[^0-9.-]/g, ''));
+            const reason = document.getElementById('withdrawalReason').value;
             
-            // Add event listener to show balance
-            select.addEventListener('change', (e) => {
-                const selectedOption = e.target.options[e.target.selectedIndex];
-                const balance = selectedOption.getAttribute('data-balance');
-                selectedMemberId = e.target.value;
-                selectedMemberBalance = parseFloat(balance) || 0;
-                document.getElementById('currentBalance').value = formatCurrency(selectedMemberBalance);
-            });
-        } catch (error) {
-            console.error("Error loading members:", error);
-        }
-    }
-    
-    // Load withdrawal records
-    async function loadWithdrawals() {
-        const withdrawalsList = document.getElementById('withdrawalsList');
-        withdrawalsList.innerHTML = '<tr><td colspan="5" class="loading">Loading...</td></tr>';
-        
-        try {
-            const querySnapshot = await getDocs(collection(db, "withdrawals"));
-            withdrawalsList.innerHTML = '';
-            
-            if (querySnapshot.empty) {
-                withdrawalsList.innerHTML = '<tr><td colspan="5">No withdrawal records found.</td></tr>';
+            if (!memberSelect.value) {
+                showError('Please select a member');
                 return;
             }
             
-            for (const docSnap of querySnapshot.docs) {
-                const withdrawal = docSnap.data();
-                // Get member name
-                const memberDoc = await getDocs(collection(db, "members"));
-                let memberName = 'Unknown';
-                for (const member of memberDoc.docs) {
-                    if (member.id === withdrawal.memberId) {
-                        memberName = member.data().fullName;
-                        break;
+            if (isNaN(amount) || amount <= 0) {
+                showError('Please enter a valid withdrawal amount');
+                return;
+            }
+            
+            if (amount > currentBalance) {
+                showError(`Insufficient balance! Available: ${formatCurrency(currentBalance)}`);
+                return;
+            }
+            
+            if (!reason) {
+                showError('Please select a reason for withdrawal');
+                return;
+            }
+            
+            // Show confirmation dialog
+            const confirmMsg = `
+                <strong>Member:</strong> ${memberName}<br>
+                <strong>Amount:</strong> ${formatCurrency(amount)}<br>
+                <strong>Reason:</strong> ${reason}<br>
+                <strong>New Balance:</strong> ${formatCurrency(currentBalance - amount)}<br><br>
+                Are you sure you want to process this withdrawal?
+            `;
+            document.getElementById('confirmMessage').innerHTML = confirmMsg;
+            
+            // Store form data for confirmation
+            pendingWithdrawalData = {
+                memberId: memberSelect.value,
+                amount: amount,
+                reason: reason,
+                note: document.getElementById('withdrawalNote').value,
+                memberPhone: document.getElementById('memberPhone').value
+            };
+            
+            document.getElementById('confirmModal').style.display = 'flex';
+        });
+    }
+    
+    // Confirm withdrawal
+    document.getElementById('confirmWithdrawalBtn')?.addEventListener('click', async () => {
+        if (pendingWithdrawalData) {
+            // Create a mock event for processWithdrawal
+            const mockEvent = {
+                preventDefault: () => {},
+                target: {
+                    querySelector: (selector) => {
+                        if (selector === '#memberId') {
+                            return { value: pendingWithdrawalData.memberId };
+                        }
+                        if (selector === '#withdrawalAmount') {
+                            return { value: pendingWithdrawalData.amount };
+                        }
+                        if (selector === '#withdrawalReason') {
+                            return { value: pendingWithdrawalData.reason };
+                        }
+                        if (selector === '#withdrawalNote') {
+                            return { value: pendingWithdrawalData.note };
+                        }
+                        if (selector === '#memberPhone') {
+                            return { value: pendingWithdrawalData.memberPhone };
+                        }
+                        return null;
                     }
                 }
-                
-                const row = `
-                    <tr>
-                        <td>${docSnap.id.slice(0, 8)}</td>
-                        <td>${memberName}</td>
-                        <td>${formatCurrency(withdrawal.amount)}</td>
-                        <td>${formatDate(withdrawal.date)}</td>
-                        <td>${withdrawal.status || 'completed'}</td>
-                    </tr>
-                `;
-                withdrawalsList.innerHTML += row;
+            };
+            
+            await processWithdrawal(mockEvent);
+            closeModal('confirmModal');
+            pendingWithdrawalData = null;
+            loadWithdrawals();
+        }
+    });
+
+    // Export withdrawals
+    document.getElementById('exportWithdrawalsBtn')?.addEventListener('click', () => {
+        const rows = document.querySelectorAll('#withdrawalsList tr');
+        const csvData = [];
+        
+        rows.forEach(row => {
+            const cells = row.querySelectorAll('td');
+            if (cells.length > 1 && !row.textContent.includes('No withdrawals')) {
+                csvData.push({
+                    'Date': cells[8]?.textContent || '',
+                    'Transaction ID': cells[1]?.textContent || '',
+                    'Member Name': cells[2]?.textContent || '',
+                    'Phone': cells[3]?.textContent || '',
+                    'Amount': cells[4]?.textContent || '',
+                    'Previous Balance': cells[5]?.textContent || '',
+                    'New Balance': cells[6]?.textContent || '',
+                    'Reason': cells[7]?.textContent || '',
+                    'Status': cells[9]?.textContent || ''
+                });
             }
-        } catch (error) {
-            console.error("Error loading withdrawals:", error);
-            showError('Failed to load withdrawal records');
+        });
+        
+        if (csvData.length > 0) {
+            // Create CSV
+            const headers = Object.keys(csvData[0]);
+            const csvRows = [headers.join(',')];
+            
+            for (const row of csvData) {
+                const values = headers.map(header => {
+                    const val = row[header] || '';
+                    return `"${val.toString().replace(/"/g, '""')}"`;
+                });
+                csvRows.push(values.join(','));
+            }
+            
+            const blob = new Blob([csvRows.join('\n')], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `withdrawals_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            showSuccess('Report exported successfully!');
+        } else {
+            showError('No data to export');
+        }
+    });
+
+    // Filter functionality
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    filterBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            filterBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            const filter = btn.getAttribute('data-filter');
+            const rows = document.querySelectorAll('#withdrawalsList tr');
+            const today = new Date().toISOString().split('T')[0];
+            const weekAgo = new Date();
+            weekAgo.setDate(weekAgo.getDate() - 7);
+            const monthAgo = new Date();
+            monthAgo.setMonth(monthAgo.getMonth() - 1);
+            
+            rows.forEach(row => {
+                if (row.textContent.includes('No withdrawals') || row.textContent.includes('Loading')) {
+                    return;
+                }
+                
+                const dateCell = row.cells[8];
+                if (!dateCell) return;
+                
+                const dateText = dateCell.textContent;
+                const rowDate = new Date(dateText);
+                const rowDateStr = rowDate.toISOString().split('T')[0];
+                
+                let show = true;
+                if (filter === 'today') {
+                    show = rowDateStr === today;
+                } else if (filter === 'week') {
+                    show = rowDate >= weekAgo;
+                } else if (filter === 'month') {
+                    show = rowDate >= monthAgo;
+                }
+                
+                row.style.display = show ? '' : 'none';
+            });
+        });
+    });
+
+    // Update today's withdrawals
+    async function updateTodayWithdrawals() {
+        const today = new Date().toISOString().split('T')[0];
+        let todayTotal = 0;
+        
+        const rows = document.querySelectorAll('#withdrawalsList tr');
+        rows.forEach(row => {
+            const dateCell = row.cells[8];
+            if (dateCell && dateCell.textContent.includes(today)) {
+                const amountCell = row.cells[4];
+                if (amountCell) {
+                    const amount = parseFloat(amountCell.textContent.replace(/[^0-9.-]/g, ''));
+                    if (!isNaN(amount)) todayTotal += amount;
+                }
+            }
+        });
+        
+        const todayElement = document.getElementById('todayWithdrawals');
+        if (todayElement) {
+            todayElement.textContent = formatCurrency(todayTotal);
         }
     }
     
-    // Process withdrawal
-    document.getElementById('withdrawalForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        const memberId = document.getElementById('memberId').value;
-        const amount = parseFloat(document.getElementById('withdrawalAmount').value);
-        const { month, year } = getCurrentMonthYear();
-        
-        if (!memberId) {
-            showError('Please select a member');
-            return;
-        }
-        
-        if (amount <= 0) {
-            showError('Please enter a valid amount');
-            return;
-        }
-        
-        if (amount > selectedMemberBalance) {
-            showError('Insufficient balance!');
-            return;
-        }
-        
-        try {
-            // Record withdrawal transaction
-            await addDoc(collection(db, "withdrawals"), {
-                memberId: memberId,
-                amount: amount,
-                date: Timestamp.now(),
-                status: 'completed',
-                month: month,
-                year: year,
-                createdAt: Timestamp.now()
-            });
-            
-            // Update member's savings balance
-            const memberRef = doc(db, "members", memberId);
-            await updateDoc(memberRef, { savingsBalance: selectedMemberBalance - amount });
-            
-            showSuccess(`Withdrawal of ${formatCurrency(amount)} processed successfully!`);
-            closeModal('withdrawalModal');
-            document.getElementById('withdrawalForm').reset();
-            document.getElementById('currentBalance').value = '';
-            loadWithdrawals();
-            loadMembersForDropdown(); // Refresh dropdown balances
-        } catch (error) {
-            console.error("Error processing withdrawal:", error);
-            showError('Error processing withdrawal: ' + error.message);
-        }
-    });
+    // Make closeModal and print functions available globally
+    window.closeModal = closeModal;
     
-    window.openWithdrawalModal = () => {
-        openModal('withdrawalModal');
-        loadMembersForDropdown();
+    window.printWithdrawalReceipt = () => {
+        const receiptContent = document.getElementById('withdrawalReceiptContent').innerHTML;
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(`
+            <html>
+                <head>
+                    <title>Withdrawal Receipt</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; padding: 40px; }
+                        .receipt { text-align: center; }
+                        hr { margin: 20px 0; }
+                        @media print {
+                            body { padding: 0; }
+                            button { display: none; }
+                        }
+                    </style>
+                </head>
+                <body>${receiptContent}</body>
+            </html>
+        `);
+        printWindow.document.close();
+        printWindow.print();
     };
     
-    window.closeModal = closeModal;
-    setupModalHandlers();
+    // Initialize withdrawals page
+    initWithdrawalsPage();
     
-    // Initial load
-    loadWithdrawals();
+    // Update today's withdrawals after loading
+    setTimeout(updateTodayWithdrawals, 1000);
 </script>
+
+<style>
+    .filter-btn {
+        padding: 8px 16px;
+        background: #f0f0f0;
+        border: none;
+        border-radius: 20px;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    
+    .filter-btn:hover {
+        background: #e0e0e0;
+    }
+    
+    .filter-btn.active {
+        background: #1a3c34;
+        color: white;
+    }
+    
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+    }
+    
+    .btn-secondary:hover {
+        background: #5a6268;
+    }
+    
+    .balance-info {
+        text-align: center;
+    }
+    
+    #currentBalance {
+        color: #28a745;
+    }
+    
+    .btn-edit i, .btn-primary i {
+        margin-right: 5px;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .filter-buttons {
+            flex-wrap: wrap;
+        }
+        
+        .filter-btn {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+        
+        table {
+            font-size: 12px;
+        }
+        
+        th, td {
+            padding: 8px 4px;
+        }
+    }
+</style>
 
 </body>
 </html>
