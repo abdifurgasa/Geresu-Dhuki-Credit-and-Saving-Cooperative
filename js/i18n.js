@@ -1,7 +1,8 @@
-// js/i18n.js
+// js/i18n.js - Complete Multi-language Support
 
-// Translations
+// Translations for all languages
 const translations = {
+    // English
     en: {
         // Navigation
         'nav.dashboard': 'Dashboard',
@@ -14,6 +15,31 @@ const translations = {
         'nav.users': 'Users',
         'nav.settings': 'Settings',
         
+        // Dashboard
+        'dashboard.title': 'Financial Dashboard',
+        'dashboard.welcome': 'Welcome',
+        'dashboard.totalSavings': 'Total Savings',
+        'dashboard.totalLoans': 'Total Loans',
+        'dashboard.totalWithdrawals': 'Total Withdrawals',
+        'dashboard.totalMembers': 'Total Members',
+        'dashboard.quickActions': 'Quick Actions',
+        'dashboard.addMember': 'Add Member',
+        'dashboard.recordSavings': 'Record Savings',
+        'dashboard.createLoan': 'Create Loan',
+        'dashboard.processWithdrawal': 'Process Withdrawal',
+        'dashboard.noData': 'No data found! Start by adding members or load sample data.',
+        'dashboard.savingsOverview': 'Savings Overview',
+        'dashboard.quickStats': 'Quick Stats',
+        'dashboard.summary': 'Summary',
+        'dashboard.members': 'Members',
+        'dashboard.savings': 'Savings',
+        'dashboard.loans': 'Loans',
+        'dashboard.withdrawals': 'Withdrawals',
+        'dashboard.netPosition': 'Net Position',
+        'dashboard.loading': 'Loading...',
+        'dashboard.activeMembers': 'active members',
+        'dashboard.addMembersToStart': 'Add members to start',
+        
         // Common
         'common.save': 'Save',
         'common.cancel': 'Cancel',
@@ -21,25 +47,17 @@ const translations = {
         'common.edit': 'Edit',
         'common.add': 'Add',
         'common.search': 'Search',
-        'common.filter': 'Filter',
         'common.export': 'Export',
         'common.loading': 'Loading...',
         'common.noData': 'No data found',
         'common.success': 'Success',
         'common.error': 'Error',
         'common.confirm': 'Are you sure?',
-        
-        // Dashboard
-        'dashboard.title': 'Financial Dashboard',
-        'dashboard.totalSavings': 'Total Savings',
-        'dashboard.totalLoans': 'Total Loans',
-        'dashboard.totalWithdrawals': 'Total Withdrawals',
-        'dashboard.totalProfit': 'Total Profit',
-        'dashboard.quickActions': 'Quick Actions',
-        'dashboard.addMember': 'Add Member',
-        'dashboard.recordSavings': 'Record Savings',
-        'dashboard.createLoan': 'Create Loan',
-        'dashboard.processWithdrawal': 'Process Withdrawal',
+        'common.actions': 'Actions',
+        'common.status': 'Status',
+        'common.date': 'Date',
+        'common.amount': 'Amount',
+        'common.logout': 'Logout',
         
         // Members
         'members.title': 'Member Management',
@@ -59,77 +77,48 @@ const translations = {
         'loans.applyNew': 'Apply New Loan',
         'loans.amount': 'Loan Amount',
         'loans.interest': 'Interest Rate',
-        'loans.duration': 'Duration (Months)',
-        'loans.totalLoan': 'Total Loan',
-        'loans.remainingLoan': 'Remaining Balance',
+        'loans.duration': 'Duration',
+        'loans.months': 'months',
+        'loans.remaining': 'Remaining Balance',
         'loans.monthlyPayment': 'Monthly Payment',
-        'loans.type': 'Loan Type',
         'loans.status': 'Status',
-        'loans.purpose': 'Purpose',
+        'loans.approved': 'Approved',
+        'loans.pending': 'Pending',
+        'loans.rejected': 'Rejected',
         
         // Repayments
         'repayments.title': 'Repayment Management',
         'repayments.makePayment': 'Make Payment',
-        'repayments.amount': 'Payment Amount',
+        'repayments.paymentAmount': 'Payment Amount',
         'repayments.previousBalance': 'Previous Balance',
         'repayments.newBalance': 'New Balance',
-        'repayments.date': 'Payment Date',
+        'repayments.paymentMethod': 'Payment Method',
         
         // Withdrawals
         'withdrawals.title': 'Withdrawal Management',
         'withdrawals.process': 'Process Withdrawal',
         'withdrawals.amount': 'Withdrawal Amount',
         'withdrawals.reason': 'Reason for Withdrawal',
-        'withdrawals.previousBalance': 'Previous Balance',
-        'withdrawals.newBalance': 'New Balance',
         
         // Reports
         'reports.title': 'Financial Reports',
-        'reports.incomeExpense': 'Income vs Expenses',
-        'reports.memberGrowth': 'Member Growth',
-        'reports.loanPerformance': 'Loan Performance',
         'reports.transactionHistory': 'Transaction History',
-        
-        // Users
-        'users.title': 'User Management',
-        'users.addNew': 'Add New User',
-        'users.role': 'Role',
-        'users.admin': 'Admin',
-        'users.officer': 'Officer',
-        'users.viewer': 'Viewer',
         
         // Settings
         'settings.title': 'System Settings',
-        'settings.general': 'General Settings',
         'settings.language': 'Language',
-        'settings.currency': 'Currency',
-        'settings.backup': 'Backup & Restore',
-        'settings.security': 'Security Settings',
         
         // Auth
         'auth.login': 'Login',
         'auth.logout': 'Logout',
-        'auth.username': 'Username',
+        'auth.email': 'Email Address',
         'auth.password': 'Password',
         'auth.forgotPassword': 'Forgot Password?',
-        'auth.welcome': 'Welcome',
-        
-        // Messages
-        'msg.loginSuccess': 'Login successful!',
-        'msg.logoutSuccess': 'Logout successful!',
-        'msg.saveSuccess': 'Saved successfully!',
-        'msg.deleteSuccess': 'Deleted successfully!',
-        'msg.confirmDelete': 'Are you sure you want to delete this?',
-        'msg.insufficientBalance': 'Insufficient balance!',
-        'msg.memberAdded': 'Member added successfully!',
-        'msg.savingsRecorded': 'Savings recorded successfully!',
-        'msg.loanApproved': 'Loan approved successfully!',
-        'msg.repaymentRecorded': 'Repayment recorded successfully!',
-        'msg.withdrawalProcessed': 'Withdrawal processed successfully!'
+        'auth.welcome': 'Welcome to SACCO Banking'
     },
     
+    // Afaan Oromo
     om: {
-        // Afaan Oromo Translations
         'nav.dashboard': 'Deepphoo',
         'nav.members': 'Miseensonni',
         'nav.savings': 'Kadhaa',
@@ -137,8 +126,29 @@ const translations = {
         'nav.repayments': 'Kaffaltii',
         'nav.withdrawals': 'Baatii',
         'nav.reports': 'Gabaasa',
-        'nav.users': 'Fayyadamaa',
+        'nav.users': 'Fayyadamtoota',
         'nav.settings': 'Qindaa\'ina',
+        
+        'dashboard.title': 'Deepphoo Fiinaansii',
+        'dashboard.welcome': 'Anaadhufu',
+        'dashboard.totalSavings': 'Kadhaa Guutuu',
+        'dashboard.totalLoans': 'Liqii Guutuu',
+        'dashboard.totalWithdrawals': 'Baatii Guutuu',
+        'dashboard.totalMembers': 'Miseensonni Guutuu',
+        'dashboard.quickActions': 'Gochaawwan Dafaa',
+        'dashboard.addMember': 'Miseensa Dabali',
+        'dashboard.recordSavings': 'Kadhaa Galmeessi',
+        'dashboard.createLoan': 'Liqii Uumi',
+        'dashboard.processWithdrawal': 'Baatii Hojjadhu',
+        'dashboard.savingsOverview': 'Yaadannoo Kadhaa',
+        'dashboard.quickStats': 'Gabatee Dafaa',
+        'dashboard.summary': 'Gabaaba',
+        'dashboard.members': 'Miseensonni',
+        'dashboard.savings': 'Kadhaa',
+        'dashboard.loans': 'Liqii',
+        'dashboard.withdrawals': 'Baatii',
+        'dashboard.netPosition': 'Haala Qabeenyaa',
+        'dashboard.loading': 'Fe\'aa...',
         
         'common.save': 'Kadhaa',
         'common.cancel': 'Haqi',
@@ -147,40 +157,29 @@ const translations = {
         'common.add': 'Dabali',
         'common.search': 'Barbaadi',
         'common.loading': 'Fe\'aa...',
-        'common.noData': 'Dhaata hin argamne',
         'common.success': 'Milkaa\'ina',
         'common.error': 'Dogoggora',
-        
-        'dashboard.title': 'Deepphoo Fiinaansii',
-        'dashboard.totalSavings': 'Kadhaa Guutuu',
-        'dashboard.totalLoans': 'Liqii Guutuu',
-        'dashboard.totalWithdrawals': 'Baatii Guutuu',
-        'dashboard.addMember': 'Miseensa Dabali',
-        'dashboard.recordSavings': 'Kadhaa Galmeessi',
+        'common.logout': 'Baani',
         
         'members.title': 'Bulchiinsa Miseensotaa',
         'members.addNew': 'Miseensa Haaraa Dabali',
         'members.fullName': 'Maqaa Guutuu',
+        'members.email': 'Iimeelii',
         'members.phone': 'Lakkoofsa Bilbilaa',
-        'members.nid': 'Paaspoorii/Biliksoo',
         
         'loans.title': 'Bulchiinsa Liqii',
         'loans.applyNew': 'Liqii Haaraa Kadhataa',
         'loans.amount': 'Hamta Liqii',
-        'loans.interest': 'Haara Wabii',
         
         'auth.login': 'Seeni',
         'auth.logout': 'Baani',
-        'auth.username': 'Maqaa Fayyadamaa',
+        'auth.email': 'Teessoo Iimeelii',
         'auth.password': 'Jechicha Darba',
-        'auth.welcome': 'Anaa dhufte',
-        
-        'msg.saveSuccess': 'Akka barbaadetti kuusame!',
-        'msg.deleteSuccess': 'Akkasitti balleessame!'
+        'auth.welcome': 'SACCO Baankiiitti Bagamtan'
     },
     
+    // Amharic
     am: {
-        // Amharic Translations
         'nav.dashboard': 'ዳሽቦርድ',
         'nav.members': 'አባላት',
         'nav.savings': 'ቁጠባ',
@@ -191,6 +190,27 @@ const translations = {
         'nav.users': 'ተጠቃሚዎች',
         'nav.settings': 'ቅንብሮች',
         
+        'dashboard.title': 'የፋይናንስ ዳሽቦርድ',
+        'dashboard.welcome': 'እንኳን ደህና መጡ',
+        'dashboard.totalSavings': 'ጠቅላላ ቁጠባ',
+        'dashboard.totalLoans': 'ጠቅላላ ብድር',
+        'dashboard.totalWithdrawals': 'ጠቅላላ መውጫ',
+        'dashboard.totalMembers': 'ጠቅላላ አባላት',
+        'dashboard.quickActions': 'ፈጣን እርምጃዎች',
+        'dashboard.addMember': 'አባል ጨምር',
+        'dashboard.recordSavings': 'ቁጠባ መዝግብ',
+        'dashboard.createLoan': 'ብድር ፍጠር',
+        'dashboard.processWithdrawal': 'መውጫ አካሂድ',
+        'dashboard.savingsOverview': 'የቁጠባ አጠቃላይ እይታ',
+        'dashboard.quickStats': 'ፈጣን ስታቲስቲክስ',
+        'dashboard.summary': 'ማጠቃለያ',
+        'dashboard.members': 'አባላት',
+        'dashboard.savings': 'ቁጠባ',
+        'dashboard.loans': 'ብድር',
+        'dashboard.withdrawals': 'መውጫ',
+        'dashboard.netPosition': 'የተጣራ ቦታ',
+        'dashboard.loading': 'በመጫን ላይ...',
+        
         'common.save': 'አስቀምጥ',
         'common.cancel': 'ሰርዝ',
         'common.delete': 'ሰርዝ',
@@ -200,19 +220,13 @@ const translations = {
         'common.loading': 'በመጫን ላይ...',
         'common.success': 'ተሳክቷል',
         'common.error': 'ስህተት',
-        
-        'dashboard.title': 'የፋይናንስ ዳሽቦርድ',
-        'dashboard.totalSavings': 'ጠቅላላ ቁጠባ',
-        'dashboard.totalLoans': 'ጠቅላላ ብድር',
-        'dashboard.totalWithdrawals': 'ጠቅላላ መውጫ',
-        'dashboard.addMember': 'አባል ጨምር',
-        'dashboard.recordSavings': 'ቁጠባ መዝግብ',
+        'common.logout': 'ውጣ',
         
         'members.title': 'የአባላት አስተዳደር',
         'members.addNew': 'አዲስ አባል ጨምር',
         'members.fullName': 'ሙሉ ስም',
+        'members.email': 'ኢሜይል',
         'members.phone': 'ስልክ ቁጥር',
-        'members.nid': 'ብሄራዊ መታወቂያ',
         
         'loans.title': 'የብድር አስተዳደር',
         'loans.applyNew': 'አዲስ ብድር አመልክት',
@@ -220,16 +234,16 @@ const translations = {
         
         'auth.login': 'ግባ',
         'auth.logout': 'ውጣ',
-        'auth.welcome': 'እንኳን ደህና መጡ',
-        
-        'msg.saveSuccess': 'በሚገባ ተቀምጧል!',
-        'msg.deleteSuccess': 'በሚገባ ተሰርዟል!'
+        'auth.email': 'ኢሜይል አድራሻ',
+        'auth.password': 'የይለፍ ቃል',
+        'auth.welcome': 'እንኳን ወደ SACCO ባንክ በደህና መጡ'
     }
 };
 
+// Current language
 let currentLanguage = localStorage.getItem('sacco_language') || 'en';
 
-// Translate function
+// Translation function
 export function t(key) {
     return translations[currentLanguage][key] || translations['en'][key] || key;
 }
@@ -252,14 +266,22 @@ export function getCurrentLanguage() {
 
 // Update all translatable elements on the page
 export function updatePageTranslations() {
+    // Update elements with data-i18n attribute
     document.querySelectorAll('[data-i18n]').forEach(element => {
         const key = element.getAttribute('data-i18n');
+        const translation = t(key);
+        
         if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
-            if (element.getAttribute('placeholder')) {
-                element.placeholder = t(key);
+            if (element.hasAttribute('placeholder')) {
+                element.placeholder = translation;
+            } else if (element.hasAttribute('value')) {
+                // Don't override input values
+                if (!element.value || element.value === element.getAttribute('data-original-value')) {
+                    element.value = translation;
+                }
             }
         } else {
-            element.textContent = t(key);
+            element.textContent = translation;
         }
     });
     
@@ -273,7 +295,7 @@ export function updatePageTranslations() {
 export function initI18n() {
     updatePageTranslations();
     
-    // Add language switcher if exists
+    // Add language switcher event listener
     const languageSwitcher = document.getElementById('languageSwitcher');
     if (languageSwitcher) {
         languageSwitcher.value = currentLanguage;
