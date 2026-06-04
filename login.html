@@ -162,6 +162,13 @@
             border: 1px solid #c3e6cb;
             display: block;
         }
+        
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -185,7 +192,7 @@
         <form id="loginForm">
             <div class="form-group">
                 <label data-i18n="auth.email">Email Address</label>
-                <input type="email" id="email" placeholder="admin@sacco.com" value="admin@sacco.com">
+                <input type="email" id="email" placeholder="admin@sacco.com" value="abdifurgasa20@gmail.com">
             </div>
             
             <div class="form-group">
@@ -197,31 +204,32 @@
         </form>
         
         <div class="demo-card">
-            <p class="demo-title">📋 Demo Credentials</p>
-            <p>Email: <strong>admin@sacco.com</strong></p>
+            <p class="demo-title">📋 Login Credentials</p>
+            <p>Email: <strong>abdifurgasa20@gmail.com</strong></p>
             <p>Password: <strong>Admin123!</strong></p>
-            <p style="font-size: 11px; margin-top: 8px;">⚠️ First, create this user in Firebase Authentication</p>
+            <p style="font-size: 11px; margin-top: 8px;">✅ User will be auto-created if not exists</p>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { initI18n, setLanguage, t } from './js/i18n.js';
         
         // 🔴 REPLACE WITH YOUR FIREBASE CONFIGURATION 🔴
-          const firebaseConfig = {
-  apiKey: "AIzaSyCS-3e_WqGHNycDgvlXVkInaynTnvnplYE",
-  authDomain: "geresu-dhuki-sacco.firebaseapp.com",
-  projectId: "geresu-dhuki-sacco",
-  storageBucket: "geresu-dhuki-sacco.appspot.com",
-  messagingSenderId: "944934938425",
-  appId: "1:944934938425:web:caef23f2f3bb34c843eae8"
-};
-    
+     const firebaseConfig = {
+        apiKey: "AIzaSyCS-3e_WqGHNycDgvlXVkInaynTnvnplYE",
+        authDomain: "geresu-dhuki-sacco.firebaseapp.com",
+        projectId: "geresu-dhuki-sacco",
+        storageBucket: "geresu-dhuki-sacco.firebasestorage.app",
+        messagingSenderId: "944934938425",
+        appId: "1:944934938425:web:caef23f2f3bb34c843eae8",
+        measurementId: "G-QRHNWMZMXC"
         
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
+        const db = getFirestore(app);
         
         // Initialize i18n
         initI18n();
@@ -238,6 +246,23 @@
         const passwordInput = document.getElementById('password');
         const alertDiv = document.getElementById('alert');
         
+        async function createUserInFirestore(user, userData) {
+            try {
+                await setDoc(doc(db, "users", user.uid), {
+                    uid: user.uid,
+                    email: user.email,
+                    fullName: userData.name || "Abdi Furgasa",
+                    role: userData.role || "admin",
+                    status: "active",
+                    createdAt: new Date(),
+                    updatedAt: new Date()
+                });
+                console.log("User created in Firestore");
+            } catch (error) {
+                console.error("Error creating user in Firestore:", error);
+            }
+        }
+        
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -251,33 +276,65 @@
             
             const submitBtn = form.querySelector('button[type="submit"]');
             const originalText = submitBtn.innerHTML;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
             submitBtn.disabled = true;
             
             try {
-                const userCredential = await signInWithEmailAndPassword(auth, email, password);
-                showAlert('Login successful! Redirecting...', 'success');
-                
-                setTimeout(() => {
-                    window.location.href = 'dashboard.html';
-                }, 1000);
+                // Try to sign in first
+                try {
+                    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                    console.log('Login successful:', userCredential.user.email);
+                    showAlert('Login successful! Redirecting...', 'success');
+                    
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 1000);
+                    
+                } catch (signInError) {
+                    // If user doesn't exist, create them
+                    if (signInError.code === 'auth/user-not-found') {
+                        showAlert('User not found. Creating new account...', 'info');
+                        
+                        try {
+                            // Create new user
+                            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                            const user = userCredential.user;
+                            
+                            // Update profile with name
+                            await updateProfile(user, {
+                                displayName: "Abdi Furgasa"
+                            });
+                            
+                            // Create user document in Firestore
+                            await createUserInFirestore(user, {
+                                name: "Abdi Furgasa",
+                                role: "admin"
+                            });
+                            
+                            console.log('User created successfully:', user.email);
+                            showAlert('Account created! Logging in...', 'success');
+                            
+                            setTimeout(() => {
+                                window.location.href = 'dashboard.html';
+                            }, 1500);
+                            
+                        } catch (createError) {
+                            console.error('Create user error:', createError);
+                            showAlert('Error creating account: ' + createError.message, 'error');
+                        }
+                        
+                    } else if (signInError.code === 'auth/wrong-password') {
+                        showAlert('Wrong password. Please try again.', 'error');
+                    } else if (signInError.code === 'auth/invalid-email') {
+                        showAlert('Invalid email format.', 'error');
+                    } else {
+                        showAlert('Login failed: ' + signInError.message, 'error');
+                    }
+                }
                 
             } catch (error) {
-                let errorMessage = 'Login failed. ';
-                switch (error.code) {
-                    case 'auth/user-not-found':
-                        errorMessage = 'User not found. Please check your email.';
-                        break;
-                    case 'auth/wrong-password':
-                        errorMessage = 'Wrong password. Please try again.';
-                        break;
-                    case 'auth/invalid-email':
-                        errorMessage = 'Invalid email format.';
-                        break;
-                    default:
-                        errorMessage += error.message;
-                }
-                showAlert(errorMessage, 'error');
+                console.error('Unexpected error:', error);
+                showAlert('An unexpected error occurred', 'error');
                 
             } finally {
                 submitBtn.innerHTML = originalText;
@@ -292,7 +349,7 @@
             setTimeout(() => {
                 alertDiv.style.display = 'none';
                 alertDiv.className = 'alert';
-            }, 3000);
+            }, 4000);
         }
     </script>
 </body>
