@@ -19,8 +19,9 @@
             color: white;
         }
         .loader i {
-            font-size: 50px;
+            font-size: 60px;
             animation: spin 1s linear infinite;
+            margin-bottom: 20px;
         }
         @keyframes spin {
             0% { transform: rotate(0deg); }
@@ -29,35 +30,51 @@
         .loader p {
             margin-top: 20px;
             font-size: 18px;
+            opacity: 0.9;
+        }
+        .loader .subtitle {
+            font-size: 14px;
+            opacity: 0.7;
+            margin-top: 10px;
         }
     </style>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <div class="loader">
         <i class="fas fa-piggy-bank"></i>
-        <p>Loading SACCO Banking System...</p>
+        <p>SACCO Banking System</p>
+        <p class="subtitle">Loading...</p>
     </div>
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
-    <script>
-        // Check if user is logged in
-        import { auth, onAuthStateChanged } from './js/firebase.js';
-        
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                window.location.href = 'dashboard.html';
-            } else {
-                window.location.href = 'login.html';
-            }
-        });
-    </script>
+
     <script type="module">
-        import { auth, onAuthStateChanged } from './js/firebase.js';
+        // Dynamically import Firebase only when needed
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         
+        // Your Firebase configuration (REPLACE WITH YOUR ACTUAL CONFIG)
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+        
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        
+        // Check authentication state
         onAuthStateChanged(auth, (user) => {
+            console.log("Auth state changed:", user ? "Logged in" : "Logged out");
             if (user) {
+                // User is logged in, redirect to dashboard
                 window.location.href = 'dashboard.html';
             } else {
+                // User is logged out, redirect to login
                 window.location.href = 'login.html';
             }
         });
