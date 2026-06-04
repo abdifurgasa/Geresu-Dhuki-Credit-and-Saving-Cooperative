@@ -14,43 +14,28 @@
             background: linear-gradient(135deg, #1a3c34, #0e2a24);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        .loader {
+        .splash {
             text-align: center;
             color: white;
         }
-        .loader i {
+        .splash i {
             font-size: 60px;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+            margin-bottom: 20px;
         }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <div class="loader">
+    <div class="splash">
         <i class="fas fa-piggy-bank"></i>
-        <p>Loading SACCO Banking System...</p>
+        <h1>SACCO Banking System</h1>
+        <p>Loading...</p>
     </div>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { firebaseConfig } from './js/firebase-config.js';
-        
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        
-        onAuthStateChanged(auth, (user) => {
-            setTimeout(() => {
-                if (user) {
-                    window.location.href = 'dashboard.html';
-                } else {
-                    window.location.href = 'login.html';
-                }
-            }, 1500);
-        });
+    <script>
+        // Direct redirect - no Firebase
+        setTimeout(() => {
+            window.location.href = 'dashboard.html';
+        }, 1000);
     </script>
 </body>
 </html>
