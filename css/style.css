@@ -533,3 +533,187 @@ tr:hover {
         display: none;
     }
 }
+/* Additional styles for new pages */
+
+/* Settings page */
+.settings-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 25px;
+}
+
+.settings-card {
+    background: white;
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
+
+.settings-card h2 {
+    color: #1a3c34;
+    margin-bottom: 20px;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Search input */
+.search-input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.table-header {
+    margin-bottom: 15px;
+}
+
+/* Loan info in modal */
+.loan-info {
+    background: #f8f9fa;
+    padding: 12px;
+    border-radius: 8px;
+    margin: 10px 0;
+}
+
+.loan-info p {
+    margin: 5px 0;
+}
+
+/* User avatar */
+.user-avatar {
+    width: 35px;
+    height: 35px;
+    background: #ffc107;
+    color: #1a3c34;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+/* Role badges */
+.status.admin, .status.active {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status.officer {
+    background: #d1ecf1;
+    color: #0c5460;
+}
+
+.status.viewer {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.status.inactive {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+/* Receipt modal */
+#receiptContent {
+    padding: 20px;
+}
+
+/* Backup buttons */
+.backup-buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 15px;
+}
+
+.backup-info {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+    color: #666;
+}
+
+/* System info */
+.system-info p {
+    padding: 8px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+/* Danger zone */
+.danger-zone {
+    border: 2px solid #dc3545;
+    background: #fff5f5;
+}
+
+.danger-buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.btn-danger {
+    background: #dc3545;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.btn-danger:hover {
+    background: #c82333;
+}
+
+/* Animation for modals */
+.modal-content {
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive table */
+@media (max-width: 768px) {
+    table {
+        font-size: 12px;
+    }
+    
+    th, td {
+        padding: 8px;
+    }
+    
+    .btn-edit, .btn-danger {
+        padding: 4px 8px;
+        font-size: 11px;
+    }
+    
+    .settings-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .quick-actions {
+        grid-template-columns: 1fr;
+    }
+    
+    .performance-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .charts-row {
+        grid-template-columns: 1fr;
+    }
+}
