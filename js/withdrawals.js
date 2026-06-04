@@ -306,3 +306,30 @@ export function initWithdrawalsPage() {
         }
     };
 }
+// Add this function to the existing withdrawals.js file
+
+// Print receipt function
+window.printWithdrawalReceipt = () => {
+    const receiptContent = document.getElementById('withdrawalReceiptContent');
+    if (receiptContent) {
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(`
+            <html>
+                <head>
+                    <title>Withdrawal Receipt</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; padding: 40px; }
+                        .receipt { text-align: center; }
+                        hr { margin: 20px 0; }
+                        @media print {
+                            body { padding: 0; }
+                        }
+                    </style>
+                </head>
+                <body>${receiptContent.innerHTML}</body>
+            </html>
+        `);
+        printWindow.document.close();
+        printWindow.print();
+    }
+};
