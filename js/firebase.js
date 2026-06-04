@@ -1,12 +1,44 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { getStorage } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
-
 /* =========================
    FIREBASE CONFIG
 ========================= */
-const firebaseConfig = {
+
+// js/firebase.js
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { 
+    getFirestore, 
+    collection, 
+    getDocs, 
+    getDoc,
+    addDoc, 
+    updateDoc, 
+    deleteDoc, 
+    doc, 
+    query, 
+    where, 
+    orderBy, 
+    limit,
+    Timestamp,
+    writeBatch,
+    increment
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { 
+    getAuth, 
+    createUserWithEmailAndPassword, 
+    signInWithEmailAndPassword, 
+    signOut, 
+    onAuthStateChanged,
+    sendPasswordResetEmail,
+    updateProfile
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { 
+    getStorage, 
+    ref, 
+    uploadBytes, 
+    getDownloadURL,
+    deleteObject
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+
+ const firebaseConfig = {
   apiKey: "AIzaSyCS-3e_WqGHNycDgvlXVkInaynTnvnplYE",
   authDomain: "geresu-dhuki-sacco.firebaseapp.com",
   projectId: "geresu-dhuki-sacco",
@@ -15,15 +47,53 @@ const firebaseConfig = {
   appId: "1:944934938425:web:caef23f2f3bb34c843eae8"
 };
 
-/* =========================
-   INIT APP
-========================= */
-const app = initializeApp(firebaseConfig);
 
-/* =========================
-   SERVICES
-========================= */
-export const auth = getAuth(app);
-export const db = getFirestore(app);
-export const storage = getStorage(app);   // ✅ IMPORTANT FIX
-export { app };
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+const storage = getStorage(app);
+
+// Collection references
+const collections = {
+    users: "users",
+    members: "members",
+    savings: "savings",
+    loans: "loans",
+    repayments: "repayments",
+    withdrawals: "withdrawals",
+    settings: "settings",
+    activities: "activities"
+};
+
+// Export all Firebase services
+export { 
+    db, 
+    auth, 
+    storage,
+    collections,
+    collection, 
+    getDocs,
+    getDoc,
+    addDoc, 
+    updateDoc, 
+    deleteDoc, 
+    doc, 
+    query, 
+    where, 
+    orderBy, 
+    limit,
+    Timestamp,
+    writeBatch,
+    increment,
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    signOut,
+    onAuthStateChanged,
+    sendPasswordResetEmail,
+    updateProfile,
+    ref,
+    uploadBytes,
+    getDownloadURL,
+    deleteObject
+};
