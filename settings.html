@@ -1,233 +1,145 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8">
-  <title>Settings</title>
-  <link rel="stylesheet" href="css/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SACCO | Settings</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-
 <body>
- <!-- TOGGLE -->
-  <button class="toggle-btn"
-          onclick="toggleSidebar()">
 
-    ☰
-
-  </button>
-
-  <!-- LOGO -->
-  <h2 class="logo">
-
-    🏦 SACCO
-
-  </h2>
-
-  <!-- NAVIGATION -->
-  <nav class="nav">
-
-    <!-- DASHBOARD -->
-    <a href="dashboard.html"
-       class="nav-item active">
-
-      <span class="icon">📊</span>
-
-      <span class="text"
-            data-i18n="dashboard">
-
-        Dashboard
-
-      </span>
-
-    </a>
-
-    <!-- MEMBERS -->
-    <a href="members.html"
-       class="nav-item admin-only">
-
-      <span class="icon">👥</span>
-
-      <span class="text"
-            data-i18n="members">
-
-        Members
-
-      </span>
-
-    </a>
-
-    <!-- SAVINGS -->
-    <a href="savings.html"
-       class="nav-item">
-
-      <span class="icon">💰</span>
-
-      <span class="text"
-            data-i18n="savings">
-
-        Savings
-
-      </span>
-
-    </a>
-
-    <!-- LOANS -->
-    <a href="loans.html"
-       class="nav-item">
-
-      <span class="icon">🏦</span>
-
-      <span class="text"
-            data-i18n="loans">
-
-        Loans
-
-      </span>
-
-    </a>
-
-    <!-- REPAYMENTS -->
-    <a href="repayments.html"
-       class="nav-item">
-
-      <span class="icon">💵</span>
-
-      <span class="text"
-            data-i18n="repayments">
-
-        Repayments
-
-      </span>
-
-    </a>
-
-    <!-- TRANSACTIONS -->
-    <a href="transactions.html"
-       class="nav-item admin-only">
-
-      <span class="icon">💱</span>
-
-      <span class="text"
-            data-i18n="transactions">
-
-        Transactions
-
-      </span>
-
-    </a>
-    
-<!-- WITHDRAWALS -->
-    <a href="withdrawals.html"
-       class="nav-item admin-only">
-
-      <span class="icon">💵</span>
-
-      <span class="text"
-            data-i18n="withdrawals">
-
-        Withdrawals
-
-      </span>
-
-    </a>
-    <!-- REPORTS -->
-    <a href="reports.html"
-       class="nav-item admin-only">
-
-      <span class="icon">📄</span>
-
-      <span class="text"
-            data-i18n="reports">
-
-        Reports
-
-      </span>
-
-    </a>
-
-    <!-- USERS -->
-    <a href="users.html"
-       class="nav-item admin-only">
-
-      <span class="icon">👤</span>
-
-      <span class="text"
-            data-i18n="users">
-
-        Users
-
-      </span>
-
-    </a>
-
-    <!-- SETTINGS -->
-    <a href="settings.html"
-       class="nav-item">
-
-      <span class="icon">⚙️</span>
-
-      <span class="text"
-            data-i18n="settings">
-
-        Settings
-
-      </span>
-
-    </a>
-
-  </nav>
-
-</aside>
-
-<div class="container">
-
-  <h1>⚙️ SETTINGS</h1>
-
-  <!-- USER INFO -->
-  <div class="selected-box">
-
-    <h3>👤 Account Info</h3>
-
-    <p id="userName">Loading...</p>
-    <p id="userEmail">Loading...</p>
-    <p id="userRole">Loading...</p>
-
-  </div>
-
-  <!-- PASSWORD RESET -->
-  <div class="form-box">
-
-    <h3>🔐 Change Password</h3>
-
-    <input id="newPassword"
-           type="password"
-           class="input"
-           placeholder="New Password">
-
-    <button class="btn primary"
-            onclick="changePassword()">
-
-      Update Password
-
-    </button>
-
-  </div>
-
-  <!-- ACTIONS -->
-  <div style="margin-top:20px;">
-
-    <button class="btn danger"
-            onclick="logoutUser()">
-
-      Logout
-
-    </button>
-
-  </div>
-
+<div class="sidebar"></div>
+
+<div class="main-content">
+    <div class="header"></div>
+
+    <div class="settings-container">
+        <!-- General Settings -->
+        <div class="settings-card">
+            <h2><i class="fas fa-cog"></i> <span data-i18n="settings.general">General Settings</span></h2>
+            <form id="generalSettingsForm">
+                <div class="form-group">
+                    <label data-i18n="settings.organizationName">Organization Name</label>
+                    <input type="text" id="orgName" placeholder="SACCO Banking System">
+                </div>
+                <div class="form-group">
+                    <label data-i18n="settings.currency">Currency</label>
+                    <select id="currency">
+                        <option value="ETB">Ethiopian Birr (ETB)</option>
+                        <option value="USD">US Dollar (USD)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label data-i18n="settings.dateFormat">Date Format</label>
+                    <select id="dateFormat">
+                        <option value="MM/DD/YYYY">MM/DD/YYYY</option>
+                        <option value="DD/MM/YYYY">DD/MM/YYYY</option>
+                        <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-primary">Save Settings</button>
+            </form>
+        </div>
+
+        <!-- Loan Settings -->
+        <div class="settings-card">
+            <h2><i class="fas fa-hand-holding-usd"></i> <span data-i18n="loans.title">Loan Settings</span></h2>
+            <form id="loanSettingsForm">
+                <div class="form-group">
+                    <label>Default Interest Rate (%)</label>
+                    <input type="number" id="interestRate" step="0.5" value="12">
+                </div>
+                <div class="form-group">
+                    <label>Minimum Loan Amount (ETB)</label>
+                    <input type="number" id="minLoanAmount" value="1000">
+                </div>
+                <div class="form-group">
+                    <label>Maximum Loan Amount (ETB)</label>
+                    <input type="number" id="maxLoanAmount" value="100000">
+                </div>
+                <div class="form-group">
+                    <label>Maximum Loan Term (Months)</label>
+                    <input type="number" id="maxLoanTerm" value="24">
+                </div>
+                <button type="submit" class="btn-primary">Save Loan Settings</button>
+            </form>
+        </div>
+
+        <!-- Backup & Restore -->
+        <div class="settings-card">
+            <h2><i class="fas fa-database"></i> <span data-i18n="settings.backup">Backup & Restore</span></h2>
+            <div class="backup-buttons">
+                <button id="backupBtn" class="btn-primary">
+                    <i class="fas fa-download"></i> Export Backup
+                </button>
+                <button id="restoreBtn" class="btn-primary">
+                    <i class="fas fa-upload"></i> Import Restore
+                </button>
+                <input type="file" id="restoreFile" accept=".json" style="display: none;">
+            </div>
+            <div class="backup-info">
+                <small>Last backup: <span id="lastBackup">Never</span></small>
+            </div>
+        </div>
+
+        <!-- System Info -->
+        <div class="settings-card">
+            <h2><i class="fas fa-info-circle"></i> System Information</h2>
+            <div class="system-info">
+                <p><strong>Version:</strong> 1.0.0</p>
+                <p><strong>Build Date:</strong> 2024</p>
+                <p><strong>Developer:</strong> SACCO Banking System</p>
+                <p><strong>Support:</strong> support@sacco.com</p>
+            </div>
+        </div>
+
+        <!-- Danger Zone -->
+        <div class="settings-card danger-zone">
+            <h2><i class="fas fa-exclamation-triangle"></i> Danger Zone</h2>
+            <div class="danger-buttons">
+                <button id="clearDataBtn" class="btn-danger">Clear All Data</button>
+                <button id="resetSystemBtn" class="btn-danger">Reset System</button>
+            </div>
+        </div>
+    </div>
 </div>
 
-<script type="module" src="js/settings.js"></script>
+<script type="module">
+    import { db, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, where, Timestamp, writeBatch } from './js/firebase.js';
+    import { initLayout, createSidebarHTML, createHeaderHTML } from './js/layout.js';
+    import { showError, showSuccess } from './js/utils.js';
+    import { t } from './js/i18n.js';
 
-</body>
-</html>
+    // Load layout
+    document.querySelector('.sidebar').innerHTML = createSidebarHTML();
+    document.querySelector('.header').innerHTML = createHeaderHTML();
+    initLayout();
+
+    // Load settings from localStorage
+    function loadSettings() {
+        const orgName = localStorage.getItem('sacco_org_name') || 'SACCO Banking System';
+        const currency = localStorage.getItem('sacco_currency') || 'ETB';
+        const dateFormat = localStorage.getItem('sacco_date_format') || 'DD/MM/YYYY';
+        const interestRate = localStorage.getItem('sacco_interest_rate') || '12';
+        const minLoanAmount = localStorage.getItem('sacco_min_loan') || '1000';
+        const maxLoanAmount = localStorage.getItem('sacco_max_loan') || '100000';
+        const maxLoanTerm = localStorage.getItem('sacco_max_term') || '24';
+        const lastBackup = localStorage.getItem('sacco_last_backup') || 'Never';
+        
+        document.getElementById('orgName').value = orgName;
+        document.getElementById('currency').value = currency;
+        document.getElementById('dateFormat').value = dateFormat;
+        document.getElementById('interestRate').value = interestRate;
+        document.getElementById('minLoanAmount').value = minLoanAmount;
+        document.getElementById('maxLoanAmount').value = maxLoanAmount;
+        document.getElementById('maxLoanTerm').value = maxLoanTerm;
+        document.getElementById('lastBackup').textContent = lastBackup;
+    }
+    
+    // Save general settings
+    document.getElementById('generalSettingsForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        localStorage.setItem('sacco_org_name', document.getElementById('orgName').value);
+        localStorage.setItem('sacco_currency', document.getElementById('currency').value);
+        localStorage.set
