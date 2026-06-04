@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SACCO Banking System | Dashboard</title>
+    <title>SACCO | Dashboard</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -11,73 +11,55 @@
 <body>
 
 <div class="sidebar">
-    <div class="logo">
-        <h2><i class="fas fa-piggy-bank"></i> SACCO</h2>
-        <p>Banking System</p>
-    </div>
-    <ul class="nav-menu">
-        <li class="nav-item active"><a href="index.html"><i class="fas fa-chart-line"></i> <span>Dashboard</span></a></li>
-        <li class="nav-item"><a href="members.html"><i class="fas fa-users"></i> <span>Members</span></a></li>
-        <li class="nav-item"><a href="savings.html"><i class="fas fa-coins"></i> <span>Savings</span></a></li>
-        <li class="nav-item"><a href="loans.html"><i class="fas fa-hand-holding-usd"></i> <span>Loans</span></a></li>
-        <li class="nav-item"><a href="withdrawals.html"><i class="fas fa-money-bill-wave"></i> <span>Withdrawals</span></a></li>
-        <li class="nav-item"><a href="reports.html"><i class="fas fa-file-alt"></i> <span>Reports</span></a></li>
-        <li class="nav-item"><a href="users.html"><i class="fas fa-user-cog"></i> <span>Users</span></a></li>
-        <li class="nav-item"><a href="settings.html"><i class="fas fa-cog"></i> <span>Settings</span></a></li>
-    </ul>
+    <!-- Sidebar will be loaded by layout.js -->
 </div>
 
 <div class="main-content">
     <div class="header">
-        <h1>Financial Dashboard</h1>
-        <div class="user-info">
-            <span id="userName">Welcome, Admin</span>
-            <i class="fas fa-bell"></i>
-            <i class="fas fa-user-circle fa-2x"></i>
-        </div>
+        <!-- Header will be loaded by layout.js -->
     </div>
 
     <div class="quick-actions">
         <div class="action-card" onclick="window.location.href='members.html'">
             <i class="fas fa-user-plus"></i>
-            <h3>Add Member</h3>
-            <p>Register new member</p>
+            <h3 data-i18n="dashboard.addMember">Add Member</h3>
+            <p data-i18n="members.addNew">Register new member</p>
         </div>
         <div class="action-card" onclick="window.location.href='savings.html'">
             <i class="fas fa-save"></i>
-            <h3>Savings</h3>
-            <p>Record member savings</p>
+            <h3 data-i18n="dashboard.recordSavings">Savings</h3>
+            <p data-i18n="savings.title">Record member savings</p>
         </div>
         <div class="action-card" onclick="window.location.href='loans.html'">
             <i class="fas fa-hand-holding-usd"></i>
-            <h3>Loans</h3>
-            <p>Create new loan</p>
+            <h3 data-i18n="dashboard.createLoan">Loans</h3>
+            <p data-i18n="loans.applyNew">Create new loan</p>
         </div>
         <div class="action-card" onclick="window.location.href='withdrawals.html'">
             <i class="fas fa-money-bill-wave"></i>
-            <h3>Withdrawals</h3>
-            <p>Process withdrawals</p>
+            <h3 data-i18n="dashboard.processWithdrawal">Withdrawals</h3>
+            <p data-i18n="withdrawals.process">Process withdrawals</p>
         </div>
     </div>
 
     <div class="performance-grid">
         <div class="kpi-card">
-            <h4>Savings (ETB)</h4>
+            <h4 data-i18n="dashboard.totalSavings">Savings (ETB)</h4>
             <div class="value" id="savingsValue">0</div>
             <div class="trend" id="savingsTrend">Loading...</div>
         </div>
         <div class="kpi-card">
-            <h4>Loans (ETB)</h4>
+            <h4 data-i18n="dashboard.totalLoans">Loans (ETB)</h4>
             <div class="value" id="loansValue">0</div>
             <div class="trend" id="loansTrend">Loading...</div>
         </div>
         <div class="kpi-card">
-            <h4>Withdrawals (ETB)</h4>
+            <h4 data-i18n="dashboard.totalWithdrawals">Withdrawals (ETB)</h4>
             <div class="value" id="withdrawalsValue">0</div>
             <div class="trend" id="withdrawalsTrend">Loading...</div>
         </div>
         <div class="kpi-card">
-            <h4>Profit (ETB)</h4>
+            <h4 data-i18n="dashboard.totalProfit">Profit (ETB)</h4>
             <div class="value" id="profitValue">0</div>
             <div class="trend" id="profitTrend">Loading...</div>
         </div>
@@ -85,65 +67,59 @@
 
     <div class="charts-row">
         <div class="chart-card">
-            <h3>Loans vs Repayments</h3>
+            <h3 data-i18n="reports.loanPerformance">Loans vs Repayments</h3>
             <canvas id="loansRepaymentsChart"></canvas>
         </div>
         <div class="chart-card">
-            <h3>Monthly Performance - This Year</h3>
-            <canvas id="monthlyChart"></canvas>
+            <h3 data-i18n="reports.memberGrowth">Member Growth</h3>
+            <canvas id="memberGrowthChart"></canvas>
         </div>
     </div>
 </div>
 
 <script type="module">
     import { db, collection, getDocs, query, where, Timestamp } from './js/firebase.js';
-    import { formatCurrency, getCurrentMonthYear, showError } from './js/utils.js';
+    import { initLayout, createSidebarHTML, createHeaderHTML } from './js/layout.js';
+    import { formatCurrency } from './js/utils.js';
+    import { t } from './js/i18n.js';
+    
+    // Load layout
+    document.querySelector('.sidebar').innerHTML = createSidebarHTML();
+    document.querySelector('.header').innerHTML = createHeaderHTML();
+    initLayout();
     
     let loansChart = null;
-    let monthlyChart = null;
+    let growthChart = null;
     
-    // Load dashboard data
     async function loadDashboardData() {
         try {
             // Get savings total
             const savingsSnapshot = await getDocs(collection(db, "savings"));
             let totalSavings = 0;
-            savingsSnapshot.forEach(doc => {
-                totalSavings += doc.data().amount || 0;
-            });
+            savingsSnapshot.forEach(doc => totalSavings += doc.data().amount || 0);
             document.getElementById('savingsValue').innerText = formatCurrency(totalSavings);
             
             // Get loans total
             const loansSnapshot = await getDocs(collection(db, "loans"));
             let totalLoans = 0;
-            loansSnapshot.forEach(doc => {
-                totalLoans += doc.data().amount || 0;
-            });
+            loansSnapshot.forEach(doc => totalLoans += doc.data().principal || doc.data().amount || 0);
             document.getElementById('loansValue').innerText = formatCurrency(totalLoans);
             
             // Get withdrawals total
             const withdrawalsSnapshot = await getDocs(collection(db, "withdrawals"));
             let totalWithdrawals = 0;
-            withdrawalsSnapshot.forEach(doc => {
-                totalWithdrawals += doc.data().amount || 0;
-            });
+            withdrawalsSnapshot.forEach(doc => totalWithdrawals += doc.data().amount || 0);
             document.getElementById('withdrawalsValue').innerText = formatCurrency(totalWithdrawals);
             
             // Calculate profit
             const profit = (totalLoans * 0.12) - (totalWithdrawals * 0.02);
             document.getElementById('profitValue').innerText = formatCurrency(profit);
             
-            // Update trends
-            document.getElementById('savingsTrend').innerHTML = '↑ 12% from last month';
-            document.getElementById('loansTrend').innerHTML = '↑ 8% from last month';
-            document.getElementById('withdrawalsTrend').innerHTML = '↓ 5% from last month';
-            document.getElementById('profitTrend').innerHTML = '↑ 15% from last month';
-            
             // Load charts
             await loadCharts();
+            
         } catch (error) {
             console.error("Error loading dashboard:", error);
-            showError('Failed to load dashboard data');
         }
     }
     
@@ -152,107 +128,63 @@
         const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
         
         // Get monthly loans
-        const loansQuery = query(collection(db, "loans"), where("year", "==", currentYear));
-        const loansSnapshot = await getDocs(loansQuery);
+        const loansSnapshot = await getDocs(query(collection(db, "loans"), where("year", "==", currentYear)));
         const monthlyLoans = new Array(12).fill(0);
         loansSnapshot.forEach(doc => {
-            const month = (doc.data().month || 1) - 1;
-            monthlyLoans[month] += doc.data().amount || 0;
+            const month = (doc.data().month || new Date().getMonth() + 1) - 1;
+            monthlyLoans[month] += doc.data().principal || doc.data().amount || 0;
         });
         
         // Get monthly repayments
-        const repaymentsQuery = query(collection(db, "repayments"), where("year", "==", currentYear));
-        const repaymentsSnapshot = await getDocs(repaymentsQuery);
+        const repaymentsSnapshot = await getDocs(query(collection(db, "repayments"), where("year", "==", currentYear)));
         const monthlyRepayments = new Array(12).fill(0);
         repaymentsSnapshot.forEach(doc => {
-            const month = (doc.data().month || 1) - 1;
+            const month = (doc.data().month || new Date().getMonth() + 1) - 1;
             monthlyRepayments[month] += doc.data().amount || 0;
         });
         
-        // Destroy existing charts if they exist
         if (loansChart) loansChart.destroy();
-        if (monthlyChart) monthlyChart.destroy();
         
-        // Chart 1: Loans vs Repayments
         const ctx1 = document.getElementById('loansRepaymentsChart').getContext('2d');
         loansChart = new Chart(ctx1, {
             type: 'bar',
             data: {
                 labels: months,
                 datasets: [
-                    {
-                        label: 'Loans Issued (ETB)',
-                        data: monthlyLoans,
-                        backgroundColor: '#ffc107',
-                        borderColor: '#ffc107',
-                        borderWidth: 1
-                    },
-                    {
-                        label: 'Repayments (ETB)',
-                        data: monthlyRepayments,
-                        backgroundColor: '#1a3c34',
-                        borderColor: '#1a3c34',
-                        borderWidth: 1
-                    }
+                    { label: t('loans.title'), data: monthlyLoans, backgroundColor: '#ffc107' },
+                    { label: t('repayments.title'), data: monthlyRepayments, backgroundColor: '#1a3c34' }
                 ]
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: true,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: function(value) {
-                                return value.toLocaleString() + ' ETB';
-                            }
-                        }
-                    }
-                }
+                scales: { y: { beginAtZero: true, ticks: { callback: v => v.toLocaleString() + ' ETB' } } }
             }
         });
         
-        // Chart 2: Monthly transactions
-        const transactionsQuery = query(collection(db, "transactions"), where("year", "==", currentYear));
-        const transactionsSnapshot = await getDocs(transactionsQuery);
-        const monthlyTransactions = new Array(12).fill(0);
-        transactionsSnapshot.forEach(doc => {
-            const month = (doc.data().month || 1) - 1;
-            monthlyTransactions[month] += doc.data().amount || 0;
+        // Member growth chart
+        const membersSnapshot = await getDocs(collection(db, "members"));
+        const monthlyMembers = new Array(12).fill(0);
+        membersSnapshot.forEach(doc => {
+            const joinDate = doc.data().createdAt || doc.data().joinDate;
+            if (joinDate && joinDate.toDate) {
+                const month = joinDate.toDate().getMonth();
+                monthlyMembers[month]++;
+            }
         });
         
-        const ctx2 = document.getElementById('monthlyChart').getContext('2d');
-        monthlyChart = new Chart(ctx2, {
+        if (growthChart) growthChart.destroy();
+        
+        const ctx2 = document.getElementById('memberGrowthChart').getContext('2d');
+        growthChart = new Chart(ctx2, {
             type: 'line',
             data: {
                 labels: months,
-                datasets: [{
-                    label: 'Total Transactions (ETB)',
-                    data: monthlyTransactions,
-                    borderColor: '#ffc107',
-                    backgroundColor: 'rgba(255, 193, 7, 0.1)',
-                    tension: 0.4,
-                    fill: true
-                }]
+                datasets: [{ label: t('members.title'), data: monthlyMembers, borderColor: '#ffc107', fill: true }]
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: function(value) {
-                                return value.toLocaleString() + ' ETB';
-                            }
-                        }
-                    }
-                }
-            }
+            options: { responsive: true, scales: { y: { beginAtZero: true, stepSize: 1 } } }
         });
     }
     
-    // Initialize dashboard
     loadDashboardData();
 </script>
 
