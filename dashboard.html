@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>SACCO | Elegant Dashboard</title>
+  <title>SACCO | Geresu Dhuki Dashboard</title>
   <!-- Google Fonts & Font Awesome -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <!-- Custom CSS & JS -->
-  <link rel="stylesheet" href="style.css">
-  <script src="script.js" defer></script>
+  <link rel="stylesheet" href="css/style.css">
+  <script type="module" src="js/script.js"></script>
 </head>
 <body>
 <div class="dashboard-container">
@@ -43,7 +43,7 @@
     <div class="topbar">
       <div class="page-title">
         <h1 data-i18n="financialDashboard">Financial Dashboard</h1>
-        <p data-i18n="overviewSub">Insights & Analytics</p>
+        <p data-i18n="overview">Dashboard Overview</p>
       </div>
       <div class="topbar-actions">
         <div class="language-selector">
@@ -66,7 +66,7 @@
         <div>
           <h4 data-i18n="overview">Dashboard Overview</h4>
           <h2 data-i18n="welcome">Welcome to Geresu Dhuki SACCO Banking System</h2>
-          <p data-i18n="subtitle">Real‑time performance at a glance</p>
+          <p data-i18n="overview">Real‑time performance at a glance</p>
         </div>
       </div>
     </div>
@@ -76,20 +76,20 @@
       <div class="stat-card"><div class="stat-top"><div class="stat-icon blue"><i class="fas fa-users"></i></div><div><div class="stat-label" data-i18n="totalMembers">Total Members</div><div class="stat-value" id="totalMembers">0</div></div></div></div>
       <div class="stat-card"><div class="stat-top"><div class="stat-icon green"><i class="fas fa-wallet"></i></div><div><div class="stat-label" data-i18n="totalSavings">Total Savings</div><div class="stat-value" id="totalSavings">0</div></div></div></div>
       <div class="stat-card"><div class="stat-top"><div class="stat-icon orange"><i class="fas fa-landmark"></i></div><div><div class="stat-label" data-i18n="totalLoans">Total Loans</div><div class="stat-value" id="totalLoans">0</div></div></div></div>
-      <div class="stat-card"><div class="stat-top"><div class="stat-icon red"><i class="fas fa-money-bill-transfer"></i></div><div><div class="stat-label" data-i18n="withdrawals">Withdrawals</div><div class="stat-value" id="totalWithdrawals">0</div></div></div></div>
+      <div class="stat-card"><div class="stat-top"><div class="stat-icon red"><i class="fas fa-money-bill-transfer"></i></div><div><div class="stat-label" data-i18n="withdrawalsTitle">Withdrawals</div><div class="stat-value" id="totalWithdrawals">0</div></div></div></div>
       <div class="stat-card"><div class="stat-top"><div class="stat-icon green"><i class="fas fa-chart-line"></i></div><div><div class="stat-label" data-i18n="netProfit">Net Profit</div><div class="stat-value" id="netProfit">0</div></div></div></div>
     </div>
 
     <h2 class="section-title" data-i18n="quickActions"><i class="fas fa-bolt"></i> Quick Actions</h2>
     <div class="quick-actions">
       <a href="#" class="action-card"><div class="action-left"><div class="action-icon blue"><i class="fas fa-user-plus"></i></div><div class="action-text"><h4 data-i18n="addMember">Add Member</h4><p data-i18n="registerMember">Register new member</p></div></div><div class="action-arrow">→</div></a>
-      <a href="#" class="action-card"><div class="action-left"><div class="action-icon green"><i class="fas fa-wallet"></i></div><div class="action-text"><h4 data-i18n="savings">Savings</h4><p data-i18n="recordSavings">Record member savings</p></div></div><div class="action-arrow">→</div></a>
-      <a href="#" class="action-card"><div class="action-left"><div class="action-icon orange"><i class="fas fa-landmark"></i></div><div class="action-text"><h4 data-i18n="loans">Loans</h4><p data-i18n="createLoan">Create new loan</p></div></div><div class="action-arrow">→</div></a>
-      <a href="#" class="action-card"><div class="action-left"><div class="action-icon red"><i class="fas fa-money-bill-transfer"></i></div><div class="action-text"><h4 data-i18n="withdrawals">Withdrawals</h4><p data-i18n="processWithdrawals">Process withdrawals</p></div></div><div class="action-arrow">→</div></a>
+      <a href="#" class="action-card"><div class="action-left"><div class="action-icon green"><i class="fas fa-wallet"></i></div><div class="action-text"><h4 data-i18n="addSaving">Add Saving</h4><p data-i18n="recordSavings">Record member savings</p></div></div><div class="action-arrow">→</div></a>
+      <a href="#" class="action-card"><div class="action-left"><div class="action-icon orange"><i class="fas fa-landmark"></i></div><div class="action-text"><h4 data-i18n="createLoan">Create Loans</h4><p data-i18n="loansTitle">Create new loan</p></div></div><div class="action-arrow">→</div></a>
+      <a href="#" class="action-card"><div class="action-left"><div class="action-icon red"><i class="fas fa-money-bill-transfer"></i></div><div class="action-text"><h4 data-i18n="withdrawalsTitle">Withdrawals</h4><p data-i18n="processWithdrawals">Process withdrawals</p></div></div><div class="action-arrow">→</div></a>
     </div>
 
     <div class="chart-grid">
-      <div class="chart-card"><div class="chart-header"><h3 data-i18n="overviewChart">Savings vs Loans (ETB)</h3><select class="chart-filter"><option>This Year</option></select></div><div class="chart-container"><canvas id="performanceChart"></canvas></div></div>
+      <div class="chart-card"><div class="chart-header"><h3 data-i18n="performanceOverview">Performance Overview</h3><select class="chart-filter"><option>This Year</option></select></div><div class="chart-container"><canvas id="performanceChart"></canvas></div></div>
       <div class="chart-card"><div class="chart-header"><h3 data-i18n="loansVsRepayments">Loans vs Repayments</h3><select class="chart-filter"><option>This Year</option></select></div><div class="chart-container"><canvas id="loanChart"></canvas></div></div>
     </div>
   </main>
