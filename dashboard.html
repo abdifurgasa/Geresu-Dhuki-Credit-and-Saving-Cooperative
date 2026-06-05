@@ -1,40 +1,462 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>SACCO | Dashboard</title><link rel="stylesheet" href="css/style.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"><script src="https://cdn.jsdelivr.net/npm/chart.js"></script></head>
-<body><div class="sidebar"></div><div class="main-content"><div class="header"></div><div id="globalAlert" class="alert" style="display:none"></div>
-<div class="quick-actions"><div class="action-card" onclick="location.href='members.html'"><i class="fas fa-user-plus"></i><h3 data-i18n="dashboard.addMember">Add Member</h3><p>Register new member</p></div>
-<div class="action-card" onclick="location.href='savings.html'"><i class="fas fa-coins"></i><h3 data-i18n="dashboard.recordSavings">Record Savings</h3><p>Record member savings</p></div>
-<div class="action-card" onclick="location.href='loans.html'"><i class="fas fa-hand-holding-usd"></i><h3 data-i18n="dashboard.createLoan">Create Loan</h3><p>Create new loan</p></div>
-<div class="action-card" onclick="location.href='withdrawals.html'"><i class="fas fa-money-bill-wave"></i><h3 data-i18n="dashboard.processWithdrawal">Withdrawals</h3><p>Process withdrawals</p></div></div>
-<div class="performance-grid"><div class="kpi-card"><h4 data-i18n="dashboard.totalMembers">Total Members</h4><div class="value" id="totalMembers">0</div></div>
-<div class="kpi-card"><h4 data-i18n="dashboard.totalSavings">Total Savings</h4><div class="value" id="totalSavings">0 ETB</div></div>
-<div class="kpi-card"><h4 data-i18n="dashboard.totalLoans">Total Loans</h4><div class="value" id="totalLoans">0 ETB</div></div>
-<div class="kpi-card"><h4 data-i18n="dashboard.totalWithdrawals">Total Withdrawals</h4><div class="value" id="totalWithdrawals">0 ETB</div></div></div>
-<div class="charts-row"><div class="chart-card"><h3>Savings Trend</h3><canvas id="savingsChart"></canvas></div><div class="chart-card"><h3>Loan Performance</h3><canvas id="loanChart"></canvas></div></div></div>
-<script type="module">
-import { initLayout, db, collection, getDocs, formatCurrency } from "./js/app.js";
-initLayout();
-let savingsChart, loanChart;
-async function loadStats(){
-    const membersSnap = await getDocs(collection(db,"members"));
-    document.getElementById('totalMembers').innerText = membersSnap.size;
-    const savingsSnap = await getDocs(collection(db,"savings"));
-    let totalSavings=0; savingsSnap.forEach(d=>totalSavings+=d.data().amount||0);
-    document.getElementById('totalSavings').innerHTML = formatCurrency(totalSavings);
-    const loansSnap = await getDocs(collection(db,"loans"));
-    let totalLoans=0; loansSnap.forEach(d=>totalLoans+=d.data().amount||0);
-    document.getElementById('totalLoans').innerHTML = formatCurrency(totalLoans);
-    const withdrawalsSnap = await getDocs(collection(db,"withdrawals"));
-    let totalWithdrawals=0; withdrawalsSnap.forEach(d=>totalWithdrawals+=d.data().amount||0);
-    document.getElementById('totalWithdrawals').innerHTML = formatCurrency(totalWithdrawals);
-    // Charts
-    const monthly = Array(12).fill(0);
-    savingsSnap.forEach(d=>{ let m = d.data().month || new Date().getMonth()+1; monthly[m-1] += d.data().amount||0; });
-    if(savingsChart) savingsChart.destroy();
-    savingsChart = new Chart(document.getElementById('savingsChart'),{type:'line',data:{labels:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],datasets:[{label:'Savings',data:monthly,borderColor:'#1a3c34',fill:true}]}});
-    const loanMonthly = Array(12).fill(0);
-    loansSnap.forEach(d=>{ let m = d.data().month || new Date().getMonth()+1; loanMonthly[m-1] += d.data().amount||0; });
-    if(loanChart) loanChart.destroy();
-    loanChart = new Chart(document.getElementById('loanChart'),{type:'bar',data:{labels:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],datasets:[{label:'Loans Issued',data:loanMonthly,backgroundColor:'#ffc107'}]}});
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>SACCO Banking Dashboard</title>
+
+<link rel="stylesheet" href="css/style.css">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</head>
+<body>
+
+<div class="dashboard-container">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+
+        <button class="menu-toggle" id="toggleBtn">
+            <i class="fas fa-bars"></i>
+        </button>
+
+        <div class="sidebar-header">
+            <div class="logo-icon">
+                <i class="fas fa-university"></i>
+            </div>
+
+            <div class="logo-text">
+                <h2>SACCO</h2>
+                <span>Banking System</span>
+            </div>
+        </div>
+
+        <ul class="sidebar-menu">
+
+            <li class="active">
+                <a href="#">
+                    <i class="fas fa-chart-pie"></i>
+                    <span data-i18n="dashboard">Dashboard</span>
+                </a>
+            </li>
+
+            <li>
+                <a href="members.html">
+                    <i class="fas fa-users"></i>
+                    <span data-i18n="members">Members</span>
+                </a>
+            </li>
+
+            <li>
+                <a href="savings.html">
+                    <i class="fas fa-wallet"></i>
+                    <span data-i18n="savings">Savings</span>
+                </a>
+            </li>
+
+            <li>
+                <a href="loans.html">
+                    <i class="fas fa-landmark"></i>
+                    <span data-i18n="loans">Loans</span>
+                </a>
+            </li>
+
+            <li>
+                <a href="repayments.html">
+                    <i class="fas fa-money-check-dollar"></i>
+                    <span data-i18n="repayments">Repayments</span>
+                </a>
+            </li>
+
+            <li>
+                <a href="withdrawals.html">
+                    <i class="fas fa-money-bill-transfer"></i>
+                    <span data-i18n="withdrawals">Withdrawals</span>
+                </a>
+            </li>
+
+            <li>
+                <a href="reports.html">
+                    <i class="fas fa-file-alt"></i>
+                    <span data-i18n="reports">Reports</span>
+                </a>
+            </li>
+
+            <li>
+                <a href="users.html">
+                    <i class="fas fa-user"></i>
+                    <span data-i18n="users">Users</span>
+                </a>
+            </li>
+
+            <li>
+                <a href="settings.html">
+                    <i class="fas fa-gear"></i>
+                    <span data-i18n="settings">Settings</span>
+                </a>
+            </li>
+
+        </ul>
+
+        <div class="sidebar-footer">
+            <a href="#" class="logout-btn">
+                <i class="fas fa-right-from-bracket"></i>
+                <span data-i18n="logout">Logouts</span>
+            </a>
+        </div>
+
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content" id="mainContent">
+
+        <!-- HEADER -->
+        <div class="topbar">
+
+            <div class="page-title">
+                <h1 data-i18n="financialDashboard">Financial Dashboard</h1>
+                <p data-i18n="overview">Dashboard Overview</p>
+            </div>
+
+            <div class="topbar-actions">
+
+                <div class="language-selector">
+                 <select id="languageSelect" onchange="changeLanguage(this.value)">
+                   <option value="en">English</option>
+                   <option value="om">Afaan Oromo</option>
+                   <option value="am">አማርኛ</option>
+              </select>
+         </div>
+
+                <div class="profile-card">
+
+                    <div class="profile-avatar">
+                        <i class="fas fa-user fa-lg"></i>
+                    </div>
+
+                    <div class="profile-info">
+                        <h4>Admin</h4>
+                        <p>Administrator</p>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- WELCOME -->
+        <div class="welcome-card">
+
+            <div class="welcome-left">
+
+                <div class="welcome-icon">
+                    <i class="fas fa-chart-column fa-2x"></i>
+                </div>
+
+                <div>
+                    <h4 data-i18n="overview">Dashboard Overview</h4>
+                    <h2 data-i18n="welcome">
+                     Welcome to Geresu Dhuki SACCO Banking System
+                     </h2>
+                    <p>Here's what's happening with your SACCO today.</p>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- STATS -->
+        <div class="stats-grid">
+
+            <div class="stat-card">
+
+                <div class="stat-top">
+                    <div class="stat-icon blue">
+                        <i class="fas fa-users"></i>
+                    </div>
+
+                    <div>
+                        <div class="stat-label" data-i18n="totalMembers">
+                           Total Members
+                         </div>
+                       <div class="stat-value" id="totalMembers">0</div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="stat-card">
+
+                <div class="stat-top">
+                    <div class="stat-icon green">
+                        <i class="fas fa-wallet"></i>
+                    </div>
+
+                    <div>
+                        <div class="stat-label" data-i18n="totalSavings">
+                         Total Savings
+                         </div>
+                        <div class="stat-value" id="totalSavings">0</div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="stat-card">
+
+                <div class="stat-top">
+                    <div class="stat-icon orange">
+                        <i class="fas fa-landmark"></i>
+                    </div>
+
+                    <div>
+                        <div class="stat-label" data-i18n="totalLoans">
+                         Total Loans
+                        </div>
+                        <div class="stat-value" id="totalLoans">0</div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="stat-card">
+
+                <div class="stat-top">
+                    <div class="stat-icon red">
+                        <i class="fas fa-money-bill-transfer"></i>
+                    </div>
+
+                    <div>
+                        <div class="stat-label" data-i18n="withdrawals">
+                          Withdrawals
+                         </div>
+                        <div class="stat-value" id="totalWithdrawals">0</div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="stat-card">
+
+                <div class="stat-top">
+                    <div class="stat-icon green">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+
+                    <div>
+                        <div class="stat-label" data-i18n="netProfit">
+                          Net Profit
+                         </div>
+                        <div class="stat-value" id="netProfit">0</div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- QUICK ACTIONS -->
+       <h2 class="section-title" data-i18n="quickActions">
+         Quick Actions
+       </h2>
+
+        <div class="quick-actions">
+
+            <a href="members.html" class="action-card action-blue">
+
+                <div class="action-left">
+
+                    <div class="action-icon blue">
+                        <i class="fas fa-users"></i>
+                    </div>
+
+                    <div class="action-text">
+                        <h4 data-i18n="addMember">Add Member</h4>
+                        <p data-i18n="registerMember">Register new member</p>
+                    </div>
+
+                </div>
+
+                <div class="action-arrow">
+                    →
+                </div>
+
+            </a>
+
+            <a href="savings.html" class="action-card action-green">
+
+                <div class="action-left">
+
+                    <div class="action-icon green">
+                        <i class="fas fa-wallet"></i>
+                    </div>
+
+                    <div class="action-text">
+                        <h4 data-i18n="savings">Savings</h4>
+                        <p data-i18n="recordSavings">Record member savings</p>
+                    </div>
+
+                </div>
+
+                <div class="action-arrow">
+                    →
+                </div>
+
+            </a>
+
+            <a href="loans.html" class="action-card action-orange">
+
+                <div class="action-left">
+
+                    <div class="action-icon orange">
+                        <i class="fas fa-landmark"></i>
+                    </div>
+
+                    <div class="action-text">
+                        <h4 data-i18n="loans">Loans</h4>
+                        <p data-i18n="createLoan">Create new loan</p>
+                    </div>
+
+                </div>
+
+                <div class="action-arrow">
+                    →
+                </div>
+
+            </a>
+
+            <a href="withdrawals.html" class="action-card action-red">
+
+                <div class="action-left">
+
+                    <div class="action-icon red">
+                        <i class="fas fa-money-bill-transfer"></i>
+                    </div>
+
+                    <div class="action-text">
+                        <h4 data-i18n="withdrawals">Withdrawals</h4>
+                        <p data-i18n="processWithdrawals">Process withdrawals</p>
+                    </div>
+
+                </div>
+
+                <div class="action-arrow">
+                    →
+                </div>
+
+            </a>
+
+        </div>
+
+        <!-- CHARTS -->
+        <div class="chart-grid">
+
+            <div class="chart-card">
+
+                <div class="chart-header">
+                    <h3 data-i18n="overview">Dashboard Overview</h3>
+                    <select class="chart-filter">
+                        <option>This Year</option>
+                    </select>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="performanceChart"></canvas>
+                </div>
+
+            </div>
+
+            <div class="chart-card">
+
+                <div class="chart-header">
+                    <h3 data-i18n="loansVsRepayments">
+                     Loans vs Repayments
+                    </h3>
+                    <select class="chart-filter">
+                        <option>This Year</option>
+                    </select>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="loanChart"></canvas>
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+</div>
+
+<script>
+
+const sidebar = document.getElementById('sidebar');
+const mainContent = document.getElementById('mainContent');
+
+document.getElementById('toggleBtn')
+.addEventListener('click',()=>{
+
+    sidebar.classList.toggle('collapsed');
+    mainContent.classList.toggle('expanded');
+
+});
+
+new Chart(document.getElementById('performanceChart'),{
+
+type:'line',
+
+data:{
+labels:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+
+datasets:[
+{
+label:'Savings',
+data:[100,120,140,150,170,190,200,220,240,260,280,300]
+},
+{
+label:'Loans',
+data:[50,70,80,90,100,110,130,140,150,160,170,180]
 }
-loadStats();
-</script></body></html>
+]
+}
+
+});
+
+new Chart(document.getElementById('loanChart'),{
+
+type:'bar',
+
+data:{
+labels:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+
+datasets:[
+{
+label:'Loans',
+data:[100,120,150,160,180,210,230,200,170,180,170,150]
+},
+{
+label:'Repayments',
+data:[60,60,85,90,100,130,145,110,120,75,95,80]
+}
+]
+}
+
+});
+</script>
+    
+<script src="js/i18n.js"></script>
+
+<script type="module" src="js/layout.js"></script>
+
+<script type="module" src="js/dashboard.js"></script>
+
+</body>
+</html>
+    
