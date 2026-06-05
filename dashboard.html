@@ -3,19 +3,447 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>SACCO | Geresu Dhuki Dashboard</title>
-  <!-- Google Fonts & Font Awesome -->
+  <title>SACCO Dashboard | Geresu Dhuki</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-  <!-- Custom CSS & JS -->
-  <link rel="stylesheet" href="css/style.css">
-  <script type="module" src="js/script.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(145deg, #f9fafc 0%, #f0f4fa 100%);
+      color: #1a2c3e;
+    }
+
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #e2e8f0; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 10px; }
+
+    .dashboard-container {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* ========= SIDEBAR ========= */
+    .sidebar {
+      width: 280px;
+      background: rgba(255, 255, 255, 0.96);
+      backdrop-filter: blur(2px);
+      border-right: 1px solid rgba(0, 0, 0, 0.05);
+      transition: width 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+      display: flex;
+      flex-direction: column;
+      box-shadow: 4px 0 20px rgba(0, 0, 0, 0.02);
+      z-index: 10;
+    }
+
+    .sidebar.collapsed {
+      width: 90px;
+    }
+
+    .sidebar.collapsed .logo-text,
+    .sidebar.collapsed .sidebar-menu span,
+    .sidebar.collapsed .sidebar-footer span,
+    .sidebar.collapsed .sidebar-header .logo-text {
+      display: none;
+    }
+
+    .sidebar.collapsed .sidebar-menu li a {
+      justify-content: center;
+    }
+
+    .sidebar.collapsed .sidebar-menu li a i {
+      margin-right: 0;
+    }
+
+    .menu-toggle {
+      position: absolute;
+      right: -14px;
+      top: 28px;
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: #3b82f6;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+      transition: 0.2s;
+      z-index: 20;
+    }
+
+    .menu-toggle:hover {
+      background: #f1f5f9;
+      transform: scale(1.02);
+    }
+
+    .sidebar-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 32px 24px;
+      border-bottom: 1px solid #eef2f6;
+    }
+
+    .logo-icon i {
+      font-size: 32px;
+      background: linear-gradient(135deg, #2563eb, #06b6d4);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .logo-text h2 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #1e293b, #3b82f6);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .logo-text span {
+      font-size: 0.7rem;
+      color: #64748b;
+    }
+
+    .sidebar-menu {
+      flex: 1;
+      list-style: none;
+      padding: 28px 16px;
+    }
+
+    .sidebar-menu li {
+      margin-bottom: 8px;
+    }
+
+    .sidebar-menu li a {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 18px;
+      border-radius: 16px;
+      color: #475569;
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .sidebar-menu li a i {
+      width: 26px;
+      font-size: 1.1rem;
+    }
+
+    .sidebar-menu li.active a {
+      background: linear-gradient(95deg, #eef2ff, #ffffff);
+      color: #2563eb;
+      box-shadow: 0 2px 6px rgba(37,99,235,0.08);
+      border-left: 3px solid #3b82f6;
+    }
+
+    .sidebar-menu li:not(.active) a:hover {
+      background: #f8fafc;
+      color: #2563eb;
+    }
+
+    .sidebar-footer {
+      padding: 24px;
+      border-top: 1px solid #eef2f6;
+    }
+
+    .logout-btn {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: #ef4444;
+      text-decoration: none;
+      padding: 10px 16px;
+      border-radius: 14px;
+      transition: 0.2s;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .logout-btn:hover {
+      background: #fef2f2;
+    }
+
+    /* ========= MAIN CONTENT ========= */
+    .main-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 28px 36px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 32px;
+    }
+
+    .page-title h1 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 1.9rem;
+      font-weight: 700;
+      background: linear-gradient(125deg, #0f2b3d, #2c7da0);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .page-title p {
+      color: #5b7f9a;
+      font-weight: 500;
+    }
+
+    .topbar-actions {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+
+    .language-selector select {
+      padding: 8px 16px;
+      border-radius: 40px;
+      border: 1px solid #cbd5e1;
+      background: white;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .profile-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: white;
+      padding: 6px 18px 6px 12px;
+      border-radius: 60px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+      border: 1px solid #eef2f6;
+    }
+
+    .profile-avatar {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(145deg, #eef2ff, #e0e7ff);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #2563eb;
+    }
+
+    .profile-info h4 { font-size: 0.85rem; font-weight: 700; }
+    .profile-info p { font-size: 0.7rem; color: #64748b; }
+
+    .welcome-card {
+      background: white;
+      border-radius: 32px;
+      padding: 22px 30px;
+      margin-bottom: 36px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.03);
+      border: 1px solid rgba(203,213,225,0.4);
+    }
+
+    .welcome-left {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .welcome-icon {
+      background: linear-gradient(145deg, #eef2ff, #ffffff);
+      width: 60px;
+      height: 60px;
+      border-radius: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #3b82f6;
+      font-size: 1.6rem;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 24px;
+      margin-bottom: 42px;
+    }
+
+    .stat-card {
+      background: white;
+      border-radius: 28px;
+      padding: 22px;
+      transition: all 0.25s;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.02);
+      border: 1px solid #edf2f7;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 30px -12px rgba(0,0,0,0.08);
+    }
+
+    .stat-top {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .stat-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+    }
+
+    .stat-icon.blue { background: #e0f2fe; color: #0284c7; }
+    .stat-icon.green { background: #dcfce7; color: #16a34a; }
+    .stat-icon.orange { background: #ffedd5; color: #ea580c; }
+    .stat-icon.red { background: #fee2e2; color: #dc2626; }
+
+    .stat-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #5b7f9a;
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 800;
+      font-family: 'Poppins', monospace;
+      color: #0f2b3d;
+    }
+
+    .section-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin: 28px 0 18px 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #1e293b;
+    }
+
+    .quick-actions {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 22px;
+      margin-bottom: 44px;
+    }
+
+    .action-card {
+      background: white;
+      border-radius: 26px;
+      padding: 16px 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      text-decoration: none;
+      transition: all 0.2s;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+      border: 1px solid #edf2f7;
+    }
+
+    .action-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 25px -12px rgba(0,0,0,0.1);
+      border-color: #cbd5e1;
+    }
+
+    .action-left {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+
+    .action-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+    }
+
+    .action-icon.blue { background: #e0f2fe; color: #0284c7; }
+    .action-icon.green { background: #dcfce7; color: #16a34a; }
+    .action-icon.orange { background: #ffedd5; color: #ea580c; }
+    .action-icon.red { background: #fee2e2; color: #dc2626; }
+
+    .action-text h4 { font-weight: 800; font-size: 1rem; }
+    .action-text p { font-size: 0.7rem; color: #5b7f9a; }
+    .action-arrow { font-size: 1.3rem; color: #94a3b8; }
+
+    .chart-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+      gap: 28px;
+      margin-top: 20px;
+    }
+
+    .chart-card {
+      background: white;
+      border-radius: 32px;
+      padding: 22px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.02);
+      border: 1px solid #edf2f7;
+    }
+
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .chart-header h3 {
+      font-weight: 800;
+      font-size: 1.1rem;
+    }
+
+    .chart-filter {
+      padding: 6px 14px;
+      border-radius: 40px;
+      border: 1px solid #e2e8f0;
+      background: white;
+      font-size: 0.8rem;
+    }
+
+    .chart-container {
+      height: 280px;
+      position: relative;
+    }
+
+    @media (max-width: 800px) {
+      .sidebar { width: 90px; }
+      .sidebar .logo-text, .sidebar-menu span, .sidebar-footer span { display: none; }
+      .sidebar-menu li a { justify-content: center; }
+      .main-content { padding: 20px; }
+      .chart-grid { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
 <body>
 <div class="dashboard-container">
-  <!-- SIDEBAR -->
   <aside class="sidebar" id="sidebar">
     <button class="menu-toggle" id="toggleBtn"><i class="fas fa-chevron-left"></i></button>
     <div class="sidebar-header">
@@ -23,27 +451,26 @@
       <div class="logo-text"><h2>SACCO</h2><span>Geresu Dhuki</span></div>
     </div>
     <ul class="sidebar-menu">
-      <li class="active"><a href="#"><i class="fas fa-chart-pie"></i><span data-i18n="dashboard">Dashboard</span></a></li>
-      <li><a href="#"><i class="fas fa-users"></i><span data-i18n="members">Members</span></a></li>
-      <li><a href="#"><i class="fas fa-wallet"></i><span data-i18n="savings">Savings</span></a></li>
-      <li><a href="#"><i class="fas fa-landmark"></i><span data-i18n="loans">Loans</span></a></li>
-      <li><a href="#"><i class="fas fa-money-check-dollar"></i><span data-i18n="repayments">Repayments</span></a></li>
-      <li><a href="#"><i class="fas fa-money-bill-transfer"></i><span data-i18n="withdrawals">Withdrawals</span></a></li>
-      <li><a href="#"><i class="fas fa-file-alt"></i><span data-i18n="reports">Reports</span></a></li>
-      <li><a href="#"><i class="fas fa-user"></i><span data-i18n="users">Users</span></a></li>
-      <li><a href="#"><i class="fas fa-gear"></i><span data-i18n="settings">Settings</span></a></li>
+      <li class="active"><a href="#"><i class="fas fa-chart-pie"></i><span>Dashboard</span></a></li>
+      <li><a href="#"><i class="fas fa-users"></i><span>Members</span></a></li>
+      <li><a href="#"><i class="fas fa-wallet"></i><span>Savings</span></a></li>
+      <li><a href="#"><i class="fas fa-landmark"></i><span>Loans</span></a></li>
+      <li><a href="#"><i class="fas fa-money-check-dollar"></i><span>Repayments</span></a></li>
+      <li><a href="#"><i class="fas fa-money-bill-transfer"></i><span>Withdrawals</span></a></li>
+      <li><a href="#"><i class="fas fa-file-alt"></i><span>Reports</span></a></li>
+      <li><a href="#"><i class="fas fa-user"></i><span>Users</span></a></li>
+      <li><a href="#"><i class="fas fa-gear"></i><span>Settings</span></a></li>
     </ul>
     <div class="sidebar-footer">
-      <a href="#" class="logout-btn"><i class="fas fa-right-from-bracket"></i><span data-i18n="logout">Logout</span></a>
+      <div class="logout-btn" id="logoutBtn"><i class="fas fa-right-from-bracket"></i><span>Logout</span></div>
     </div>
   </aside>
 
-  <!-- MAIN CONTENT -->
   <main class="main-content">
     <div class="topbar">
       <div class="page-title">
-        <h1 data-i18n="financialDashboard">Financial Dashboard</h1>
-        <p data-i18n="overview">Dashboard Overview</p>
+        <h1>Financial Dashboard</h1>
+        <p>Geresu Dhuki Credit and Saving Cooperative – Saving and Credit System Management</p>
       </div>
       <div class="topbar-actions">
         <div class="language-selector">
@@ -56,7 +483,7 @@
         <div class="profile-card">
           <div class="profile-avatar"><i class="fas fa-user-circle"></i></div>
           <div class="profile-info">
-            <h4 id="userName">Admin User</h4>
+            <h4 id="displayName">Admin User</h4>
             <p>Super Administrator</p>
           </div>
         </div>
@@ -67,35 +494,140 @@
       <div class="welcome-left">
         <div class="welcome-icon"><i class="fas fa-chart-line"></i></div>
         <div>
-          <h4 data-i18n="overview">Dashboard Overview</h4>
-          <h2 data-i18n="welcome">Welcome to Geresu Dhuki SACCO Banking System</h2>
-          <p data-i18n="overview">Real‑time performance at a glance</p>
+          <h4>Dashboard Overview</h4>
+          <h2>Welcome to Geresu Dhuki SACCO Banking System</h2>
+          <p>Real‑time performance at a glance</p>
         </div>
       </div>
     </div>
 
-    <!-- stats cards -->
     <div class="stats-grid">
-      <div class="stat-card"><div class="stat-top"><div class="stat-icon blue"><i class="fas fa-users"></i></div><div><div class="stat-label" data-i18n="totalMembers">Total Members</div><div class="stat-value" id="totalMembers">0</div></div></div></div>
-      <div class="stat-card"><div class="stat-top"><div class="stat-icon green"><i class="fas fa-wallet"></i></div><div><div class="stat-label" data-i18n="totalSavings">Total Savings</div><div class="stat-value" id="totalSavings">0</div></div></div></div>
-      <div class="stat-card"><div class="stat-top"><div class="stat-icon orange"><i class="fas fa-landmark"></i></div><div><div class="stat-label" data-i18n="totalLoans">Total Loans</div><div class="stat-value" id="totalLoans">0</div></div></div></div>
-      <div class="stat-card"><div class="stat-top"><div class="stat-icon red"><i class="fas fa-money-bill-transfer"></i></div><div><div class="stat-label" data-i18n="withdrawalsTitle">Withdrawals</div><div class="stat-value" id="totalWithdrawals">0</div></div></div></div>
-      <div class="stat-card"><div class="stat-top"><div class="stat-icon green"><i class="fas fa-chart-line"></i></div><div><div class="stat-label" data-i18n="netProfit">Net Profit</div><div class="stat-value" id="netProfit">0</div></div></div></div>
+      <div class="stat-card"><div class="stat-top"><div class="stat-icon blue"><i class="fas fa-users"></i></div><div><div class="stat-label">Total Members</div><div class="stat-value" id="totalMembers">0</div></div></div></div>
+      <div class="stat-card"><div class="stat-top"><div class="stat-icon green"><i class="fas fa-wallet"></i></div><div><div class="stat-label">Total Savings</div><div class="stat-value" id="totalSavings">0</div></div></div></div>
+      <div class="stat-card"><div class="stat-top"><div class="stat-icon orange"><i class="fas fa-landmark"></i></div><div><div class="stat-label">Total Loans</div><div class="stat-value" id="totalLoans">0</div></div></div></div>
+      <div class="stat-card"><div class="stat-top"><div class="stat-icon red"><i class="fas fa-money-bill-transfer"></i></div><div><div class="stat-label">Withdrawals</div><div class="stat-value" id="totalWithdrawals">0</div></div></div></div>
+      <div class="stat-card"><div class="stat-top"><div class="stat-icon green"><i class="fas fa-chart-line"></i></div><div><div class="stat-label">Net Profit</div><div class="stat-value" id="netProfit">0</div></div></div></div>
     </div>
 
-    <h2 class="section-title" data-i18n="quickActions"><i class="fas fa-bolt"></i> Quick Actions</h2>
+    <h2 class="section-title"><i class="fas fa-bolt"></i> Quick Actions</h2>
     <div class="quick-actions">
-      <a href="#" class="action-card"><div class="action-left"><div class="action-icon blue"><i class="fas fa-user-plus"></i></div><div class="action-text"><h4 data-i18n="addMember">Add Member</h4><p data-i18n="registerMember">Register new member</p></div></div><div class="action-arrow">→</div></a>
-      <a href="#" class="action-card"><div class="action-left"><div class="action-icon green"><i class="fas fa-wallet"></i></div><div class="action-text"><h4 data-i18n="addSaving">Add Saving</h4><p data-i18n="recordSavings">Record member savings</p></div></div><div class="action-arrow">→</div></a>
-      <a href="#" class="action-card"><div class="action-left"><div class="action-icon orange"><i class="fas fa-landmark"></i></div><div class="action-text"><h4 data-i18n="createLoan">Create Loans</h4><p data-i18n="loansTitle">Create new loan</p></div></div><div class="action-arrow">→</div></a>
-      <a href="#" class="action-card"><div class="action-left"><div class="action-icon red"><i class="fas fa-money-bill-transfer"></i></div><div class="action-text"><h4 data-i18n="withdrawalsTitle">Withdrawals</h4><p data-i18n="processWithdrawals">Process withdrawals</p></div></div><div class="action-arrow">→</div></a>
+      <a href="#" class="action-card"><div class="action-left"><div class="action-icon blue"><i class="fas fa-user-plus"></i></div><div class="action-text"><h4>Add Member</h4><p>Register new member</p></div></div><div class="action-arrow">→</div></a>
+      <a href="#" class="action-card"><div class="action-left"><div class="action-icon green"><i class="fas fa-wallet"></i></div><div class="action-text"><h4>Add Saving</h4><p>Record member savings</p></div></div><div class="action-arrow">→</div></a>
+      <a href="#" class="action-card"><div class="action-left"><div class="action-icon orange"><i class="fas fa-landmark"></i></div><div class="action-text"><h4>Create Loans</h4><p>Create new loan</p></div></div><div class="action-arrow">→</div></a>
+      <a href="#" class="action-card"><div class="action-left"><div class="action-icon red"><i class="fas fa-money-bill-transfer"></i></div><div class="action-text"><h4>Withdrawals</h4><p>Process withdrawals</p></div></div><div class="action-arrow">→</div></a>
     </div>
 
     <div class="chart-grid">
-      <div class="chart-card"><div class="chart-header"><h3 data-i18n="performanceOverview">Performance Overview</h3><select class="chart-filter"><option>This Year</option></select></div><div class="chart-container"><canvas id="performanceChart"></canvas></div></div>
-      <div class="chart-card"><div class="chart-header"><h3 data-i18n="loansVsRepayments">Loans vs Repayments</h3><select class="chart-filter"><option>This Year</option></select></div><div class="chart-container"><canvas id="loanChart"></canvas></div></div>
+      <div class="chart-card"><div class="chart-header"><h3>Performance Overview (Savings vs Loans)</h3><select class="chart-filter"><option>This Year</option></select></div><div class="chart-container"><canvas id="performanceChart"></canvas></div></div>
+      <div class="chart-card"><div class="chart-header"><h3>Loans vs Repayments</h3><select class="chart-filter"><option>This Year</option></select></div><div class="chart-container"><canvas id="loanChart"></canvas></div></div>
     </div>
   </main>
 </div>
+
+<script>
+  // ==================== MOCK DATA ====================
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const savingsData = [320000, 580000, 890000, 1230000, 1620000, 2110000, 2690000, 3320000, 4010000, 4620000, 5120000, 5487350];
+  const loansData = [148000, 310000, 498000, 752000, 1030000, 1370000, 1760000, 2185000, 2570000, 2890000, 3110000, 3289670];
+  const repaymentsData = [86000, 104000, 156000, 198000, 244000, 282000, 315000, 345000, 380000, 410000, 445000, 472000];
+  const totals = { members: 2847, savings: 5487350, loans: 3289670, withdrawals: 1245800, profit: 2197680 };
+
+  let perfChart, loanChart;
+
+  function formatMoney(amt) { return amt.toLocaleString() + ' ETB'; }
+
+  function updateStats() {
+    document.getElementById('totalMembers').innerText = totals.members;
+    document.getElementById('totalSavings').innerText = formatMoney(totals.savings);
+    document.getElementById('totalLoans').innerText = formatMoney(totals.loans);
+    document.getElementById('totalWithdrawals').innerText = formatMoney(totals.withdrawals);
+    document.getElementById('netProfit').innerText = formatMoney(totals.profit);
+  }
+
+  function initCharts() {
+    const ctx1 = document.getElementById('performanceChart').getContext('2d');
+    const ctx2 = document.getElementById('loanChart').getContext('2d');
+    if (perfChart) perfChart.destroy();
+    if (loanChart) loanChart.destroy();
+    perfChart = new Chart(ctx1, {
+      type: 'line',
+      data: { labels: months, datasets: [
+        { label: 'Savings (ETB)', data: savingsData, borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.05)', tension: 0.3, fill: true, pointRadius: 3 },
+        { label: 'Loans (ETB)', data: loansData, borderColor: '#f97316', backgroundColor: 'rgba(249,115,22,0.02)', tension: 0.3, fill: false }
+      ] },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { tooltip: { callbacks: { label: (ctx) => `${ctx.dataset.label}: ${ctx.raw.toLocaleString()} ETB` } } } }
+    });
+    loanChart = new Chart(ctx2, {
+      type: 'bar',
+      data: { labels: months, datasets: [
+        { label: 'Loans Issued', data: loansData, backgroundColor: '#06b6d4', borderRadius: 8 },
+        { label: 'Repayments', data: repaymentsData, backgroundColor: '#8b5cf6', borderRadius: 8 }
+      ] },
+      options: { responsive: true, maintainAspectRatio: false }
+    });
+  }
+
+  // ==================== SIDEBAR TOGGLE ====================
+  const sidebar = document.getElementById('sidebar');
+  const toggleBtn = document.getElementById('toggleBtn');
+  toggleBtn.addEventListener('click', () => {
+    sidebar.classList.toggle('collapsed');
+    const icon = toggleBtn.querySelector('i');
+    if (sidebar.classList.contains('collapsed')) {
+      icon.classList.remove('fa-chevron-left');
+      icon.classList.add('fa-chevron-right');
+    } else {
+      icon.classList.remove('fa-chevron-right');
+      icon.classList.add('fa-chevron-left');
+    }
+  });
+
+  // ==================== MULTI-LANGUAGE (simple mock) ====================
+  const translations = {
+    en: { dashboard: "Dashboard", members: "Members", savings: "Savings", loans: "Loans", repayments: "Repayments", withdrawals: "Withdrawals", reports: "Reports", users: "Users", settings: "Settings", logout: "Logout", financialDashboard: "Financial Dashboard", overview: "Dashboard Overview", welcome: "Welcome to Geresu Dhuki SACCO Banking System", quickActions: "Quick Actions", addMember: "Add Member", registerMember: "Register new member", addSaving: "Add Saving", recordSavings: "Record member savings", createLoan: "Create Loans", loansTitle: "Loans", processWithdrawals: "Process withdrawals", withdrawalsTitle: "Withdrawals", totalMembers: "Total Members", totalSavings: "Total Savings", totalLoans: "Total Loans", netProfit: "Net Profit", performanceOverview: "Performance Overview", loansVsRepayments: "Loans vs Repayments" },
+    om: { dashboard: "Daashboordii", members: "Miseensota", savings: "Qusannaa", loans: "Liqii", repayments: "Deebii", withdrawals: "Baasii", reports: "Gabaasa", users: "Fayyadamtoota", settings: "Sirreessituu", logout: "Ba'i", financialDashboard: "Daashboordii Faayinaansii", overview: "Ilaalcha Waliigalaa", welcome: "Baga Gara Sirna Baankii SACCO Geresu Dhuki Nagaan Dhuftan", quickActions: "Gocha Saffisaa", addMember: "Miseensa Dabali", registerMember: "Miseensa Haaraa Galmeessi", addSaving: "Qusannaa Dabali", recordSavings: "Qusannaa Galchi", createLoan: "Liqii Uumi", loansTitle: "Liqii", processWithdrawals: "Baasii Raawwadhu", withdrawalsTitle: "Baasii", totalMembers: "Miseensota Waliigalaa", totalSavings: "Qusannaa Waliigalaa", totalLoans: "Liqii Waliigalaa", netProfit: "Bu'aa Qulqulluu", performanceOverview: "Raawwii Hojii", loansVsRepayments: "Liqii fi Deebii Liqii" },
+    am: { dashboard: "ዳሽቦርድ", members: "አባላት", savings: "ቁጠባ", loans: "ብድር", repayments: "ክፍያ", withdrawals: "መውጣት", reports: "ሪፖርት", users: "ተጠቃሚዎች", settings: "ቅንብሮች", logout: "ውጣ", financialDashboard: "የፋይናንስ ዳሽቦርድ", overview: "አጠቃላይ እይታ", welcome: "እንኳን ወደ ገረሱ ዱኪ SACCO ባንክ ሲስተም በደህና መጡ", quickActions: "ፈጣን እርምጃዎች", addMember: "አባል ጨምር", registerMember: "አዲስ አባል መዝግብ", addSaving: "ቁጠባ ጨምር", recordSavings: "የቁጠባ መዝገብ", createLoan: "ብድር ፈጥር", loansTitle: "ብድር", processWithdrawals: "የመውጣት ሂደት", withdrawalsTitle: "መውጣት", totalMembers: "ጠቅላላ አባላት", totalSavings: "ጠቅላላ ቁጠባ", totalLoans: "ጠቅላላ ብድር", netProfit: "ንጹህ ትርፍ", performanceOverview: "የአፈጻጸም እይታ", loansVsRepayments: "ብድር እና ክፍያ" }
+  };
+
+  function applyLanguage(lang) {
+    const elements = document.querySelectorAll('[data-i18n]');
+    elements.forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if (translations[lang] && translations[lang][key]) {
+        if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') el.placeholder = translations[lang][key];
+        else el.textContent = translations[lang][key];
+      }
+    });
+    // Also update page title (if needed)
+    document.querySelector('.page-title h1').textContent = translations[lang].financialDashboard || 'Financial Dashboard';
+    document.querySelector('.page-title p').innerHTML = `Geresu Dhuki Credit and Saving Cooperative – ${translations[lang].overview || 'Saving and Credit System Management'}`;
+  }
+
+  const langSelect = document.getElementById('languageSelect');
+  langSelect.addEventListener('change', (e) => {
+    localStorage.setItem('sacco_lang', e.target.value);
+    applyLanguage(e.target.value);
+  });
+  const savedLang = localStorage.getItem('sacco_lang') || 'en';
+  langSelect.value = savedLang;
+  applyLanguage(savedLang);
+
+  // ==================== MOCK AUTH / LOGOUT ====================
+  // For demo, we simulate a logged-in user. In real Firebase, you would check auth state.
+  // Logout just redirects to a login page (create login.html or show alert)
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    if (confirm('Are you sure you want to logout?')) {
+      // In a real app, you would sign out from Firebase and redirect
+      window.location.href = 'login.html';  // You can create a simple login.html later
+    }
+  });
+
+  // Initialize everything
+  updateStats();
+  initCharts();
+
+  // Optional: set display name from mock user (if you have login, replace with user.email)
+  document.getElementById('displayName').innerText = 'Admin User';
+</script>
 </body>
 </html>
